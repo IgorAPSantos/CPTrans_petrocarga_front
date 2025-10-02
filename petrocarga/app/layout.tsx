@@ -1,14 +1,19 @@
 import Footer from "@/components/layout/footer";
-import Navbar from "@/components/layout/navbar";
+import { Navbar } from "@/components/layout/navbar";
 import { Metadata } from "next";
 import { Maven_Pro } from 'next/font/google';
+import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import "./globals.css";
 
-const mavenPro = Maven_Pro({ weight: "variable", subsets: ["latin"], variable: "--font-maven-pro" })
+const mavenPro = Maven_Pro({
+  weight: "variable",
+  subsets: ["latin"],
+  variable: "--font-maven-pro"
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
-  description: "O CodanteVagas conecta candidatos a empregos ideais, oferecendo funcionalidades intuitivas para busca er gerencaimento de vagas",
+  description: "O CodanteVagas conecta candidatos a empregos ideais, oferecendo funcionalidades intuitivas para busca er gerenciamento de vagas",
 };
 
 export default function RootLayout({
@@ -20,11 +25,11 @@ export default function RootLayout({
     <html lang="pt-br" className={mavenPro.variable}>
       <body>
         <div className="flex min-h-screen flex-col">
-          <Navbar/>
-          <main className="flex flex-1">
+          <Navbar />
+          <main className="flex-1 relative">
             {children}
           </main>
-          <Footer/>
+          <Footer />
         </div>
       </body>
     </html>
