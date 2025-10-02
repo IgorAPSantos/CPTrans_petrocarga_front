@@ -1,17 +1,20 @@
-import Map from "@/components/map/map"
+"use client";
 
-export default function Page(){
-    return(
-        <main className="container mx-auto flex items-center">
+import { ViewMap } from "@/components/map/viewMap";
+import { useState } from "react";
 
-        <div className="w-[640px] h-[300px]">
-            <Map/>
-        </div>
-        <div className="bg-amber-300">
-            <h1>lista</h1>
-        </div>
+export default function Page() {
+  const [selectedPlace, setSelectedPlace] = useState(null);
 
+  return (
+    <main className="container mx-auto flex flex-col items-center gap-4">
+      <div className="w-full max-w-[640px] h-[400px]">
+        <ViewMap selectedPlace={selectedPlace} />
+      </div>
 
-        </main>
-    )
+      <div className="w-[640px] bg-amber-300 p-4">
+        <h1 className="text-lg font-bold">Lista</h1>
+      </div>
+    </main>
+  );
 }
