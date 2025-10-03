@@ -2,29 +2,60 @@ import { NextResponse } from "next/server";
 import { Vaga } from "@/lib/types";
 
 const vagas: Vaga[] = [
-  {
+   {
     id: 1,
-    title: "Desenvolvedor Frontend",
-    company: "Tech Corp",
-    city: "São Paulo",
-    salary: 5000,
-    company_website: "https://techcorp.com",
-    schedule: "full time",
-    number_of_positions: 2,
-    description: "Desenvolver interfaces em React.",
-    requirements: "Conhecimento em React e Tailwind.",
+    area: "Centro Histórico",
+    comprimento: 12, // metros permitidos
+    horario_inicio: 8, // 08:00
+    horario_fim: 18, // 18:00
+    localizacao: "Rua do Imperador, em frente ao Museu Imperial",
+    max_eixos: 3,
+    status: "ativo",
+    endereco_id: 101,
   },
   {
     id: 2,
-    title: "Analista de Dados",
-    company: "Data Inc",
-    city: "Rio de Janeiro",
-    salary: 4500,
-    company_website: "https://datainc.com",
-    schedule: "part-time",
-    number_of_positions: 1,
-    description: "Analisar e estruturar dados.",
-    requirements: "SQL, Python e PowerBI.",
+    area: "Rua Teresa",
+    comprimento: 10,
+    horario_inicio: 7, // 07:00
+    horario_fim: 20, // 20:00
+    localizacao: "Rua Teresa, próximo ao número 700",
+    max_eixos: 2,
+    status: "ativo",
+    endereco_id: 102,
+  },
+  {
+    id: 3,
+    area: "Bingen",
+    comprimento: 15,
+    horario_inicio: 6, // 06:00
+    horario_fim: 22, // 22:00
+    localizacao: "Avenida Getúlio Vargas, em frente ao posto BR",
+    max_eixos: 4,
+    status: "ativo",
+    endereco_id: 103,
+  },
+  {
+    id: 4,
+    area: "Quitandinha",
+    comprimento: 8,
+    horario_inicio: 9,
+    horario_fim: 17,
+    localizacao: "Avenida Ayrton Senna, próximo ao Hotel Quitandinha",
+    max_eixos: 2,
+    status: "manutenção",
+    endereco_id: 104,
+  },
+  {
+    id: 5,
+    area: "Rua Paulo Barbosa",
+    comprimento: 12,
+    horario_inicio: 7,
+    horario_fim: 19,
+    localizacao: "Rua Paulo Barbosa, ao lado do Terminal Centro",
+    max_eixos: 3,
+    status: "ativo",
+    endereco_id: 105,
   },
 ];
 

@@ -28,7 +28,7 @@ export default function Page() {
   </div>
 
   {/* Lista de vagas */}
-  <div className="flex-1 flex flex-col bg-blue-100 h-[70vh] min-h-[300px] p-4 rounded-lg shadow-md">
+  <div className="flex-1 flex flex-col bg-blue-100 h-[70vh] min-h-[300px] p-4 rounded-lg shadow-md overflow-y-auto ">
     <h1 className="text-lg font-bold text-center">Lista de Vagas</h1>
 
     {loading ? (

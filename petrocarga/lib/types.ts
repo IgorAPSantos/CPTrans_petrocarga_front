@@ -1,12 +1,11 @@
 export type Vaga = {
     id: number;
-    title: string;
-    company: string;
-    city: string;
-    salary: number;
-    company_website: string;
-    schedule: "part-time" | "full time";
-    number_of_positions: number;
-    description: string;
-    requirements: string;
+    area: string;
+    comprimento: number;
+    horario_fim: number;
+    horario_inicio: number;
+    localizacao: string;
+    max_eixos: number;
+    status: string;
+    endereco_id: number;
 };
