@@ -1,8 +1,6 @@
 "use client";
 
 import { ViewMap } from "@/components/map/viewMap";
-import VagaItem from "@/components/cards/vagas-item";
-
 import { useState } from "react";
 import { ListaVagas } from "@/components/lista/listaVagas";
 
@@ -19,7 +17,7 @@ export default function Page() {
   </div>
 
   {/* Lista de vagas */}
-  <div className="flex-1 flex flex-col bg-blue-100 h-[70vh] min-h-[300px] p-4 rounded-lg shadow-md overflow-y-auto  ">
+  <div className="flex-1 flex flex-col bg-blue-100 h-[70vh] min-h-[300px] p-4 rounded-lg shadow-md ">
     <ListaVagas/>
   </div>
 </main>

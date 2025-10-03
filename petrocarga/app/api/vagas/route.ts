@@ -21,7 +21,7 @@ const vagas: Vaga[] = [
     horario_fim: 20, // 20:00
     localizacao: "Rua Teresa, próximo ao número 700",
     max_eixos: 2,
-    status: "ativo",
+    status: "inativo",
     endereco_id: 102,
   },
   {
