@@ -7,7 +7,7 @@ type VagaItemProp = {
     vaga: Vaga;
 };
 
-export default function vagaItem({ vaga }: VagaItemProp) {
+export default function VagaItem({ vaga }: VagaItemProp) {
     return (
         <article className="grid w-full grid-cols-6 items-center border border-t-4 border-black bg-white px-6 py-4 shadow transition-colors hover:border-blue-400">
         <h3 className="font-display col-span-2 overflow-hidden text-lg font-medium text-ellipsis whitespace-nowrap text-gray-700">
