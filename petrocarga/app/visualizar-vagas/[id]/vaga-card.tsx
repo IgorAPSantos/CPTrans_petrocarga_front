@@ -1,81 +1,70 @@
-"Use Client";
+"use client";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Vaga } from "@/lib/types";
-import { Briefcase, DollarSign, MapPin, Users } from "lucide-react";
-import Link from "next/link";
+import { MapPin, Clock, Ruler, Truck } from "lucide-react";
 
 export default function JobPostingCard({ vaga }: { vaga: Vaga }) {
-    return (
-        <Card>
-        <CardHeader className="space-y-4">
-            <div className="flex items-start justify-between">
-            <div>
-                <h1 className="text-2xl font-bold">{vaga.title}</h1>
-                <p className="text-muted-foreground">
-                Vaga disponível no{" "}
-                <Link
-                    href={vaga.company_website}
-                    className="text-blue-600 hover:underline"
-                >
-                    {vaga.company}
-                </Link>
-                </p>
-            </div>
-            {/* <Form action={deleteVaga}>
-                <input type="hidden" name="id" value={vaga.id} />
-                <Button variant="destructive" className="cursor-pointer">
-                Apagar Vaga
-                </Button>
-            </Form> */}
-            </div>
-        </CardHeader>
+  return (
+    <Card>
+      <CardHeader className="space-y-4">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Vaga {vaga.id}</h1>
+            <p className="text-muted-foreground">
+              Localização:{" "}
+              <span className="text-blue-600">{vaga.localizacao}</span>
+            </p>
+          </div>
 
-        <CardContent className="space-y-8">
-            <div className="grid gap-4 md:grid-cols-2">
-                <div className="flex items-center gap-2">
-                    <MapPin className="text-muted-foreground h-5 w-5" />
-                    <span>{vaga.city}</span>
-                </div>
+          <Badge variant={vaga.status === "disponível" ? "default" : "secondary"}>
+            {vaga.status.toUpperCase()}
+          </Badge>
+        </div>
+      </CardHeader>
 
-                <div className="flex items-center gap-2">
-                    <Briefcase className="text-muted-foreground h-5 w-5" />
-                    <div className="flex gap-2">
-                        <Badge variant="secondary">
-                            {vaga.schedule === "full time" ? "Integral" : "Meio período"}
-                        </Badge>
-                    </div>
-                </div>
+      <CardContent className="space-y-8">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex items-center gap-2">
+            <Ruler className="text-muted-foreground h-5 w-5" />
+            <span>
+              Comprimento: <strong>{vaga.comprimento} m</strong>
+            </span>
+          </div>
 
-                <div className="flex items-center gap-2">
-                    <DollarSign className="text-muted-foreground h-5 w-5" />
-                    <span>{vaga.salary.toFixed(2)}</span>
-                </div>
+          <div className="flex items-center gap-2">
+            <Truck className="text-muted-foreground h-5 w-5" />
+            <span>
+              Máx. de eixos: <strong>{vaga.max_eixos}</strong>
+            </span>
+          </div>
 
-                <div className="flex items-center gap-2">
-                    <Users className="text-muted-foreground h-5 w-5" />
-                    <span>{vaga.number_of_positions}</span>
-                </div>
-            </div>
+          <div className="flex items-center gap-2">
+            <Clock className="text-muted-foreground h-5 w-5" />
+            <span>
+              Horário: <strong>{vaga.horario_inicio}h - {vaga.horario_fim}h</strong>
+            </span>
+          </div>
 
-            <Separator />
+          <div className="flex items-center gap-2">
+            <MapPin className="text-muted-foreground h-5 w-5" />
+            <span>
+              Endereço ID: <strong>{vaga.endereco_id}</strong>
+            </span>
+          </div>
+        </div>
 
-                <section>
-                    <h2 className="mb-4 text-xl font-semibold">Descrição da Vaga</h2>
-                    <p className="text-muted-foreground leading-relaxed">
-                        {vaga.description}
-                    </p>
-                </section>
+        <Separator />
 
-            <Separator />
-
-            <section>
-                <h2 className="mb-4 text-xl font-semibold">Requisitos</h2>
-                <p className="text-muted-foreground">{vaga.requirements}</p>
-            </section>
-        </CardContent>
-        </Card>
-    );
+        <section>
+          <h2 className="mb-4 text-xl font-semibold">Área</h2>
+          <p className="text-muted-foreground leading-relaxed">
+            {vaga.area}
+          </p>
+        </section>
+      </CardContent>
+    </Card>
+  );
 }
