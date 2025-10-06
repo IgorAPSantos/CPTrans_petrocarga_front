@@ -12,7 +12,7 @@ const mavenPro = Maven_Pro({
 });
 
 export const metadata: Metadata = {
-  title: "Create Next App",
+  title: "PetroCarga",
   description: "O CodanteVagas conecta candidatos a empregos ideais, oferecendo funcionalidades intuitivas para busca er gerenciamento de vagas",
 };
 
