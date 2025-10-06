@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function addVaga(prevState: any, formData: FormData) {
+export async function addVaga(prevState: unknown, formData: FormData) {
     // Extrair valores do formData para retornar em caso de erro
     const valores = {
         codigo: formData.get("codigo") as string,

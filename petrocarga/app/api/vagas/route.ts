@@ -5,35 +5,56 @@ const vagas: Vaga[] = [
    {
     id: 1,
     area: "Centro Histórico",
-    comprimento: 12, // metros permitidos
-    horario_inicio: 8, // 08:00
-    horario_fim: 18, // 18:00
+    comprimento: 12,
+    horario_inicio: 8,
+    horario_fim: 18,
     localizacao: "Rua do Imperador, em frente ao Museu Imperial",
     max_eixos: 3,
     status: "ativo",
-    endereco_id: 101,
+    descricao: "Vaga ampla e bem localizada, ideal para caminhões de médio porte.",
+    endereco: {
+      id: 101,
+      codigo_PMP: "CH-101",
+      logradouro: "Rua do Imperador",
+      bairro: "Centro",
+    },
+    diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
   },
   {
     id: 2,
     area: "Rua Teresa",
     comprimento: 10,
-    horario_inicio: 7, // 07:00
-    horario_fim: 20, // 20:00
+    horario_inicio: 7,
+    horario_fim: 20,
     localizacao: "Rua Teresa, próximo ao número 700",
     max_eixos: 2,
     status: "inativo",
-    endereco_id: 102,
+    descricao: "Vaga localizada em área comercial, atualmente indisponível para uso.",
+    endereco: {
+      id: 102,
+      codigo_PMP: "RT-102",
+      logradouro: "Rua Teresa",
+      bairro: "Mosela",
+    },
+    diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"],
   },
   {
     id: 3,
     area: "Bingen",
     comprimento: 15,
-    horario_inicio: 6, // 06:00
-    horario_fim: 22, // 22:00
+    horario_inicio: 6,
+    horario_fim: 22,
     localizacao: "Avenida Getúlio Vargas, em frente ao posto BR",
     max_eixos: 4,
     status: "ativo",
-    endereco_id: 103,
+    descricao: "Vaga espaçosa para caminhões grandes, com fácil acesso à BR-040.",
+    endereco: {
+      id: 103,
+      codigo_PMP: "BG-103",
+      logradouro: "Av. Getúlio Vargas",
+      bairro: "Bingen",
+    },
+    diasSemana: ["Todos os dias"],
   },
   {
     id: 4,
@@ -44,7 +65,14 @@ const vagas: Vaga[] = [
     localizacao: "Avenida Ayrton Senna, próximo ao Hotel Quitandinha",
     max_eixos: 2,
     status: "manutenção",
-    endereco_id: 104,
+    descricao: "Vaga em manutenção temporária. Previsão de liberação em breve.",
+    endereco: {
+      id: 104,
+      codigo_PMP: "QT-104",
+      logradouro: "Av. Ayrton Senna",
+      bairro: "Quitandinha",
+    },
+    diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
   },
   {
     id: 5,
@@ -55,7 +83,14 @@ const vagas: Vaga[] = [
     localizacao: "Rua Paulo Barbosa, ao lado do Terminal Centro",
     max_eixos: 3,
     status: "ativo",
-    endereco_id: 105,
+    descricao: "Vaga estratégica ao lado do terminal, ideal para carga e descarga rápida.",
+    endereco: {
+      id: 105,
+      codigo_PMP: "PB-105",
+      logradouro: "Rua Paulo Barbosa",
+      bairro: "Centro",
+    },
+    diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
   },
 ];
 

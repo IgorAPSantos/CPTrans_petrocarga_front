@@ -1,70 +1,96 @@
-"use client";
-
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Vaga } from "@/lib/types";
-import { MapPin, Clock, Ruler, Truck } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Calendar, MapPin, Ruler, Truck, Info } from "lucide-react";
 
-export default function JobPostingCard({ vaga }: { vaga: Vaga }) {
+type VagaDetalhesProps = {
+  vaga: Vaga;
+};
+
+export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   return (
-    <Card>
-      <CardHeader className="space-y-4">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Vaga {vaga.id}</h1>
-            <p className="text-muted-foreground">
-              Localização:{" "}
-              <span className="text-blue-600">{vaga.localizacao}</span>
-            </p>
-          </div>
+    <article className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl border-l-8 border-blue-500 transition-shadow max-w-4xl mx-auto">
+      {/* Cabeçalho */}
+      <header className="mb-6">
+        <h2 className="text-3xl font-bold text-gray-800">{vaga.area}</h2>
+        <p className="text-gray-500 flex items-center gap-2">
+          <MapPin className="w-4 h-4 text-gray-400" /> {vaga.localizacao}
+        </p>
+      </header>
 
-          <Badge variant={vaga.status === "disponível" ? "default" : "secondary"}>
-            {vaga.status.toUpperCase()}
-          </Badge>
-        </div>
-      </CardHeader>
+      {/* Descrição */}
+      <p className="text-gray-700 mb-6 flex items-start gap-2">
+        <Info className="w-4 h-4 text-gray-400 mt-0.5" />
+        {vaga.descricao}
+      </p>
 
-      <CardContent className="space-y-8">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="flex items-center gap-2">
-            <Ruler className="text-muted-foreground h-5 w-5" />
-            <span>
-              Comprimento: <strong>{vaga.comprimento} m</strong>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Truck className="text-muted-foreground h-5 w-5" />
-            <span>
-              Máx. de eixos: <strong>{vaga.max_eixos}</strong>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Clock className="text-muted-foreground h-5 w-5" />
-            <span>
-              Horário: <strong>{vaga.horario_inicio}h - {vaga.horario_fim}h</strong>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <MapPin className="text-muted-foreground h-5 w-5" />
-            <span>
-              Endereço ID: <strong>{vaga.endereco_id}</strong>
-            </span>
-          </div>
+      {/* Informações detalhadas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm">
+        <div className="flex items-center gap-2">
+          <Ruler className="w-4 h-4 text-gray-400" />
+          <span><strong>Comprimento permitido:</strong> {vaga.comprimento} m</span>
         </div>
 
-        <Separator />
+        <div className="flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-gray-400" />
+          <span>
+            <strong>Horário:</strong> {vaga.horario_inicio}:00 - {vaga.horario_fim}:00
+          </span>
+        </div>
 
-        <section>
-          <h2 className="mb-4 text-xl font-semibold">Área</h2>
-          <p className="text-muted-foreground leading-relaxed">
-            {vaga.area}
-          </p>
-        </section>
-      </CardContent>
-    </Card>
+        <div className="flex items-center gap-2">
+          <Truck className="w-4 h-4 text-gray-400" />
+          <span><strong>Máx. eixos:</strong> {vaga.max_eixos}</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span><strong>Status:</strong></span>
+          <span
+            className={cn(
+              "px-2 py-0.5 rounded-full text-sm font-semibold",
+              vaga.status === "ativo" && "bg-green-100 text-green-800",
+              vaga.status === "inativo" && "bg-red-100 text-red-800",
+              vaga.status === "manutenção" && "bg-yellow-100 text-yellow-800"
+            )}
+          >
+            {vaga.status}
+          </span>
+        </div>
+
+        <div>
+          <strong>Logradouro:</strong> {vaga.endereco.logradouro}
+        </div>
+
+        <div>
+          <strong>Bairro:</strong> {vaga.endereco.bairro}
+        </div>
+
+        <div>
+          <strong>Código PMP:</strong> {vaga.endereco.codigo_PMP}
+        </div>
+
+        <div>
+          <strong>Dias disponíveis:</strong>{" "}
+          <div className="flex flex-wrap gap-1 mt-1">
+            {vaga.diasSemana.map((dia) => (
+              <span
+                key={dia}
+                className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-medium"
+              >
+                {dia}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <strong>ID da vaga:</strong> {vaga.id}
+        </div>
+      </div>
+
+      {/* Botão ou ação extra */}
+      <div className="mt-6 flex justify-end">
+        {/* Aqui você pode colocar ações, como "Editar vaga" ou "Reservar" */}
+      </div>
+    </article>
   );
 }

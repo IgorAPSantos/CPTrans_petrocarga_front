@@ -24,15 +24,15 @@ export default function VagaItem({ vaga }: VagaItemProp) {
     <div className="flex flex-wrap gap-4 text-sm text-gray-600 min-w-0">
       <span className="truncate">Comprimento: {vaga.comprimento} m</span>
       <span
-  className={cn(
-    "truncate font-medium",
-    vaga.status === "ativo" && "text-green-600",
-    vaga.status === "inativo" && "text-red-600",
-    vaga.status === "manutenção" && "text-yellow-600"
-  )}
->
-  Status: {vaga.status}
-</span>
+            className={cn(
+              "px-2 py-0.5 rounded-full text-sm font-semibold",
+              vaga.status === "ativo" && "bg-green-100 text-green-800",
+              vaga.status === "inativo" && "bg-red-100 text-red-800",
+              vaga.status === "manutenção" && "bg-yellow-100 text-yellow-800"
+            )}
+          >
+            {vaga.status}
+          </span>
     </div>
   </div>
 

@@ -7,5 +7,14 @@ export type Vaga = {
     localizacao: string;
     max_eixos: number;
     status: string;
-    endereco_id: number;
+    descricao: string;
+    endereco: Endereco;
+    diasSemana: string[];
 };
+
+type Endereco = {
+    id: number;
+    codigo_PMP: string;
+    logradouro: string;
+    bairro: string;
+}
