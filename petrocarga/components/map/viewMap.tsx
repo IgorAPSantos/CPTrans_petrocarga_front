@@ -1,7 +1,7 @@
 "use client";
 
 import mapboxgl from "mapbox-gl";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -14,7 +14,7 @@ interface MapboxFeature {
 
 interface MapProps {
   selectedPlace: MapboxFeature | null;
-  onSelectPlace?: (place: MapboxFeature) => void; // callback para o parent
+  onSelectPlace?: (place: MapboxFeature) => void;
 }
 
 interface GeocoderResultEvent {
@@ -25,11 +25,27 @@ interface GeocoderResultEvent {
   };
 }
 
+interface Vaga {
+  id: string;
+  area: string;
+  localizacao: string;
+  enderecoVagaResponseDTO: {
+    id: string;
+    codidoPmp: string;
+    logradouro: string;
+    bairro: string;
+  };
+}
+
 export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
+  const [vagas, setVagas] = useState<Vaga[]>([]);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
+  // Inicializa o mapa
   useEffect(() => {
     if (mapRef.current || !mapContainer.current) return;
 
@@ -37,18 +53,19 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
     if (!token) throw new Error("MAPBOX TOKEN não definido");
     mapboxgl.accessToken = token;
 
-    // Cria o mapa
-    mapRef.current = new mapboxgl.Map({
+    const map = new mapboxgl.Map({
       container: mapContainer.current,
       style: "mapbox://styles/jusenx/cmg9pmy5d006b01s2959hdkmb",
       center: [-43.17572436276286, -22.5101573150628],
       zoom: 13,
     });
 
-    // Botões de navegação
-    mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-right");
+    mapRef.current = map;
 
-    // Adiciona Geocoder como control
+    map.on("load", () => setMapLoaded(true));
+
+    map.addControl(new mapboxgl.NavigationControl(), "top-right");
+
     const geocoder = new MapboxGeocoder({
       accessToken: mapboxgl.accessToken,
       mapboxgl,
@@ -56,28 +73,60 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
       placeholder: "Pesquisar endereço",
     });
 
-    mapRef.current.addControl(geocoder, "top-left");
+    map.addControl(geocoder, "top-left");
 
-    // Atualiza posição quando um endereço é selecionado
     geocoder.on("result", (e: GeocoderResultEvent) => {
       const [lng, lat] = e.result.geometry.coordinates;
-
-      if (onSelectPlace) {
-        onSelectPlace({
-          id: e.result.id,
-          place_name: e.result.place_name,
-          geometry: { type: "Point", coordinates: [lng, lat] },
-        });
-      }
-
-      mapRef.current?.flyTo({ center: [lng, lat], zoom: 16 });
+      onSelectPlace?.({
+        id: e.result.id,
+        place_name: e.result.place_name,
+        geometry: { type: "Point", coordinates: [lng, lat] },
+      });
+      map.flyTo({ center: [lng, lat], zoom: 16 });
     });
 
-    // Cleanup
-    return () => {
-      mapRef.current?.remove();
-    };
+    return () => map.remove();
   }, [onSelectPlace]);
+
+  // Busca as vagas
+  useEffect(() => {
+    async function fetchVagas() {
+      try {
+        const res = await fetch("http://localhost:8000/petrocarga/vagas");
+        const data: Vaga[] = await res.json();
+        setVagas(data);
+      } catch (err) {
+        console.error("Erro ao buscar vagas:", err);
+      }
+    }
+    fetchVagas();
+  }, []);
+
+  // Adiciona marcadores somente quando mapa estiver carregado
+  useEffect(() => {
+    if (!mapLoaded || !mapRef.current) return;
+
+    // Remove marcadores antigos
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+
+    vagas.forEach((vaga) => {
+      const [lat, lng] = vaga.localizacao
+        .split(",")
+        .map((v) => parseFloat(v.trim()));
+
+      const marker = new mapboxgl.Marker({ color: "blue" })
+        .setLngLat([lng, lat])
+        .setPopup(
+          new mapboxgl.Popup({ offset: 25 }).setHTML(
+            `<strong>${vaga.area}</strong><br>${vaga.enderecoVagaResponseDTO.logradouro}`
+          )
+        )
+        .addTo(mapRef.current!);
+
+      markersRef.current.push(marker);
+    });
+  }, [mapLoaded, vagas]);
 
   // Atualiza marcador quando selectedPlace muda
   useEffect(() => {
@@ -95,14 +144,12 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
   }, [selectedPlace]);
 
   return (
-   <div className="w-full h-full rounded-lg overflow-visible">
-  <div
-    ref={mapContainer}
-    className="w-full h-full rounded-lg shadow-md overflow-visible"
-    style={{ minHeight: "300px" }}
-  />
-</div>
-
-
+    <div className="w-full h-full rounded-lg overflow-visible">
+      <div
+        ref={mapContainer}
+        className="w-full h-full rounded-lg shadow-md overflow-visible"
+        style={{ minHeight: "300px" }}
+      />
+    </div>
   );
 }
