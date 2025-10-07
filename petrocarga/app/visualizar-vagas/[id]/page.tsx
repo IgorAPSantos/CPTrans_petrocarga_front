@@ -1,4 +1,3 @@
-
 import VagaDetalhes from "./vaga-card";
 import { Vaga } from "@/lib/types";
 import { ArrowLeft } from "lucide-react";
@@ -7,14 +6,14 @@ import { notFound } from "next/navigation";
 
 // Busca uma vaga específica pelo ID do mock local
 async function buscarVaga(vagaId: string): Promise<Vaga | undefined> {
-  const res = await fetch(`http://localhost:3000/api/vagas`, {
+  const res = await fetch("http://localhost:8000/petrocarga/vagas", {
     cache: "no-store",
   });
-  
+
   if (!res.ok) return undefined;
 
   const data: Vaga[] = await res.json();
-  const vaga = data.find((v) => v.id === Number(vagaId));
+  const vaga = data.find((v) => v.id === vagaId);
 
   return vaga;
 }

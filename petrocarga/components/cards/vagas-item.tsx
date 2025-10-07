@@ -4,47 +4,47 @@ import Link from "next/link";
 import { buttonVariants } from "../ui/button";
 
 type VagaItemProp = {
-    vaga: Vaga;
+  vaga: Vaga;
 };
 
 export default function VagaItem({ vaga }: VagaItemProp) {
-    return (
-   <article className="flex flex-col md:flex-row items-center justify-between bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-blue-500 gap-4">
-  {/* Info principal */}
-  <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4 min-w-0">
-    <div className="flex-1 min-w-0">
-      <h3 className="text-lg font-semibold text-gray-800 truncate">
-        {vaga.area}
-      </h3>
-      <p className="text-sm text-gray-500 truncate">
-        {vaga.localizacao}
-      </p>
-    </div>
+  return (
+    <article className="flex flex-col md:flex-row items-center justify-between bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-blue-500 gap-4">
+      {/* Info principal */}
+      <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4 min-w-0">
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-gray-800 truncate">
+            {vaga.enderecoVagaResponseDTO.bairro}
+          </h3>
+          <p className="text-sm text-gray-500 truncate">
+            {vaga.enderecoVagaResponseDTO.logradouro}
+          </p>
+        </div>
 
-    <div className="flex flex-wrap gap-4 text-sm text-gray-600 min-w-0">
-      <span className="truncate">Comprimento: {vaga.comprimento} m</span>
-      <span
+        <div className="flex flex-wrap gap-4 text-sm text-gray-600 min-w-0">
+          <span className="truncate">Comprimento: {vaga.comprimento} m</span>
+          <span
             className={cn(
               "px-2 py-0.5 rounded-full text-sm font-semibold",
-              vaga.status === "ativo" && "bg-green-100 text-green-800",
-              vaga.status === "inativo" && "bg-red-100 text-red-800",
-              vaga.status === "manutenção" && "bg-yellow-100 text-yellow-800"
+              vaga.status === "DISPONIVEL" && "bg-green-100 text-green-800",
+              vaga.status === "OCUPADO" && "bg-red-100 text-red-800",
+              vaga.status === "MANUTENCAO" && "bg-yellow-100 text-yellow-800"
             )}
           >
             {vaga.status}
           </span>
-    </div>
-  </div>
+        </div>
+      </div>
 
-  {/* Botão */}
-  <div className="mt-2 md:mt-0 flex-shrink-0">
-    <Link
-      href={`/visualizar-vagas/${vaga.id}`}
-      className={cn(buttonVariants({ variant: "outline" }))}
-    >
-      Mais
-    </Link>
-  </div>
-</article>
-    );
+      {/* Botão */}
+      <div className="mt-2 md:mt-0 flex-shrink-0">
+        <Link
+          href={`/visualizar-vagas/${vaga.id}`}
+          className={cn(buttonVariants({ variant: "outline" }))}
+        >
+          Mais
+        </Link>
+      </div>
+    </article>
+  );
 }
