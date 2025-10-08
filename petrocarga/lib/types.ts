@@ -10,6 +10,8 @@ export type Vaga = {
     descricao: string;
     endereco: Endereco;
     diasSemana: string[];
+    latitude: number; 
+    longitude: number;  
 };
 
 type Endereco = {
