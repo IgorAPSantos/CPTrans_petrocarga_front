@@ -6,7 +6,7 @@ import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 
-// Interface para tipos do Mapbox
+// Tipos do Mapbox
 interface MapboxFeature {
   id: string;
   place_name: string;
@@ -26,7 +26,7 @@ interface GeocoderResultEvent {
   };
 }
 
-// Instância global reutilizável
+// Instância global reutilizável do mapa
 let globalMap: mapboxgl.Map | null = null;
 
 export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
@@ -38,15 +38,19 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
     if (!token) throw new Error("MAPBOX TOKEN não definido");
     mapboxgl.accessToken = token;
 
-    // Se já existe um mapa global, só reanexa o container
+    // Captura o container atual numa variável estável
+    const container = mapContainer.current;
+    if (!container) return;
+
+    // Se já existe o mapa global, apenas reanexa o container
     if (globalMap) {
-      if (mapContainer.current && !mapContainer.current.contains(globalMap.getContainer())) {
-        mapContainer.current.appendChild(globalMap.getContainer());
+      if (!container.contains(globalMap.getContainer())) {
+        container.appendChild(globalMap.getContainer());
       }
-    } else if (mapContainer.current) {
+    } else {
       // Cria o mapa apenas uma vez
       globalMap = new mapboxgl.Map({
-        container: mapContainer.current,
+        container,
         style: "mapbox://styles/jusenx/cmg9pmy5d006b01s2959hdkmb",
         center: [-43.17572436276286, -22.5101573150628],
         zoom: 13,
@@ -81,10 +85,10 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
       });
     }
 
-    // Cleanup: só remove o container do DOM, não o mapa
+    // Cleanup 
     return () => {
-      if (globalMap && globalMap.getContainer().parentNode === mapContainer.current) {
-        mapContainer.current?.removeChild(globalMap.getContainer());
+      if (globalMap && container.contains(globalMap.getContainer())) {
+        container.removeChild(globalMap.getContainer());
       }
     };
   }, [onSelectPlace]);
@@ -100,9 +104,7 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
     if (markerRef.current) markerRef.current.remove();
 
     // Cria novo marcador
-    markerRef.current = new mapboxgl.Marker()
-      .setLngLat([lng, lat])
-      .addTo(globalMap);
+    markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(globalMap);
   }, [selectedPlace]);
 
   return (
