@@ -6,6 +6,7 @@ import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import "mapbox-gl/dist/mapbox-gl.css";
 
+// Interface para tipos do Mapbox
 interface MapboxFeature {
   id: string;
   place_name: string;
@@ -14,7 +15,7 @@ interface MapboxFeature {
 
 interface MapProps {
   selectedPlace: MapboxFeature | null;
-  onSelectPlace?: (place: MapboxFeature) => void; // callback para o parent
+  onSelectPlace?: (place: MapboxFeature) => void;
 }
 
 interface GeocoderResultEvent {
@@ -25,84 +26,92 @@ interface GeocoderResultEvent {
   };
 }
 
+// Instância global reutilizável
+let globalMap: mapboxgl.Map | null = null;
+
 export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<mapboxgl.Map | null>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
-    if (mapRef.current || !mapContainer.current) return;
-
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
     if (!token) throw new Error("MAPBOX TOKEN não definido");
     mapboxgl.accessToken = token;
 
-    // Cria o mapa
-    mapRef.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/jusenx/cmg9pmy5d006b01s2959hdkmb",
-      center: [-43.17572436276286, -22.5101573150628],
-      zoom: 13,
-    });
-
-    // Botões de navegação
-    mapRef.current.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-    // Adiciona Geocoder como control
-    const geocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
-      mapboxgl,
-      marker: false,
-      placeholder: "Pesquisar endereço",
-    });
-
-    mapRef.current.addControl(geocoder, "top-left");
-
-    // Atualiza posição quando um endereço é selecionado
-    geocoder.on("result", (e: GeocoderResultEvent) => {
-      const [lng, lat] = e.result.geometry.coordinates;
-
-      if (onSelectPlace) {
-        onSelectPlace({
-          id: e.result.id,
-          place_name: e.result.place_name,
-          geometry: { type: "Point", coordinates: [lng, lat] },
-        });
+    // Se já existe um mapa global, só reanexa o container
+    if (globalMap) {
+      if (mapContainer.current && !mapContainer.current.contains(globalMap.getContainer())) {
+        mapContainer.current.appendChild(globalMap.getContainer());
       }
+    } else if (mapContainer.current) {
+      // Cria o mapa apenas uma vez
+      globalMap = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: "mapbox://styles/jusenx/cmg9pmy5d006b01s2959hdkmb",
+        center: [-43.17572436276286, -22.5101573150628],
+        zoom: 13,
+      });
 
-      mapRef.current?.flyTo({ center: [lng, lat], zoom: 16 });
-    });
+      // Controles de navegação
+      globalMap.addControl(new mapboxgl.NavigationControl(), "top-right");
 
-    // Cleanup
+      // Geocoder
+      const geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        mapboxgl,
+        marker: false,
+        placeholder: "Pesquisar endereço",
+      });
+
+      globalMap.addControl(geocoder, "top-left");
+
+      // Evento quando um endereço é selecionado
+      geocoder.on("result", (e: GeocoderResultEvent) => {
+        const [lng, lat] = e.result.geometry.coordinates;
+
+        if (onSelectPlace) {
+          onSelectPlace({
+            id: e.result.id,
+            place_name: e.result.place_name,
+            geometry: { type: "Point", coordinates: [lng, lat] },
+          });
+        }
+
+        globalMap?.flyTo({ center: [lng, lat], zoom: 16 });
+      });
+    }
+
+    // Cleanup: só remove o container do DOM, não o mapa
     return () => {
-      mapRef.current?.remove();
+      if (globalMap && globalMap.getContainer().parentNode === mapContainer.current) {
+        mapContainer.current?.removeChild(globalMap.getContainer());
+      }
     };
   }, [onSelectPlace]);
 
-  // Atualiza marcador quando selectedPlace muda
+  // Atualiza marcador e posição quando selectedPlace muda
   useEffect(() => {
-    if (!mapRef.current || !selectedPlace) return;
+    if (!globalMap || !selectedPlace) return;
 
     const [lng, lat] = selectedPlace.geometry.coordinates;
+    globalMap.flyTo({ center: [lng, lat], zoom: 14 });
 
-    mapRef.current.flyTo({ center: [lng, lat], zoom: 14 });
-
+    // Remove marcador anterior
     if (markerRef.current) markerRef.current.remove();
 
+    // Cria novo marcador
     markerRef.current = new mapboxgl.Marker()
       .setLngLat([lng, lat])
-      .addTo(mapRef.current);
+      .addTo(globalMap);
   }, [selectedPlace]);
 
   return (
-   <div className="w-full h-full rounded-lg overflow-visible">
-  <div
-    ref={mapContainer}
-    className="w-full h-full rounded-lg shadow-md overflow-visible"
-    style={{ minHeight: "300px" }}
-  />
-</div>
-
-
+    <div className="w-full h-full rounded-lg overflow-visible">
+      <div
+        ref={mapContainer}
+        className="w-full h-full rounded-lg shadow-md overflow-visible"
+        style={{ minHeight: "300px" }}
+      />
+    </div>
   );
 }
