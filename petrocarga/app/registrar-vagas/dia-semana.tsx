@@ -1,140 +1,62 @@
 import React, { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export default function DiaSemana({ name = "diaSemana" }) {
+  const [selecionarDias, setSelecionarDias] = useState<string[]>([]);
+
   const diasDaSemana = [
-    { id: 'dom', label: 'Domingo', value: '1', abrev: 'Dom' },
-    { id: 'seg', label: 'Segunda-feira', value: '2', abrev: 'Seg' },
-    { id: 'ter', label: 'Terça-feira', value: '3', abrev: 'Ter' },
-    { id: 'qua', label: 'Quarta-feira', value: '4', abrev: 'Qua' },
-    { id: 'qui', label: 'Quinta-feira', value: '5', abrev: 'Qui' },
-    { id: 'sex', label: 'Sexta-feira', value: '6', abrev: 'Sex' },
-    { id: 'sab', label: 'Sábado', value: '7', abrev: 'Sáb' }
+    { id: 'dom', label: 'Domingo', value: '1' },
+    { id: 'seg', label: 'Segunda-feira', value: '2' },
+    { id: 'ter', label: 'Terça-feira', value: '3' },
+    { id: 'qua', label: 'Quarta-feira', value: '4' },
+    { id: 'qui', label: 'Quinta-feira', value: '5' },
+    { id: 'sex', label: 'Sexta-feira', value: '6' },
+    { id: 'sab', label: 'Sábado', value: '7' }
   ];
 
-  type DiaConfig = {
-    ativo: boolean;
-    horarioInicio: string;
-    horarioFim: string;
-  };
-
-  type DiasConfig = {
-    [key: string]: DiaConfig;
-  };
-
-  const [diasConfig, setDiasConfig] = useState<DiasConfig>(
-    diasDaSemana.reduce<DiasConfig>((acc, dia) => {
-      acc[dia.value] = {
-        ativo: false,
-        horarioInicio: '',
-        horarioFim: ''
-      };
-      return acc;
-    }, {})
-  );
-
   const handleDayToggle = (dayValue: string) => {
-    setDiasConfig(prev => ({
-      ...prev,
-      [dayValue]: {
-        ...prev[dayValue],
-        ativo: !prev[dayValue].ativo
-      }
-    }));
+    setSelecionarDias(prev => 
+      prev.includes(dayValue)
+        ? prev.filter(d => d !== dayValue)
+        : [...prev, dayValue]
+    );
   };
 
-  const handleHorarioChange = (
-    dayValue: string,
-    tipo: 'horarioInicio' | 'horarioFim',
-    valor: string
-  ) => {
-    setDiasConfig(prev => ({
-      ...prev,
-      [dayValue]: {
-        ...prev[dayValue],
-        [tipo]: valor
-      }
-    }));
+  const selectAll = () => {
+    setSelecionarDias(diasDaSemana.map(d => d.value));
   };
 
-  const hiddenValue = JSON.stringify(
-    Object.entries(diasConfig)
-      .filter(([_, config]) => config.ativo)
-      .map(([dia, config]) => ({
-        dia,
-        horarioInicio: config.horarioInicio,
-        horarioFim: config.horarioFim
-      }))
-  );
+  const clearAll = () => {
+    setSelecionarDias([]);
+  };
+
+  // Input hidden que enviará os valores no formato correto: "0,3,4"
+  const hiddenValue = selecionarDias.sort((a, b) => Number(a) - Number(b)).join(',');
 
   return (
-    <div className="w-full space-y-2 md:space-y-3">
-      {diasDaSemana.map((dia) => (
-        <div 
-          key={dia.id} 
-          className="border border-gray-300 rounded-md p-3 md:p-4 hover:bg-gray-50 transition-colors"
-        >
-          <div className="flex flex-col gap-3">
-            {/* Checkbox e Label do dia */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                className="border border-gray-500 flex-shrink-0"
-                id={dia.id}
-                checked={diasConfig[dia.value].ativo}
-                onCheckedChange={() => handleDayToggle(dia.value)}
-              />
-              <Label
-                htmlFor={dia.id}
-                className="text-sm md:text-base font-medium cursor-pointer select-none"
-              >
-                {/* Mostra abreviação em mobile, nome completo em desktop */}
-                <span className="md:hidden">{dia.abrev}</span>
-                <span className="hidden md:inline">{dia.label}</span>
-              </Label>
-            </div>
-
-            {/* Inputs de horário - só aparecem quando o dia está ativo */}
-            {diasConfig[dia.value].ativo && (
-              <div className="flex flex-col sm:flex-row gap-3 pl-0 sm:pl-6">
-                <div className="flex-1">
-                  <label 
-                    htmlFor={`${dia.id}-inicio`} 
-                    className="text-xs md:text-sm text-gray-600 mb-1 block"
-                  >
-                    Início
-                  </label>
-                  <Input 
-                    className="rounded-sm border-gray-400 w-full text-sm md:text-base" 
-                    type="time"
-                    id={`${dia.id}-inicio`}
-                    value={diasConfig[dia.value].horarioInicio}
-                    onChange={(e) => handleHorarioChange(dia.value, 'horarioInicio', e.target.value)}
-                  />
-                </div>
-                
-                <div className="flex-1">
-                  <label 
-                    htmlFor={`${dia.id}-fim`} 
-                    className="text-xs md:text-sm text-gray-600 mb-1 block"
-                  >
-                    Fim
-                  </label>
-                  <Input 
-                    className="rounded-sm border-gray-400 w-full text-sm md:text-base" 
-                    type="time"
-                    id={`${dia.id}-fim`}
-                    value={diasConfig[dia.value].horarioFim}
-                    onChange={(e) => handleHorarioChange(dia.value, 'horarioFim', e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
+    <div>
+      <div className='flex sm:gap-20 border border-gray-500 rounded-xs p-4'>
+        {diasDaSemana.map((dia) => (
+          <div key={dia.id}>
+            <Checkbox
+              className='border border-gray-500'
+              id={dia.id}
+              checked={selecionarDias.includes(dia.value)}
+              onCheckedChange={() => handleDayToggle(dia.value)}
+            />
+            <Label
+              htmlFor={dia.id}
+              className="text-sm font-medium cursor-pointer select-none"
+            >
+              {dia.label}
+            </Label>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
+      {/* Input hidden que será enviado com o formulário */}
       <input 
         type="hidden" 
         name={name} 
