@@ -33,61 +33,77 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const markerRef = useRef<mapboxgl.Marker | null>(null);
 
-  useEffect(() => {
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-    if (!token) throw new Error("MAPBOX TOKEN não definido");
-    mapboxgl.accessToken = token;
+ useEffect(() => {
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+  if (!token) throw new Error("MAPBOX TOKEN não definido");
+  mapboxgl.accessToken = token;
 
-    // Se já existe um mapa global, só reanexa o container
-    if (globalMap) {
-      if (mapContainer.current && !mapContainer.current.contains(globalMap.getContainer())) {
-        mapContainer.current.appendChild(globalMap.getContainer());
-      }
-    } else if (mapContainer.current) {
-      // Cria o mapa apenas uma vez
-      globalMap = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: "mapbox://styles/jusenx/cmg9pmy5d006b01s2959hdkmb",
-        center: [-43.17572436276286, -22.5101573150628],
-        zoom: 13,
-      });
+  if (!mapContainer.current) return;
+  const container = mapContainer.current;
 
-      // Controles de navegação
-      globalMap.addControl(new mapboxgl.NavigationControl(), "top-right");
-
-      // Geocoder
-      const geocoder = new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl,
-        marker: false,
-        placeholder: "Pesquisar endereço",
-      });
-
-      globalMap.addControl(geocoder, "top-left");
-
-      // Evento quando um endereço é selecionado
-      geocoder.on("result", (e: GeocoderResultEvent) => {
-        const [lng, lat] = e.result.geometry.coordinates;
-
-        if (onSelectPlace) {
-          onSelectPlace({
-            id: e.result.id,
-            place_name: e.result.place_name,
-            geometry: { type: "Point", coordinates: [lng, lat] },
-          });
-        }
-
-        globalMap?.flyTo({ center: [lng, lat], zoom: 16 });
-      });
+  // Se já existe um mapa global, só reanexa o container
+  if (globalMap) {
+    if (!container.contains(globalMap.getContainer())) {
+      container.appendChild(globalMap.getContainer());
     }
+    // Força o mapa a redimensionar
+    globalMap.resize();
+  } else {
+    // Cria o mapa apenas uma vez
+    globalMap = new mapboxgl.Map({
+      container,
+      style: "mapbox://styles/jusenx/cmg9pmy5d006b01s2959hdkmb",
+      center: [-43.17572436276286, -22.5101573150628],
+      zoom: 13,
+    });
 
-    // Cleanup: só remove o container do DOM, não o mapa
-    return () => {
-      if (globalMap && globalMap.getContainer().parentNode === mapContainer.current) {
-        mapContainer.current!.appendChild(globalMap.getContainer());
+    // Controles de navegação
+    globalMap.addControl(new mapboxgl.NavigationControl(), "top-right");
+
+    // Geocoder
+    const geocoder = new MapboxGeocoder({
+      accessToken: mapboxgl.accessToken,
+      mapboxgl,
+      marker: false,
+      placeholder: "Pesquisar endereço",
+    });
+
+    globalMap.addControl(geocoder, "top-left");
+
+    // Evento quando um endereço é selecionado
+    geocoder.on("result", (e: GeocoderResultEvent) => {
+      const [lng, lat] = e.result.geometry.coordinates;
+
+      if (onSelectPlace) {
+        onSelectPlace({
+          id: e.result.id,
+          place_name: e.result.place_name,
+          geometry: { type: "Point", coordinates: [lng, lat] },
+        });
       }
-    };
-  }, [onSelectPlace]);
+
+      globalMap?.flyTo({ center: [lng, lat], zoom: 16 });
+    });
+
+    // Também chama resize depois que o mapa é criado
+    globalMap.on("load", () => {
+      globalMap?.resize();
+    });
+  }
+
+  // Listener para redimensionamento da janela
+  const handleResize = () => globalMap?.resize();
+  window.addEventListener("resize", handleResize);
+
+  // Cleanup
+  return () => {
+    window.removeEventListener("resize", handleResize);
+    if (globalMap && globalMap.getContainer().parentNode === container) {
+      container.appendChild(globalMap.getContainer());
+    }
+  };
+}, [onSelectPlace]);
+
 
   // Atualiza marcador e posição quando selectedPlace muda
   useEffect(() => {
