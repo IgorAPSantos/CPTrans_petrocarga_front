@@ -7,27 +7,44 @@ type VagaItemProp = {
     vaga: Vaga;
 };
 
-export default function vagaItem({ vaga }: VagaItemProp) {
+export default function VagaItem({ vaga }: VagaItemProp) {
     return (
-        <article className="grid w-full grid-cols-6 items-center border border-t-4 border-black bg-white px-6 py-4 shadow transition-colors hover:border-blue-400">
-        <h3 className="font-display col-span-2 overflow-hidden text-lg font-medium text-ellipsis whitespace-nowrap text-gray-700">
-            {vaga.title}
-        </h3>
-        <h4 className="overflow-hidden font-light text-gray-500">
-            {vaga.company}
-        </h4>
-        <h4 className="font-light text-gray-500">
-            {vaga.city}
-        </h4>
-        <h4 className="font-light text-gray-500">
-            R$ {vaga.salary.toFixed(2)}
-        </h4>
-        <Link
-            href={`/visualizar-vagas/${vaga.id}`}
-            className={cn(buttonVariants({ variant: "outline" }))}
-        >
-            Mais
-        </Link>
-        </article>
+   <article className="flex flex-col md:flex-row items-center justify-between bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow border-l-4 border-blue-500 gap-4">
+  {/* Info principal */}
+  <div className="flex-1 flex flex-col md:flex-row md:items-center gap-4 min-w-0">
+    <div className="flex-1 min-w-0">
+      <h3 className="text-lg font-semibold text-gray-800 truncate">
+        {vaga.area}
+      </h3>
+      <p className="text-sm text-gray-500 truncate">
+        {vaga.localizacao}
+      </p>
+    </div>
+
+    <div className="flex flex-wrap gap-4 text-sm text-gray-600 min-w-0">
+      <span className="truncate">Comprimento: {vaga.comprimento} m</span>
+      <span
+  className={cn(
+    "truncate font-medium",
+    vaga.status === "ativo" && "text-green-600",
+    vaga.status === "inativo" && "text-red-600",
+    vaga.status === "manutenção" && "text-yellow-600"
+  )}
+>
+  Status: {vaga.status}
+</span>
+    </div>
+  </div>
+
+  {/* Botão */}
+  <div className="mt-2 md:mt-0 flex-shrink-0">
+    <Link
+      href={`/visualizar-vagas/${vaga.id}`}
+      className={cn(buttonVariants({ variant: "outline" }))}
+    >
+      Mais
+    </Link>
+  </div>
+</article>
     );
 }
