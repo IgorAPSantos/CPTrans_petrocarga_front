@@ -3,6 +3,7 @@ import mapboxgl from "mapbox-gl";
 interface Vaga {
   id: string;
   area: string;
+  status: string;
   enderecoVagaResponseDTO: {
     logradouro: string;
     bairro: string;
@@ -30,13 +31,13 @@ export function addVagaMarkers(
 
     const el = document.createElement("div");
     el.className =
-      "vaga-marker w-6 h-6 bg-yellow-500 rounded-full border-2 border-white shadow-lg";
+      "vaga-marker w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg";
 
     const marker = new mapboxgl.Marker(el)
       .setLngLat(vaga.coordinates)
       .setPopup(
         new mapboxgl.Popup({ offset: 25 }).setHTML(
-          `<strong>${vaga.area}</strong><br/>${vaga.enderecoVagaResponseDTO.logradouro}, ${vaga.enderecoVagaResponseDTO.bairro}`
+          `<strong>${vaga.status}</strong><br/>${vaga.enderecoVagaResponseDTO.logradouro}, ${vaga.enderecoVagaResponseDTO.bairro}`
         )
       )
       .addTo(map);

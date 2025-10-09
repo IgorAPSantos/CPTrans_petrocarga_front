@@ -13,7 +13,7 @@ interface Vaga {
 }
 
 export function useVagas() {
-  const [vagas, setVagas] = useState<Vaga[]>([]);
+  const [buscarVagas, setBuscarVagas] = useState<Vaga[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,7 +21,7 @@ export function useVagas() {
     const fetchVagas = async () => {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:8000/petrocarga/vagas");
+        const res = await fetch("http://localhost:8000/petrocarga/vagas"); // Para usar o MOCK troque por /api/vagas
         if (!res.ok) throw new Error("Erro ao buscar vagas");
         const data: Vaga[] = await res.json();
 
@@ -36,7 +36,7 @@ export function useVagas() {
           };
         });
 
-        setVagas(vagasFormatadas);
+        setBuscarVagas(vagasFormatadas);
       } catch (err: unknown) {
         console.error("Erro ao carregar vagas:", err);
         if (err instanceof Error) {
@@ -52,5 +52,5 @@ export function useVagas() {
     fetchVagas();
   }, []);
 
-  return { vagas, loading, error };
+  return { buscarVagas, loading, error };
 }

@@ -26,7 +26,7 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   // Hooks
-  const { vagas, loading, error } = useVagas();
+  const { buscarVagas, loading, error } = useVagas();
   const { map, mapLoaded } = useMapbox({
     containerRef: mapContainer,
     onSelectPlace,
@@ -45,9 +45,14 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
 
   // Cria marcadores das vagas
   useEffect(() => {
-    if (!map || !mapLoaded || vagas.length === 0) return;
-    addVagaMarkers(map, vagas, markersRef);
-  }, [vagas, map, mapLoaded]);
+    if (!map || !mapLoaded || buscarVagas.length === 0) return;
+    // Garantir que cada vaga tem a propriedade 'status'
+    const vagasComStatus = buscarVagas.map((vaga) => ({
+      status: "",
+      ...vaga,
+    }));
+    addVagaMarkers(map, vagasComStatus, markersRef);
+  }, [buscarVagas, map, mapLoaded]);
 
   return (
     <div className="w-full h-full rounded-lg overflow-visible relative">
