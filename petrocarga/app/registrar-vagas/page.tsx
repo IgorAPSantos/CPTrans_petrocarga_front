@@ -10,6 +10,7 @@ import { useActionState } from "react";
 import FormItem from "./form-item";
 import React from "react";
 import DiaSemana from "./dia-semana";
+import SelecaoCustomizada from "./selecao-customizada";
 
 export default function Cadastro() {
   const [state, addVagaAction, pending] = useActionState(addVaga, null);
@@ -54,18 +55,50 @@ export default function Cadastro() {
               />
             </FormItem>
 
-            {/* Localização */}
+            {/* Número da Vaga */}
             <FormItem
-              name="Localização"
-              description="Latitude e Longitude. Exemplo: -23.55052, -46.633308"
+              name="Número da Vaga"
+              description="Exemplo: Vaga 03"
             >
               <Input
                 className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="localizacao"
-                name="localizacao"
-                placeholder="-23.55052, -46.633308"
+                id="numeroEndereco"
+                name="numeroEndereco"
+                placeholder="Vaga 03"
               />
             </FormItem>
+
+          <FormItem
+            name="Área"
+            description="Selecione a cor da área da vaga"
+          >
+            <SelecaoCustomizada
+              id="area"
+              name="area"
+              placeholder="Selecione a área"
+              options={[
+                { value: "vermelha", label: "Vermelha" },
+                { value: "amarela", label: "Amarela" },
+                { value: "azul", label: "Azul" },
+                { value: "branca", label: "Branca" }
+              ]}
+            />
+          </FormItem>
+
+          <FormItem
+            name="Tipo"
+            description="Perpendicular ou Paralela à rua"
+          >
+            <SelecaoCustomizada
+              id="tipo"
+              name="tipo"
+              placeholder="Selecione o tipo"
+              options={[
+                { value: "paralela", label: "Paralela" },
+                { value: "perpendicular", label: "Perpendicular" }
+              ]}
+            />
+          </FormItem>
 
             {/* Bairro */}
             <FormItem
@@ -78,14 +111,6 @@ export default function Cadastro() {
                 name="bairro"
                 placeholder="Centro"
               />
-            </FormItem>
-
-            {/* Dias da semana */}
-            <FormItem
-              name="Dias da semana" 
-              description="Selecione os dias em que a vaga estará disponível e defina os horários"
-            > 
-              <DiaSemana name="diaSemana" />
             </FormItem>
 
             {/* Comprimento */}
@@ -115,6 +140,39 @@ export default function Cadastro() {
                 className="min-h-[100px] md:min-h-[120px] rounded-sm border-gray-400 text-sm md:text-base resize-none"
                 placeholder="Ex: Em frente à praça, próximo ao mercado..."
               />
+            </FormItem>
+
+            {/* Localização */}
+            <FormItem
+              name="Localização inicial"
+              description="Latitude e Longitude do início da vaga. Exemplo: -23.55052, -46.633308"
+            >
+              <Input
+                className="rounded-sm border-gray-400 text-sm md:text-base"
+                id="localizacao-inicio"
+                name="localizacao-inicio"
+                placeholder="-23.55052, -46.633308"
+              />
+            </FormItem>
+
+            <FormItem
+              name="Localização final"
+              description="Latitude e Longitude do fim da vaga. Exemplo: -23.55052, -46.633308"
+            >
+              <Input
+                className="rounded-sm border-gray-400 text-sm md:text-base"
+                id="localizacao-fim"
+                name="localizacao-fim"
+                placeholder="-23.55052, -46.633308"
+              />
+            </FormItem>
+
+            {/* Dias da semana */}
+            <FormItem
+              name="Dias da semana" 
+              description="Selecione os dias em que a vaga estará disponível e defina os horários"
+            > 
+              <DiaSemana name="diaSemana" />
             </FormItem>
           </CardContent>
 
