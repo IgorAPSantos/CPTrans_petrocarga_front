@@ -1,22 +1,19 @@
 export type Vaga = {
-    id: number;
-    area: string;
-    comprimento: number;
-    horario_fim: number;
-    horario_inicio: number;
-    localizacao: string;
-    max_eixos: number;
-    status: string;
-    descricao: string;
-    endereco: Endereco;
-    diasSemana: string[];
-    latitude: number; 
-    longitude: number;  
+  id: string; // UUID
+  area: string;
+  comprimento: number;
+  horarioInicio: string; // "08:00:00"
+  horarioFim: string; // "18:00:00"
+  localizacao: string; // "-22.509135, -43.171351"
+  maxEixos: number;
+  status: string;
+  diasSemana: string[];
+  enderecoVagaResponseDTO: Endereco;
 };
 
-type Endereco = {
-    id: number;
-    codigo_PMP: string;
-    logradouro: string;
-    bairro: string;
-}
+export type Endereco = {
+  id: string; // UUID
+  codidoPmp: string;
+  logradouro: string;
+  bairro: string;
+};

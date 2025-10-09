@@ -27,7 +27,7 @@ export function ListaVagas() {
   useEffect(() => {
     async function fetchVagas() {
       try {
-        const res = await fetch("/api/vagas");
+        const res = await fetch("http://localhost:8000/petrocarga/vagas"); // Para usar o MOCK troque por /api/vagas
         const data = await res.json();
         setVagas(data);
       } catch (err) {
@@ -66,7 +66,9 @@ export function ListaVagas() {
         ) : vagasFiltradas.length > 0 ? (
           vagasFiltradas.map((vaga) => <VagaItem key={vaga.id} vaga={vaga} />)
         ) : (
-          <p className="text-gray-500 text-center mt-4">Nenhuma vaga encontrada.</p>
+          <p className="text-gray-500 text-center mt-4">
+            Nenhuma vaga encontrada.
+          </p>
         )}
       </div>
     </div>
