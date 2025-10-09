@@ -6,10 +6,12 @@ import { notFound } from "next/navigation";
 
 // Busca uma vaga específica pelo ID do mock local
 async function buscarVaga(vagaId: string): Promise<Vaga | undefined> {
-  const res = await fetch("http://localhost:8000/petrocarga/vagas", {
-    // Para usar o MOCK use troque por http://localhost:3000/api/vagas
-    cache: "no-store",
-  });
+  const res = await fetch(
+    "http://localhost:8000/petrocarga/vagas", // Para usar o MOCK troque por `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/vagas`
+    {
+      cache: "no-store",
+    }
+  );
 
   if (!res.ok) return undefined;
 
@@ -19,16 +21,17 @@ async function buscarVaga(vagaId: string): Promise<Vaga | undefined> {
   return vaga;
 }
 
-export default async function JobPosting({
+export default async function VagaPosting({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
-  const vagaId = params.id;
-  const vaga = await buscarVaga(vagaId);
+  const { id } = await params;
+  const vaga = await buscarVaga(id);
 
   if (!vaga) {
     notFound();
+    return null;
   }
 
   return (
