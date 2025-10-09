@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { Vaga } from "@/lib/types";
 
 const vagas: Vaga[] = [
-   {
+  {
     id: 1,
     area: "Centro Histórico",
     comprimento: 12,
@@ -19,6 +19,8 @@ const vagas: Vaga[] = [
       bairro: "Centro",
     },
     diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
+    latitude: -22.4138,
+    longitude: -42.9685,
   },
   {
     id: 2,
@@ -37,6 +39,8 @@ const vagas: Vaga[] = [
       bairro: "Mosela",
     },
     diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"],
+    latitude: -22.4145,
+    longitude: -42.9610,
   },
   {
     id: 3,
@@ -55,6 +59,8 @@ const vagas: Vaga[] = [
       bairro: "Bingen",
     },
     diasSemana: ["Todos os dias"],
+    latitude: -22.4160,
+    longitude: -42.9500,
   },
   {
     id: 4,
@@ -73,6 +79,8 @@ const vagas: Vaga[] = [
       bairro: "Quitandinha",
     },
     diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
+    latitude: -22.4210,
+    longitude: -42.9660,
   },
   {
     id: 5,
@@ -91,6 +99,8 @@ const vagas: Vaga[] = [
       bairro: "Centro",
     },
     diasSemana: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"],
+    latitude: -22.4125,
+    longitude: -42.9700,
   },
 ];
 
