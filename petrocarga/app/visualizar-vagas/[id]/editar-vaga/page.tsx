@@ -44,7 +44,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     name="codigo"
                     maxLength={30}
                     placeholder="Md-1234"
-                    defaultValue={vaga.endereco.codigo_PMP}
+                    defaultValue={vaga.id.toString()}
                 />
                 </FormItem>
 
@@ -152,7 +152,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     name="descricao"
                     className="min-h-[100px] md:min-h-[120px] rounded-sm border-gray-400 text-sm md:text-base resize-none"
                     placeholder="Ex: Em frente à praça, próximo ao mercado..."
-                    defaultValue={vaga.descricao}
+                    defaultValue={vaga.id.toString()}
                 />
                 </FormItem>
 

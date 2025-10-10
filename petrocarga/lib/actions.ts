@@ -16,7 +16,7 @@ export async function addVaga(prevState: unknown, formData: FormData) {
         descricao: formData.get("descricao") as string,
     };
 
-    const res = await fetch('http://localhost:3000/api/vagas', {
+    const res = await fetch('http://localhost:3000/registrar-vagas', {
         method: 'POST',
         body: formData,
     });
@@ -40,7 +40,7 @@ export async function addVaga(prevState: unknown, formData: FormData) {
 }
 
 export async function deleteVaga(id: string) {
-    const res = await fetch(`http://localhost:3000/api/vagas/${id}`, {
+    const res = await fetch(`http://localhost:3000/visualizar-vagas/${id}`, {
         method: 'DELETE',
     });
     if(!res.ok) {
@@ -69,7 +69,7 @@ export async function atualizarVaga(prevState: unknown, formData: FormData) {
         diaSemana: formData.get("diaSemana") as string,
     };
 
-    const res = await fetch(`http://localhost:3000/api/vagas/${id}`, {
+    const res = await fetch(`http://localhost:3000/visualizar-vagas/${id}/editar-vaga`, {
         method: 'PUT',
         body: formData,
     });
