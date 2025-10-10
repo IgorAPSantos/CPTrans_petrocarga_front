@@ -8,7 +8,8 @@ export type DiaSemana =
   | "DOMINGO";
 
 export type OperacoesVaga = {
-  diaSemana: DiaSemana; // apenas um dia por operação
+  id: string;
+  diaSemana: DiaSemana;
   horaInicio: string;
   horaFim: string;
 };
@@ -30,6 +31,6 @@ export type Vaga = {
   referenciaGeoFim: string;
   comprimento: number;
   status: "DISPONIVEL" | "OCUPADO" | "MANUTENCAO" | string;
-  operacoesVaga: OperacoesVaga[]; // array de operações
-  endereco: Endereco; // nome correto conforme JSON
+  operacoesVaga: OperacoesVaga[];
+  endereco: Endereco;
 };
