@@ -8,30 +8,28 @@ type VagaDetalhesProps = {
 
 export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   return (
-    <article className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl border-l-8 border-blue-500 transition-shadow max-w-4xl mx-auto">
-      {/* Cabeçalho principal */}
-      <header className="mb-6">
-        <div className="flex flex-wrap justify-between items-start gap-3">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">
-              {vaga.endereco.logradouro}
-            </h2>
-            <p className="text-gray-600 flex items-center gap-2 mt-1">
-              <MapPin className="w-4 h-4 text-gray-400" />
-              {vaga.endereco.bairro}
-            </p>
-          </div>
+    <article className="relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl border-l-8 border-blue-500 transition-shadow max-w-4xl mx-auto">
+      {/* Status bolinha no canto superior direito */}
+      <div
+        className={cn(
+          "absolute top-4 right-4 w-4 h-4 rounded-full shadow-md",
+          vaga.status === "DISPONIVEL" && "bg-green-500",
+          vaga.status === "OCUPADO" && "bg-red-500",
+          vaga.status === "MANUTENCAO" && "bg-yellow-400"
+        )}
+        title={vaga.status}
+      />
 
-          <span
-            className={cn(
-              "px-3 py-1 rounded-full text-sm font-semibold shadow-sm",
-              vaga.status === "DISPONIVEL" && "bg-green-100 text-green-800",
-              vaga.status === "OCUPADO" && "bg-red-100 text-red-800",
-              vaga.status === "MANUTENCAO" && "bg-yellow-100 text-yellow-800"
-            )}
-          >
-            {vaga.status}
-          </span>
+      {/* Cabeçalho principal */}
+      <header className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-2xl font-bold text-gray-800 truncate">
+            {vaga.endereco.logradouro}
+          </h2>
+          <p className="text-gray-600 flex items-center gap-2 mt-1 truncate">
+            <MapPin className="w-4 h-4 text-gray-400" />
+            {vaga.endereco.bairro}
+          </p>
         </div>
       </header>
 
@@ -39,30 +37,30 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm">
         {vaga.operacoesVaga.map((op, index) => (
           <div key={index} className="flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-gray-400" />
-            <span>
-              <strong>Horário ({op.diaSemana}):</strong> {op.horaInicio} -{" "}
-              {op.horaFim}
+            <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
+            <span className="truncate">
+              <strong>{op.diaSemana}:</strong> {op.horaInicio.slice(0, 5)} -{" "}
+              {op.horaFim.slice(0, 5)}
             </span>
           </div>
         ))}
 
         <div className="flex items-center gap-2">
-          <Ruler className="w-4 h-4 text-gray-400" />
+          <Ruler className="w-4 h-4 text-gray-400 flex-shrink-0" />
           <span>
             <strong>Comprimento:</strong> {vaga.comprimento} m
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Truck className="w-4 h-4 text-gray-400" />
+          <Truck className="w-4 h-4 text-gray-400 flex-shrink-0" />
           <span>
             <strong>Tipo:</strong> {vaga.tipoVaga}
           </span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Info className="w-4 h-4 text-gray-400" />
+          <Info className="w-4 h-4 text-gray-400 flex-shrink-0" />
           <span>
             <strong>Área:</strong> {vaga.area}
           </span>
@@ -70,7 +68,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
       </section>
 
       {/* Informações complementares */}
-      <section className="mt-6 border-t pt-4 text-xs text-gray-500">
+      <section className="mt-6 border-t pt-4 text-xs text-gray-500 space-y-1">
         <p>
           <strong>Código PMP:</strong> {vaga.endereco.codidoPmp}
         </p>
