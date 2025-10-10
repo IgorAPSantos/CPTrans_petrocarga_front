@@ -1,10 +1,12 @@
 import React from 'react';
 
+{/* Definição dos tipos para as opções e propriedades do componente */}
 interface SelecionarOpcao {
     value: string;
     label: string;
 }
 
+{/* Definição das propriedades esperadas pelo componente */}
 interface SelecaoCustomizadaProps {
     id: string;
     name: string;
@@ -13,6 +15,7 @@ interface SelecaoCustomizadaProps {
     defaultValue?: string;
 }
 
+{/* Componente de seleção customizada */}
 export default function SelecaoCustomizada({ 
     id, 
     name, 
@@ -33,7 +36,7 @@ export default function SelecaoCustomizada({
             </option>
         )}
         {options.map((option) => (
-            <option key={option.value} value={option.value} className="border bg-white text-gray-900 py-2">
+            <option key={option.value} value={option.value} className="bg-white text-gray-900 py-2">
             {option.label}
             </option>
         ))}

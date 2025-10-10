@@ -13,6 +13,7 @@ import DiaSemana from "./dia-semana";
 import SelecaoCustomizada from "./selecao-customizada";
 
 export default function Cadastro() {
+  {/* Hook para gerenciar o estado da ação de adicionar vaga */}
   const [state, addVagaAction, pending] = useActionState(addVaga, null);
 
   return (
@@ -68,37 +69,39 @@ export default function Cadastro() {
               />
             </FormItem>
 
-          <FormItem
-            name="Área"
-            description="Selecione a cor da área da vaga"
-          >
-            <SelecaoCustomizada
-              id="area"
-              name="area"
-              placeholder="Selecione a área"
-              options={[
-                { value: "vermelha", label: "Vermelha" },
-                { value: "amarela", label: "Amarela" },
-                { value: "azul", label: "Azul" },
-                { value: "branca", label: "Branca" }
-              ]}
-            />
-          </FormItem>
+            {/* Cor da Vaga */}
+            <FormItem
+              name="Área"
+              description="Selecione a cor da área da vaga"
+            >
+              <SelecaoCustomizada
+                id="area"
+                name="area"
+                placeholder="Selecione a área"
+                options={[
+                  { value: "vermelha", label: "Vermelha" },
+                  { value: "amarela", label: "Amarela" },
+                  { value: "azul", label: "Azul" },
+                  { value: "branca", label: "Branca" }
+                ]}
+              />
+            </FormItem>
 
-          <FormItem
-            name="Tipo"
-            description="Perpendicular ou Paralela à rua"
-          >
-            <SelecaoCustomizada
-              id="tipo"
-              name="tipo"
-              placeholder="Selecione o tipo"
-              options={[
-                { value: "paralela", label: "Paralela" },
-                { value: "perpendicular", label: "Perpendicular" }
-              ]}
-            />
-          </FormItem>
+            {/* Tipo da Vaga */}
+            <FormItem
+              name="Tipo"
+              description="Perpendicular ou Paralela à rua"
+            >
+              <SelecaoCustomizada
+                id="tipo"
+                name="tipo"
+                placeholder="Selecione o tipo"
+                options={[
+                  { value: "paralela", label: "Paralela" },
+                  { value: "perpendicular", label: "Perpendicular" }
+                ]}
+              />
+            </FormItem>
 
             {/* Bairro */}
             <FormItem
