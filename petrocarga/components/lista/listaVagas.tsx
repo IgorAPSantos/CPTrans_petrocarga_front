@@ -43,7 +43,9 @@ export function ListaVagas() {
   const vagasFiltradas = vagas.filter(
     (vaga) =>
       vaga.area.toLowerCase().includes(filtroDebounced.toLowerCase()) ||
-      vaga.localizacao.toLowerCase().includes(filtroDebounced.toLowerCase())
+      vaga.referenciaEndereco
+        .toLowerCase()
+        .includes(filtroDebounced.toLowerCase())
   );
 
   return (

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 interface Vaga {
   id: string;
   area: string;
-  localizacao: string; // "-22.509135, -43.171351"
+  referenciaGeoInicio: string; // "-22.509135, -43.171351"
   enderecoVagaResponseDTO: {
     logradouro: string;
     bairro: string;
@@ -26,7 +26,7 @@ export function useVagas() {
         const data: Vaga[] = await res.json();
 
         const vagasFormatadas = data.map((vaga) => {
-          const [latStr, lngStr] = vaga.localizacao.split(",");
+          const [latStr, lngStr] = vaga.referenciaGeoInicio.split(",");
           return {
             ...vaga,
             coordinates: [
