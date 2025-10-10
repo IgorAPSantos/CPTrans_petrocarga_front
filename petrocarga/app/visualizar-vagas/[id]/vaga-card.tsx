@@ -14,11 +14,11 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         <div className="flex flex-wrap justify-between items-start gap-3">
           <div>
             <h2 className="text-2xl font-bold text-gray-800">
-              {vaga.enderecoVagaResponseDTO.logradouro}
+              {vaga.endereco.logradouro}
             </h2>
             <p className="text-gray-600 flex items-center gap-2 mt-1">
               <MapPin className="w-4 h-4 text-gray-400" />
-              {vaga.enderecoVagaResponseDTO.bairro}
+              {vaga.endereco.bairro}
             </p>
           </div>
 
@@ -37,12 +37,15 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
 
       {/* Informações principais */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-gray-400" />
-          <span>
-            <strong>Horário:</strong> {vaga.horarioInicio} - {vaga.horarioFim}
-          </span>
-        </div>
+        {vaga.operacoesVaga.map((op, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-gray-400" />
+            <span>
+              <strong>Horário ({op.diaSemana}):</strong> {op.horaInicio} -{" "}
+              {op.horaFim}
+            </span>
+          </div>
+        ))}
 
         <div className="flex items-center gap-2">
           <Ruler className="w-4 h-4 text-gray-400" />
@@ -54,7 +57,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         <div className="flex items-center gap-2">
           <Truck className="w-4 h-4 text-gray-400" />
           <span>
-            <strong>Máx. eixos:</strong> {vaga.maxEixos}
+            <strong>Tipo:</strong> {vaga.tipoVaga}
           </span>
         </div>
 
@@ -66,31 +69,25 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         </div>
       </section>
 
-      {/* Dias disponíveis */}
-      <section className="mt-4">
-        <strong className="block text-gray-800 mb-1">Dias disponíveis:</strong>
-        <div className="flex flex-wrap gap-1">
-          {vaga.diasSemana.map((dia) => (
-            <span
-              key={dia}
-              className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full text-xs font-medium"
-            >
-              {dia}
-            </span>
-          ))}
-        </div>
-      </section>
-
       {/* Informações complementares */}
       <section className="mt-6 border-t pt-4 text-xs text-gray-500">
         <p>
-          <strong>Código PMP:</strong> {vaga.enderecoVagaResponseDTO.codidoPmp}
+          <strong>Código PMP:</strong> {vaga.endereco.codidoPmp}
         </p>
         <p>
           <strong>ID da vaga:</strong> {vaga.id}
         </p>
         <p>
-          <strong>Localização GPS:</strong> {vaga.localizacao}
+          <strong>Referência do endereço:</strong> {vaga.referenciaEndereco}
+        </p>
+        <p>
+          <strong>Número da vaga:</strong> {vaga.numeroEndereco}
+        </p>
+        <p>
+          <strong>Localização GPS início:</strong> {vaga.referenciaGeoInicio}
+        </p>
+        <p>
+          <strong>Localização GPS fim:</strong> {vaga.referenciaGeoFim}
         </p>
       </section>
     </article>

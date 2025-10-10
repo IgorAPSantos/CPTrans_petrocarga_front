@@ -27,7 +27,7 @@ export function ListaVagas() {
   useEffect(() => {
     async function fetchVagas() {
       try {
-        const res = await fetch("/api/vagas");
+        const res = await fetch("http://localhost:8000/petrocarga/vagas"); // Para usar o MOCK troque por /api/vagas
         const data = await res.json();
         setVagas(data);
       } catch (err) {
