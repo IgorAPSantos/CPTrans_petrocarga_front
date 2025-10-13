@@ -30,7 +30,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   });
 
   return (
-    <article className="relative bg-white p-6 rounded-2xl shadow-lg max-w-4xl mx-auto border border-gray-200">
+    <article className="relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl border-l-8 border-blue-500 transition-shadow max-w-4xl mx-auto">
       {/* Cabeçalho com título e botões */}
       <header className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
         {/* Status */}
