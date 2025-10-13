@@ -1,15 +1,5 @@
 import mapboxgl from "mapbox-gl";
-
-interface Vaga {
-  id: string;
-  numeroEndereco: string;
-  referenciaGeoInicio: string;
-  status: string;
-  endereco: {
-    logradouro: string;
-    bairro: string;
-  };
-}
+import { Vaga } from "@/lib/types";
 
 // Converte a String Localização em latitude e longitude
 function parseCoordinates(coord: string): [number, number] {

@@ -1,19 +1,8 @@
 import { useEffect, useState } from "react";
-
-// Tipagem das vagas
-interface Vaga {
-  id: string;
-  area: string;
-  referenciaGeoInicio: string; // "-22.509135, -43.171351"
-  enderecoVagaResponseDTO: {
-    logradouro: string;
-    bairro: string;
-  };
-  coordinates?: [number, number];
-}
+import { Vaga } from "@/lib/types";
 
 export function useVagas() {
-  const [buscarVagas, setBuscarVagas] = useState<Vaga[]>([]);
+  const [Vagas, setVagas] = useState<Vaga[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,27 +12,13 @@ export function useVagas() {
         setLoading(true);
         const res = await fetch("http://localhost:8000/petrocarga/vagas"); // Para usar o MOCK troque por /api/vagas
         if (!res.ok) throw new Error("Erro ao buscar vagas");
+
         const data: Vaga[] = await res.json();
 
-        const vagasFormatadas = data.map((vaga) => {
-          const [latStr, lngStr] = vaga.referenciaGeoInicio.split(",");
-          return {
-            ...vaga,
-            coordinates: [
-              parseFloat(lngStr.trim()),
-              parseFloat(latStr.trim()),
-            ] as [number, number],
-          };
-        });
-
-        setBuscarVagas(vagasFormatadas);
-      } catch (err: unknown) {
+        setVagas(data);
+      } catch (err) {
         console.error("Erro ao carregar vagas:", err);
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Erro desconhecido");
-        }
+        setError(err instanceof Error ? err.message : "Erro desconhecido");
       } finally {
         setLoading(false);
       }
@@ -52,5 +27,5 @@ export function useVagas() {
     fetchVagas();
   }, []);
 
-  return { buscarVagas, loading, error };
+  return { Vagas, loading, error };
 }
