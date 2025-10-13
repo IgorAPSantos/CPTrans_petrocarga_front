@@ -64,7 +64,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         Espaço para mapa
       </div>
 
-      {/* Dias da semana clicáveis */}
+      {/* Dias da semana */}
       <section className="mb-4 flex flex-wrap gap-2">
         {diasSemana.map((dia) => {
           const ativo = horariosPorDia.has(dia);
