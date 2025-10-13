@@ -23,8 +23,7 @@ export function Navbar() {
           href="/"
           className="flex items-center space-x-2 text-xl font-bold hover:text-gray-300"
         >
-          <Image src={Logo} alt="Logo da Cptrans" className="w-10 h-auto" />
-          <span>PetroCarga</span>
+          <Image src={Logo} alt="Logo da Cptrans" className="w-16 h-auto" />
         </Link>
 
         {/* MENU DESKTOP */}
