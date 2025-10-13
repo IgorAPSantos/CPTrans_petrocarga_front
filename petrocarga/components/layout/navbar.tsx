@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import Logo from "@/public/Logo.png";
+import Image from "next/image";
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -17,8 +19,11 @@ export function Navbar() {
     <header className="bg-blue-800 text-white relative">
       <nav className="flex items-center justify-between p-4 max-w-6xl mx-auto">
         {/* Logo */}
-        <Link href="/" className="text-xl font-bold hover:text-gray-300">
-          PetroCarga
+        <Link
+          href="/"
+          className="flex items-center space-x-2 text-xl font-bold hover:text-gray-300"
+        >
+          <Image src={Logo} alt="Logo da Cptrans" className="w-16 h-auto" />
         </Link>
 
         {/* MENU DESKTOP */}

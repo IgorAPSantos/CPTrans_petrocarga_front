@@ -8,6 +8,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useVagas } from "./hooks/useVagas";
 import { useMapbox } from "./hooks/useMapbox";
 import { addVagaMarkers } from "./utils/markerUtils";
+import { Vaga } from "@/lib/types";
 
 interface MapboxFeature {
   id: string;
@@ -26,7 +27,7 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   // Hooks
-  const { buscarVagas, loading, error } = useVagas();
+  const { Vagas, loading, error } = useVagas();
   const { map, mapLoaded } = useMapbox({
     containerRef: mapContainer,
     onSelectPlace,
@@ -45,14 +46,9 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
 
   // Cria marcadores das vagas
   useEffect(() => {
-    if (!map || !mapLoaded || buscarVagas.length === 0) return;
-    // Garantir que cada vaga tem a propriedade 'status'
-    const vagasComStatus = buscarVagas.map((vaga) => ({
-      status: "",
-      ...vaga,
-    }));
-    addVagaMarkers(map, vagasComStatus, markersRef);
-  }, [buscarVagas, map, mapLoaded]);
+    if (!map || !mapLoaded || Vagas.length === 0) return;
+    addVagaMarkers(map, Vagas as Vaga[], markersRef);
+  }, [Vagas, map, mapLoaded]);
 
   return (
     <div className="w-full h-full rounded-lg overflow-visible relative">
