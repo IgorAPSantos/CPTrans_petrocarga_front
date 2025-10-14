@@ -5,6 +5,7 @@ import { Vaga, DiaSemana } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import CardMap from "@/components/map/cardMap";
 
 type VagaDetalhesProps = {
   vaga: Vaga;
@@ -93,7 +94,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
       </header>
 
       <div className="w-full h-48 mb-6 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
-        Espaço para mapa
+        <CardMap vaga={vaga} />
       </div>
 
       <section className="mb-4 flex flex-wrap gap-2">
