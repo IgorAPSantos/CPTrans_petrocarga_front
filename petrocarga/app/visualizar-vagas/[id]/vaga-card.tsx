@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Vaga, DiaSemana } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type VagaDetalhesProps = {
   vaga: Vaga;
@@ -20,6 +22,8 @@ const diasSemana: DiaSemana[] = [
 
 export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   const [diaSelecionado, setDiaSelecionado] = useState<DiaSemana | null>(null);
+  const [modalAberto, setModalAberto] = useState(false);
+  const router = useRouter();
 
   const horariosPorDia = new Map<DiaSemana, string>();
   vaga.operacoesVaga.forEach((op) => {
@@ -29,11 +33,28 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
     );
   });
 
+  const handleExcluir = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/petrocarga/vagas/${vaga.id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) {
+        alert("Erro ao excluir vaga.");
+        return;
+      }
+
+      setModalAberto(false);
+      router.back(); // volta para a página anterior
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir vaga.");
+    }
+  };
+
   return (
     <article className="relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl border-l-8 border-blue-500 transition-shadow max-w-4xl mx-auto">
-      {/* Cabeçalho com título e botões */}
       <header className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
-        {/* Status */}
         <div
           className={cn(
             "absolute top-4 right-4 w-4 h-4 rounded-full shadow-md",
@@ -50,21 +71,25 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
           <p className="text-gray-600 mt-1 truncate">{vaga.endereco.bairro}</p>
         </div>
         <div className="flex gap-2 mt-2 sm:mt-5">
-          <button className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition">
+          <Link
+            href={`/visualizar-vagas/${vaga.id}/editar-vaga`}
+            className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition inline-block"
+          >
             Alterar
-          </button>
-          <button className="px-4 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md transition">
+          </Link>
+          <button
+            onClick={() => setModalAberto(true)}
+            className="px-4 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md transition"
+          >
             Excluir
           </button>
         </div>
       </header>
 
-      {/* Mapa reservado */}
       <div className="w-full h-48 mb-6 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
         Espaço para mapa
       </div>
 
-      {/* Dias da semana */}
       <section className="mb-4 flex flex-wrap gap-2">
         {diasSemana.map((dia) => {
           const ativo = horariosPorDia.has(dia);
@@ -90,7 +115,6 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         })}
       </section>
 
-      {/* Exibe horário do dia selecionado */}
       {diaSelecionado && horariosPorDia.has(diaSelecionado) && (
         <p className="mb-6 text-gray-700 text-sm">
           <strong>Horário de {diaSelecionado}:</strong>{" "}
@@ -98,7 +122,6 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         </p>
       )}
 
-      {/* Informações da vaga */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm mb-4">
         <p>
           <strong>Comprimento:</strong> {vaga.comprimento} m
@@ -111,7 +134,6 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         </p>
       </section>
 
-      {/* Informações complementares */}
       <section className="border-t pt-4 text-xs text-gray-500 space-y-1">
         <p>
           <strong>Código PMP:</strong> {vaga.endereco.codidoPmp}
@@ -132,6 +154,35 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
           <strong>Localização GPS fim:</strong> {vaga.referenciaGeoFim}
         </p>
       </section>
+
+     {/* Modal de confirmação elegante */}
+{modalAberto && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm z-50 animate-fadeIn">
+    <div className="bg-white rounded-2xl p-6 w-96 max-w-full shadow-2xl transform transition-all duration-300 scale-95 animate-scaleIn">
+      <h3 className="text-xl font-semibold text-gray-800 mb-3">
+        Confirmar exclusão
+      </h3>
+      <p className="text-gray-600 mb-6">
+        Tem certeza que deseja excluir esta vaga? Esta ação não pode ser desfeita.
+      </p>
+      <div className="flex justify-end gap-3">
+        <button
+          onClick={() => setModalAberto(false)}
+          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
+        >
+          Cancelar
+        </button>
+        <button
+          onClick={handleExcluir}
+          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+        >
+          Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </article>
   );
 }
