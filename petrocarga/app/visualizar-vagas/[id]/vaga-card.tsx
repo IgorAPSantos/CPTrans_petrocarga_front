@@ -35,9 +35,12 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
 
   const handleExcluir = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/petrocarga/vagas/${vaga.id}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `http://localhost:8000/petrocarga/vagas/${vaga.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!res.ok) {
         alert("Erro ao excluir vaga.");
@@ -72,7 +75,10 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         </div>
         <div className="flex gap-2 mt-2 sm:mt-5">
           <Link
-            href={`/visualizar-vagas/${vaga.id}/editar-vaga`}
+            href={{
+              pathname: `/visualizar-vagas/${vaga.id}/editar-vaga`,
+              query: { vaga: JSON.stringify(vaga) }, // passa os dados da vaga na query
+            }}
             className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition inline-block"
           >
             Alterar
@@ -155,34 +161,38 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         </p>
       </section>
 
-     {/* Modal de confirmação elegante */}
-{modalAberto && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 backdrop-blur-sm z-50 animate-fadeIn">
-    <div className="bg-white rounded-2xl p-6 w-96 max-w-full shadow-2xl transform transition-all duration-300 scale-95 animate-scaleIn">
-      <h3 className="text-xl font-semibold text-gray-800 mb-3">
-        Confirmar exclusão
-      </h3>
-      <p className="text-gray-600 mb-6">
-        Tem certeza que deseja excluir esta vaga? Esta ação não pode ser desfeita.
-      </p>
-      <div className="flex justify-end gap-3">
-        <button
-          onClick={() => setModalAberto(false)}
-          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={handleExcluir}
-          className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
-        >
-          Excluir
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+      {/* Modal de confirmação DELETE */}
+      {modalAberto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setModalAberto(false)} // fecha clicando no fundo
+          />
+          <div className="relative bg-white rounded-2xl p-6 w-96 max-w-full shadow-2xl transform transition-all duration-300 scale-95 animate-scaleIn">
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">
+              Confirmar exclusão
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Tem certeza que deseja excluir esta vaga? Esta ação não pode ser
+              desfeita.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setModalAberto(false)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleExcluir}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </article>
   );
 }
