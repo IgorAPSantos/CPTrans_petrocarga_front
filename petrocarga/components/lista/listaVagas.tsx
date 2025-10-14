@@ -40,13 +40,17 @@ export function ListaVagas() {
     fetchVagas();
   }, []);
 
-  const vagasFiltradas = vagas.filter(
-    (vaga) =>
-      vaga.area.toLowerCase().includes(filtroDebounced.toLowerCase()) ||
-      vaga.referenciaEndereco
-        .toLowerCase()
-        .includes(filtroDebounced.toLowerCase())
-  );
+  // Filtro atualizado — inclui área, referência, logradouro e bairro
+  const vagasFiltradas = vagas.filter((vaga) => {
+    const filtroLower = filtroDebounced.toLowerCase();
+
+    return (
+      vaga.area?.toLowerCase().includes(filtroLower) ||
+      vaga.referenciaEndereco?.toLowerCase().includes(filtroLower) ||
+      vaga.endereco?.logradouro?.toLowerCase().includes(filtroLower) ||
+      vaga.endereco?.bairro?.toLowerCase().includes(filtroLower)
+    );
+  });
 
   return (
     <div className="flex flex-col h-full">
@@ -54,7 +58,7 @@ export function ListaVagas() {
       <div className="mb-2">
         <input
           type="text"
-          placeholder="Filtrar por área ou localização..."
+          placeholder="Filtrar por área, rua ou bairro..."
           value={filtro}
           onChange={(e) => setFiltro(e.target.value)}
           className="w-full p-2 rounded border border-gray-300 shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
