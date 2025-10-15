@@ -76,6 +76,23 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                 />
                 </FormItem>
 
+                {/* Status da vaga */}
+                <FormItem
+                name="Status"
+                description="Disponivel ou Indisponível, a vaga"
+                >
+                <SelecaoCustomizada
+                    id="status"
+                    name="status"
+                    placeholder="Selecione o status"
+                    defaultValue={vaga.status.toLowerCase()} 
+                    options={[
+                    { value: "disponivel", label: "Disponivel" },
+                    { value: "indisponivel", label: "Indisponível" }
+                    ]}
+                />
+                </FormItem>
+
                 {/* Área */}
                 <FormItem
                 name="Área"

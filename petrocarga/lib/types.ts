@@ -30,7 +30,7 @@ export type Vaga = {
   referenciaGeoInicio: string;
   referenciaGeoFim: string;
   comprimento: number;
-  status: "DISPONIVEL" | "OCUPADO" | "MANUTENCAO" | string;
+  status: "DISPONIVEL" | "OCUPADO" | "MANUTENCAO" | "INDISPONIVEL" | string;
   operacoesVaga: OperacoesVaga[];
   endereco: Endereco;
 };

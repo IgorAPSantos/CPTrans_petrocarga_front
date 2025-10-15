@@ -63,7 +63,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
           className={cn(
             "absolute top-4 right-4 w-4 h-4 rounded-full shadow-md",
             vaga.status === "DISPONIVEL" && "bg-green-500",
-            vaga.status === "OCUPADO" && "bg-red-500",
+            vaga.status === "INDISPONIVEL" && "bg-red-500",
             vaga.status === "MANUTENCAO" && "bg-yellow-400"
           )}
           title={vaga.status}

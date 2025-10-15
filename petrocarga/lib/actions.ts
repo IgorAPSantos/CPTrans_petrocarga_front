@@ -17,17 +17,16 @@ export async function addVaga(prevState: unknown, formData: FormData) {
         numeroEndereco: formData.get("numeroEndereco") as string,
         referenciaEndereco: formData.get("descricao") as string,
         tipoVaga: (formData.get("tipo") as string)?.toUpperCase(),
+        status: "DISPONIVEL",
         referenciaGeoInicio: formData.get("localizacao-inicio") as string,
         referenciaGeoFim: formData.get("localizacao-fim") as string,
         comprimento: Number(formData.get("comprimento")),
-        status: "DISPONIVEL",
         operacoesVaga: diasSemana.map((dia: any) => ({
             codigoDiaSemana: Number(dia.dia),
             horaInicio: dia.horarioInicio,
             horaFim: dia.horarioFim,
         })),
     };
-
     const res = await fetch('http://localhost:8000/petrocarga/vagas', {
         method: 'POST',
         headers: {
@@ -46,6 +45,8 @@ export async function addVaga(prevState: unknown, formData: FormData) {
     }
 
     revalidatePath('/visualizar-vagas');
+     {/* Redireciona após sucesso */}
+    redirect(`/visualizar-vagas`);
     
     {/* Retornar sucesso ou redirecionar */}
     return {
@@ -84,6 +85,7 @@ export async function atualizarVaga(prevState: unknown, formData: FormData) {
         numeroEndereco: formData.get("numeroEndereco") as string,
         referenciaEndereco: formData.get("descricao") as string,
         tipoVaga: (formData.get("tipo") as string)?.toUpperCase(),
+        status: (formData.get("status") as string)?.toUpperCase(),
         referenciaGeoInicio: formData.get("localizacao-inicio") as string,
         referenciaGeoFim: formData.get("localizacao-fim") as string,
         comprimento: Number(formData.get("comprimento")),
