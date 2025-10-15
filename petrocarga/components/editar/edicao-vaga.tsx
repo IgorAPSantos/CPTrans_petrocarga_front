@@ -1,10 +1,21 @@
-import EditarVaga from "@/components/editar-vaga/editar-vaga"; // seu componente
+"use client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { atualizarVaga } from "@/lib/actions";
+import { CircleAlert } from "lucide-react";
+import Form from "next/form";
+import { useActionState } from "react";
+import FormItem from "@/app/registrar-vagas/form-item";
+import React from "react";
+import DiaSemana from "@/app/registrar-vagas/dia-semana";
+import SelecaoCustomizada from "@/app/registrar-vagas/selecao-customizada";
 import { Vaga } from "@/lib/types";
 
-async function getVaga(id: string): Promise<Vaga> {
-  const res = await fetch(`http://localhost:8000/petrocarga/vagas/${id}`, {
-    cache: "no-store",
-  });
+export default function EditarVaga({ vaga }: { vaga: Vaga }) {
+    {/* Hook para gerenciar o estado da ação de atualizar vaga */}
+    const [state, atualizarVagaAction, pending] = useActionState(atualizarVaga, null);
 
     return (
         <main className="container mx-auto px-4 py-4 md:py-8">
@@ -37,8 +48,19 @@ async function getVaga(id: string): Promise<Vaga> {
                 />
                 </FormItem>
 
-  return res.json();
-}
+                {/* Nome da rua */}
+                <FormItem
+                name="Nome da rua"
+                description="Exemplo: Rua do Imperador"
+                >
+                <Input
+                    className="rounded-sm border-gray-400 text-sm md:text-base"
+                    id="logradouro"
+                    name="logradouro"
+                    placeholder="Rua do Imperador"
+                    defaultValue={vaga.endereco.logradouro}
+                />
+                </FormItem>
 
                 {/* Número da Vaga */}
                 <FormItem
