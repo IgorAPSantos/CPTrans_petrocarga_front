@@ -9,7 +9,7 @@ export type DiaSemana =
 
 export type OperacoesVaga = {
   id: string;
-  diaSemana: DiaSemana;
+  diaSemanaEnum: DiaSemana;
   horaInicio: string;
   horaFim: string;
 };

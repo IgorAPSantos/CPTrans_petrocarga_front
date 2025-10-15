@@ -29,7 +29,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   const horariosPorDia = new Map<DiaSemana, string>();
   vaga.operacoesVaga.forEach((op) => {
     horariosPorDia.set(
-      op.diaSemana,
+      op.diaSemanaEnum,
       `${op.horaInicio.slice(0, 5)} - ${op.horaFim.slice(0, 5)}`
     );
   });
@@ -76,10 +76,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         </div>
         <div className="flex gap-2 mt-2 sm:mt-5">
           <Link
-            href={{
-              pathname: `/visualizar-vagas/${vaga.id}/editar-vaga`,
-              query: { vaga: JSON.stringify(vaga) }, // passa os dados da vaga na query
-            }}
+            href={`/visualizar-vagas/${vaga.id}/editar`}
             className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition inline-block"
           >
             Alterar

@@ -44,7 +44,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     name="codigo"
                     maxLength={30}
                     placeholder="Md-1234"
-                    defaultValue={vaga.id.toString()}
+                    defaultValue={vaga.endereco.codidoPmp}
                 />
                 </FormItem>
 
@@ -72,7 +72,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     id="numeroEndereco"
                     name="numeroEndereco"
                     placeholder="Vaga 03"
-                    defaultValue={vaga.id.toString()}
+                    defaultValue={vaga.numeroEndereco}
                 />
                 </FormItem>
 
@@ -85,7 +85,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     id="area"
                     name="area"
                     placeholder="Selecione a área"
-                    defaultValue={vaga.area}
+                    defaultValue={vaga.area.toLowerCase()} // ← Adicione .toLowerCase() //
                     options={[
                     { value: "vermelha", label: "Vermelha" },
                     { value: "amarela", label: "Amarela" },
@@ -104,6 +104,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     id="tipo"
                     name="tipo"
                     placeholder="Selecione o tipo"
+                    defaultValue={vaga.tipoVaga.toLowerCase()} // ← Adicione .toLowerCase() //
                     options={[
                     { value: "paralela", label: "Paralela" },
                     { value: "perpendicular", label: "Perpendicular" }
@@ -152,7 +153,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     name="descricao"
                     className="min-h-[100px] md:min-h-[120px] rounded-sm border-gray-400 text-sm md:text-base resize-none"
                     placeholder="Ex: Em frente à praça, próximo ao mercado..."
-                    defaultValue={vaga.id.toString()}
+                    defaultValue={vaga.referenciaEndereco}
                 />
                 </FormItem>
 
@@ -166,7 +167,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     id="localizacao-inicio"
                     name="localizacao-inicio"
                     placeholder="-23.55052, -46.633308"
-                    defaultValue={vaga.id.toString()}
+                    defaultValue={vaga.referenciaGeoInicio}
                 />
                 </FormItem>
 
@@ -180,7 +181,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     id="localizacao-fim"
                     name="localizacao-fim"
                     placeholder="-23.55052, -46.633308"
-                    defaultValue={vaga.id.toString()}
+                    defaultValue={vaga.referenciaGeoFim}
                 />
                 </FormItem>
 
@@ -189,7 +190,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                 name="Dias da semana" 
                 description="Selecione os dias em que a vaga estará disponível e defina os horários"
                 > 
-                <DiaSemana name="diaSemana" />
+                <DiaSemana name="diaSemana" operacoesVaga={vaga.operacoesVaga} />
                 </FormItem>
             </CardContent>
 
@@ -207,4 +208,4 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
         </Card>
         </main>
     );
-    }
+}
