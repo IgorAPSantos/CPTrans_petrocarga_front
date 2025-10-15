@@ -2,7 +2,7 @@ import { Vaga } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { buttonVariants } from "../ui/button";
-import { MapPin, Clock, Ruler } from "lucide-react";
+import { MapPin, Clock, Ruler, Code, CodeIcon, Code2, ScanBarcodeIcon } from "lucide-react";
 
 type VagaItemProp = {
   vaga: Vaga;
@@ -50,8 +50,8 @@ export default function VagaItem({ vaga }: VagaItemProp) {
         <div className="flex flex-wrap gap-2 sm:gap-3 text-sm sm:text-gray-600">
           {operacao && (
             <span className="flex items-center gap-1">
-              <Clock className="w-4 h-4 text-gray-400" />
-              {operacao.horaInicio.slice(0, 5)} - {operacao.horaFim.slice(0, 5)}
+              <ScanBarcodeIcon className="w-4 h-4 text-gray-400" />
+              {vaga.endereco.codidoPmp.toUpperCase()}
             </span>
           )}
           <span className="flex items-center gap-1">
