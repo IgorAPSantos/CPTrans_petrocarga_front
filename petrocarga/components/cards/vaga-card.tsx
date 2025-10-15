@@ -12,13 +12,13 @@ type VagaDetalhesProps = {
 };
 
 const diasSemana: DiaSemana[] = [
+  "DOMINGO",
   "SEGUNDA",
   "TERCA",
   "QUARTA",
   "QUINTA",
   "SEXTA",
   "SABADO",
-  "DOMINGO",
 ];
 
 export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
