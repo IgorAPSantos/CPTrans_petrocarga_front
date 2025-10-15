@@ -1,18 +1,17 @@
 export type DiaSemana =
+  | "DOMINGO"
   | "SEGUNDA"
   | "TERCA"
   | "QUARTA"
   | "QUINTA"
   | "SEXTA"
-  | "SABADO"
-  | "DOMINGO";
+  | "SABADO";
 
 export type OperacoesVaga = {
   id: string;
   diaSemanaEnum: DiaSemana;
   horaInicio: string;
   horaFim: string;
-  diaSemanaEnum: DiaSemana;
 };
 
 export type Endereco = {
