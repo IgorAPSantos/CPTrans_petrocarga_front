@@ -2,17 +2,23 @@ import React, { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { OperacoesVaga } from '@/lib/types';
 
 {/* Definição das propriedades esperadas pelo componente */}
-export default function DiaSemana({ name = "diaSemana" }) {
+interface DiaSemanaProps {
+  name?: string;
+  operacoesVaga?: OperacoesVaga[];
+}
+
+export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: DiaSemanaProps) {
   const diasDaSemana = [
-    { id: 'dom', label: 'Domingo', value: '1', abrev: 'Dom' },
-    { id: 'seg', label: 'Segunda-feira', value: '2', abrev: 'Seg' },
-    { id: 'ter', label: 'Terça-feira', value: '3', abrev: 'Ter' },
-    { id: 'qua', label: 'Quarta-feira', value: '4', abrev: 'Qua' },
-    { id: 'qui', label: 'Quinta-feira', value: '5', abrev: 'Qui' },
-    { id: 'sex', label: 'Sexta-feira', value: '6', abrev: 'Sex' },
-    { id: 'sab', label: 'Sábado', value: '7', abrev: 'Sáb' }
+    { id: 'dom', label: 'Domingo', value: '1', abrev: 'Dom', enum: 'DOMINGO' },
+    { id: 'seg', label: 'Segunda-feira', value: '2', abrev: 'Seg', enum: 'SEGUNDA' },
+    { id: 'ter', label: 'Terça-feira', value: '3', abrev: 'Ter', enum: 'TERCA' },
+    { id: 'qua', label: 'Quarta-feira', value: '4', abrev: 'Qua', enum: 'QUARTA' },
+    { id: 'qui', label: 'Quinta-feira', value: '5', abrev: 'Qui', enum: 'QUINTA' },
+    { id: 'sex', label: 'Sexta-feira', value: '6', abrev: 'Sex', enum: 'SEXTA' },
+    { id: 'sab', label: 'Sábado', value: '7', abrev: 'Sáb', enum: 'SABADO' }
   ];
 
   {/* Estado para gerenciar os dias e horários selecionados */}
@@ -27,17 +33,33 @@ export default function DiaSemana({ name = "diaSemana" }) {
     [key: string]: DiaConfig;
   };
 
-  {/* Inicializa o estado com todos os dias desativados e horários padrão */}
-  const [diasConfig, setDiasConfig] = useState<DiasConfig>(
-    diasDaSemana.reduce<DiasConfig>((acc, dia) => {
-      acc[dia.value] = {
-        ativo: false,
-        horarioInicio: "00:00",
-        horarioFim: "13:00"
-      };
-      return acc;
-    }, {})
-  );
+  {/* Função para converter as operações da vaga em configuração inicial */}
+  const getInitialConfig = () => {
+    const config: DiasConfig = {};
+    
+    diasDaSemana.forEach((dia) => {
+      const operacao = operacoesVaga.find(op => op.diaSemanaEnum === dia.enum);
+      
+      if (operacao) {
+        config[dia.value] = {
+          ativo: true,
+          horarioInicio: operacao.horaInicio.slice(0, 5), // Remove os segundos
+          horarioFim: operacao.horaFim.slice(0, 5),
+        };
+      } else {
+        config[dia.value] = {
+          ativo: false,
+          horarioInicio: "00:00",
+          horarioFim: "13:00"
+        };
+      }
+    });
+    
+    return config;
+  };
+
+  {/* Inicializa o estado com os valores da vaga ou valores padrão */}
+  const [diasConfig, setDiasConfig] = useState<DiasConfig>(getInitialConfig());
 
   {/* Função para alternar o estado ativo de um dia */}
   const handleDayToggle = (dayValue: string) => {

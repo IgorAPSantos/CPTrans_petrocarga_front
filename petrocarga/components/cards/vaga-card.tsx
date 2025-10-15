@@ -12,13 +12,13 @@ type VagaDetalhesProps = {
 };
 
 const diasSemana: DiaSemana[] = [
+  "DOMINGO",
   "SEGUNDA",
   "TERCA",
   "QUARTA",
   "QUINTA",
   "SEXTA",
   "SABADO",
-  "DOMINGO",
 ];
 
 export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
@@ -76,7 +76,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         </div>
         <div className="flex gap-2 mt-2 sm:mt-5">
           <Link
-            href={`/visualizar-vagas/${vaga.id}/editar-vaga`}
+            href={`/visualizar-vagas/${vaga.id}/editar`}
             className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition inline-block"
           >
             Alterar
