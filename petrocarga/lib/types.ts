@@ -9,9 +9,10 @@ export type DiaSemana =
 
 export type OperacoesVaga = {
   id: string;
-  diaSemana: DiaSemana;
+  diaSemana: string;
   horaInicio: string;
   horaFim: string;
+  diaSemanaEnum: DiaSemana;
 };
 
 export type Endereco = {
@@ -26,7 +27,7 @@ export type Vaga = {
   area: string;
   numeroEndereco: string;
   referenciaEndereco: string;
-  tipoVaga: string;
+  tipoVaga: "PARALELA" | "PERPENDICULAR" | string;
   referenciaGeoInicio: string;
   referenciaGeoFim: string;
   comprimento: number;

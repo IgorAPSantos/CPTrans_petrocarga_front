@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-// Busca uma vaga específica pelo ID do mock local
+// Busca uma vaga específica pelo ID
 async function buscarVaga(vagaId: string): Promise<Vaga | undefined> {
   const res = await fetch(
     `http://localhost:8000/petrocarga/vagas`, // Para usar o MOCK troque por `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/vagas`
