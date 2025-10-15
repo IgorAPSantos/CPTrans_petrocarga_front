@@ -1,4 +1,4 @@
-import VagaDetalhes from "./vaga-card";
+import VagaDetalhes from "../../../components/cards/vaga-card";
 import { Vaga } from "@/lib/types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";

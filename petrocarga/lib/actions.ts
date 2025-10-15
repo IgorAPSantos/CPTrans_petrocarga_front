@@ -3,44 +3,60 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function addVaga(prevState: unknown, formData: FormData) {
-    {/* Extrair valores do formData para retornar em caso de erro */}
-    const valores = {
-        codigo: formData.get("codigo") as string,
-        logradouro: formData.get("logradouro") as string,
-        localizacao: formData.get("localizacao") as string,
-        bairro: formData.get("bairro") as string,
-        horarioInicio: formData.get("horarioInicio") as string,
-        horarioFim: formData.get("horarioFim") as string,
-        diaSemana: Number(formData.get("diaSemana")),
+    {/* Extrair e montar o payload JSON */}
+    const diasSemanaRaw = formData.get("diaSemana") as string;
+    const diasSemana = diasSemanaRaw ? JSON.parse(diasSemanaRaw) : [];
+
+    const payload = {
+        endereco: {
+            codigoPMP: formData.get("codigo") as string,
+            logradouro: formData.get("logradouro") as string,
+            bairro: formData.get("bairro") as string,
+        },
+        area: (formData.get("area") as string)?.toUpperCase(),
+        numeroEndereco: formData.get("numeroEndereco") as string,
+        referenciaEndereco: formData.get("descricao") as string,
+        tipoVaga: (formData.get("tipo") as string)?.toUpperCase(),
+        referenciaGeoInicio: formData.get("localizacao-inicio") as string,
+        referenciaGeoFim: formData.get("localizacao-fim") as string,
         comprimento: Number(formData.get("comprimento")),
-        descricao: formData.get("descricao") as string,
+        status: "DISPONIVEL",
+        operacoesVaga: diasSemana.map((dia: any) => ({
+            codigoDiaSemana: Number(dia.dia),
+            horaInicio: dia.horarioInicio,
+            horaFim: dia.horarioFim,
+        })),
     };
 
-    const res = await fetch('http://localhost:3000/registrar-vagas', {
+    const res = await fetch('http://localhost:8000/petrocarga/vagas', {
         method: 'POST',
-        body: formData,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
     });
 
     if(!res.ok) {
+        const errorData = await res.json();
         return {
             error: true,
-            message: (await res.json()).message,
-            valores, /* Retorna os valores para manter no formulário */
+            message: errorData.message || "Erro ao cadastrar vaga",
+            valores: payload,
         };
     }
 
-    revalidatePath('/registrar-vagas');
+    revalidatePath('/visualizar-vagas');
     
     {/* Retornar sucesso ou redirecionar */}
     return {
         error: false,
         message: "Vaga cadastrada com sucesso!",
-        valores: null, /* Limpa os valores em caso de sucesso */
+        valores: null,
     };
 }
 
 export async function deleteVaga(id: string) {
-    const res = await fetch(`http://localhost:3000/visualizar-vagas/${id}`, {
+    const res = await fetch(`http://localhost:8000/petrocarga/vagas/${id}`, {
         method: 'DELETE',
     });
     if(!res.ok) {
@@ -54,31 +70,44 @@ export async function atualizarVaga(prevState: unknown, formData: FormData) {
     {/* Certifique-se de enviar o ID no formData */}
     const id = formData.get("id") as string;
     
-    {/* Extrair valores para retornar em caso de erro */}
-    const valores = {
-        codigo: formData.get("codigo") as string,
-        logradouro: formData.get("logradouro") as string,
+    {/* Extrair e montar o payload JSON */}
+    const diasSemanaRaw = formData.get("diaSemana") as string;
+    const diasSemana = diasSemanaRaw ? JSON.parse(diasSemanaRaw) : [];
+
+    const payload = {
+        endereco: {
+            codigoPMP: formData.get("codigo") as string,
+            logradouro: formData.get("logradouro") as string,
+            bairro: formData.get("bairro") as string,
+        },
+        area: (formData.get("area") as string)?.toUpperCase(),
         numeroEndereco: formData.get("numeroEndereco") as string,
-        area: formData.get("area") as string,
-        tipo: formData.get("tipo") as string,
-        bairro: formData.get("bairro") as string,
+        referenciaEndereco: formData.get("descricao") as string,
+        tipoVaga: (formData.get("tipo") as string)?.toUpperCase(),
+        referenciaGeoInicio: formData.get("localizacao-inicio") as string,
+        referenciaGeoFim: formData.get("localizacao-fim") as string,
         comprimento: Number(formData.get("comprimento")),
-        descricao: formData.get("descricao") as string,
-        localizacaoInicio: formData.get("localizacao-inicio") as string,
-        localizacaoFim: formData.get("localizacao-fim") as string,
-        diaSemana: formData.get("diaSemana") as string,
+        operacoesVaga: diasSemana.map((dia: any) => ({
+            codigoDiaSemana: Number(dia.dia),
+            horaInicio: dia.horarioInicio,
+            horaFim: dia.horarioFim,
+        })),
     };
 
-    const res = await fetch(`http://localhost:3000/visualizar-vagas/${id}/editar-vaga`, {
-        method: 'PUT',
-        body: formData,
+    const res = await fetch(`http://localhost:8000/petrocarga/vagas/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
     });
 
     if(!res.ok) {
+        const errorData = await res.json();
         return {
             error: true,
-            message: (await res.json()).message,
-            valores,
+            message: errorData.message || "Erro ao atualizar vaga",
+            valores: payload,
         };
     } 
 
