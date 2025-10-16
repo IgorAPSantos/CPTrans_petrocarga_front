@@ -68,7 +68,7 @@ export default function VagaItem({ vaga }: VagaItemProp) {
           className={cn(
             "sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center",
             vaga.status === "DISPONIVEL" && "bg-green-100 text-green-800",
-            vaga.status === "OCUPADO" && "bg-red-100 text-red-800",
+            vaga.status === "INDISPONIVEL" && "bg-red-100 text-red-800",
             vaga.status === "MANUTENCAO" && "bg-yellow-100 text-yellow-800"
           )}
         >
