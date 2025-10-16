@@ -1,7 +1,13 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { DiaSemana } from "./types";
 
+type OperacoesVaga = {
+    dia: string;
+    horarioInicio: string;
+    horarioFim: string;
+};
 export async function addVaga(prevState: unknown, formData: FormData) {
     {/* Extrair e montar o payload JSON */ }
     const diasSemanaRaw = formData.get("diaSemana") as string;
@@ -21,7 +27,7 @@ export async function addVaga(prevState: unknown, formData: FormData) {
         referenciaGeoFim: formData.get("localizacao-fim") as string,
         comprimento: Number(formData.get("comprimento")),
         status: "DISPONIVEL",
-        operacoesVaga: diasSemana.map((dia: any) => ({
+        operacoesVaga: diasSemana.map((dia: OperacoesVaga) => ({
             codigoDiaSemana: Number(dia.dia),
             horaInicio: dia.horarioInicio,
             horaFim: dia.horarioFim,
@@ -87,7 +93,7 @@ export async function atualizarVaga(prevState: unknown, formData: FormData) {
         referenciaGeoInicio: formData.get("localizacao-inicio") as string,
         referenciaGeoFim: formData.get("localizacao-fim") as string,
         comprimento: Number(formData.get("comprimento")),
-        operacoesVaga: diasSemana.map((dia: any) => ({
+        operacoesVaga: diasSemana.map((dia: OperacoesVaga) => ({
             codigoDiaSemana: Number(dia.dia),
             horaInicio: dia.horarioInicio,
             horaFim: dia.horarioFim,
