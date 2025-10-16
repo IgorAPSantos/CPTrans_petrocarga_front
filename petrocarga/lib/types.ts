@@ -1,11 +1,11 @@
 export type DiaSemana =
+  | "DOMINGO"
   | "SEGUNDA"
   | "TERCA"
   | "QUARTA"
   | "QUINTA"
   | "SEXTA"
-  | "SABADO"
-  | "DOMINGO";
+  | "SABADO";
 
 export type OperacoesVaga = {
   id: string;
@@ -26,11 +26,11 @@ export type Vaga = {
   area: string;
   numeroEndereco: string;
   referenciaEndereco: string;
-  tipoVaga: string;
+  tipoVaga: "PARALELA" | "PERPENDICULAR" | string;
   referenciaGeoInicio: string;
   referenciaGeoFim: string;
   comprimento: number;
-  status: "DISPONIVEL" | "OCUPADO" | "MANUTENCAO" | string;
+  status: "DISPONIVEL" | "OCUPADO" | "MANUTENCAO" | "INDISPONIVEL" | string;
   operacoesVaga: OperacoesVaga[];
   endereco: Endereco;
 };

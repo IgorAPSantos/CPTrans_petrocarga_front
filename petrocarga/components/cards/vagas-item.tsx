@@ -2,7 +2,7 @@ import { Vaga } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { buttonVariants } from "../ui/button";
-import { MapPin, Clock, Ruler } from "lucide-react";
+import { MapPin, Ruler, ScanBarcodeIcon } from "lucide-react";
 
 type VagaItemProp = {
   vaga: Vaga;
@@ -32,7 +32,7 @@ export default function VagaItem({ vaga }: VagaItemProp) {
             className={cn(
               "hidden sm:inline-block px-2 py-0.5 rounded-full text-xs sm:text-sm font-semibold shadow-sm",
               vaga.status === "DISPONIVEL" && "bg-green-100 text-green-800",
-              vaga.status === "OCUPADO" && "bg-red-100 text-red-800",
+              vaga.status === "INDISPONIVEL" && "bg-red-100 text-red-800",
               vaga.status === "MANUTENCAO" && "bg-yellow-100 text-yellow-800"
             )}
           >
@@ -50,8 +50,8 @@ export default function VagaItem({ vaga }: VagaItemProp) {
         <div className="flex flex-wrap gap-2 sm:gap-3 text-sm sm:text-gray-600">
           {operacao && (
             <span className="flex items-center gap-1">
-              <Clock className="w-4 h-4 text-gray-400" />
-              {operacao.horaInicio.slice(0, 5)} - {operacao.horaFim.slice(0, 5)}
+              <ScanBarcodeIcon className="w-4 h-4 text-gray-400" />
+              {vaga.endereco.codidoPmp.toUpperCase()}
             </span>
           )}
           <span className="flex items-center gap-1">
@@ -68,7 +68,7 @@ export default function VagaItem({ vaga }: VagaItemProp) {
           className={cn(
             "sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center",
             vaga.status === "DISPONIVEL" && "bg-green-100 text-green-800",
-            vaga.status === "OCUPADO" && "bg-red-100 text-red-800",
+            vaga.status === "INDISPONIVEL" && "bg-red-100 text-red-800",
             vaga.status === "MANUTENCAO" && "bg-yellow-100 text-yellow-800"
           )}
         >
