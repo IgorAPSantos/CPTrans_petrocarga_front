@@ -10,7 +10,7 @@ export function useVagas() {
     const fetchVagas = async () => {
       try {
         setLoading(true);
-        const res = await fetch("http://localhost:8000/petrocarga/vagas"); // Para usar o MOCK troque por /api/vagas
+        const res = await fetch("https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas"); // Para usar o MOCK troque por /api/vagas
         if (!res.ok) throw new Error("Erro ao buscar vagas");
 
         const data: Vaga[] = await res.json();

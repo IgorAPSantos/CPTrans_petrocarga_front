@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { OperacoesVaga } from '@/lib/types';
 
-{/* Definição das propriedades esperadas pelo componente */}
+{/* Definição das propriedades esperadas pelo componente */ }
 interface DiaSemanaProps {
   name?: string;
   operacoesVaga?: OperacoesVaga[];
@@ -21,25 +21,25 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
     { id: 'sab', label: 'Sábado', value: '7', abrev: 'Sáb', enum: 'SABADO' }
   ];
 
-  {/* Estado para gerenciar os dias e horários selecionados */}
+  {/* Estado para gerenciar os dias e horários selecionados */ }
   type DiaConfig = {
     ativo: boolean;
     horarioInicio: string;
     horarioFim: string;
   };
 
-  {/* Mapeamento dos dias para suas configurações */}
+  {/* Mapeamento dos dias para suas configurações */ }
   type DiasConfig = {
     [key: string]: DiaConfig;
   };
 
-  {/* Função para converter as operações da vaga em configuração inicial */}
+  {/* Função para converter as operações da vaga em configuração inicial */ }
   const getInitialConfig = () => {
     const config: DiasConfig = {};
-    
+
     diasDaSemana.forEach((dia) => {
       const operacao = operacoesVaga.find(op => op.diaSemanaEnum === dia.enum);
-      
+
       if (operacao) {
         config[dia.value] = {
           ativo: true,
@@ -54,14 +54,14 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
         };
       }
     });
-    
+
     return config;
   };
 
-  {/* Inicializa o estado com os valores da vaga ou valores padrão */}
+  {/* Inicializa o estado com os valores da vaga ou valores padrão */ }
   const [diasConfig, setDiasConfig] = useState<DiasConfig>(getInitialConfig());
 
-  {/* Função para alternar o estado ativo de um dia */}
+  {/* Função para alternar o estado ativo de um dia */ }
   const handleDayToggle = (dayValue: string) => {
     setDiasConfig(prev => ({
       ...prev,
@@ -72,7 +72,7 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
     }));
   };
 
-  {/* Função para atualizar os horários de início e fim */}
+  {/* Função para atualizar os horários de início e fim */ }
   const handleHorarioChange = (
     dayValue: string,
     tipo: "horarioInicio" | "horarioFim",
@@ -87,10 +87,10 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
     }));
   };
 
-  {/* Gera o valor JSON para o input hidden com os dias ativos e seus horários */}
+  {/* Gera o valor JSON para o input hidden com os dias ativos e seus horários */ }
   const hiddenValue = JSON.stringify(
     Object.entries(diasConfig)
-      .filter(([_, config]) => config.ativo)
+      .filter(([, config]) => config.ativo)
       .map(([dia, config]) => ({
         dia,
         horarioInicio: config.horarioInicio,
@@ -98,12 +98,12 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
       }))
   );
 
-  {/* Renderiza o componente */}
+  {/* Renderiza o componente */ }
   return (
     <div className="w-full space-y-2 md:space-y-3">
       {diasDaSemana.map((dia) => (
-        <div 
-          key={dia.id} 
+        <div
+          key={dia.id}
           className="border border-gray-300 rounded-md p-3 md:p-4 hover:bg-gray-50 transition-colors"
         >
           <div className="flex flex-col gap-3">
@@ -129,34 +129,34 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
             {diasConfig[dia.value].ativo && (
               <div className="flex flex-col sm:flex-row gap-3 pl-0 sm:pl-6">
                 <div className="flex-1">
-                  <label 
-                    htmlFor={`${dia.id}-inicio`} 
+                  <label
+                    htmlFor={`${dia.id}-inicio`}
                     className="text-xs md:text-sm text-gray-600 mb-1 block"
                   >
                     Início
                   </label>
-                  <Input 
-                    className="rounded-sm border-gray-400 w-full text-sm md:text-base" 
+                  <Input
+                    className="rounded-sm border-gray-400 w-full text-sm md:text-base"
                     type="time"
                     id={`${dia.id}-inicio`}
                     value={diasConfig[dia.value].horarioInicio}
                     onChange={(e) => handleHorarioChange(dia.value, 'horarioInicio', e.target.value)}
                   />
                 </div>
-                
+
                 <div className="flex-1">
-                  <label 
-                    htmlFor={`${dia.id}-fim`} 
+                  <label
+                    htmlFor={`${dia.id}-fim`}
                     className="text-xs md:text-sm text-gray-600 mb-1 block"
                   >
                     Fim
                   </label>
-                  <Input 
-                    className="rounded-sm border-gray-400 w-full text-sm md:text-base" 
+                  <Input
+                    className="rounded-sm border-gray-400 w-full text-sm md:text-base"
                     type="time"
                     id={`${dia.id}-fim`}
                     value={diasConfig[dia.value].horarioFim}
-                    onChange={(e) => handleHorarioChange(dia.value,"horarioFim", e.target.value)}
+                    onChange={(e) => handleHorarioChange(dia.value, "horarioFim", e.target.value)}
                   />
                 </div>
               </div>
@@ -166,9 +166,9 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
       ))}
 
       {/* Input hidden para enviar os dados dos dias e horários selecionados */}
-      <input 
-        type="hidden" 
-        name={name} 
+      <input
+        type="hidden"
+        name={name}
         value={hiddenValue}
       />
     </div>
