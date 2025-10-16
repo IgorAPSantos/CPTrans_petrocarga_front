@@ -21,7 +21,7 @@ const vagas: Vaga[] = [
     operacoesVaga: [
       {
         id: "afaeba6a-1a01-4896-8bda-7e1b052116e3",
-        diaSemana: "SEGUNDA",
+        diaSemanaEnum: "SEGUNDA",
         horaInicio: "00:00:00",
         horaFim: "13:00:00",
       },
@@ -46,13 +46,13 @@ const vagas: Vaga[] = [
     operacoesVaga: [
       {
         id: "0845a2d9-80da-4f13-bb8e-8f9a649753d8",
-        diaSemana: "QUARTA",
+        diaSemanaEnum: "QUARTA",
         horaInicio: "08:00:00",
         horaFim: "18:00:00",
       },
       {
         id: "9f0e3338-bee7-4826-9e84-cfce30ab60a9",
-        diaSemana: "TERCA",
+        diaSemanaEnum: "TERCA",
         horaInicio: "08:00:00",
         horaFim: "18:00:00",
       },
