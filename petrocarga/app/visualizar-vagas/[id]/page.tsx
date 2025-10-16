@@ -7,7 +7,7 @@ import { notFound } from "next/navigation";
 // Busca uma vaga específica pelo ID do mock local
 async function buscarVaga(vagaId: string): Promise<Vaga | undefined> {
   const res = await fetch(
-    `http://localhost:8000/petrocarga/vagas`, // Para usar o MOCK troque por `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/vagas`
+    `https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas`, // Para usar o MOCK troque por `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/vagas`
     {
       cache: "no-store",
     }

@@ -4,12 +4,12 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-{/* Busca uma vaga específica pelo ID */}
+{/* Busca uma vaga específica pelo ID */ }
 async function buscarVaga(id: string): Promise<Vaga | undefined> {
-    const res = await fetch(`http://localhost:8000/petrocarga/vagas/${id}`, {
+    const res = await fetch(`https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`, {
         cache: "no-store",
     });
-    
+
     if (!res.ok) {
         console.error(`Erro ao buscar vaga ${id}:`, res.status); // Debug
         return undefined;
@@ -26,7 +26,7 @@ export default async function EditarVagaPage({
 }) {
     const { id } = await params;
     console.log("Tentando buscar vaga com ID:", id); // Debug
-    
+
     const vaga = await buscarVaga(id);
 
     if (!vaga) {

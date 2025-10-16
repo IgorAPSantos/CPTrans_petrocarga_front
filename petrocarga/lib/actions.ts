@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function addVaga(prevState: unknown, formData: FormData) {
-    {/* Extrair e montar o payload JSON */}
+    {/* Extrair e montar o payload JSON */ }
     const diasSemanaRaw = formData.get("diaSemana") as string;
     const diasSemana = diasSemanaRaw ? JSON.parse(diasSemanaRaw) : [];
 
@@ -28,7 +28,7 @@ export async function addVaga(prevState: unknown, formData: FormData) {
         })),
     };
 
-    const res = await fetch('http://localhost:8000/petrocarga/vagas', {
+    const res = await fetch('https://cptranspetrocargaback-production.up.railway.app/petrocarga//vagas', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -36,7 +36,7 @@ export async function addVaga(prevState: unknown, formData: FormData) {
         body: JSON.stringify(payload),
     });
 
-    if(!res.ok) {
+    if (!res.ok) {
         const errorData = await res.json();
         return {
             error: true,
@@ -46,8 +46,8 @@ export async function addVaga(prevState: unknown, formData: FormData) {
     }
 
     revalidatePath('/visualizar-vagas');
-    
-    {/* Retornar sucesso ou redirecionar */}
+
+    {/* Retornar sucesso ou redirecionar */ }
     return {
         error: false,
         message: "Vaga cadastrada com sucesso!",
@@ -56,10 +56,10 @@ export async function addVaga(prevState: unknown, formData: FormData) {
 }
 
 export async function deleteVaga(id: string) {
-    const res = await fetch(`http://localhost:8000/petrocarga/vagas/${id}`, {
+    const res = await fetch(`https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`, {
         method: 'DELETE',
     });
-    if(!res.ok) {
+    if (!res.ok) {
         throw new Error('Erro ao deletar a vaga');
     }
 
@@ -67,10 +67,10 @@ export async function deleteVaga(id: string) {
 }
 
 export async function atualizarVaga(prevState: unknown, formData: FormData) {
-    {/* Certifique-se de enviar o ID no formData */}
+    {/* Certifique-se de enviar o ID no formData */ }
     const id = formData.get("id") as string;
-    
-    {/* Extrair e montar o payload JSON */}
+
+    {/* Extrair e montar o payload JSON */ }
     const diasSemanaRaw = formData.get("diaSemana") as string;
     const diasSemana = diasSemanaRaw ? JSON.parse(diasSemanaRaw) : [];
 
@@ -94,7 +94,7 @@ export async function atualizarVaga(prevState: unknown, formData: FormData) {
         })),
     };
 
-    const res = await fetch(`http://localhost:8000/petrocarga/vagas/${id}`, {
+    const res = await fetch(`https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
@@ -102,19 +102,19 @@ export async function atualizarVaga(prevState: unknown, formData: FormData) {
         body: JSON.stringify(payload),
     });
 
-    if(!res.ok) {
+    if (!res.ok) {
         const errorData = await res.json();
         return {
             error: true,
             message: errorData.message || "Erro ao atualizar vaga",
             valores: payload,
         };
-    } 
+    }
 
-    {/* Revalida a lista e a página específica da vaga */}
+    {/* Revalida a lista e a página específica da vaga */ }
     revalidatePath('/visualizar-vagas');
     revalidatePath(`/visualizar-vagas/${id}`);
-    
-    {/* Redireciona após sucesso */}
+
+    {/* Redireciona após sucesso */ }
     redirect(`/visualizar-vagas/${id}`);
 }
