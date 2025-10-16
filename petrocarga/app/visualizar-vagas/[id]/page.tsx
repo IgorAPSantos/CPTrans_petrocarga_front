@@ -46,7 +46,7 @@ export default async function VagaPosting({
         </Link>
       </div>
 
-      {/* Exibe os dados da vaga */}
+      {/* Exibe os dados da vag */}
       <VagaDetalhes vaga={vaga} />
     </div>
   );
