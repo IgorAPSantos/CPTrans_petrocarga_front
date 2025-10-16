@@ -34,7 +34,7 @@ export async function addVaga(prevState: unknown, formData: FormData) {
     };
 
 
-    const res = await fetch('https://cptranspetrocargaback-production.up.railway.app/petrocarga//vagas', {
+    const res = await fetch('https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
