@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import CardMap from "@/components/map/cardMap";
+import { deleteVaga } from "@/lib/actions";
 
 type VagaDetalhesProps = {
   vaga: Vaga;
@@ -35,26 +36,16 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   });
 
   const handleExcluir = async () => {
-    try {
-      const res = await fetch(
-        `http://localhost:8000/petrocarga/vagas/${vaga.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+  try {
+    await deleteVaga(vaga.id);
 
-      if (!res.ok) {
-        alert("Erro ao excluir vaga.");
-        return;
-      }
-
-      setModalAberto(false);
-      router.back(); // volta para a página anterior
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao excluir vaga.");
-    }
-  };
+    setModalAberto(false);
+    router.back();
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao excluir vaga.");
+  }
+};
 
   return (
     <article className="relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl border-l-8 border-blue-500 transition-shadow max-w-4xl mx-auto">
