@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import VagaItem from "@/components/cards/vagas-item";
+import VagaItem from "@/components/gestor/cards/vagas-item";
 import { Vaga } from "@/lib/types";
 import { ChevronUp, ChevronDown } from "lucide-react";
 

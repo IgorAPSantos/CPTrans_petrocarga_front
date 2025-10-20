@@ -1,4 +1,4 @@
-import EditarVaga from "../../../../components/editar/edicao-vaga";
+import EditarVaga from "@/components/gestor/editar/edicao-vaga";
 import { Vaga } from "@/lib/types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";

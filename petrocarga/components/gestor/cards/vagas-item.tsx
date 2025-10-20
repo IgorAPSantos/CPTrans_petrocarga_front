@@ -1,7 +1,7 @@
 import { Vaga } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { buttonVariants } from "../ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { MapPin, Ruler, ScanBarcodeIcon } from "lucide-react";
 
 type VagaItemProp = {
