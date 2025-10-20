@@ -7,10 +7,10 @@ import { atualizarVaga } from "@/lib/actions";
 import { CircleAlert } from "lucide-react";
 import Form from "next/form";
 import { useActionState } from "react";
-import FormItem from "@/app/registrar-vagas/form-item";
+import FormItem from "@/app/(gestor)/registrar-vagas/form-item";
 import React from "react";
-import DiaSemana from "@/app/registrar-vagas/dia-semana";
-import SelecaoCustomizada from "@/app/registrar-vagas/selecao-customizada";
+import DiaSemana from "@/app/(gestor)/registrar-vagas/dia-semana";
+import SelecaoCustomizada from "@/app/(gestor)/registrar-vagas/selecao-customizada";
 import { Vaga } from "@/lib/types";
 
 export default function EditarVaga({ vaga }: { vaga: Vaga }) {
