@@ -56,16 +56,16 @@ export default function Cadastro() {
               />
             </FormItem>
 
-            {/* Número da Vaga */}
+            {/* Número da Referência da Vaga */}
             <FormItem
-              name="Número da Vaga"
-              description="Exemplo: Vaga 03"
+              name="Número Referência"
+              description="Números de locais por onde passa a área da vaga. Exemplo: 90 ao 130"
             >
               <Input
                 className="rounded-sm border-gray-400 text-sm md:text-base"
                 id="numeroEndereco"
                 name="numeroEndereco"
-                placeholder="Vaga 03"
+                placeholder="90 ao 130"
               />
             </FormItem>
 
