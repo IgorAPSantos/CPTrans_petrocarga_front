@@ -1,29 +1,23 @@
-"use client";
+"use client"; 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { atualizarVaga } from "@/lib/actions";
+import { addVaga } from "@/lib/actions";
 import { CircleAlert } from "lucide-react";
 import Form from "next/form";
 import { useActionState } from "react";
-import FormItem from "@/components/form/form-item";
+import FormItem from "../../../components/form/form-item";
 import React from "react";
-import DiaSemana from "@/app/(gestor)/registrar-vagas/dia-semana";
-import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
-import { Vaga } from "@/lib/types";
 
-export default function EditarVaga({ vaga }: { vaga: Vaga }) {
-    {/* Hook para gerenciar o estado da ação de atualizar vaga */}
-    const [state, atualizarVagaAction, pending] = useActionState(atualizarVaga, null);
+export default function Cadastro() {
+    {/* Hook para gerenciar o estado da ação de adicionar vaga */}
+    const [state, addVagaAction, pending] = useActionState(addVaga, null);
 
     return (
         <main className="container mx-auto px-4 py-4 md:py-8">
         <Card className="w-full max-w-5xl mx-auto">
-            <Form action={atualizarVagaAction}>
-            {/* Campo hidden com o ID da vaga */}
-            <input type="hidden" name="id" value={vaga.id} />
-            
+            <Form action={addVagaAction}>
             <CardContent className="p-4 md:p-6 lg:p-8">
                 {/* Mensagem de erro */}
                 {state?.error && (
@@ -44,7 +38,6 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     name="codigo"
                     maxLength={30}
                     placeholder="Md-1234"
-                    defaultValue={vaga.endereco.codidoPmp}
                 />
                 </FormItem>
 
@@ -58,11 +51,10 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     id="logradouro"
                     name="logradouro"
                     placeholder="Rua do Imperador"
-                    defaultValue={vaga.endereco.logradouro}
                 />
                 </FormItem>
 
-                {/* Número da Referência da Vaga  */}
+                {/* Número da Referência da Vaga */}
                 <FormItem
                 name="Número Referência"
                 description="Números de locais por onde passa a área da vaga. Exemplo: 90 ao 130"
@@ -71,61 +63,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     className="rounded-sm border-gray-400 text-sm md:text-base"
                     id="numeroEndereco"
                     name="numeroEndereco"
-                    placeholder="Vaga 03"
-                    defaultValue={vaga.numeroEndereco}
-                />
-                </FormItem>
-
-                {/* Status da vaga */}
-                <FormItem
-                name="Status"
-                description="Disponivel ou Indisponível, a vaga"
-                >
-                <SelecaoCustomizada
-                    id="status"
-                    name="status"
-                    placeholder="Selecione o status"
-                    defaultValue={vaga.status.toLowerCase()} 
-                    options={[
-                    { value: "disponivel", label: "Disponivel" },
-                    { value: "indisponivel", label: "Indisponível" }
-                    ]}
-                />
-                </FormItem>
-
-                {/* Área */}
-                <FormItem
-                name="Área"
-                description="Selecione a cor da área da vaga"
-                >
-                <SelecaoCustomizada
-                    id="area"
-                    name="area"
-                    placeholder="Selecione a área"
-                    defaultValue={vaga.area.toLowerCase()} // ← Adicione .toLowerCase() //
-                    options={[
-                    { value: "vermelha", label: "Vermelha" },
-                    { value: "amarela", label: "Amarela" },
-                    { value: "azul", label: "Azul" },
-                    { value: "branca", label: "Branca" }
-                    ]}
-                />
-                </FormItem>
-
-                {/* Tipo da Vaga */}
-                <FormItem
-                name="Tipo"
-                description="Perpendicular ou Paralela à rua"
-                >
-                <SelecaoCustomizada
-                    id="tipo"
-                    name="tipo"
-                    placeholder="Selecione o tipo"
-                    defaultValue={vaga.tipoVaga.toLowerCase()} // ← Adicione .toLowerCase() //
-                    options={[
-                    { value: "paralela", label: "Paralela" },
-                    { value: "perpendicular", label: "Perpendicular" }
-                    ]}
+                    placeholder="90 ao 130"
                 />
                 </FormItem>
 
@@ -139,7 +77,6 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     id="bairro"
                     name="bairro"
                     placeholder="Centro"
-                    defaultValue={vaga.endereco.bairro}
                 />
                 </FormItem>
 
@@ -156,7 +93,6 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     placeholder="10"
                     step="0.1"
                     min="0"
-                    defaultValue={vaga.comprimento}
                 />
                 </FormItem>
 
@@ -170,11 +106,10 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     name="descricao"
                     className="min-h-[100px] md:min-h-[120px] rounded-sm border-gray-400 text-sm md:text-base resize-none"
                     placeholder="Ex: Em frente à praça, próximo ao mercado..."
-                    defaultValue={vaga.referenciaEndereco}
                 />
                 </FormItem>
 
-                {/* Localização inicial */}
+                {/* Localização */}
                 <FormItem
                 name="Localização inicial"
                 description="Latitude e Longitude do início da vaga. Exemplo: -23.55052, -46.633308"
@@ -184,11 +119,9 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     id="localizacao-inicio"
                     name="localizacao-inicio"
                     placeholder="-23.55052, -46.633308"
-                    defaultValue={vaga.referenciaGeoInicio}
                 />
                 </FormItem>
 
-                {/* Localização final */}
                 <FormItem
                 name="Localização final"
                 description="Latitude e Longitude do fim da vaga. Exemplo: -23.55052, -46.633308"
@@ -198,16 +131,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                     id="localizacao-fim"
                     name="localizacao-fim"
                     placeholder="-23.55052, -46.633308"
-                    defaultValue={vaga.referenciaGeoFim}
                 />
-                </FormItem>
-
-                {/* Dias da semana */}
-                <FormItem
-                name="Dias da semana" 
-                description="Selecione os dias em que a vaga estará disponível e defina os horários"
-                > 
-                <DiaSemana name="diaSemana" operacoesVaga={vaga.operacoesVaga} />
                 </FormItem>
             </CardContent>
 
@@ -218,7 +142,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                 disabled={pending}
                 className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium"
                 >
-                {pending ? "Atualizando..." : "Atualizar"}
+                {pending ? "Salvando..." : "Salvar"}
                 </Button>
             </CardFooter>
             </Form>

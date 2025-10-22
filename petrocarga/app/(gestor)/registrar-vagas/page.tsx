@@ -7,10 +7,10 @@ import { addVaga } from "@/lib/actions";
 import { CircleAlert } from "lucide-react";
 import Form from "next/form";
 import { useActionState } from "react";
-import FormItem from "./form-item";
+import FormItem from "../../../components/form/form-item";
 import React from "react";
 import DiaSemana from "./dia-semana";
-import SelecaoCustomizada from "./selecao-customizada";
+import SelecaoCustomizada from "../../../components/gestor/selecaoItem/selecao-customizada";
 
 export default function Cadastro() {
   {/* Hook para gerenciar o estado da ação de adicionar vaga */}
