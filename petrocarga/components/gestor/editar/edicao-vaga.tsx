@@ -9,7 +9,7 @@ import Form from "next/form";
 import { useActionState } from "react";
 import FormItem from "@/components/form/form-item";
 import React from "react";
-import DiaSemana from "@/app/(gestor)/registrar-vagas/dia-semana";
+import DiaSemana from "@/app/gestor/registrar-vagas/dia-semana";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
 import { Vaga } from "@/lib/types";
 

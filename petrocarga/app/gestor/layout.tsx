@@ -1,5 +1,5 @@
-import Footer from "@/app/(gestor)/layout/footer";
-import { Navbar } from "@/app/(gestor)/layout/navbar";
+import Footer from "@/app/gestor/layout/footer";
+import { Navbar } from "@/app/gestor/layout/navbar";
 import { Metadata } from "next";
 import { Maven_Pro } from 'next/font/google';
 import { MapProvider } from "@/context/MapContext";
