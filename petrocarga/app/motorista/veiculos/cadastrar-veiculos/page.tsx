@@ -10,7 +10,7 @@ import { useActionState } from "react";
 import FormItem from "@/components/form/form-item";
 import React from "react";
 
-export default function CadastroUsuario() {
+export default function CadastroVeiculo() {
     {/* Hook para gerenciar o estado da ação de adicionar vaga */}
     const [state, addVagaAction, pending] = useActionState(addVaga, null);
 

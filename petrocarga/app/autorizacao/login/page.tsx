@@ -1,3 +1,4 @@
+// app/login/page.tsx (versão corrigida)
 "use client";
 
 import { useState } from "react";
@@ -21,12 +22,16 @@ export default function LoginPage() {
         // Simula autenticação
         setTimeout(() => {
         if (email === "gestor@teste.com" && senha === "123456") {
-            alert("Login como Gestor - Redirecionando para /gestor/dashboard");
+            alert("Login como Gestor - Redirecionando para /gestor/visualizar-vagas");
             setLoading(false);
         } else if (email === "usuario@teste.com" && senha === "123456") {
-            alert("Login como Usuário - Redirecionando para /usuario/home");
+            alert("Login como Motorista - Redirecionando para /motorista/home");
             setLoading(false);
-        } else {
+        } else if (email === "agente@teste.com " && senha === "123456") {
+            alert("Login como Agente - Redirecionando para /agente/home");
+            setLoading(false);
+        }
+        else {
             setError("Email ou senha incorretos");
             setLoading(false);
         }
@@ -57,7 +62,7 @@ export default function LoginPage() {
             </CardHeader>
 
             <CardContent>
-            <div className="space-y-5">
+            <div className="space-y-4">
                 {/* Mensagem de erro */}
                 {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg flex items-start gap-2 animate-shake">
@@ -122,7 +127,6 @@ export default function LoginPage() {
                     Esqueceu a senha?
                 </button>
                 </div>
-
                 
                 {/* Botão Entrar */}
                 <Button
@@ -148,21 +152,13 @@ export default function LoginPage() {
                 </div>
 
                 {/* Botão Cadastro */}
-                <Link href="/cadastro" className="block w-full">
+                <Link href="/cadastro">
                     <Button
-                    className="w-full h-12 bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-1000 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="w-full h-12 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                     Criar Conta
                     </Button>
                 </Link>
-                
-            </div>
-
-            {/* Divisor 2 */}
-            <div className="mt-6 mb-4 flex items-center">
-                <div className="flex-1 border-t border-gray-300"></div>
-                <span className="px-4 text-sm text-gray-500">testes</span>
-                <div className="flex-1 border-t border-gray-300"></div>
             </div>
 
             {/* Credenciais de teste */}
@@ -171,7 +167,7 @@ export default function LoginPage() {
                 <div className="space-y-1 text-blue-700">
                 <p><strong>Gestor:</strong> gestor@teste.com / 123456</p>
                 <p><strong>Motorista:</strong> motorista@teste.com / 123456</p>
-                <p><strong>Agente:</strong> agente@teste.com / 123456</p>
+                <p><strong>Agente:</strong> Agente@teste.com / 123456</p>
                 </div>
             </div>
             </CardContent>

@@ -1,5 +1,5 @@
 import VagaDetalhes from "@/components/gestor/cards/vaga-card";
-import { Vaga } from "@/lib/types";
+import { Vaga } from "@/types/vaga";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";

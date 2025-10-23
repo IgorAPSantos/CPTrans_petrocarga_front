@@ -17,7 +17,7 @@ export default function Home() {
             Sistema oficial da CPTrans para reserva e gestão de áreas destinadas à carga e descarga no município
           </p>
           <div className="flex flex-col sm:flex-row justify-center">
-            <Link href="/login">
+            <Link href="/autorizacao/login">
               <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-sm md:text-base">
                 Fazer Reserva
               </Button>
@@ -119,12 +119,12 @@ export default function Home() {
               Acesse o sistema e garanta sua área de carga e descarga de forma rápida e segura
             </p>
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <Link href="/login">
+              <Link href="/autorizacao/login">
                 <Button variant="secondary" size="lg" className="text-sm md:text-base">
                   Acessar Minha Conta
                 </Button>
               </Link>
-              <Link href="/cadastro">
+              <Link href="/autorizacao/cadastro">
                 <Button variant="outline" size="lg" className="bg-transparent border-white text-white hover:bg-white hover:text-blue-600 text-sm md:text-base">
                   Criar Nova Conta
                 </Button>

@@ -9,9 +9,10 @@ export function Navbar() {
     const [menuAberto, setMenuAberto] = useState(false);
 
     const links = [
-        { href: "/", label: "Introdução" },
-        { href: "/autorizacao/login", label: "Acessar Conta" },
-        { href: "/quemsomos", label: "Quem Somos" },
+        { href: "/", label: "Reservar-vaga" },
+        { href: "/veiculos/veiculos&reservas", label: "Meu Veículo" },
+        { href: "/veiculos/cadastrar-veiculos", label: "Adicionar Veículo" },
+        { href: "/perfil", label: "Meu Perfil" },
     ];
 
     return (

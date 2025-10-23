@@ -1,4 +1,4 @@
-import { Vaga } from "@/lib/types";
+import { Vaga } from "@/types/vaga";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";

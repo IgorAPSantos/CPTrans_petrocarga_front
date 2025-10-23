@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
-import { Vaga } from "@/lib/types";
+import { Vaga } from "@/types/vaga";
 
 interface CardMapProps {
   vaga: Vaga;
