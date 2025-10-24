@@ -8,7 +8,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { useVagas } from "./hooks/useVagas";
 import { useMapbox } from "./hooks/useMapbox";
 import { addVagaMarkers } from "./utils/markerUtils";
-import { Vaga } from "@/types/vaga";
+import { Vaga } from "@/lib/types/vaga";
 
 interface MapboxFeature {
   id: string;

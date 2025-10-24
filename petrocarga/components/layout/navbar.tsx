@@ -7,13 +7,14 @@ import Image from "next/image";
 
 export function Navbar() {
     const [menuAberto, setMenuAberto] = useState(false);
+    const [logado, setDeslogado] = useState(false);
 
     const links = [
         { href: "/", label: "Introdução" },
         { href: "/autorizacao/login", label: "Acessar Conta" },
         { href: "/quemsomos", label: "Quem Somos" },
     ];
-
+    
     return (
         <header className="bg-blue-800 text-white relative">
         <nav className="flex items-center justify-between p-4 max-w-6xl mx-auto">

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Vaga, DiaSemana } from "@/types/vaga";
+import { Vaga, DiaSemana } from "@/lib/types/vaga";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import CardMap from "@/components/map/cardMap";
-import { deleteVaga } from "@/lib/actions";
+import { deleteVaga } from "@/lib/actions/vagaActions";
 
 type VagaDetalhesProps = {
   vaga: Vaga;

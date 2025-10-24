@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Vaga } from "@/types/vaga";
+import { Vaga } from "@/lib/types/vaga";
 
 const vagas: Vaga[] = [
   {

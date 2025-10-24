@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Vaga } from "@/types/vaga";
+import { Vaga } from "@/lib/types/vaga";
 
 export function useVagas() {
   const [Vagas, setVagas] = useState<Vaga[]>([]);

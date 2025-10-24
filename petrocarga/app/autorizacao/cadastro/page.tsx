@@ -1,23 +1,55 @@
 "use client"; 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { addVaga } from "@/lib/actions";
-import { CircleAlert } from "lucide-react";
+import { addMotorista } from "@/lib/actions/motoristaActions";
+import { CircleAlert, Eye, EyeOff, UserIcon, } from "lucide-react";
 import Form from "next/form";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import FormItem from "@/components/form/form-item";
 import React from "react";
+import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
 
 export default function CadastroUsuario() {
     {/* Hook para gerenciar o estado da ação de adicionar vaga */}
-    const [state, addVagaAction, pending] = useActionState(addVaga, null);
+    const [state, addMotoristaAction, pending] = useActionState(addMotorista, null);
+    const [exibirSenha, setExibirSenha] = useState(false);
+    const [email, setEmail] = useState("");
+    const [senha, setSenha] = useState("");
+    const [confirmarEmail, setConfirmarEmail] = useState("");
+    const [confirmarSenha, setConfirmarSenha] = useState("");
+
+    // Validar emails
+    if (email !== confirmarEmail) {
+        return {
+            error: true,
+            message: "Os emails não correspondem",
+        };
+    }
+
+    // Validar senhas
+    if (senha !== confirmarSenha) {
+        return {
+            error: true,
+            message: "As senhas não correspondem",
+        };
+    }
 
     return (
         <main className="container mx-auto px-4 py-4 md:py-8">
         <Card className="w-full max-w-5xl mx-auto">
-            <Form action={addVagaAction}>
+            <CardHeader className="space-y-3 text-center pb-6">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <UserIcon className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                    Cadastro
+                </CardTitle>
+                <CardDescription className="text-base">
+                    Forneça os dados para criar sua conta
+                </CardDescription>
+            </CardHeader>
+            <Form action={addMotoristaAction}>
             <CardContent className="p-4 md:p-6 lg:p-8">
                 {/* Mensagem de erro */}
                 {state?.error && (
@@ -26,112 +58,197 @@ export default function CadastroUsuario() {
                     <span className="text-sm md:text-base">{state.message}</span>
                 </div>
                 )}
+
+                <CardDescription className="text-base text-center mb-6 text-blue-800 font-bold">
+                    Primeiro, alguns dados pessoais
+                </CardDescription> 
                 
-                {/* Código */}
+                {/* Nome */}
                 <FormItem
-                name="Código"
-                description="Ponha o código PMP da rua. Exemplo: Md-1234"
+                name="Nome"
+                description="Insira seu nome completo."
                 >
                 <Input
                     className="rounded-sm border-gray-400 text-sm md:text-base"
-                    id="codigo"
-                    name="codigo"
-                    maxLength={30}
-                    placeholder="Md-1234"
+                    id="nome"
+                    name="nome"
+                    placeholder="João Alves da Silva"
                 />
                 </FormItem>
 
-                {/* Nome da rua */}
+                {/* CPF */}
                 <FormItem
-                name="Nome da rua"
-                description="Exemplo: Rua do Imperador"
+                    name="CPF"
+                    description="Insira seu CPF (apenas números). Exemplo: 12345678900"
+                >
+                    <Input
+                        className="rounded-sm border-gray-400 text-sm md:text-base"
+                        id="cpf"
+                        name="cpf"
+                        placeholder="12345678900"
+                        maxLength={11}
+                        type="text"
+                        inputMode="numeric"
+                        onInput={(e) => {
+                            const target = e.target as HTMLInputElement;
+                            target.value = target.value.replace(/\D/g, ''); // Remove tudo que não é número
+                        }}
+                    />
+                </FormItem>
+
+                {/* Telefone */}
+                <FormItem
+                    name="Número de Telefone"
+                    description="Digite seu número de telefone com DDD (apenas números). Exemplo: 22912345678"
+                >
+                    <Input
+                        className="rounded-sm border-gray-400 text-sm md:text-base"
+                        id="telefone"
+                        name="telefone"
+                        placeholder="22912345678"
+                        maxLength={11}
+                        type="text"
+                        inputMode="numeric"
+                        onInput={(e) => {
+                            const target = e.target as HTMLInputElement;
+                            target.value = target.value.replace(/\D/g, ''); // Remove tudo que não é número
+                        }}
+                    />
+                </FormItem>
+
+                <CardDescription className="text-base text-center mb-6 text-blue-800 font-bold">
+                    Agora Vamos para a CNH
+                </CardDescription>
+
+                {/* CNH */}
+                <FormItem
+                name="Número da CNH"
+                description="Ponha o número da CNH. Exemplo: 123456789-0"
                 >
                 <Input
                     className="rounded-sm border-gray-400 text-sm md:text-base"
-                    id="logradouro"
-                    name="logradouro"
-                    placeholder="Rua do Imperador"
+                    id="numeroCnh"
+                    name="numeroCnh"
+                    placeholder="123456789-0"
                 />
                 </FormItem>
 
-                {/* Número da Referência da Vaga */}
+                {/* Tipo da CNH */}
                 <FormItem
-                name="Número Referência"
-                description="Números de locais por onde passa a área da vaga. Exemplo: 90 ao 130"
+                name="Categoria da CNH"
+                description="Selecione a categoria da sua CNH"
                 >
-                <Input
-                    className="rounded-sm border-gray-400 text-sm md:text-base"
-                    id="numeroEndereco"
-                    name="numeroEndereco"
-                    placeholder="90 ao 130"
-                />
+                    <SelecaoCustomizada
+                        id="categoriaCnh"
+                        name="categoriaCnh"
+                        placeholder="Selecione a categoria"
+                        options={[
+                            { value: "categoriaA", label: "Categoria A" },
+                            { value: "categoriaB", label: "categoria B" },
+                            { value: "categoriaC", label: "categoria C" },
+                            { value: "categoriaD", label: "categoria D" },
+                            { value: "categoriaE", label: "categoria E" }
+                            ]}
+                        />
                 </FormItem>
 
-                {/* Bairro */}
+                {/* Data de Vencimento da CNH */}
                 <FormItem
-                name="Bairro"
-                description="Exemplo: Centro"
-                >
-                <Input
-                    className="rounded-sm border-gray-400 text-sm md:text-base"
-                    id="bairro"
-                    name="bairro"
-                    placeholder="Centro"
-                />
+                    name="Data de Vencimento da CNH"
+                    description="Informe a data de vencimento da sua CNH"
+                    >
+                        <Input
+                            className="rounded-sm border-gray-400 text-sm md:text-base"
+                            type="date"
+                            id="dataVencimentoCnh"
+                            name="dataVencimentoCnh"
+                        />
                 </FormItem>
 
-                {/* Comprimento */}
-                <FormItem 
-                name="Comprimento" 
-                description="Comprimento em metros da vaga"
-                >
-                <Input
-                    className="rounded-sm border-gray-400 text-sm md:text-base"
-                    id="comprimento"
-                    name="comprimento"
-                    type="number"
-                    placeholder="10"
-                    step="0.1"
-                    min="0"
-                />
-                </FormItem>
-
-                {/* Descrição */}
+                <CardDescription className="text-base text-center mb-6 text-blue-800 font-bold">
+                    Por fim, os dados de acesso
+                </CardDescription>
+                
+                {/* Email */}
                 <FormItem
-                name="Descrição"
-                description="Coloque pontos de referência ou outras informações relevantes"
-                >
-                <Textarea
-                    id="descricao"
-                    name="descricao"
-                    className="min-h-[100px] md:min-h-[120px] rounded-sm border-gray-400 text-sm md:text-base resize-none"
-                    placeholder="Ex: Em frente à praça, próximo ao mercado..."
-                />
+                    name="Email"
+                    description="Digite seu email"
+                    >
+                    <Input
+                        className="rounded-sm border-gray-400 text-sm md:text-base"
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="seu@email.com"
+                    />
                 </FormItem>
 
-                {/* Localização */}
+                {/* Confirmação do Email */}
                 <FormItem
-                name="Localização inicial"
-                description="Latitude e Longitude do início da vaga. Exemplo: -23.55052, -46.633308"
-                >
-                <Input
-                    className="rounded-sm border-gray-400 text-sm md:text-base"
-                    id="localizacao-inicio"
-                    name="localizacao-inicio"
-                    placeholder="-23.55052, -46.633308"
-                />
+                    name="Confirmar Email"
+                    description="Redigite seu email"
+                    >
+                    <Input
+                        className="rounded-sm border-gray-400 text-sm md:text-base"
+                        type="email"
+                        id="confirmacaoEmail"
+                        name="confirmacaoEmail"
+                        placeholder="seu@email.com"
+                    />
+                </FormItem>
+                
+                {/* Senha */}
+                <FormItem
+                    name="Senha"
+                    description="Digite sua senha"
+                    >
+                        <div className="relative">
+                            <Input
+                                type={exibirSenha ? "text" : "password"}
+                                className="rounded-sm border-gray-400 text-sm md:text-base pr-10"
+                                id="senha"
+                                name="senha"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setExibirSenha(!exibirSenha)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                {exibirSenha ? (
+                                    <EyeOff className="w-5 h-5" />
+                                ) : (
+                                    <Eye className="w-5 h-5" />
+                                )}
+                            </button>
+                        </div>
                 </FormItem>
 
+                {/* Confirme sua Senha */}
                 <FormItem
-                name="Localização final"
-                description="Latitude e Longitude do fim da vaga. Exemplo: -23.55052, -46.633308"
-                >
-                <Input
-                    className="rounded-sm border-gray-400 text-sm md:text-base"
-                    id="localizacao-fim"
-                    name="localizacao-fim"
-                    placeholder="-23.55052, -46.633308"
-                />
+                    name="Confirmar Senha"
+                    description="Confirme sua senha"
+                    >
+                        <div className="relative">
+                            <Input
+                                type={exibirSenha ? "text" : "password"}
+                                className="rounded-sm border-gray-400 text-sm md:text-base pr-10"
+                                id="senha"
+                                name="senha"
+                                placeholder="••••••••"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setExibirSenha(!exibirSenha)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                {exibirSenha ? (
+                                    <EyeOff className="w-5 h-5" />
+                                ) : (
+                                    <Eye className="w-5 h-5" />
+                                )}
+                            </button>
+                        </div>
                 </FormItem>
             </CardContent>
 
@@ -140,7 +257,7 @@ export default function CadastroUsuario() {
                 <Button
                 type="submit"
                 disabled={pending}
-                className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium"
+                className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium text-blue-800 bg-blue-200 hover:bg-blue-300 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
                 {pending ? "Salvando..." : "Salvar"}
                 </Button>

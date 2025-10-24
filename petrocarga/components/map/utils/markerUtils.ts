@@ -1,5 +1,5 @@
 import mapboxgl from "mapbox-gl";
-import { Vaga } from "@/types/vaga";
+import { Vaga } from "@/lib/types/vaga";
 
 // Converte a String Localização em latitude e longitude
 function parseCoordinates(coord: string): [number, number] {

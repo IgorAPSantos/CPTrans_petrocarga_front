@@ -34,10 +34,10 @@ export async function addVaga(prevState: unknown, formData: FormData) {
     };
 
 
-    const res = await fetch('https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas', {
-        method: 'POST',
+    const res = await fetch("https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas", {
+        method: "POST",
         headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
     });
@@ -51,8 +51,7 @@ export async function addVaga(prevState: unknown, formData: FormData) {
         };
     }
 
-    revalidatePath('/visualizar-vagas');
-
+    revalidatePath("/visualizar-vagas");
 
     {/* Retornar sucesso ou redirecionar */ }
     return {
@@ -64,13 +63,18 @@ export async function addVaga(prevState: unknown, formData: FormData) {
 
 export async function deleteVaga(id: string) {
     const res = await fetch(`https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
     });
+
     if (!res.ok) {
-        throw new Error('Erro ao deletar a vaga');
+        throw new Error("Erro ao deletar a vaga");
     }
 
-    revalidatePath('/visualizar-vagas');
+    revalidatePath("/visualizar-vagas");
+    return {
+        error: false,
+        message: "Vaga deletada com sucesso!",
+    };
 }
 
 export async function atualizarVaga(prevState: unknown, formData: FormData) {
@@ -103,9 +107,9 @@ export async function atualizarVaga(prevState: unknown, formData: FormData) {
     };
 
     const res = await fetch(`https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
     });
@@ -120,7 +124,7 @@ export async function atualizarVaga(prevState: unknown, formData: FormData) {
     }
 
     {/* Revalida a lista e a página específica da vaga */ }
-    revalidatePath('/visualizar-vagas');
+    revalidatePath("/visualizar-vagas");
     revalidatePath(`/visualizar-vagas/${id}`);
 
     {/* Redireciona após sucesso */ }

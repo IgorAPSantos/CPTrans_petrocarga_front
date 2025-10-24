@@ -3,13 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { addVaga } from "@/lib/actions";
+import { addVaga } from "@/lib/actions/vagaActions";
 import { CircleAlert } from "lucide-react";
 import Form from "next/form";
 import { useActionState } from "react";
 import FormItem from "../../../components/form/form-item";
 import React from "react";
-import DiaSemana from "./dia-semana";
+import DiaSemana from "../../../components/gestor/dia-semana/dia-semana";
 import SelecaoCustomizada from "../../../components/gestor/selecaoItem/selecao-customizada";
 
 export default function Cadastro() {

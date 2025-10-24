@@ -4,7 +4,6 @@ import { Metadata } from "next";
 import { Maven_Pro } from 'next/font/google';
 import { MapProvider } from "@/context/MapContext";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-import "./globals.css";
 
 const mavenPro = Maven_Pro({
     weight: "variable",
