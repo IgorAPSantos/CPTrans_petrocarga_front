@@ -53,6 +53,7 @@ export default function CadastroVeiculo() {
                     id="placa"
                     name="placa"
                     placeholder="KLD2J19"
+                    required
                 />
                 </FormItem>
 
@@ -66,6 +67,7 @@ export default function CadastroVeiculo() {
                     id="marca"
                     name="marca"
                     placeholder="Ford"
+                    required
                 />
                 </FormItem>
 
@@ -79,6 +81,7 @@ export default function CadastroVeiculo() {
                     id="modelo"
                     name="modelo"
                     placeholder="Fiesta"
+                    required
                 />
                 </FormItem>
 
