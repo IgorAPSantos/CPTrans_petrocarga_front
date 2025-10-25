@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { OperacoesVaga } from '@/lib/types';
+import { OperacoesVaga } from '@/lib/types/vaga';
 
 {/* Definição das propriedades esperadas pelo componente */ }
 interface DiaSemanaProps {

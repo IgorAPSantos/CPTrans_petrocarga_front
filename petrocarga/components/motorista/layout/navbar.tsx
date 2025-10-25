@@ -7,14 +7,15 @@ import Image from "next/image";
 
 export function Navbar() {
     const [menuAberto, setMenuAberto] = useState(false);
-    const [logado, setDeslogado] = useState(false);
 
     const links = [
-        { href: "/", label: "Introdução" },
-        { href: "/autorizacao/login", label: "Acessar Conta" },
-        { href: "/quemsomos", label: "Quem Somos" },
+        { href: "/", label: "Reservar Vaga" },
+        { href: "/historico", label: "Histórico de Reservas" },
+        { href: "/veiculos/veiculosMotorista", label: "Meu Veículo" },
+        { href: "/veiculos/cadastrar-veiculos", label: "Adicionar Veículo" },
+        { href: "/perfil", label: "Meu Perfil" },
     ];
-    
+
     return (
         <header className="bg-blue-800 text-white relative">
         <nav className="flex items-center justify-between p-4 max-w-6xl mx-auto">

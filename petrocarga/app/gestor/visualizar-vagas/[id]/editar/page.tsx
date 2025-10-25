@@ -1,5 +1,5 @@
 import EditarVaga from "@/components/gestor/editar/edicao-vaga";
-import { Vaga } from "@/lib/types";
+import { Vaga } from "@/lib/types/vaga";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";

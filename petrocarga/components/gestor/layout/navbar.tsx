@@ -9,7 +9,7 @@ export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
 
   const links = [
-    { href: "/", label: "Dados" },
+    { href: "/", label: "Relatório" },
     { href: "/visualizar-vagas", label: "Visualizar Vagas" },
     { href: "/registrar-vagas", label: "Registrar Vagas" },
     { href: "/guia", label: "Guia" },

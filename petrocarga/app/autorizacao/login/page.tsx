@@ -14,24 +14,28 @@ export default function LoginPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    async function handleLogin() {
-        setLoading(true);
-        setError("");
+    // async function handleLogin() {
+    //     setLoading(true);
+    //     setError("");
 
-        // Simula autenticação
-        setTimeout(() => {
-        if (email === "gestor@teste.com" && senha === "123456") {
-            alert("Login como Gestor - Redirecionando para /gestor/dashboard");
-            setLoading(false);
-        } else if (email === "usuario@teste.com" && senha === "123456") {
-            alert("Login como Usuário - Redirecionando para /usuario/home");
-            setLoading(false);
-        } else {
-            setError("Email ou senha incorretos");
-            setLoading(false);
-        }
-        }, 1500);
-    }
+    //     // Simula autenticação
+    //     setTimeout(() => {
+    //     if (email === "gestor@teste.com" && senha === "123456") {
+    //         alert("Login como Gestor - Redirecionando para /gestor/visualizar-vagas");
+    //         setLoading(false);
+    //     } else if (email === "usuario@teste.com" && senha === "123456") {
+    //         alert("Login como Motorista - Redirecionando para /motorista/home");
+    //         setLoading(false);
+    //     } else if (email === "agente@teste.com " && senha === "123456") {
+    //         alert("Login como Agente - Redirecionando para /agente/home");
+    //         setLoading(false);
+    //     }
+    //     else {
+    //         setError("Email ou senha incorretos");
+    //         setLoading(false);
+    //     }
+    //     }, 1500);
+    // }
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100">
@@ -45,9 +49,9 @@ export default function LoginPage() {
         {/* Modal de Login */}
         <Card className="w-full max-w-md relative z-10 shadow-2xl backdrop-blur-sm bg-white/90 border-0">
             <CardHeader className="space-y-3 text-center pb-6">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <Lock className="w-8 h-8 text-white" />
-            </div>
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <Lock className="w-8 h-8 text-white" />
+                </div>
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
                 Bem-vindo
             </CardTitle>
@@ -57,7 +61,7 @@ export default function LoginPage() {
             </CardHeader>
 
             <CardContent>
-            <div className="space-y-5">
+            <div className="space-y-4">
                 {/* Mensagem de erro */}
                 {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg flex items-start gap-2 animate-shake">
@@ -122,11 +126,10 @@ export default function LoginPage() {
                     Esqueceu a senha?
                 </button>
                 </div>
-
                 
                 {/* Botão Entrar */}
                 <Button
-                    onClick={handleLogin}
+                    //onClick={handleLogin}
                     disabled={loading}
                     className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70"
                 >
@@ -148,21 +151,13 @@ export default function LoginPage() {
                 </div>
 
                 {/* Botão Cadastro */}
-                <Link href="/cadastro" className="block w-full">
+                <Link href="/autorizacao/cadastro">
                     <Button
                     className="w-full h-12 bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-1000 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200"
                     >
                     Criar Conta
                     </Button>
                 </Link>
-                
-            </div>
-
-            {/* Divisor 2 */}
-            <div className="mt-6 mb-4 flex items-center">
-                <div className="flex-1 border-t border-gray-300"></div>
-                <span className="px-4 text-sm text-gray-500">testes</span>
-                <div className="flex-1 border-t border-gray-300"></div>
             </div>
 
             {/* Credenciais de teste */}
