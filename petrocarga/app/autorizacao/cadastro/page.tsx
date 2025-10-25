@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { addMotorista } from "@/lib/actions/motoristaActions";
-import { CircleAlert, Eye, EyeOff, UserIcon } from "lucide-react";
+import { CircleAlert, Eye, EyeOff, UserIcon, CheckCircle } from "lucide-react";
 import Form from "next/form";
 import { useActionState, useState } from "react";
 import FormItem from "@/components/form/form-item";
@@ -13,35 +13,6 @@ import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customiz
 export default function CadastroUsuario() {
     const [state, addMotoristaAction, pending] = useActionState(addMotorista, null);
     const [exibirSenha, setExibirSenha] = useState(false);
-    const [email, setEmail] = useState("");
-    const [senha, setSenha] = useState("");
-    const [confirmarEmail, setConfirmarEmail] = useState("");
-    const [confirmarSenha, setConfirmarSenha] = useState("");
-    const [errosValidacao, setErrosValidacao] = useState<string[]>([]);
-
-    // Função para validar antes do submit
-    const validarFormulario = () => {
-        const novosErros: string[] = [];
-
-        if (email !== confirmarEmail) {
-            novosErros.push("Os emails não correspondem");
-        }
-
-        if (senha !== confirmarSenha) {
-            novosErros.push("As senhas não correspondem");
-        }
-
-        setErrosValidacao(novosErros);
-        return novosErros.length === 0;
-    };
-
-    // Handler personalizado para o submit
-    const handleSubmit = (formData: FormData) => {
-        if (!validarFormulario()) {
-            return; // Impede o submit se houver erros
-        }
-        return addMotoristaAction(formData);
-    };
 
     return (
         <main className="container mx-auto px-4 py-4 md:py-8">
@@ -57,25 +28,21 @@ export default function CadastroUsuario() {
                         Forneça os dados para criar sua conta
                     </CardDescription>
                 </CardHeader>
-                <Form action={handleSubmit}>
+                <Form action={addMotoristaAction}>
                     <CardContent className="p-4 md:p-6 lg:p-8">
-                        {/* Mensagem de erro do servidor */}
-                        {state?.error && (
-                            <div className="flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-4 mb-6 text-red-900">
-                                <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                        {/* Mensagem de erro ou sucesso */}
+                        {(state?.error || state?.message) && (
+                            <div className={`flex items-start gap-3 rounded-md border p-4 mb-6 ${
+                                state.error 
+                                    ? "border-red-200 bg-red-50 text-red-900" 
+                                    : "border-green-200 bg-green-50 text-green-900"
+                            }`}>
+                                {state.error ? (
+                                    <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                                ) : (
+                                    <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                                )}
                                 <span className="text-sm md:text-base">{state.message}</span>
-                            </div>
-                        )}
-
-                        {/* Mensagens de erro de validação local */}
-                        {errosValidacao.length > 0 && (
-                            <div className="flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-4 mb-6 text-red-900">
-                                <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                                <div className="text-sm md:text-base">
-                                    {errosValidacao.map((erro, index) => (
-                                        <p key={index}>{erro}</p>
-                                    ))}
-                                </div>
                             </div>
                         )}
 
@@ -93,6 +60,7 @@ export default function CadastroUsuario() {
                                 id="nome"
                                 name="nome"
                                 placeholder="João Alves da Silva"
+                                defaultValue={state?.valores?.nome || ""}
                                 required
                             />
                         </FormItem>
@@ -110,6 +78,7 @@ export default function CadastroUsuario() {
                                 maxLength={11}
                                 type="text"
                                 inputMode="numeric"
+                                defaultValue={state?.valores?.cpf || ""}
                                 required
                                 onInput={(e) => {
                                     const target = e.target as HTMLInputElement;
@@ -131,6 +100,7 @@ export default function CadastroUsuario() {
                                 maxLength={11}
                                 type="text"
                                 inputMode="numeric"
+                                defaultValue={state?.valores?.telefone || ""}
                                 required
                                 onInput={(e) => {
                                     const target = e.target as HTMLInputElement;
@@ -153,6 +123,7 @@ export default function CadastroUsuario() {
                                 id="numeroCnh"
                                 name="numeroCnh"
                                 placeholder="123456789-0"
+                                defaultValue={state?.valores?.numeroCnh || ""}
                                 required
                             />
                         </FormItem>
@@ -166,6 +137,7 @@ export default function CadastroUsuario() {
                                 id="categoriaCnh"
                                 name="categoriaCnh"
                                 placeholder="Selecione a categoria"
+                                defaultValue={state?.valores?.categoriaCnh || ""}
                                 options={[
                                     { value: "categoriaA", label: "Categoria A" },
                                     { value: "categoriaB", label: "Categoria B" },
@@ -186,6 +158,7 @@ export default function CadastroUsuario() {
                                 type="date"
                                 id="dataVencimentoCnh"
                                 name="dataVencimentoCnh"
+                                defaultValue={state?.valores?.dataVencimentoCnh || ""}
                                 required
                             />
                         </FormItem>
@@ -205,8 +178,7 @@ export default function CadastroUsuario() {
                                 id="email"
                                 name="email"
                                 placeholder="seu@email.com"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                defaultValue={state?.valores?.email || ""}
                                 required
                             />
                         </FormItem>
@@ -222,8 +194,7 @@ export default function CadastroUsuario() {
                                 id="confirmacaoEmail"
                                 name="confirmacaoEmail"
                                 placeholder="seu@email.com"
-                                value={confirmarEmail}
-                                onChange={(e) => setConfirmarEmail(e.target.value)}
+                                defaultValue={state?.valores?.confirmacaoEmail || ""}
                                 required
                             />
                         </FormItem>
@@ -240,8 +211,7 @@ export default function CadastroUsuario() {
                                     id="senha"
                                     name="senha"
                                     placeholder="••••••••"
-                                    value={senha}
-                                    onChange={(e) => setSenha(e.target.value)}
+                                    defaultValue={state?.valores?.senha || ""}
                                     required
                                 />
                                 <button
@@ -270,8 +240,7 @@ export default function CadastroUsuario() {
                                     id="confirmacaoSenha"
                                     name="confirmacaoSenha"
                                     placeholder="••••••••"
-                                    value={confirmarSenha}
-                                    onChange={(e) => setConfirmarSenha(e.target.value)}
+                                    defaultValue={state?.valores?.confirmacaoSenha || ""}
                                     required
                                 />
                                 <button
@@ -293,7 +262,7 @@ export default function CadastroUsuario() {
                     <CardFooter className="px-4 md:px-6 lg:px-8 pb-6 pt-2">
                         <Button
                             type="submit"
-                            disabled={pending || errosValidacao.length > 0}
+                            disabled={pending}
                             className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium text-blue-800 bg-blue-200 hover:bg-blue-300 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
                         >
                             {pending ? "Salvando..." : "Salvar"}
