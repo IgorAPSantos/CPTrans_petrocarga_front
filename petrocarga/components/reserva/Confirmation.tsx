@@ -3,7 +3,7 @@ interface ConfirmationProps {
   startHour: string;
   endHour: string;
   origin?: string;
-  vehicleName?: string; // nome do veículo para exibir
+  vehicleName?: string;
   onConfirm: () => void;
   onReset: () => void;
 }
@@ -21,7 +21,7 @@ export default function Confirmation({
     <div className="text-center">
       <p className="font-semibold">Confirme sua reserva:</p>
       <p className="text-blue-700 text-lg font-bold mt-2">
-        {day?.toLocaleDateString()} — {startHour} até {endHour}
+        {day.toLocaleDateString()} — {startHour} até {endHour}
       </p>
 
       {origin && (

@@ -3,8 +3,8 @@ import { useState } from "react";
 import StepIndicator from "@/components/reserva/StepIndicator";
 import DaySelection from "@/components/reserva/DaySelection";
 import TimeSelection from "@/components/reserva/TimeSelection";
+import OriginVehicleStep from "@/components/reserva/OriginVehicleStep";
 import Confirmation from "@/components/reserva/Confirmation";
-import OriginVehicleStep from "./OriginVehicleStep";
 
 const allTimes = [
   "08:00",
@@ -28,13 +28,12 @@ const allTimes = [
   "17:00",
 ];
 
+const reservedTimes = ["10:00", "13:30", "14:00"]; // Mock
 const mockVehicles = [
   { id: "v1", name: "Caminhão Azul" },
   { id: "v2", name: "Caminhão Vermelho" },
   { id: "v3", name: "Van Branca" },
 ];
-
-const reservedTimes = ["10:00", "13:30", "14:00"]; // Mock
 
 export default function ReservaComponent() {
   const [step, setStep] = useState(1);
@@ -51,12 +50,10 @@ export default function ReservaComponent() {
     setEndHour(null);
     setStep(3);
   };
-
   const handleSelectEnd = (time: string) => {
     setEndHour(time);
     setStep(4);
   };
-
   const reset = () => {
     setStep(1);
     setSelectedDay(undefined);
@@ -65,13 +62,15 @@ export default function ReservaComponent() {
     setOrigin("");
     setSelectedVehicleId(undefined);
   };
-
   const confirm = () => alert("Reserva confirmada ✅ (mock)");
+
+  const vehicleName = mockVehicles.find(
+    (v) => v.id === selectedVehicleId
+  )?.name;
 
   return (
     <div className="p-6 max-w-4xl mx-auto mt-10 border rounded-xl shadow-lg">
       <h1 className="text-3xl font-bold mb-6 text-center">Reserva de Vaga</h1>
-
       <StepIndicator step={step} />
 
       {/* Step 1: Dia */}
@@ -137,7 +136,7 @@ export default function ReservaComponent() {
           startHour={startHour}
           endHour={endHour}
           origin={origin}
-          vehicleId={selectedVehicleId}
+          vehicleName={vehicleName}
           onConfirm={confirm}
           onReset={reset}
         />
