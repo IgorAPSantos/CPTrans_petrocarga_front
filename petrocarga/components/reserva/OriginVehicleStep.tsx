@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Vehicle {
   id: string;
@@ -6,9 +6,9 @@ interface Vehicle {
 }
 
 interface OriginVehicleStepProps {
-  vehicles: Vehicle[]; // lista de veículos do usuário
-  origin: string; // valor atual do local de origem
-  selectedVehicleId?: string; // id do veículo selecionado
+  vehicles: Vehicle[];
+  origin: string;
+  selectedVehicleId?: string;
   onOriginChange: (value: string) => void;
   onVehicleChange: (id: string) => void;
   onNext: () => void;
@@ -25,10 +25,21 @@ export default function OriginVehicleStep({
   onBack,
 }: OriginVehicleStepProps) {
   const [localOrigin, setLocalOrigin] = useState(origin);
+  const [localVehicleId, setLocalVehicleId] = useState(selectedVehicleId || "");
+
+  // Sincroniza se a prop mudar
+  useEffect(() => {
+    setLocalOrigin(origin);
+  }, [origin]);
+
+  useEffect(() => {
+    setLocalVehicleId(selectedVehicleId || "");
+  }, [selectedVehicleId]);
 
   const handleNext = () => {
-    if (!localOrigin || !selectedVehicleId) return;
+    if (!localOrigin || !localVehicleId) return;
     onOriginChange(localOrigin);
+    onVehicleChange(localVehicleId);
     onNext();
   };
 
@@ -48,8 +59,8 @@ export default function OriginVehicleStep({
       <div>
         <label className="block font-semibold mb-1">Selecione o veículo:</label>
         <select
-          value={selectedVehicleId || ""}
-          onChange={(e) => onVehicleChange(e.target.value)}
+          value={localVehicleId}
+          onChange={(e) => setLocalVehicleId(e.target.value)}
           className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="" disabled>
@@ -75,7 +86,7 @@ export default function OriginVehicleStep({
         <button
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           onClick={handleNext}
-          disabled={!localOrigin || !selectedVehicleId}
+          disabled={!localOrigin || !localVehicleId}
         >
           Próximo
         </button>

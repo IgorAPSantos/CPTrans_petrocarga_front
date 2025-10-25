@@ -3,6 +3,7 @@ interface ConfirmationProps {
   startHour: string;
   endHour: string;
   origin?: string;
+  destination?: string;
   vehicleName?: string;
   onConfirm: () => void;
   onReset: () => void;
@@ -13,39 +14,43 @@ export default function Confirmation({
   startHour,
   endHour,
   origin,
+  destination,
   vehicleName,
   onConfirm,
   onReset,
 }: ConfirmationProps) {
   return (
-    <div className="text-center">
-      <p className="font-semibold">Confirme sua reserva:</p>
-      <p className="text-blue-700 text-lg font-bold mt-2">
-        {day.toLocaleDateString()} — {startHour} até {endHour}
+    <div className="p-4 border rounded shadow-md">
+      <h3 className="text-lg font-semibold mb-2">Resumo da Reserva</h3>
+      <p>
+        <strong>Data:</strong> {day.toLocaleDateString()}
       </p>
-
+      <p>
+        <strong>Horário:</strong> {startHour} - {endHour}
+      </p>
       {origin && (
-        <p className="mt-1">
-          Origem: <span className="font-medium">{origin}</span>
+        <p>
+          <strong>Endereço de Entrada:</strong> {origin}
+        </p>
+      )}
+      {destination && (
+        <p>
+          <strong>Endereço da Vaga:</strong> {destination}
         </p>
       )}
       {vehicleName && (
         <p>
-          Veículo: <span className="font-medium">{vehicleName}</span>
+          <strong>Veículo:</strong> {vehicleName}
         </p>
       )}
-
-      <div className="mt-4 flex justify-center gap-4">
+      <div className="mt-4 flex gap-2">
         <button
+          className="px-4 py-2 bg-green-600 text-white rounded"
           onClick={onConfirm}
-          className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
         >
           Confirmar
         </button>
-        <button
-          onClick={onReset}
-          className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-        >
+        <button className="px-4 py-2 bg-gray-300 rounded" onClick={onReset}>
           Reiniciar
         </button>
       </div>

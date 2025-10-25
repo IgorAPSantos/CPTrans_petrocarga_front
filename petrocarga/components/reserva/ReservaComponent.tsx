@@ -1,10 +1,17 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import StepIndicator from "@/components/reserva/StepIndicator";
 import DaySelection from "@/components/reserva/DaySelection";
 import TimeSelection from "@/components/reserva/TimeSelection";
 import OriginVehicleStep from "@/components/reserva/OriginVehicleStep";
 import Confirmation from "@/components/reserva/Confirmation";
+import { Vaga } from "@/lib/types/vaga";
+
+interface ReservaComponentProps {
+  selectedVaga: Vaga;
+  onBack?: () => void;
+}
 
 const allTimes = [
   "08:00",
@@ -28,14 +35,17 @@ const allTimes = [
   "17:00",
 ];
 
-const reservedTimes = ["10:00", "13:30", "14:00"]; // Mock
+const reservedTimes = ["10:00", "13:30", "14:00"]; // Mock de horários ocupados
 const mockVehicles = [
-  { id: "v1", name: "Caminhão Azul" },
-  { id: "v2", name: "Caminhão Vermelho" },
-  { id: "v3", name: "Van Branca" },
+  { id: "v1", name: "Carro Pessoal - Sprinter", plate: "ABC-1234" },
+  { id: "v2", name: "Moto - Honda CG", plate: "XYZ-5678" },
+  { id: "v3", name: "Carro Pessoal - VW Gol", plate: "DEF-9012" },
 ];
 
-export default function ReservaComponent() {
+export default function ReservaComponent({
+  selectedVaga,
+  onBack,
+}: ReservaComponentProps) {
   const [step, setStep] = useState(1);
   const [selectedDay, setSelectedDay] = useState<Date | undefined>();
   const [startHour, setStartHour] = useState<string | null>(null);
@@ -45,15 +55,34 @@ export default function ReservaComponent() {
     string | undefined
   >();
 
+  // Se já tiver vaga selecionada, podemos iniciar direto no step de origem/veículo
+  useEffect(() => {
+    if (selectedVaga) {
+      setStep(1); // Começa do dia mesmo, você pode mudar para 4 se quiser pular direto
+    }
+  }, [selectedVaga]);
+
+  const handleSelectDay = (day: Date) => {
+    setSelectedDay(day);
+    setStep(2);
+  };
+
   const handleSelectStart = (time: string) => {
     setStartHour(time);
     setEndHour(null);
     setStep(3);
   };
+
   const handleSelectEnd = (time: string) => {
     setEndHour(time);
     setStep(4);
   };
+
+  const handleConfirm = () => {
+    alert("Reserva confirmada ✅ (mock)");
+    reset();
+  };
+
   const reset = () => {
     setStep(1);
     setSelectedDay(undefined);
@@ -62,21 +91,26 @@ export default function ReservaComponent() {
     setOrigin("");
     setSelectedVehicleId(undefined);
   };
-  const confirm = () => alert("Reserva confirmada ✅ (mock)");
-
-  const vehicleName = mockVehicles.find(
-    (v) => v.id === selectedVehicleId
-  )?.name;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto mt-10 border rounded-xl shadow-lg">
-      <h1 className="text-3xl font-bold mb-6 text-center">Reserva de Vaga</h1>
+    <div className="p-6 border rounded-lg shadow-md max-w-4xl mx-auto">
+      {onBack && (
+        <button onClick={onBack} className="mb-4 px-3 py-1 bg-gray-200 rounded">
+          Voltar ao mapa
+        </button>
+      )}
+
+      <h2 className="text-xl font-semibold mb-4 text-center">
+        Reservando vaga: {selectedVaga.endereco.logradouro} -{" "}
+        {selectedVaga.endereco.bairro}
+      </h2>
+
       <StepIndicator step={step} />
 
-      {/* Step 1: Dia */}
+      {/* Step 1: selecionar dia */}
       {step === 1 && (
         <div>
-          <DaySelection selected={selectedDay} onSelect={setSelectedDay} />
+          <DaySelection selected={selectedDay} onSelect={handleSelectDay} />
           {selectedDay && (
             <div className="flex justify-center mt-4">
               <button
@@ -90,7 +124,7 @@ export default function ReservaComponent() {
         </div>
       )}
 
-      {/* Step 2: Horário início */}
+      {/* Step 2: horário início */}
       {step === 2 && selectedDay && (
         <TimeSelection
           times={allTimes}
@@ -102,7 +136,7 @@ export default function ReservaComponent() {
         />
       )}
 
-      {/* Step 3: Horário fim */}
+      {/* Step 3: horário fim */}
       {step === 3 && startHour && (
         <TimeSelection
           times={allTimes.filter(
@@ -116,10 +150,10 @@ export default function ReservaComponent() {
         />
       )}
 
-      {/* Step 4: Origem e veículo */}
+      {/* Step 4: origem e veículo */}
       {step === 4 && (
         <OriginVehicleStep
-          vehicles={mockVehicles}
+          vehicles={mockVehicles} // Aqui você pode passar os veículos do usuário
           origin={origin}
           selectedVehicleId={selectedVehicleId}
           onOriginChange={setOrigin}
@@ -129,15 +163,18 @@ export default function ReservaComponent() {
         />
       )}
 
-      {/* Step 5: Confirmação */}
-      {step === 5 && startHour && endHour && selectedDay && (
+      {/* Step 5: confirmação */}
+      {step === 5 && selectedDay && startHour && endHour && (
         <Confirmation
           day={selectedDay}
           startHour={startHour}
           endHour={endHour}
-          origin={origin}
-          vehicleName={vehicleName}
-          onConfirm={confirm}
+          origin={origin} // endereço de entrada/origem
+          destination={`${selectedVaga.endereco.logradouro}, ${selectedVaga.endereco.bairro}`} // endereço da vaga
+          vehicleName={`${
+            mockVehicles.find((v) => v.id === selectedVehicleId)?.name
+          }, ${mockVehicles.find((v) => v.id === selectedVehicleId)?.plate}`} // veículo selecionado
+          onConfirm={handleConfirm}
           onReset={reset}
         />
       )}

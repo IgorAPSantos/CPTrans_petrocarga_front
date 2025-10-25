@@ -10,7 +10,8 @@ function parseCoordinates(coord: string): [number, number] {
 export function addVagaMarkers(
   map: mapboxgl.Map,
   vagas: Vaga[],
-  markersRef: React.MutableRefObject<mapboxgl.Marker[]>
+  markersRef: React.MutableRefObject<mapboxgl.Marker[]>,
+  onClickVaga?: (vaga: Vaga) => void
 ) {
   // Remove marcadores antigos
   markersRef.current.forEach((marker) => marker.remove());
@@ -21,7 +22,7 @@ export function addVagaMarkers(
 
     const el = document.createElement("div");
     el.className =
-      "vaga-marker w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg";
+      "vaga-marker w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg cursor-pointer";
 
     const coordinates = parseCoordinates(vaga.referenciaGeoInicio);
 
@@ -33,6 +34,10 @@ export function addVagaMarkers(
         )
       )
       .addTo(map);
+
+    if (onClickVaga) {
+      el.addEventListener("click", () => onClickVaga(vaga));
+    }
 
     markersRef.current.push(marker);
   });
