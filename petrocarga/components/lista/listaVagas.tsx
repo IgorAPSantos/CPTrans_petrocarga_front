@@ -29,8 +29,9 @@ export function ListaVagas() {
   useEffect(() => {
     async function fetchVagas() {
       try {
-
-        const res = await fetch("https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas"); // Para usar o MOCK troque por /api/vagas
+        const res = await fetch(
+          "https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas"
+        ); // Para usar o MOCK troque por /api/vagas
         const data = await res.json();
         setVagas(data);
       } catch (err) {
@@ -85,9 +86,17 @@ export function ListaVagas() {
         <button
           onClick={() => setDisponiveisPrimeiro(!disponiveisPrimeiro)}
           className="p-2 rounded border border-gray-300 shadow-sm hover:bg-gray-100"
-          title={disponiveisPrimeiro ? "Disponíveis por último" : "Disponíveis primeiro"}
+          title={
+            disponiveisPrimeiro
+              ? "Disponíveis por último"
+              : "Disponíveis primeiro"
+          }
         >
-          {disponiveisPrimeiro ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+          {disponiveisPrimeiro ? (
+            <ChevronUp size={18} />
+          ) : (
+            <ChevronDown size={18} />
+          )}
         </button>
       </div>
 

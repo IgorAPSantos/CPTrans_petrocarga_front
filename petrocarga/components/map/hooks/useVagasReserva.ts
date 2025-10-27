@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Vaga } from "@/lib/types/vaga";
 
-export function useVagas() {
+export function useVagasReserva() {
   const [Vagas, setVagas] = useState<Vaga[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -11,7 +11,7 @@ export function useVagas() {
       try {
         setLoading(true);
         const res = await fetch(
-          "https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas"
+          "https://cptranspetrocargaback-production.up.railway.app/petrocarga/disponibilidade-vagas"
         ); // Para usar o MOCK troque por /api/vagas
         if (!res.ok) throw new Error("Erro ao buscar vagas");
 

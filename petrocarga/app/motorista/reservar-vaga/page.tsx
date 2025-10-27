@@ -22,8 +22,13 @@ export default function ReservaPage() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       {step === 1 && (
-        <div className="h-[500px]">
-          <MapReserva onClickVaga={handleSelectVaga} />
+        <div className="flex flex-col items-center justify-center h-full">
+          <h1 className=" md:text-2xl font-semibold text-center mb-4">
+            Escolha uma vaga
+          </h1>
+          <div className="h-[500px] w-full">
+            <MapReserva onClickVaga={handleSelectVaga} />
+          </div>
         </div>
       )}
 
