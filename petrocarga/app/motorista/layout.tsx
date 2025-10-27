@@ -2,7 +2,6 @@ import  Footer  from "../../components/motorista/layout/footer";
 import { Navbar } from "../../components/motorista/layout/navbar";
 import { Metadata } from "next";
 import { Maven_Pro } from 'next/font/google';
-import { MapProvider } from "@/context/MapContext";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
 const mavenPro = Maven_Pro({
@@ -27,7 +26,7 @@ const mavenPro = Maven_Pro({
             <div className="flex min-h-screen flex-col motorista-layout">
             <Navbar />
             <main className="flex-1 relative">
-                <MapProvider>{children}</MapProvider>
+                {children}
             </main>
             <Footer />
             </div>
