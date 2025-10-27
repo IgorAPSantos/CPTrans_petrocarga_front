@@ -19,7 +19,11 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   const { Vagas, loading, error } = useVagas();
-  const { map, mapLoaded } = useMapbox({ containerRef: mapContainer });
+  const { map, mapLoaded } = useMapbox({
+    containerRef: mapContainer,
+    enableSearch: false, // ativa a barra de pesquisa
+    enableNavigation: false, // desativa os botões
+  });
 
   // Cria marcadores das vagas
   useEffect(() => {

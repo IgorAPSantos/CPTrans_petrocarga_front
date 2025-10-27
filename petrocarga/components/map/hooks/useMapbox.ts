@@ -12,6 +12,8 @@ interface MapboxFeature {
 interface UseMapboxProps {
   containerRef: MutableRefObject<HTMLDivElement | null>;
   onSelectPlace?: (place: MapboxFeature) => void;
+  enableSearch?: boolean; // Ativa barra de pesquisa
+  enableNavigation?: boolean; // Ativa botões de navegação
 }
 
 interface GeocoderResultEvent {
@@ -24,7 +26,12 @@ interface GeocoderResultEvent {
 
 let globalMap: mapboxgl.Map | null = null; // instância global reutilizável
 
-export function useMapbox({ containerRef, onSelectPlace }: UseMapboxProps) {
+export function useMapbox({
+  containerRef,
+  onSelectPlace,
+  enableSearch = true,
+  enableNavigation = true,
+}: UseMapboxProps) {
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -50,30 +57,34 @@ export function useMapbox({ containerRef, onSelectPlace }: UseMapboxProps) {
         zoom: 13,
       });
 
-      globalMap.addControl(new mapboxgl.NavigationControl(), "top-right");
+      // Botões de navegação
+      if (enableNavigation) {
+        globalMap.addControl(new mapboxgl.NavigationControl(), "top-right");
+      }
 
-      const geocoder = new MapboxGeocoder({
-        accessToken: mapboxgl.accessToken,
-        mapboxgl,
-        marker: false,
-        placeholder: "Pesquisar endereço",
-      });
+      // Barra de pesquisa
+      if (enableSearch) {
+        const geocoder = new MapboxGeocoder({
+          accessToken: mapboxgl.accessToken,
+          mapboxgl,
+          marker: false,
+          placeholder: "Pesquisar endereço",
+        });
 
-      globalMap.addControl(geocoder, "top-left");
+        globalMap.addControl(geocoder, "top-left");
 
-      geocoder.on("result", (e: GeocoderResultEvent) => {
-        const [lng, lat] = e.result.geometry.coordinates;
+        geocoder.on("result", (e: GeocoderResultEvent) => {
+          const [lng, lat] = e.result.geometry.coordinates;
 
-        if (onSelectPlace) {
-          onSelectPlace({
+          onSelectPlace?.({
             id: e.result.id,
             place_name: e.result.place_name,
             geometry: { type: "Point", coordinates: [lng, lat] },
           });
-        }
 
-        globalMap?.flyTo({ center: [lng, lat], zoom: 16 });
-      });
+          globalMap?.flyTo({ center: [lng, lat], zoom: 16 });
+        });
+      }
 
       globalMap.on("load", () => setMapLoaded(true));
       setMap(globalMap);
@@ -88,7 +99,7 @@ export function useMapbox({ containerRef, onSelectPlace }: UseMapboxProps) {
         container.appendChild(globalMap.getContainer());
       }
     };
-  }, [containerRef, onSelectPlace]);
+  }, [containerRef, onSelectPlace, enableSearch, enableNavigation]);
 
   return { map, mapLoaded };
 }

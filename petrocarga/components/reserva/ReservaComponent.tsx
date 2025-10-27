@@ -35,7 +35,8 @@ const allTimes = [
   "17:00",
 ];
 
-const reservedTimes = ["10:00", "13:30", "14:00"]; // Mock de horários ocupados
+const reservedTimes = ["10:00", "13:30", "14:00"];
+
 const mockVehicles = [
   { id: "v1", name: "Carro Pessoal - Sprinter", plate: "ABC-1234" },
   { id: "v2", name: "Moto - Honda CG", plate: "XYZ-5678" },
@@ -47,41 +48,15 @@ export default function ReservaComponent({
   onBack,
 }: ReservaComponentProps) {
   const [step, setStep] = useState(1);
-  const [selectedDay, setSelectedDay] = useState<Date | undefined>();
+  const [selectedDay, setSelectedDay] = useState<Date>();
   const [startHour, setStartHour] = useState<string | null>(null);
   const [endHour, setEndHour] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
-  const [selectedVehicleId, setSelectedVehicleId] = useState<
-    string | undefined
-  >();
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string>();
 
-  // Se já tiver vaga selecionada, podemos iniciar direto no step de origem/veículo
   useEffect(() => {
-    if (selectedVaga) {
-      setStep(1); // Começa do dia mesmo, você pode mudar para 4 se quiser pular direto
-    }
+    if (selectedVaga) setStep(1);
   }, [selectedVaga]);
-
-  const handleSelectDay = (day: Date) => {
-    setSelectedDay(day);
-    setStep(2);
-  };
-
-  const handleSelectStart = (time: string) => {
-    setStartHour(time);
-    setEndHour(null);
-    setStep(3);
-  };
-
-  const handleSelectEnd = (time: string) => {
-    setEndHour(time);
-    setStep(4);
-  };
-
-  const handleConfirm = () => {
-    alert("Reserva confirmada ✅ (mock)");
-    reset();
-  };
 
   const reset = () => {
     setStep(1);
@@ -92,92 +67,111 @@ export default function ReservaComponent({
     setSelectedVehicleId(undefined);
   };
 
+  const handleConfirm = () => {
+    alert("Reserva confirmada ✅ (mock)");
+    reset();
+  };
+
   return (
-    <div className="p-6 border rounded-lg shadow-md max-w-4xl mx-auto">
+    <div
+      className="p-4 sm:p-6 border rounded-xl shadow-lg 
+      max-w-2xl mx-auto bg-white 
+      min-h-[80vh] flex flex-col gap-4"
+    >
       {onBack && (
-        <button onClick={onBack} className="mb-4 px-3 py-1 bg-gray-200 rounded">
+        <button
+          onClick={onBack}
+          className="px-3 py-2 w-fit bg-gray-200 rounded-lg text-sm sm:text-base"
+        >
           Voltar ao mapa
         </button>
       )}
 
-      <h2 className="text-xl font-semibold mb-4 text-center">
-        Reservando vaga: {selectedVaga.endereco.logradouro} -{" "}
-        {selectedVaga.endereco.bairro}
+      <h2 className="text-lg sm:text-xl font-semibold text-center leading-tight">
+        Reservando vaga: <br className="sm:hidden" />
+        {selectedVaga.endereco.logradouro} - {selectedVaga.endereco.bairro}
       </h2>
 
       <StepIndicator step={step} />
 
-      {/* Step 1: selecionar dia */}
-      {step === 1 && (
-        <div>
-          <DaySelection selected={selectedDay} onSelect={handleSelectDay} />
-          {selectedDay && (
-            <div className="flex justify-center mt-4">
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                onClick={() => setStep(2)}
-              >
-                Próximo
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+      <div className="flex-1 overflow-y-auto pb-4">
+        {step === 1 && (
+          <>
+            <DaySelection
+              selected={selectedDay}
+              onSelect={(day) => setSelectedDay(day)}
+            />
+            {selectedDay && (
+              <div className="flex justify-center mt-4">
+                <button
+                  className="px-6 py-3 text-white text-sm bg-blue-600 rounded-lg hover:bg-blue-700 w-full sm:w-auto"
+                  onClick={() => setStep(2)}
+                >
+                  Próximo
+                </button>
+              </div>
+            )}
+          </>
+        )}
 
-      {/* Step 2: horário início */}
-      {step === 2 && selectedDay && (
-        <TimeSelection
-          times={allTimes}
-          reserved={reservedTimes}
-          selected={startHour}
-          onSelect={handleSelectStart}
-          onBack={() => setStep(1)}
-          color="blue"
-        />
-      )}
+        {step === 2 && selectedDay && (
+          <TimeSelection
+            times={allTimes}
+            reserved={reservedTimes}
+            selected={startHour}
+            onSelect={(t) => {
+              setStartHour(t);
+              setEndHour(null);
+              setStep(3);
+            }}
+            onBack={() => setStep(1)}
+            color="blue"
+          />
+        )}
 
-      {/* Step 3: horário fim */}
-      {step === 3 && startHour && (
-        <TimeSelection
-          times={allTimes.filter(
-            (t) => allTimes.indexOf(t) > allTimes.indexOf(startHour)
-          )}
-          reserved={reservedTimes}
-          selected={endHour}
-          onSelect={handleSelectEnd}
-          onBack={() => setStep(2)}
-          color="green"
-        />
-      )}
+        {step === 3 && startHour && (
+          <TimeSelection
+            times={allTimes.filter(
+              (t) => allTimes.indexOf(t) > allTimes.indexOf(startHour)
+            )}
+            reserved={reservedTimes}
+            selected={endHour}
+            onSelect={(t) => {
+              setEndHour(t);
+              setStep(4);
+            }}
+            onBack={() => setStep(2)}
+            color="blue"
+          />
+        )}
 
-      {/* Step 4: origem e veículo */}
-      {step === 4 && (
-        <OriginVehicleStep
-          vehicles={mockVehicles} // Aqui você pode passar os veículos do usuário
-          origin={origin}
-          selectedVehicleId={selectedVehicleId}
-          onOriginChange={setOrigin}
-          onVehicleChange={setSelectedVehicleId}
-          onNext={() => setStep(5)}
-          onBack={() => setStep(3)}
-        />
-      )}
+        {step === 4 && (
+          <OriginVehicleStep
+            vehicles={mockVehicles}
+            origin={origin}
+            selectedVehicleId={selectedVehicleId}
+            onOriginChange={setOrigin}
+            onVehicleChange={setSelectedVehicleId}
+            onNext={() => setStep(5)}
+            onBack={() => setStep(3)}
+          />
+        )}
 
-      {/* Step 5: confirmação */}
-      {step === 5 && selectedDay && startHour && endHour && (
-        <Confirmation
-          day={selectedDay}
-          startHour={startHour}
-          endHour={endHour}
-          origin={origin} // endereço de entrada/origem
-          destination={`${selectedVaga.endereco.logradouro}, ${selectedVaga.endereco.bairro}`} // endereço da vaga
-          vehicleName={`${
-            mockVehicles.find((v) => v.id === selectedVehicleId)?.name
-          }, ${mockVehicles.find((v) => v.id === selectedVehicleId)?.plate}`} // veículo selecionado
-          onConfirm={handleConfirm}
-          onReset={reset}
-        />
-      )}
+        {step === 5 && (
+          <Confirmation
+            day={selectedDay!}
+            startHour={startHour!}
+            endHour={endHour!}
+            origin={origin}
+            destination={`${selectedVaga.endereco.logradouro}, ${selectedVaga.endereco.bairro}`}
+            vehicleName={`${
+              mockVehicles.find((v) => v.id === selectedVehicleId)?.name
+            } - ${mockVehicles.find((v) => v.id === selectedVehicleId)?.plate}`}
+            onConfirm={handleConfirm}
+            onReset={reset}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -12,34 +12,49 @@ const steps = [
 
 export default function StepIndicator({ step }: StepIndicatorProps) {
   return (
-    <div className="flex justify-between mb-8">
-      {steps.map((s) => (
-        <div
-          key={s.number}
-          className="flex flex-col items-center flex-1 relative"
-        >
-          <div
-            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold 
-              ${
-                step === s.number
-                  ? "bg-blue-600 text-white"
-                  : step > s.number
-                  ? "bg-green-600 text-white"
-                  : "bg-gray-300 text-gray-600"
-              }`}
-          >
-            {s.number}
-          </div>
-          <span className="mt-2 text-sm text-center">{s.label}</span>
-          {s.number < steps.length && (
+    <div className="relative mb-10">
+      {/* Linha de fundo */}
+      <div className="absolute top-4 left-0 right-0 bg-gray-300 h-1"></div>
+
+      {/* Linha de progresso */}
+      <div
+        className="absolute top-4 left-0 h-1 bg-blue-600 transition-all duration-300"
+        style={{ width: `${((step - 1) / (steps.length - 1)) * 100}%` }}
+      ></div>
+
+      <div className="flex justify-between w-full relative">
+        {steps.map((s) => {
+          const isCurrent = step === s.number;
+          const isCompleted = step > s.number;
+
+          return (
             <div
-              className={`absolute top-5 right-[-50%] h-1 flex-1 ${
-                step > s.number ? "bg-green-600" : "bg-gray-300"
-              }`}
-            ></div>
-          )}
-        </div>
-      ))}
+              key={s.number}
+              className="flex flex-col items-center text-center w-full"
+            >
+              {/* Bolinhas */}
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold border-4
+                ${
+                  isCurrent
+                    ? "bg-blue-600 border-blue-600 text-white"
+                    : isCompleted
+                    ? "bg-green-600 border-green-600 text-white"
+                    : "bg-white border-gray-300 text-gray-600"
+                }
+                `}
+              >
+                {s.number}
+              </div>
+
+              {/* Labels */}
+              <span className="mt-2 text-[10px] sm:text-xs max-w-[70px] break-words">
+                {s.label}
+              </span>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
