@@ -4,12 +4,20 @@ import Link from "next/link";
 import { useState } from "react";
 import Logo from "@/public/Logo.png";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
+  const { user, loading } = useAuth();
 
-  // 🧩 Aqui futuramente você pega o role do usuário pelo Auth Context ou Token JWT
-  const role: "visitante" | "motorista" | "gestor" | "admin" = "visitante";
+  // Enquanto o contexto carrega, podemos mostrar nada ou um menu temporário
+  if (loading) return null; // ou um loader simples
+
+  // Define o role do usuário baseado no contexto
+  let role: "visitante" | "motorista" | "gestor" | "admin" = "visitante";
+  if (user?.permissao) {
+    role = user.permissao.toLowerCase() as typeof role; // MOTORISTA -> motorista
+  }
 
   const menus: Record<string, { href: string; label: string }[]> = {
     visitante: [
@@ -59,7 +67,7 @@ export function Navbar() {
           ))}
         </ul>
 
-        {/* Botão mobile */}
+        {/* Botão Mobile */}
         <button
           className="md:hidden text-2xl hover:text-gray-300"
           onClick={() => setMenuAberto(!menuAberto)}

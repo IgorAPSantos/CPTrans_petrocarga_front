@@ -2,10 +2,11 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function addMotorista(prevState: unknown, formData: FormData) {
-  {
-    /* Extrair e montar o payload JSON */
-  }
+/* ==============================
+   Funções de cadastro/edição
+============================== */
+
+export async function addMotorista(formData: FormData) {
   const payload = {
     nome: formData.get("nome") as string,
     cpf: formData.get("cpf") as string,
@@ -21,9 +22,7 @@ export async function addMotorista(prevState: unknown, formData: FormData) {
     "https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas",
     {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     }
   );
@@ -43,9 +42,7 @@ export async function addMotorista(prevState: unknown, formData: FormData) {
 export async function deleteMotorista(motoristaId: string) {
   const res = await fetch(
     `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas/${motoristaId}`,
-    {
-      method: "DELETE",
-    }
+    { method: "DELETE" }
   );
 
   if (!res.ok) {
@@ -57,24 +54,12 @@ export async function deleteMotorista(motoristaId: string) {
   }
 
   revalidatePath("/motoristas/veiculos&reservas");
-  return {
-    error: false,
-    message: "Motorista deletado com sucesso!",
-  };
+  return { error: false, message: "Motorista deletado com sucesso!" };
 }
 
-export async function atualizarMotorista(
-  prevState: unknown,
-  formData: FormData
-) {
-  {
-    /* Certifique-se de enviar o ID no formData */
-  }
+export async function atualizarMotorista(formData: FormData) {
   const id = formData.get("id") as string;
 
-  {
-    /* Extrair e montar o payload JSON */
-  }
   const payload = {
     nome: formData.get("nome") as string,
     cpf: formData.get("cpf") as string,
@@ -90,9 +75,7 @@ export async function atualizarMotorista(
     `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas/${id}`,
     {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     }
   );
@@ -106,19 +89,45 @@ export async function atualizarMotorista(
     };
   }
 
-  {
-    /* Revalida a página de listagem de motoristas */
-  }
   revalidatePath("/gestor/lista-motoristas");
   revalidatePath("/motoristas/perfil");
-  return {
-    error: false,
-    message: "Perfil atualizado com sucesso!",
-    valores: null,
-  };
 
-  {
-    /* Redirecionar para a página de perfil do motorista */
-  }
   redirect("/motoristas/perfil");
+}
+
+/* ==============================
+   Server Action para buscar motorista
+============================== */
+
+export async function getMotoristaByUserId(token: string, userId: string) {
+  if (!token || !userId) {
+    return { error: true, message: "Usuário ou token não fornecido" };
+  }
+
+  try {
+    const res = await fetch(
+      `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas/${userId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      return {
+        error: true,
+        message: errorData.message || "Erro ao buscar motorista",
+      };
+    }
+
+    const motorista = await res.json();
+    return { error: false, motoristaId: motorista.id, motorista };
+  } catch (error) {
+    console.error("Erro ao buscar motorista:", error);
+    return { error: true, message: "Erro interno ao buscar motorista" };
+  }
 }

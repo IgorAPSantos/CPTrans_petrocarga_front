@@ -9,6 +9,9 @@ import Confirmation from "@/components/reserva/Confirmation";
 import { Vaga, DiaSemana } from "@/lib/types/vaga";
 import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
 import { useAuth } from "@/context/AuthContext";
+import { reservarVaga } from "@/lib/actions/reservaActions";
+import { getMotoristaByUserId } from "@/lib/actions/motoristaActions";
+import { useRouter } from "next/navigation";
 
 interface ReservaComponentProps {
   selectedVaga: Vaga;
@@ -31,7 +34,7 @@ export default function ReservaComponent({
   selectedVaga,
   onBack,
 }: ReservaComponentProps) {
-  const { token, user, loading } = useAuth();
+  const { user, setUser, token, loading } = useAuth();
   const [step, setStep] = useState(1);
   const [selectedDay, setSelectedDay] = useState<Date>();
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
@@ -41,32 +44,50 @@ export default function ReservaComponent({
   const [origin, setOrigin] = useState("");
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>();
   const [vehicles, setVehicles] = useState<Veiculo[]>([]);
+  const [loadingMotorista, setLoadingMotorista] = useState(true);
+  const router = useRouter();
 
-  // Carrega veículos do usuário ao montar
+  // Buscar motorista ID do usuário e salvar no contexto
   useEffect(() => {
-    console.log("🚀 useEffect: carregando veículos");
-    console.log("loading:", loading, "user:", user, "token:", token);
+    async function fetchMotorista() {
+      if (!user?.id || !token) return;
 
-    const fetchVehicles = async () => {
-      if (!user?.id || !token) {
-        console.log("❌ Usuário ou token não disponível ainda");
-        return;
-      }
-
-      console.log("📡 Buscando veículos para usuário:", user.id);
-
-      const result = await getVeiculosUsuario(user.id, token);
-      console.log("Resultado do getVeiculosUsuario:", result);
-
-      if (!result.error) {
-        setVehicles(result.veiculos as Veiculo[]);
+      // Só busca se ainda não tiver motoristaId
+      if (!user.motoristaId) {
+        try {
+          const result = await getMotoristaByUserId(token, user.id);
+          if (!result.error && result.motoristaId) {
+            setUser({
+              ...user,
+              motoristaId: result.motoristaId,
+            });
+            console.log("Motorista ID salvo:", result.motoristaId);
+          } else {
+            console.error("Erro ao buscar motorista:", result.message);
+          }
+        } catch (err) {
+          console.error("Erro ao buscar motorista:", err);
+        } finally {
+          setLoadingMotorista(false);
+        }
       } else {
-        console.error(result.message);
+        setLoadingMotorista(false);
       }
-    };
+    }
 
+    fetchMotorista();
+  }, [user, token, setUser]);
+
+  // Carrega veículos do usuário
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      if (!user?.id || !token) return;
+      const result = await getVeiculosUsuario(user.id, token);
+      if (!result.error) setVehicles(result.veiculos as Veiculo[]);
+      else console.error(result.message);
+    };
     fetchVehicles();
-  }, [user, token, loading]);
+  }, [user, token]);
 
   // Reset ao trocar vaga
   useEffect(() => {
@@ -83,6 +104,13 @@ export default function ReservaComponent({
     setOrigin("");
     setSelectedVehicleId(undefined);
   };
+
+  function formatDateTime(day: Date, hour: string): string {
+    const [h, m] = hour.split(":").map(Number);
+    const date = new Date(day);
+    date.setHours(h, m, 0, 0);
+    return date.toISOString();
+  }
 
   const fetchHorariosDisponiveis = (day: Date, vaga: Vaga): string[] => {
     const dias: DiaSemana[] = [
@@ -121,17 +149,59 @@ export default function ReservaComponent({
 
   const handleDaySelect = (day: Date) => {
     setSelectedDay(day);
-    const times = fetchHorariosDisponiveis(day, selectedVaga);
-    setAvailableTimes(times);
+    setAvailableTimes(fetchHorariosDisponiveis(day, selectedVaga));
     setStep(2);
   };
 
-  const handleConfirm = () => {
-    alert("Reserva confirmada ✅ (mock)");
-    reset();
+  const handleConfirm = async () => {
+    if (!token || !user) {
+      alert("Usuário ou token não disponível. Faça login novamente.");
+      return;
+    }
+    if (!user.motoristaId) {
+      alert("Motorista não encontrado. Verifique seu cadastro.");
+      return;
+    }
+    if (
+      !selectedVaga ||
+      !selectedVehicleId ||
+      !startHour ||
+      !endHour ||
+      !origin
+    ) {
+      alert("Preencha todos os campos antes de confirmar a reserva.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("vagaId", selectedVaga.id);
+    formData.append("motoristaId", user.motoristaId);
+    formData.append("veiculoId", selectedVehicleId);
+    formData.append("cidadeOrigem", origin);
+    formData.append("inicio", formatDateTime(selectedDay!, startHour));
+    formData.append("fim", formatDateTime(selectedDay!, endHour));
+
+    try {
+      console.log("Payload de reserva:", {
+        vagaId: selectedVaga.id,
+        motoristaId: user.motoristaId,
+        veiculoId: selectedVehicleId,
+        cidadeOrigem: origin,
+        inicio: formatDateTime(selectedDay!, startHour),
+        fim: formatDateTime(selectedDay!, endHour),
+        status: "ATIVA",
+      });
+
+      await reservarVaga(formData, token);
+      alert("Reserva confirmada ✅");
+      reset();
+      router.push("/motorista/minhas-reservas");
+    } catch (err) {
+      console.error("Erro ao reservar vaga:", err);
+      alert("Erro ao tentar reservar a vaga. Tente novamente.");
+    }
   };
 
-  // Mapear veículos para o formato que o OriginVehicleStep espera
   const vehiclesForStep = vehicles.map((v) => ({
     id: v.id,
     name: `${v.marca} ${v.modelo}`,
@@ -217,7 +287,6 @@ export default function ReservaComponent({
             )}
           </>
         )}
-
         {step === 5 && (
           <Confirmation
             day={selectedDay!}

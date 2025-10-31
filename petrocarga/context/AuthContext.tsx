@@ -11,6 +11,8 @@ interface User {
   id: string;
   nome: string;
   email: string;
+  permissao: string;
+  motoristaId?: string;
 }
 
 interface AuthContextType {

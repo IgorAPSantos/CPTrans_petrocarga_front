@@ -28,6 +28,7 @@ export default function LoginPage() {
     setError("");
 
     try {
+      // Login normal
       const res = await fetch(
         "https://cptranspetrocargaback-production.up.railway.app/petrocarga/auth/login",
         {
@@ -45,16 +46,33 @@ export default function LoginPage() {
         return;
       }
 
-      // Salva o token e usuario no contexto global
-      setToken(data.token);
-      setUser({
-        id: data.usuario.id,
-        nome: data.usuario.nome,
-        email: data.usuario.email,
-      });
+      // Pega token e usuário
+      const { token, usuario } = data;
 
-      // Redireciona conforme a permissão do usuário
-      switch (data.usuario.permissao) {
+      // Busca motorista pelo usuário logado (se for motorista)
+      let motoristaId: string | undefined = undefined;
+      if (usuario.permissao === "MOTORISTA") {
+        const motoristaRes = await fetch(
+          `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motorista/${usuario.id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        if (motoristaRes.ok) {
+          const motoristaData = await motoristaRes.json();
+          motoristaId = motoristaData.id; // esse é o ID que você precisa
+        } else {
+          console.warn("Motorista não encontrado para este usuário.");
+        }
+      }
+
+      // Salva no AuthContext
+      setToken(token);
+      setUser({ ...usuario, motoristaId });
+
+      // Redireciona conforme permissão
+      switch (usuario.permissao) {
         case "GESTOR":
           window.location.href = "/gestor/visualizar-vagas";
           break;

@@ -1,6 +1,6 @@
 "use server";
 
-export async function reservarVaga(formData: FormData) {
+export async function reservarVaga(formData: FormData, token: string) {
   const vagaId = formData.get("vagaId");
   const motoristaId = formData.get("motoristaId");
   const veiculoId = formData.get("veiculoId");
@@ -25,8 +25,7 @@ export async function reservarVaga(formData: FormData) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // se precisar autenticar:
-          // 'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, // ⚡ Aqui passa o token
         },
         body: JSON.stringify(body),
       }
