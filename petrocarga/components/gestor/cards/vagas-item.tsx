@@ -51,7 +51,7 @@ export default function VagaItem({ vaga }: VagaItemProp) {
           {operacao && (
             <span className="flex items-center gap-1">
               <ScanBarcodeIcon className="w-4 h-4 text-gray-400" />
-              {vaga?.endereco?.codidoPMP?.toUpperCase()}
+              {vaga?.endereco?.codigoPMP?.toUpperCase()}
             </span>
           )}
           <span className="flex items-center gap-1">
@@ -77,7 +77,7 @@ export default function VagaItem({ vaga }: VagaItemProp) {
 
         {/* Botão */}
         <Link
-          href={`/visualizar-vagas/${vaga.id}`}
+          href={`/gestor/visualizar-vagas/${vaga.id}`}
           className={cn(
             buttonVariants({ variant: "outline" }),
             "text-sm sm:text-base w-full sm:w-auto text-center"

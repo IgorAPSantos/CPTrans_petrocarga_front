@@ -21,7 +21,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { setToken } = useAuth();
+  const { setToken, setUser } = useAuth();
 
   async function handleLogin() {
     setLoading(true);
@@ -45,8 +45,13 @@ export default function LoginPage() {
         return;
       }
 
-      // Salva o token no contexto global
+      // Salva o token e usuario no contexto global
       setToken(data.token);
+      setUser({
+        id: data.usuario.id,
+        nome: data.usuario.nome,
+        email: data.usuario.email,
+      });
 
       // Redireciona conforme a permissão do usuário
       switch (data.usuario.permissao) {
@@ -54,7 +59,7 @@ export default function LoginPage() {
           window.location.href = "/gestor/visualizar-vagas";
           break;
         case "MOTORISTA":
-          window.location.href = "/motorista/home";
+          window.location.href = "/motorista/reservar-vaga";
           break;
         case "AGENTE":
           window.location.href = "/agente/home";

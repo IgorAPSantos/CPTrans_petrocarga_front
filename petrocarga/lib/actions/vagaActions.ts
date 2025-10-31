@@ -86,10 +86,29 @@ export async function deleteVaga(id: string, token: string) {
 }
 
 export async function atualizarVaga(formData: FormData, token: string) {
-  const id = formData.get("id") as string;
+  // 🔹 Verifica se formData existe
+  if (!formData) {
+    console.error("⚠️ formData é null!");
+    return { error: true, message: "Formulário não enviado corretamente" };
+  }
 
+  // 🔹 Lista todas as chaves e valores do formData
+  console.log("💾 Conteúdo do FormData:");
+  for (const [key, value] of formData.entries()) {
+    console.log(` - ${key}: ${value}`);
+  }
+
+  // 🔹 Verifica token
+  console.log("🔑 Token recebido na action:", token);
+
+  // 🔹 Pegando id e diasSemana
+  const id = formData.get("id") as string;
   const diasSemanaRaw = formData.get("diaSemana") as string;
+  console.log("🆔 ID da vaga:", id);
+  console.log("🗓️ diasSemanaRaw:", diasSemanaRaw);
+
   const diasSemana = diasSemanaRaw ? JSON.parse(diasSemanaRaw) : [];
+  console.log("🗓️ diasSemana parseado:", diasSemana);
 
   const payload = {
     endereco: {
@@ -112,6 +131,8 @@ export async function atualizarVaga(formData: FormData, token: string) {
     })),
   };
 
+  console.log("📦 Payload a ser enviado para a API:", payload);
+
   const res = await fetch(
     `https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`,
     {
@@ -124,8 +145,11 @@ export async function atualizarVaga(formData: FormData, token: string) {
     }
   );
 
+  console.log("📡 Status da resposta da API:", res.status, res.statusText);
+
   if (!res.ok) {
-    const errorData = await res.json();
+    const errorData = await res.json().catch(() => ({}));
+    console.error("❌ Erro ao atualizar vaga:", errorData);
     return {
       error: true,
       message: errorData.message || "Erro ao atualizar vaga",
@@ -173,5 +197,40 @@ export async function getVagas(token?: string) {
     // qualquer erro de fetch retorna array vazio
     console.error("Erro em getVagas:", err);
     return [];
+  }
+}
+// Buscar vaga específica pelo ID
+export async function getVagaById(id: string, token?: string) {
+  try {
+    const res = await fetch(
+      `https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`,
+      {
+        method: "GET",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      }
+    );
+
+    console.log("📡 Status da resposta:", res.status, res.statusText);
+    console.log("🔑 Token enviado:", token);
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("❌ Erro da API:", text);
+      throw new Error(`Erro ao buscar vaga de ID ${id}`);
+    }
+
+    const data = await res.json().catch((err) => {
+      console.error("⚠️ Erro ao fazer parse do JSON:", err);
+      return null;
+    });
+
+    console.log("✅ Vaga recebida da API:", data);
+
+    return data;
+  } catch (err) {
+    console.error(`Erro em getVagaById(${id}):`, err);
+    return null;
   }
 }

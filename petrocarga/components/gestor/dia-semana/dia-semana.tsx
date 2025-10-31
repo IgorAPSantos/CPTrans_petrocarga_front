@@ -1,176 +1,214 @@
-import React, { useState } from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { OperacoesVaga } from '@/lib/types/vaga';
+"use client";
 
-{/* Definição das propriedades esperadas pelo componente */ }
-interface DiaSemanaProps {
-  name?: string;
-  operacoesVaga?: OperacoesVaga[];
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { atualizarVaga } from "@/lib/actions/vagaActions";
+import { CircleAlert } from "lucide-react";
+import FormItem from "@/components/form/form-item";
+import DiaSemana from "@/components/gestor/dia-semana/dia-semana";
+import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
+import { Vaga } from "@/lib/types/vaga";
+import { useAuth } from "@/context/AuthContext";
+
+interface EditarVagaProps {
+  vaga: Vaga;
 }
 
-export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: DiaSemanaProps) {
-  const diasDaSemana = [
-    { id: 'dom', label: 'Domingo', value: '1', abrev: 'Dom', enum: 'DOMINGO' },
-    { id: 'seg', label: 'Segunda-feira', value: '2', abrev: 'Seg', enum: 'SEGUNDA' },
-    { id: 'ter', label: 'Terça-feira', value: '3', abrev: 'Ter', enum: 'TERCA' },
-    { id: 'qua', label: 'Quarta-feira', value: '4', abrev: 'Qua', enum: 'QUARTA' },
-    { id: 'qui', label: 'Quinta-feira', value: '5', abrev: 'Qui', enum: 'QUINTA' },
-    { id: 'sex', label: 'Sexta-feira', value: '6', abrev: 'Sex', enum: 'SEXTA' },
-    { id: 'sab', label: 'Sábado', value: '7', abrev: 'Sáb', enum: 'SABADO' }
-  ];
+export default function EditarVaga({ vaga }: EditarVagaProps) {
+  const { token, loading } = useAuth();
+  const [pending, setPending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  {/* Estado para gerenciar os dias e horários selecionados */ }
-  type DiaConfig = {
-    ativo: boolean;
-    horarioInicio: string;
-    horarioFim: string;
-  };
+  if (loading) return <p>Carregando...</p>;
+  if (!token) return <p>Você precisa estar logado para editar a vaga.</p>;
 
-  {/* Mapeamento dos dias para suas configurações */ }
-  type DiasConfig = {
-    [key: string]: DiaConfig;
-  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending(true);
+    setError(null);
 
-  {/* Função para converter as operações da vaga em configuração inicial */ }
-  const getInitialConfig = () => {
-    const config: DiasConfig = {};
+    const formData = new FormData(e.currentTarget);
 
-    diasDaSemana.forEach((dia) => {
-      const operacao = operacoesVaga.find(op => op.diaSemanaEnum === dia.enum);
-
-      if (operacao) {
-        config[dia.value] = {
-          ativo: true,
-          horarioInicio: operacao.horaInicio.slice(0, 5), // Remove os segundos
-          horarioFim: operacao.horaFim.slice(0, 5),
-        };
-      } else {
-        config[dia.value] = {
-          ativo: false,
-          horarioInicio: "00:00",
-          horarioFim: "13:00"
-        };
+    try {
+      const result = await atualizarVaga(formData, token);
+      if (result?.error) {
+        setError(result.message);
       }
-    });
-
-    return config;
+    } catch (err: any) {
+      setError(err.message || "Erro desconhecido ao atualizar a vaga");
+    } finally {
+      setPending(false);
+    }
   };
 
-  {/* Inicializa o estado com os valores da vaga ou valores padrão */ }
-  const [diasConfig, setDiasConfig] = useState<DiasConfig>(getInitialConfig());
-
-  {/* Função para alternar o estado ativo de um dia */ }
-  const handleDayToggle = (dayValue: string) => {
-    setDiasConfig(prev => ({
-      ...prev,
-      [dayValue]: {
-        ...prev[dayValue],
-        ativo: !prev[dayValue].ativo
-      }
-    }));
-  };
-
-  {/* Função para atualizar os horários de início e fim */ }
-  const handleHorarioChange = (
-    dayValue: string,
-    tipo: "horarioInicio" | "horarioFim",
-    valor: string
-  ) => {
-    setDiasConfig(prev => ({
-      ...prev,
-      [dayValue]: {
-        ...prev[dayValue],
-        [tipo]: valor
-      }
-    }));
-  };
-
-  {/* Gera o valor JSON para o input hidden com os dias ativos e seus horários */ }
-  const hiddenValue = JSON.stringify(
-    Object.entries(diasConfig)
-      .filter(([, config]) => config.ativo)
-      .map(([dia, config]) => ({
-        dia,
-        horarioInicio: config.horarioInicio,
-        horarioFim: config.horarioFim
-      }))
-  );
-
-  {/* Renderiza o componente */ }
   return (
-    <div className="w-full space-y-2 md:space-y-3">
-      {diasDaSemana.map((dia) => (
-        <div
-          key={dia.id}
-          className="border border-gray-300 rounded-md p-3 md:p-4 hover:bg-gray-50 transition-colors"
-        >
-          <div className="flex flex-col gap-3">
-            {/* Checkbox e Label do dia */}
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                className="border border-gray-500 flex-shrink-0"
-                id={dia.id}
-                checked={diasConfig[dia.value].ativo}
-                onCheckedChange={() => handleDayToggle(dia.value)}
-              />
-              <Label
-                htmlFor={dia.id}
-                className="text-sm md:text-base font-medium cursor-pointer select-none"
-              >
-                {/* Mostra abreviação em mobile, nome completo em desktop */}
-                <span className="md:hidden">{dia.abrev}</span>
-                <span className="hidden md:inline">{dia.label}</span>
-              </Label>
-            </div>
+    <main className="container mx-auto px-4 py-4 md:py-8">
+      <Card className="w-full max-w-5xl mx-auto">
+        <form onSubmit={handleSubmit}>
+          <input type="hidden" name="id" value={vaga.id} />
 
-            {/* Inputs de horário - só aparecem quando o dia está ativo */}
-            {diasConfig[dia.value].ativo && (
-              <div className="flex flex-col sm:flex-row gap-3 pl-0 sm:pl-6">
-                <div className="flex-1">
-                  <label
-                    htmlFor={`${dia.id}-inicio`}
-                    className="text-xs md:text-sm text-gray-600 mb-1 block"
-                  >
-                    Início
-                  </label>
-                  <Input
-                    className="rounded-sm border-gray-400 w-full text-sm md:text-base"
-                    type="time"
-                    id={`${dia.id}-inicio`}
-                    value={diasConfig[dia.value].horarioInicio}
-                    onChange={(e) => handleHorarioChange(dia.value, 'horarioInicio', e.target.value)}
-                  />
-                </div>
-
-                <div className="flex-1">
-                  <label
-                    htmlFor={`${dia.id}-fim`}
-                    className="text-xs md:text-sm text-gray-600 mb-1 block"
-                  >
-                    Fim
-                  </label>
-                  <Input
-                    className="rounded-sm border-gray-400 w-full text-sm md:text-base"
-                    type="time"
-                    id={`${dia.id}-fim`}
-                    value={diasConfig[dia.value].horarioFim}
-                    onChange={(e) => handleHorarioChange(dia.value, "horarioFim", e.target.value)}
-                  />
-                </div>
+          <CardContent className="p-4 md:p-6 lg:p-8">
+            {error && (
+              <div className="flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-4 mb-6 text-red-900">
+                <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <span className="text-sm md:text-base">{error}</span>
               </div>
             )}
-          </div>
-        </div>
-      ))}
 
-      {/* Input hidden para enviar os dados dos dias e horários selecionados */}
-      <input
-        type="hidden"
-        name={name}
-        value={hiddenValue}
-      />
-    </div>
+            <FormItem
+              name="Código"
+              description="Ponha o código PMP da rua. Exemplo: Md-1234"
+            >
+              <Input
+                id="codigo"
+                name="codigo"
+                maxLength={30}
+                placeholder="Md-1234"
+                defaultValue={vaga.endereco.codigoPMP}
+              />
+            </FormItem>
+
+            <FormItem
+              name="Nome da rua"
+              description="Exemplo: Rua do Imperador"
+            >
+              <Input
+                id="logradouro"
+                name="logradouro"
+                placeholder="Rua do Imperador"
+                defaultValue={vaga.endereco.logradouro}
+              />
+            </FormItem>
+
+            <FormItem name="Número Referência" description="Exemplo: 90 ao 130">
+              <Input
+                id="numeroEndereco"
+                name="numeroEndereco"
+                placeholder="Vaga 03"
+                defaultValue={vaga.numeroEndereco}
+              />
+            </FormItem>
+
+            <FormItem name="Status" description="Disponível ou Indisponível">
+              <SelecaoCustomizada
+                id="status"
+                name="status"
+                defaultValue={vaga.status.toLowerCase()}
+                options={[
+                  { value: "disponivel", label: "Disponível" },
+                  { value: "indisponivel", label: "Indisponível" },
+                ]}
+              />
+            </FormItem>
+
+            <FormItem name="Área" description="Selecione a cor da área da vaga">
+              <SelecaoCustomizada
+                id="area"
+                name="area"
+                defaultValue={vaga.area.toLowerCase()}
+                options={[
+                  { value: "vermelha", label: "Vermelha" },
+                  { value: "amarela", label: "Amarela" },
+                  { value: "azul", label: "Azul" },
+                  { value: "branca", label: "Branca" },
+                ]}
+              />
+            </FormItem>
+
+            <FormItem name="Tipo" description="Perpendicular ou Paralela à rua">
+              <SelecaoCustomizada
+                id="tipo"
+                name="tipo"
+                defaultValue={vaga.tipoVaga.toLowerCase()}
+                options={[
+                  { value: "paralela", label: "Paralela" },
+                  { value: "perpendicular", label: "Perpendicular" },
+                ]}
+              />
+            </FormItem>
+
+            <FormItem name="Bairro" description="Exemplo: Centro">
+              <Input
+                id="bairro"
+                name="bairro"
+                placeholder="Centro"
+                defaultValue={vaga.endereco.bairro}
+              />
+            </FormItem>
+
+            <FormItem
+              name="Comprimento"
+              description="Comprimento em metros da vaga"
+            >
+              <Input
+                id="comprimento"
+                name="comprimento"
+                type="number"
+                placeholder="10"
+                step="0.1"
+                min="0"
+                defaultValue={vaga.comprimento}
+              />
+            </FormItem>
+
+            <FormItem
+              name="Descrição"
+              description="Coloque pontos de referência"
+            >
+              <Textarea
+                id="descricao"
+                name="descricao"
+                placeholder="Ex: Em frente à praça, próximo ao mercado..."
+                defaultValue={vaga.referenciaEndereco}
+              />
+            </FormItem>
+
+            <FormItem
+              name="Localização inicial"
+              description="Latitude e Longitude do início da vaga"
+            >
+              <Input
+                id="localizacao-inicio"
+                name="localizacao-inicio"
+                placeholder="-23.55052, -46.633308"
+                defaultValue={vaga.referenciaGeoInicio}
+              />
+            </FormItem>
+
+            <FormItem
+              name="Localização final"
+              description="Latitude e Longitude do fim da vaga"
+            >
+              <Input
+                id="localizacao-fim"
+                name="localizacao-fim"
+                placeholder="-23.55052, -46.633308"
+                defaultValue={vaga.referenciaGeoFim}
+              />
+            </FormItem>
+
+            <FormItem
+              name="Dias da semana"
+              description="Selecione os dias e horários"
+            >
+              <DiaSemana name="diaSemana" operacoesVaga={vaga.operacoesVaga} />
+            </FormItem>
+          </CardContent>
+
+          <CardFooter className="px-4 md:px-6 lg:px-8 pb-6 pt-2">
+            <Button
+              type="submit"
+              disabled={pending}
+              className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium"
+            >
+              {pending ? "Atualizando..." : "Atualizar"}
+            </Button>
+          </CardFooter>
+        </form>
+      </Card>
+    </main>
   );
 }

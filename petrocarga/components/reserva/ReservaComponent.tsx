@@ -7,35 +7,72 @@ import TimeSelection from "@/components/reserva/TimeSelection";
 import OriginVehicleStep from "@/components/reserva/OriginVehicleStep";
 import Confirmation from "@/components/reserva/Confirmation";
 import { Vaga, DiaSemana } from "@/lib/types/vaga";
+import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
+import { useAuth } from "@/context/AuthContext";
 
 interface ReservaComponentProps {
   selectedVaga: Vaga;
   onBack?: () => void;
 }
 
-const mockVehicles = [
-  { id: "v1", name: "Carro Pessoal - Sprinter", plate: "ABC-1234" },
-];
+interface Veiculo {
+  id: string;
+  placa: string;
+  marca: string;
+  modelo: string;
+  tipo: string;
+  comprimento: number;
+  usuarioId: string;
+  cpfProprietario?: string | null;
+  cnpjProprietario?: string | null;
+}
 
 export default function ReservaComponent({
   selectedVaga,
   onBack,
 }: ReservaComponentProps) {
+  const { token, user, loading } = useAuth();
   const [step, setStep] = useState(1);
   const [selectedDay, setSelectedDay] = useState<Date>();
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [reservedTimes, setReservedTimes] = useState<string[]>([]); // pode ser fetch do backend
+  const [reservedTimes, setReservedTimes] = useState<string[]>([]);
   const [startHour, setStartHour] = useState<string | null>(null);
   const [endHour, setEndHour] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>();
+  const [vehicles, setVehicles] = useState<Veiculo[]>([]);
+
+  // Carrega veículos do usuário ao montar
+  useEffect(() => {
+    console.log("🚀 useEffect: carregando veículos");
+    console.log("loading:", loading, "user:", user, "token:", token);
+
+    const fetchVehicles = async () => {
+      if (!user?.id || !token) {
+        console.log("❌ Usuário ou token não disponível ainda");
+        return;
+      }
+
+      console.log("📡 Buscando veículos para usuário:", user.id);
+
+      const result = await getVeiculosUsuario(user.id, token);
+      console.log("Resultado do getVeiculosUsuario:", result);
+
+      if (!result.error) {
+        setVehicles(result.veiculos as Veiculo[]);
+      } else {
+        console.error(result.message);
+      }
+    };
+
+    fetchVehicles();
+  }, [user, token, loading]);
 
   // Reset ao trocar vaga
   useEffect(() => {
     if (selectedVaga) reset();
   }, [selectedVaga]);
 
-  // Reset completo
   const reset = () => {
     setStep(1);
     setSelectedDay(undefined);
@@ -47,7 +84,6 @@ export default function ReservaComponent({
     setSelectedVehicleId(undefined);
   };
 
-  // Função para calcular horários disponíveis do dia
   const fetchHorariosDisponiveis = (day: Date, vaga: Vaga): string[] => {
     const dias: DiaSemana[] = [
       "DOMINGO",
@@ -59,9 +95,8 @@ export default function ReservaComponent({
       "SABADO",
     ];
     const diaSemana = dias[day.getDay()];
-
     const operacao = vaga.operacoesVaga?.find(
-      (op) => op.diaSemanaEnum === diaSemana
+      (op) => op.diaSemanaAsEnum === diaSemana
     );
     if (!operacao) return [];
 
@@ -71,7 +106,7 @@ export default function ReservaComponent({
     const times: string[] = [];
     let h = hInicio,
       m = mInicio;
-    while (h < hFim || (h === hFim && m <= mFim)) {
+    while (h < hFim || (h === hFim && m < mFim)) {
       const pad = (n: number) => n.toString().padStart(2, "0");
       times.push(`${pad(h)}:${pad(m)}`);
       m += 30;
@@ -81,14 +116,11 @@ export default function ReservaComponent({
       }
     }
 
-    // filtrar horários reservados
     return times.filter((t) => !reservedTimes.includes(t));
   };
 
-  // Ao selecionar dia
   const handleDaySelect = (day: Date) => {
     setSelectedDay(day);
-    if (!selectedVaga) return;
     const times = fetchHorariosDisponiveis(day, selectedVaga);
     setAvailableTimes(times);
     setStep(2);
@@ -98,6 +130,13 @@ export default function ReservaComponent({
     alert("Reserva confirmada ✅ (mock)");
     reset();
   };
+
+  // Mapear veículos para o formato que o OriginVehicleStep espera
+  const vehiclesForStep = vehicles.map((v) => ({
+    id: v.id,
+    name: `${v.marca} ${v.modelo}`,
+    plate: v.placa,
+  }));
 
   return (
     <div className="p-4 sm:p-6 border rounded-xl shadow-lg max-w-2xl mx-auto bg-white min-h-[80vh] flex flex-col gap-4">
@@ -118,12 +157,9 @@ export default function ReservaComponent({
       <StepIndicator step={step} />
 
       <div className="flex-1 overflow-y-auto pb-4">
-        {/* Passo 1: Seleção do dia */}
         {step === 1 && (
           <DaySelection selected={selectedDay} onSelect={handleDaySelect} />
         )}
-
-        {/* Passo 2: Seleção do horário inicial */}
         {step === 2 && selectedDay && (
           <TimeSelection
             times={availableTimes}
@@ -138,8 +174,6 @@ export default function ReservaComponent({
             color="blue"
           />
         )}
-
-        {/* Passo 3: Seleção do horário final */}
         {step === 3 && startHour && (
           <TimeSelection
             times={availableTimes.filter(
@@ -156,21 +190,34 @@ export default function ReservaComponent({
             color="blue"
           />
         )}
-
-        {/* Passo 4: Veículo e origem */}
         {step === 4 && (
-          <OriginVehicleStep
-            vehicles={mockVehicles}
-            origin={origin}
-            selectedVehicleId={selectedVehicleId}
-            onOriginChange={setOrigin}
-            onVehicleChange={setSelectedVehicleId}
-            onNext={() => setStep(5)}
-            onBack={() => setStep(3)}
-          />
+          <>
+            {vehiclesForStep.length > 0 ? (
+              <OriginVehicleStep
+                vehicles={vehiclesForStep}
+                origin={origin}
+                selectedVehicleId={selectedVehicleId}
+                onOriginChange={setOrigin}
+                onVehicleChange={setSelectedVehicleId}
+                onNext={() => setStep(5)}
+                onBack={() => setStep(3)}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-4 py-10">
+                <p className="text-gray-700 text-center">
+                  Você ainda não tem veículos cadastrados.
+                </p>
+                <button
+                  onClick={() => alert("Redirecionar para cadastro de veículo")}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                >
+                  Cadastrar veículo
+                </button>
+              </div>
+            )}
+          </>
         )}
 
-        {/* Passo 5: Confirmação */}
         {step === 5 && (
           <Confirmation
             day={selectedDay!}
@@ -179,8 +226,10 @@ export default function ReservaComponent({
             origin={origin}
             destination={`${selectedVaga.endereco.logradouro}, ${selectedVaga.endereco.bairro}`}
             vehicleName={`${
-              mockVehicles.find((v) => v.id === selectedVehicleId)?.name
-            } - ${mockVehicles.find((v) => v.id === selectedVehicleId)?.plate}`}
+              vehiclesForStep.find((v) => v.id === selectedVehicleId)?.name
+            } - ${
+              vehiclesForStep.find((v) => v.id === selectedVehicleId)?.plate
+            }`}
             onConfirm={handleConfirm}
             onReset={reset}
           />

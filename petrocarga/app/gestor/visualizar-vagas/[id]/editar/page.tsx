@@ -1,52 +1,39 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import EditarVaga from "@/components/gestor/editar/edicao-vaga";
 import { Vaga } from "@/lib/types/vaga";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
-import { notFound } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+import { getVagaById } from "@/lib/actions/vagaActions";
 
-{/* Busca uma vaga específica pelo ID */ }
-async function buscarVaga(id: string): Promise<Vaga | undefined> {
-    const res = await fetch(`https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`, {
-        cache: "no-store",
-    });
+export default function EditarVagaPage() {
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const { token, loading: authLoading } = useAuth();
+  const [vaga, setVaga] = useState<Vaga | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-    if (!res.ok) {
-        console.error(`Erro ao buscar vaga ${id}:`, res.status); // Debug
-        return undefined;
-    }
+  useEffect(() => {
+    if (!id || !token) return;
 
-    const vaga: Vaga = await res.json();
-    return vaga;
-}
+    const fetchVaga = async () => {
+      setLoading(true);
+      const vagaData = await getVagaById(id, token);
+      if (!vagaData) {
+        router.replace("/visualizar-vagas");
+      } else {
+        setVaga(vagaData);
+      }
+      setLoading(false);
+    };
 
-export default async function EditarVagaPage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
-    const { id } = await params;
-    console.log("Tentando buscar vaga com ID:", id); // Debug
+    fetchVaga();
+  }, [id, token, router]);
 
-    const vaga = await buscarVaga(id);
+  if (authLoading || loading) return <p>Carregando...</p>;
+  if (!vaga) return <p>Vaga não encontrada</p>;
 
-    if (!vaga) {
-        console.error("Vaga não encontrada, chamando notFound()"); // Debug
-        notFound();
-    }
-
-    return (
-        <div className="mx-auto max-w-5xl p-6">
-            <div className="mb-6">
-                <Link
-                    href={`/visualizar-vagas/${id}`}
-                    className="text-muted-foreground hover:text-foreground inline-flex items-center"
-                >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Voltar para detalhes
-                </Link>
-            </div>
-
-            <EditarVaga vaga={vaga} />
-        </div>
-    );
+  return <EditarVaga vaga={vaga} />;
 }

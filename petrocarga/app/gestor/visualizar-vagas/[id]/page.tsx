@@ -1,44 +1,72 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import VagaDetalhes from "@/components/gestor/cards/vaga-card";
+import { useAuth } from "@/context/AuthContext";
+import * as vagaActions from "@/lib/actions/vagaActions";
 import { Vaga } from "@/lib/types/vaga";
+import { useParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
-// Busca uma vaga específica pelo ID
-async function buscarVaga(vagaId: string): Promise<Vaga | undefined> {
-  const res = await fetch(
-    `https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas`, // Para usar o MOCK troque por `${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/vagas`
-    {
-      cache: "no-store",
+export default function VagaPosting() {
+  const { token } = useAuth();
+  const params = useParams() as { id: string };
+
+  const [vaga, setVaga] = useState<Vaga | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!token) {
+      setError("Usuário não autenticado.");
+      setLoading(false);
+      return;
     }
-  );
 
-  if (!res.ok) return undefined;
+    async function fetchVaga() {
+      setLoading(true);
+      setError("");
 
-  const data: Vaga[] = await res.json();
-  const vaga = data.find((v) => v.id === vagaId);
+      try {
+        const vagaData = await vagaActions.getVagaById(params.id, token);
 
-  return vaga;
-}
+        if (!vagaData) {
+          setError("Vaga não encontrada.");
+        } else {
+          setVaga(vagaData);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar vaga:", err);
+        setError("Erro ao buscar vaga.");
+      } finally {
+        setLoading(false);
+      }
+    }
 
-export default async function VagaPosting({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const vaga = await buscarVaga(id);
+    fetchVaga();
+  }, [params.id, token]);
 
-  if (!vaga) {
-    notFound();
-    return null;
-  }
+  if (loading) return <p className="text-center mt-6">Carregando vaga...</p>;
+
+  if (error)
+    return (
+      <div className="text-center mt-6 text-red-600">
+        {error} <br />
+        <Link
+          href="/gestor/visualizar-vagas"
+          className="text-blue-600 underline"
+        >
+          Voltar para todas as vagas
+        </Link>
+      </div>
+    );
 
   return (
     <div className="mx-auto max-w-5xl p-6">
       <div className="mb-6">
         <Link
-          href="/visualizar-vagas"
+          href="/gestor/visualizar-vagas"
           className="text-muted-foreground hover:text-foreground inline-flex items-center"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -46,8 +74,8 @@ export default async function VagaPosting({
         </Link>
       </div>
 
-      {/* Exibe os dados da vag */}
-      <VagaDetalhes vaga={vaga} />
+      {/* Exibe os dados da vaga */}
+      {vaga && <VagaDetalhes vaga={vaga} />}
     </div>
   );
 }
