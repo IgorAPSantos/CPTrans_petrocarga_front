@@ -16,7 +16,7 @@ export type OperacoesVaga = {
 
 export type Endereco = {
   id: string;
-  codidoPmp: string;
+  codidoPMP: string;
   logradouro: string;
   bairro: string;
 };

@@ -17,13 +17,16 @@ export async function addMotorista(prevState: unknown, formData: FormData) {
     data_validade_cnh: formData.get("dataValidadeCnh") as string,
   };
 
-  const res = await fetch("http://localhost:8000/petrocarga/motoristas", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  const res = await fetch(
+    "https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
 
   if (!res.ok) {
     const errorData = await res.json();
@@ -39,7 +42,7 @@ export async function addMotorista(prevState: unknown, formData: FormData) {
 
 export async function deleteMotorista(motoristaId: string) {
   const res = await fetch(
-    `http://localhost:8000/petrocarga/motoristas/${motoristaId}`,
+    `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas/${motoristaId}`,
     {
       method: "DELETE",
     }
@@ -83,13 +86,16 @@ export async function atualizarMotorista(
     data_validade_cnh: formData.get("dataValidadeCnh") as string,
   };
 
-  const res = await fetch(`http://localhost:8000/petrocarga/motoristas/${id}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-  });
+  const res = await fetch(
+    `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas/${id}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    }
+  );
 
   if (!res.ok) {
     const errorData = await res.json();

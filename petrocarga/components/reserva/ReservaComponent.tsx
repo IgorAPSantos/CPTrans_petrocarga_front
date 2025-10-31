@@ -6,41 +6,15 @@ import DaySelection from "@/components/reserva/DaySelection";
 import TimeSelection from "@/components/reserva/TimeSelection";
 import OriginVehicleStep from "@/components/reserva/OriginVehicleStep";
 import Confirmation from "@/components/reserva/Confirmation";
-import { Vaga } from "@/lib/types/vaga";
+import { Vaga, DiaSemana } from "@/lib/types/vaga";
 
 interface ReservaComponentProps {
   selectedVaga: Vaga;
   onBack?: () => void;
 }
 
-const allTimes = [
-  "08:00",
-  "08:30",
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-  "15:30",
-  "16:00",
-  "16:30",
-  "17:00",
-];
-
-const reservedTimes = ["10:00", "13:30", "14:00"];
-
 const mockVehicles = [
   { id: "v1", name: "Carro Pessoal - Sprinter", plate: "ABC-1234" },
-  { id: "v2", name: "Moto - Honda CG", plate: "XYZ-5678" },
-  { id: "v3", name: "Carro Pessoal - VW Gol", plate: "DEF-9012" },
 ];
 
 export default function ReservaComponent({
@@ -49,22 +23,75 @@ export default function ReservaComponent({
 }: ReservaComponentProps) {
   const [step, setStep] = useState(1);
   const [selectedDay, setSelectedDay] = useState<Date>();
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [reservedTimes, setReservedTimes] = useState<string[]>([]); // pode ser fetch do backend
   const [startHour, setStartHour] = useState<string | null>(null);
   const [endHour, setEndHour] = useState<string | null>(null);
   const [origin, setOrigin] = useState("");
   const [selectedVehicleId, setSelectedVehicleId] = useState<string>();
 
+  // Reset ao trocar vaga
   useEffect(() => {
-    if (selectedVaga) setStep(1);
+    if (selectedVaga) reset();
   }, [selectedVaga]);
 
+  // Reset completo
   const reset = () => {
     setStep(1);
     setSelectedDay(undefined);
+    setAvailableTimes([]);
+    setReservedTimes([]);
     setStartHour(null);
     setEndHour(null);
     setOrigin("");
     setSelectedVehicleId(undefined);
+  };
+
+  // Função para calcular horários disponíveis do dia
+  const fetchHorariosDisponiveis = (day: Date, vaga: Vaga): string[] => {
+    const dias: DiaSemana[] = [
+      "DOMINGO",
+      "SEGUNDA",
+      "TERCA",
+      "QUARTA",
+      "QUINTA",
+      "SEXTA",
+      "SABADO",
+    ];
+    const diaSemana = dias[day.getDay()];
+
+    const operacao = vaga.operacoesVaga?.find(
+      (op) => op.diaSemanaEnum === diaSemana
+    );
+    if (!operacao) return [];
+
+    const [hInicio, mInicio] = operacao.horaInicio.split(":").map(Number);
+    const [hFim, mFim] = operacao.horaFim.split(":").map(Number);
+
+    const times: string[] = [];
+    let h = hInicio,
+      m = mInicio;
+    while (h < hFim || (h === hFim && m <= mFim)) {
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      times.push(`${pad(h)}:${pad(m)}`);
+      m += 30;
+      if (m >= 60) {
+        h += 1;
+        m -= 60;
+      }
+    }
+
+    // filtrar horários reservados
+    return times.filter((t) => !reservedTimes.includes(t));
+  };
+
+  // Ao selecionar dia
+  const handleDaySelect = (day: Date) => {
+    setSelectedDay(day);
+    if (!selectedVaga) return;
+    const times = fetchHorariosDisponiveis(day, selectedVaga);
+    setAvailableTimes(times);
+    setStep(2);
   };
 
   const handleConfirm = () => {
@@ -73,11 +100,7 @@ export default function ReservaComponent({
   };
 
   return (
-    <div
-      className="p-4 sm:p-6 border rounded-xl shadow-lg 
-      max-w-2xl mx-auto bg-white 
-      min-h-[80vh] flex flex-col gap-4"
-    >
+    <div className="p-4 sm:p-6 border rounded-xl shadow-lg max-w-2xl mx-auto bg-white min-h-[80vh] flex flex-col gap-4">
       {onBack && (
         <button
           onClick={onBack}
@@ -95,28 +118,15 @@ export default function ReservaComponent({
       <StepIndicator step={step} />
 
       <div className="flex-1 overflow-y-auto pb-4">
+        {/* Passo 1: Seleção do dia */}
         {step === 1 && (
-          <>
-            <DaySelection
-              selected={selectedDay}
-              onSelect={(day) => setSelectedDay(day)}
-            />
-            {selectedDay && (
-              <div className="flex justify-center mt-4">
-                <button
-                  className="px-6 py-3 text-white text-sm bg-blue-600 rounded-lg hover:bg-blue-700 w-full sm:w-auto"
-                  onClick={() => setStep(2)}
-                >
-                  Próximo
-                </button>
-              </div>
-            )}
-          </>
+          <DaySelection selected={selectedDay} onSelect={handleDaySelect} />
         )}
 
+        {/* Passo 2: Seleção do horário inicial */}
         {step === 2 && selectedDay && (
           <TimeSelection
-            times={allTimes}
+            times={availableTimes}
             reserved={reservedTimes}
             selected={startHour}
             onSelect={(t) => {
@@ -129,10 +139,12 @@ export default function ReservaComponent({
           />
         )}
 
+        {/* Passo 3: Seleção do horário final */}
         {step === 3 && startHour && (
           <TimeSelection
-            times={allTimes.filter(
-              (t) => allTimes.indexOf(t) > allTimes.indexOf(startHour)
+            times={availableTimes.filter(
+              (t) =>
+                availableTimes.indexOf(t) > availableTimes.indexOf(startHour)
             )}
             reserved={reservedTimes}
             selected={endHour}
@@ -145,6 +157,7 @@ export default function ReservaComponent({
           />
         )}
 
+        {/* Passo 4: Veículo e origem */}
         {step === 4 && (
           <OriginVehicleStep
             vehicles={mockVehicles}
@@ -157,6 +170,7 @@ export default function ReservaComponent({
           />
         )}
 
+        {/* Passo 5: Confirmação */}
         {step === 5 && (
           <Confirmation
             day={selectedDay!}

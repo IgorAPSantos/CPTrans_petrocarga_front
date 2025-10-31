@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import VagaItem from "@/components/gestor/cards/vagas-item";
 import { Vaga } from "@/lib/types/vaga";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import * as vagaActions from "@/lib/actions/vagaActions";
+import { useAuth } from "@/context/AuthContext";
 
 // Hook simples de debounce
 function useDebounce(value: string, delay = 300) {
@@ -22,28 +24,31 @@ export function ListaVagas() {
   const [loading, setLoading] = useState(true);
   const [filtro, setFiltro] = useState("");
   const [disponiveisPrimeiro, setDisponiveisPrimeiro] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  const { token } = useAuth(); // <-- pega o token do contexto
   const filtroDebounced = useDebounce(filtro, 300);
 
-  // Buscar dados da API
+  // Buscar dados usando vagaActions.getVagas
   useEffect(() => {
-    async function fetchVagas() {
+    if (!token) return; // evita chamar sem token
+
+    const fetchVagas = async () => {
+      setLoading(true);
       try {
-        const res = await fetch(
-          "https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas"
-        ); // Para usar o MOCK troque por /api/vagas
-        const data = await res.json();
+        const data: Vaga[] = await vagaActions.getVagas(token);
         setVagas(data);
       } catch (err) {
-        console.error("Erro ao buscar vagas:", err);
+        console.error("Erro ao carregar vagas:", err);
+        setError(err instanceof Error ? err.message : "Erro desconhecido");
+        setVagas([]); // garante array vazio
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     fetchVagas();
-  }, []);
-
+  }, [token]);
   // Filtra as vagas
   const vagasFiltradas = vagas.filter((vaga) => {
     const filtroLower = filtroDebounced.toLowerCase();

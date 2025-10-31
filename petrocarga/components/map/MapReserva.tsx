@@ -18,7 +18,7 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  const { Vagas, loading, error } = useVagas();
+  const { vagas, loading, error } = useVagas();
   const { map, mapLoaded } = useMapbox({
     containerRef: mapContainer,
     enableSearch: true,
@@ -27,10 +27,17 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
 
   // Cria marcadores das vagas
   useEffect(() => {
-    if (!map || !mapLoaded || Vagas.length === 0) return;
+    if (!map || !mapLoaded) return;
 
-    addVagaMarkersReserva(map, Vagas, markersRef, onClickVaga);
-  }, [Vagas, map, mapLoaded, onClickVaga]);
+    // Limpa marcadores antigos
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = [];
+
+    // Cria novos marcadores se houver vagas
+    if (vagas.length > 0) {
+      addVagaMarkersReserva(map, vagas, markersRef, onClickVaga);
+    }
+  }, [vagas, map, mapLoaded, onClickVaga]);
 
   return (
     <div className="w-full h-full rounded-lg overflow-visible relative">
