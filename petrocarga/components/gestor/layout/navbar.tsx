@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import Logo from "@/public/Logo.png";
 import Image from "next/image";
-import { logout } from "@/lib/actions/auth";
+import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { LogoutButton } from "@/components/logoutButton/logoutButton";
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { logout } = useAuth();
 
   const links = [
     { href: "/gestor/relatorio", label: "Relatório" },
@@ -18,12 +20,6 @@ export function Navbar() {
     { href: "/gestor/registrar-vagas", label: "Registrar Vagas" },
     { href: "/gestor/guia", label: "Guia" },
   ];
-
-  async function handleLogout() {
-    setLoading(true);
-    await logout();
-    router.push("/");
-  }
 
   return (
     <header className="bg-blue-800 text-white relative">
@@ -45,13 +41,7 @@ export function Navbar() {
           ))}
           {/* Sair simples */}
           <li className="hover:text-gray-300">
-            <button 
-              onClick={handleLogout} 
-              disabled={loading}
-              className="hover:text-gray-300 disabled:opacity-50"
-            >
-              {loading ? "Saindo..." : "Sair"}
-            </button>
+            <LogoutButton />
           </li>
         </ul>
 
@@ -82,16 +72,7 @@ export function Navbar() {
           ))}
           {/* Logout no Mobile */}
           <li className="hover:bg-blue-700 rounded">
-            <button 
-              onClick={() => {
-                setMenuAberto(false);
-                handleLogout();
-              }}
-              disabled={loading}
-              className="block px-2 py-1 w-full text-left text-red-600 hover:text-red-700 disabled:opacity-50"
-            >
-              {loading ? "Saindo..." : "Sair"}
-            </button>
+            < LogoutButton mobile={true} />
           </li>
         </ul>
       </div>
