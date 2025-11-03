@@ -187,20 +187,16 @@ type Veiculo = {
   };
 };
 
-type VeiculosResponse = {
+interface GetVeiculosResult {
   error: boolean;
   message: string;
   veiculos: Veiculo[];
-};
+}
 
 export async function getVeiculosUsuario(
   usuarioId: string,
   token: string
-): Promise<VeiculosResponse> {
-  console.log("📌 getVeiculosUsuario chamado");
-  console.log("Usuario ID:", usuarioId);
-  console.log("Token:", token);
-
+): Promise<GetVeiculosResult> {
   try {
     const res = await fetch(
       `https://cptranspetrocargaback-production.up.railway.app/petrocarga/veiculos/usuario/${usuarioId}`,
@@ -211,11 +207,8 @@ export async function getVeiculosUsuario(
       }
     );
 
-    console.log("Status da resposta:", res.status);
-
     if (!res.ok) {
       const errorData = await res.json();
-      console.error("Erro no fetch:", errorData);
       return {
         error: true,
         message: errorData.message || "Erro ao buscar veículos do usuário",
@@ -224,21 +217,15 @@ export async function getVeiculosUsuario(
     }
 
     const data: Veiculo[] = await res.json();
-    console.log("Dados recebidos:", data);
-
     return {
       error: false,
       message: "Veículos carregados com sucesso",
       veiculos: data,
     };
   } catch (err) {
-    console.error("Erro ao buscar veículos:", err);
     return {
       error: true,
-      message:
-        err instanceof Error
-          ? err.message
-          : "Erro desconhecido ao buscar veículos",
+      message: (err as Error).message || "Erro desconhecido ao buscar veículos",
       veiculos: [],
     };
   }

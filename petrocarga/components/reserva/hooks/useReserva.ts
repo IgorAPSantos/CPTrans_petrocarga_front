@@ -1,26 +1,19 @@
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { getMotoristaByUserId } from "@/lib/actions/motoristaActions";
 import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
 import { reservarVaga } from "@/lib/actions/reservaActions";
 import { useAuth } from "@/context/AuthContext";
 import { Vaga, DiaSemana } from "@/lib/types/vaga";
+import { Veiculo } from "@/lib/types/veiculo";
 
-interface Veiculo {
-  id: string;
-  placa: string;
-  marca: string;
-  modelo: string;
-  tipo: string;
-  comprimento: number;
-  usuarioId: string;
-  cpfProprietario?: string | null;
-  cnpjProprietario?: string | null;
+interface GetVeiculosResult {
+  error: boolean;
+  message: string;
+  veiculos: Veiculo[];
 }
 
 export function useReserva(selectedVaga: Vaga | null) {
   const { user, setUser, token } = useAuth();
-  const router = useRouter();
 
   const [step, setStep] = useState(1);
   const [selectedDay, setSelectedDay] = useState<Date>();
@@ -57,7 +50,10 @@ export function useReserva(selectedVaga: Vaga | null) {
   useEffect(() => {
     if (!user?.id || !token) return;
     const fetchVehicles = async () => {
-      const result = await getVeiculosUsuario(user.id, token);
+      const result: GetVeiculosResult = await getVeiculosUsuario(
+        user.id,
+        token
+      );
       if (!result.error) setVehicles(result.veiculos);
     };
     fetchVehicles();
@@ -121,8 +117,8 @@ export function useReserva(selectedVaga: Vaga | null) {
     return date.toISOString();
   };
 
-  const handleConfirm = async () => {
-    if (!token || !user?.motoristaId) return alert("Faça login novamente.");
+  const handleConfirm = async (): Promise<boolean> => {
+    if (!token || !user?.motoristaId) return false;
     if (
       !selectedVaga ||
       !selectedVehicleId ||
@@ -130,7 +126,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       !endHour ||
       !origin
     )
-      return alert("Preencha todos os campos.");
+      return false;
 
     const formData = new FormData();
     formData.append("vagaId", selectedVaga.id);
@@ -142,11 +138,10 @@ export function useReserva(selectedVaga: Vaga | null) {
 
     try {
       await reservarVaga(formData, token);
-      alert("Reserva confirmada ✅");
       reset();
-      router.push("/motorista/reservas");
+      return true;
     } catch {
-      alert("Erro ao tentar reservar a vaga.");
+      return false;
     }
   };
 
