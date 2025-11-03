@@ -27,8 +27,8 @@ export default function LoginPage() {
         setLoading(true);
         setError("");
 
-    try {
-      // Login normal
+        try {
+        // Login normal
         const res = await fetch(
             "https://cptranspetrocargaback-production.up.railway.app/petrocarga/auth/login",
             {
@@ -92,7 +92,8 @@ export default function LoginPage() {
         } finally {
         setLoading(false);
         }
-}
+    }
+
     return (
         <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100">
             {/* Background decorativo */}
@@ -134,7 +135,6 @@ export default function LoginPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    onKeyPress={handleKeyPress}
                                     placeholder="seu@email.com"
                                     className="pl-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                                     disabled={loading}
@@ -152,7 +152,6 @@ export default function LoginPage() {
                                     type={showPassword ? "text" : "password"}
                                     value={senha}
                                     onChange={(e) => setSenha(e.target.value)}
-                                    onKeyPress={handleKeyPress}
                                     placeholder="••••••••"
                                     className="pl-10 pr-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                                     disabled={loading}

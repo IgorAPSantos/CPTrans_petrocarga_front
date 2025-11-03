@@ -20,7 +20,7 @@ export function Navbar() {
 
     const links = [
         { href: "/motorista/reservar-vaga", label: "Reservar Vaga" },
-        { href: "/motorista/historico", label: "Histórico" },
+        { href: "/motorista/reservas", label: "Minhas Reservas" },
     ];
 
     return (

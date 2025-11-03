@@ -1,6 +1,5 @@
 "use client";
-
-import { logout } from "@/lib/actions/auth";
+import { AuthProvider, useAuth } from "@/context/AuthContext";   
 import { LogOut } from "lucide-react";
 import { useState } from "react";
 
@@ -10,6 +9,7 @@ interface LogoutButtonProps {
 
 export function LogoutButton({ mobile = false }: LogoutButtonProps) {
     const [loading, setLoading] = useState(false);
+    const { logout } = useAuth();
 
     async function handleLogout() {
         setLoading(true);
