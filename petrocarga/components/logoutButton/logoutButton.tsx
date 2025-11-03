@@ -1,5 +1,5 @@
 "use client";
-import { AuthProvider, useAuth } from "@/context/AuthContext";   
+import { useAuth } from "@/context/AuthContext";   
 import { LogOut } from "lucide-react";
 import { redirect } from "next/navigation";
 import { useState } from "react";
@@ -15,7 +15,6 @@ export function LogoutButton({ mobile = false }: LogoutButtonProps) {
     async function handleLogout() {
         setLoading(true);
         await logout();
-
         redirect("/");
     }
 
