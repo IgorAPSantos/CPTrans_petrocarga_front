@@ -144,7 +144,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       await reservarVaga(formData, token);
       alert("Reserva confirmada ✅");
       reset();
-      router.push("/motorista/minhas-reservas");
+      router.push("/motorista/reservas");
     } catch {
       alert("Erro ao tentar reservar a vaga.");
     }

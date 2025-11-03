@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { getReservasPorUsuario } from "@/lib/actions/reservaActions";
-import { getMotoristaByUserId } from "@/lib/actions/motoristaActions";
 import { Loader2 } from "lucide-react";
 
 interface Reserva {
@@ -20,63 +19,35 @@ interface Reserva {
 }
 
 export default function MinhasReservas() {
-  const { user, token, setUser } = useAuth();
-
+  const { user, token } = useAuth();
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  /**
-   * 🔹 Obtém o motoristaId do usuário logado.
-   */
-  const fetchMotoristaId = useCallback(async () => {
-    if (!user?.motoristaId && user?.id && token) {
-      const motoristaResponse = await getMotoristaByUserId(token, user.id);
-      if (motoristaResponse?.motoristaId) {
-        const motoristaId = motoristaResponse.motoristaId;
-        setUser((prevUser) => {
-          if (!prevUser) return prevUser;
-          return { ...prevUser, motoristaId };
-        });
+  useEffect(() => {
+    // Só tenta buscar se tiver user e token
+    if (!user?.id || !token) return;
 
-        return motoristaId;
-      } else {
-        throw new Error("Não foi possível encontrar o motorista.");
-      }
-    }
-    return user?.motoristaId;
-  }, [user, token, setUser]);
-
-  /**
-   * 🔹 Carrega as reservas do motorista logado.
-   */
-  const fetchReservas = useCallback(async () => {
-    if (!token) return;
-
-    try {
+    const fetchReservas = async () => {
       setLoading(true);
       setError(null);
 
-      const motoristaId = await fetchMotoristaId();
-      if (!motoristaId) throw new Error("Motorista não identificado.");
+      try {
+        // Aqui usamos user.id diretamente, que é o esperado pela API
+        const data = await getReservasPorUsuario(user.id, token);
+        setReservas(data);
+      } catch (err) {
+        console.error("Erro ao carregar reservas:", err);
+        setError("Erro ao buscar suas reservas. Tente novamente mais tarde.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      const data = await getReservasPorUsuario(motoristaId, token);
-      setReservas(data);
-    } catch (err) {
-      console.error("Erro ao carregar reservas:", err);
-      setError("Erro ao buscar suas reservas. Tente novamente mais tarde.");
-    } finally {
-      setLoading(false);
-    }
-  }, [token, fetchMotoristaId]);
-
-  useEffect(() => {
     fetchReservas();
-  }, [fetchReservas]);
+  }, [user?.id, token]);
 
-  /**
-   * 🔹 Renderizações condicionais
-   */
+  // 🔹 Renderizações condicionais
   if (loading) {
     return (
       <div className="p-4 flex items-center gap-2">
@@ -109,9 +80,7 @@ export default function MinhasReservas() {
   );
 }
 
-/**
- * 🔹 Componente isolado para um card de reserva
- */
+// 🔹 Componente isolado para um card de reserva
 function ReservaCard({ reserva }: { reserva: Reserva }) {
   const formatarData = (data: string) => new Date(data).toLocaleString("pt-BR");
 

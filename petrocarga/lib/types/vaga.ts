@@ -19,7 +19,7 @@ export type OperacoesVaga = {
 // Endereço da vaga
 export type Endereco = {
   id: string;
-  codigoPMP: string;
+  codigoPmp: string;
   logradouro: string;
   bairro: string;
 };
