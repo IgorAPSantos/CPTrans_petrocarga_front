@@ -67,11 +67,17 @@ export async function addVaga(prevState: unknown, formData: FormData) {
   };
 }
 
-export async function deleteVaga(id: string) {
+export async function deleteVaga(id: string, token: string) {
+  if (!token) throw new Error("Token de autenticação não fornecido");
+
   const res = await fetch(
     `https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`,
     {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // aqui usa o token
+      },
     }
   );
 

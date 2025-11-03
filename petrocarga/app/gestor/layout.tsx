@@ -1,5 +1,4 @@
 import Footer from "@/components/gestor/layout/footer";
-import { Navbar } from "@/components/gestor/layout/navbar";
 import { Metadata } from "next";
 import { Maven_Pro } from "next/font/google";
 import { MapProvider } from "@/context/MapContext";
@@ -23,15 +22,11 @@ export default function GestorLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-br" className={mavenPro.variable}>
-      <body>
-        <div className="flex min-h-screen flex-col">
-          <main className="flex-1 relative">
-            <MapProvider>{children}</MapProvider>
-          </main>
-          <Footer />
-        </div>
-      </body>
-    </html>
+    <div className={`flex min-h-screen flex-col ${mavenPro.variable}`}>
+      <main className="flex-1 relative">
+        <MapProvider>{children}</MapProvider>
+      </main>
+      <Footer />
+    </div>
   );
 }

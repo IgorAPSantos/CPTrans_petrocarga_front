@@ -12,7 +12,7 @@ export function useVagasReserva() {
         setLoading(true);
         const res = await fetch(
           "https://cptranspetrocargaback-production.up.railway.app/petrocarga/disponibilidade-vagas"
-        ); // Para usar o MOCK troque por /api/vagas
+        );
         if (!res.ok) throw new Error("Erro ao buscar vagas");
 
         const data: Vaga[] = await res.json();

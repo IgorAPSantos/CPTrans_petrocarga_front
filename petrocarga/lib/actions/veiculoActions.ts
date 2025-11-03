@@ -174,7 +174,29 @@ export async function atualizarVeiculo(prevState: unknown, formData: FormData) {
   redirect("/motoristas/veiculos&reservas");
 }
 
-export async function getVeiculosUsuario(usuarioId: string, token: string) {
+type Veiculo = {
+  id: string;
+  placa: string;
+  marca: string;
+  modelo: string;
+  tipo: string;
+  comprimento: number;
+  dono: {
+    cpfProprietarioVeiculo: string | null;
+    cnpjProprietarioVeiculo: string | null;
+  };
+};
+
+type VeiculosResponse = {
+  error: boolean;
+  message: string;
+  veiculos: Veiculo[];
+};
+
+export async function getVeiculosUsuario(
+  usuarioId: string,
+  token: string
+): Promise<VeiculosResponse> {
   console.log("📌 getVeiculosUsuario chamado");
   console.log("Usuario ID:", usuarioId);
   console.log("Token:", token);
@@ -197,11 +219,11 @@ export async function getVeiculosUsuario(usuarioId: string, token: string) {
       return {
         error: true,
         message: errorData.message || "Erro ao buscar veículos do usuário",
-        veiculos: [] as unknown[],
+        veiculos: [],
       };
     }
 
-    const data = await res.json();
+    const data: Veiculo[] = await res.json();
     console.log("Dados recebidos:", data);
 
     return {
@@ -209,12 +231,15 @@ export async function getVeiculosUsuario(usuarioId: string, token: string) {
       message: "Veículos carregados com sucesso",
       veiculos: data,
     };
-  } catch (err: any) {
+  } catch (err) {
     console.error("Erro ao buscar veículos:", err);
     return {
       error: true,
-      message: err.message || "Erro desconhecido ao buscar veículos",
-      veiculos: [] as unknown[],
+      message:
+        err instanceof Error
+          ? err.message
+          : "Erro desconhecido ao buscar veículos",
+      veiculos: [],
     };
   }
 }

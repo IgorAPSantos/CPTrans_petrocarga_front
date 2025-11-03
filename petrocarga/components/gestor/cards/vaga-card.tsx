@@ -45,7 +45,6 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
 
     try {
       await deleteVaga(vaga.id, token);
-
       setModalAberto(false);
       router.back();
     } catch (err) {
