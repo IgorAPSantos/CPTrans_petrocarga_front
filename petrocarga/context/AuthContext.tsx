@@ -5,6 +5,8 @@ import {
   useState,
   useEffect,
   ReactNode,
+  Dispatch,
+  SetStateAction,
 } from "react";
 
 interface User {
@@ -18,8 +20,8 @@ interface User {
 interface AuthContextType {
   token?: string;
   user?: User;
-  setToken: (token?: string) => void;
-  setUser: (user?: User) => void;
+  setToken: Dispatch<SetStateAction<string | undefined>>;
+  setUser: Dispatch<SetStateAction<User | undefined>>;
   logout: () => void;
   loading: boolean;
 }
@@ -31,10 +33,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
+  /**
+   * 🔹 Carregar dados do sessionStorage ao iniciar
+   */
   useEffect(() => {
     const savedToken = sessionStorage.getItem("token") || undefined;
     const savedUser = sessionStorage.getItem("user");
+
     setTokenState(savedToken);
+
     if (savedUser) {
       try {
         setUserState(JSON.parse(savedUser));
@@ -42,50 +49,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUserState(undefined);
       }
     }
-    setLoading(false);
 
-    if (savedToken)
-      console.log("🎯 Token carregado do sessionStorage:", savedToken);
-    if (savedUser)
-      console.log("🎯 Usuário carregado do sessionStorage:", savedUser);
+    setLoading(false);
   }, []);
 
-  const setToken = (newToken?: string) => {
-    if (newToken) {
-      sessionStorage.setItem("token", newToken);
-      console.log("💾 Token salvo no sessionStorage:", newToken);
+  /**
+   * 🔹 Sincroniza automaticamente o token e usuário com o sessionStorage
+   */
+  useEffect(() => {
+    if (token) {
+      sessionStorage.setItem("token", token);
     } else {
       sessionStorage.removeItem("token");
-      console.log("🧹 Token removido do sessionStorage");
     }
-    setTokenState(newToken);
-  };
+  }, [token]);
 
-  const setUser = (newUser?: User) => {
-    if (newUser) {
-      sessionStorage.setItem("user", JSON.stringify(newUser));
-      console.log("💾 Usuário salvo no sessionStorage:", newUser);
+  useEffect(() => {
+    if (user) {
+      sessionStorage.setItem("user", JSON.stringify(user));
     } else {
       sessionStorage.removeItem("user");
-      console.log("🧹 Usuário removido do sessionStorage");
     }
-    setUserState(newUser);
-  };
+  }, [user]);
 
+  /**
+   * 🔹 Logout limpa tudo
+   */
   const logout = () => {
-    setToken(undefined);
-    setUser(undefined);
+    setTokenState(undefined);
+    setUserState(undefined);
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
   };
 
   return (
     <AuthContext.Provider
-      value={{ token, user, setToken, setUser, logout, loading }}
+      value={{
+        token,
+        user,
+        setToken: setTokenState,
+        setUser: setUserState,
+        logout,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 }
 
+/**
+ * Hook para acessar o contexto de autenticação
+ */
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {

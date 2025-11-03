@@ -25,7 +25,7 @@ export async function reservarVaga(formData: FormData, token: string) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ⚡ Aqui passa o token
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(body),
       }
@@ -39,6 +39,31 @@ export async function reservarVaga(formData: FormData, token: string) {
     return await response.json();
   } catch (error) {
     console.error("Erro ao reservar vaga:", error);
+    throw error;
+  }
+}
+export async function getReservasPorUsuario(usuarioId: string, token: string) {
+  try {
+    const response = await fetch(
+      `https://cptranspetrocargaback-production.up.railway.app/petrocarga/reservas/usuario/${usuarioId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Erro: ${response.status} - ${err}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar reservas do usuário:", error);
     throw error;
   }
 }
