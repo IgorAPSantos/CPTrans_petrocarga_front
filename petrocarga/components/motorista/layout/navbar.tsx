@@ -81,6 +81,7 @@ export function Navbar() {
                                     </Link>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem className="p-0 m-0 focus:bg-gray-100">
+                                    {/* Redirect após logout */}
                                     <LogoutButton />
                                 </DropdownMenuItem>
                             </DropdownMenuContent>

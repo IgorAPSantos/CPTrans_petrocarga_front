@@ -1,6 +1,7 @@
 "use client";
 import { AuthProvider, useAuth } from "@/context/AuthContext";   
 import { LogOut } from "lucide-react";
+import { redirect } from "next/navigation";
 import { useState } from "react";
 
 interface LogoutButtonProps {
@@ -14,6 +15,8 @@ export function LogoutButton({ mobile = false }: LogoutButtonProps) {
     async function handleLogout() {
         setLoading(true);
         await logout();
+
+        redirect("/");
     }
 
     if (mobile) {
