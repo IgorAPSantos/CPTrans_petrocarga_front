@@ -1,13 +1,12 @@
 import mapboxgl from "mapbox-gl";
 import { Vaga } from "@/lib/types/vaga";
 
-// Converte a String Localização em latitude e longitude
 function parseCoordinates(coord: string): [number, number] {
   const [lat, lng] = coord.split(",").map((v) => parseFloat(v.trim()));
   return [lng, lat];
 }
 
-export function addVagaMarkers(
+export function addVagaMarkersReserva(
   map: mapboxgl.Map,
   vagas: Vaga[],
   markersRef: React.MutableRefObject<mapboxgl.Marker[]>,
@@ -20,9 +19,17 @@ export function addVagaMarkers(
   vagas.forEach((vaga) => {
     if (!vaga.referenciaGeoInicio) return;
 
+    const isDisponivel = vaga.status === "DISPONIVEL";
+
     const el = document.createElement("div");
-    el.className =
-      "vaga-marker w-6 h-6 bg-blue-500 rounded-full border-2 border-white shadow-lg cursor-pointer";
+    el.className = `
+      vaga-marker w-6 h-6 rounded-full border-2 border-white shadow-lg
+      ${
+        isDisponivel
+          ? "bg-blue-500 cursor-pointer"
+          : "bg-red-500 opacity-60 cursor-not-allowed"
+      }
+    `;
 
     const coordinates = parseCoordinates(vaga.referenciaGeoInicio);
 
@@ -30,12 +37,13 @@ export function addVagaMarkers(
       .setLngLat(coordinates)
       .setPopup(
         new mapboxgl.Popup({ offset: 25 }).setHTML(
-          `<strong>${vaga.numeroEndereco}</strong><br/>${vaga.endereco.logradouro}, ${vaga.endereco.bairro}`
+          `<strong>${vaga.endereco.logradouro}</strong><br/>${vaga.status}`
         )
       )
       .addTo(map);
 
-    if (onClickVaga) {
+    // Apenas se estiver disponível permite clique
+    if (isDisponivel && onClickVaga) {
       el.addEventListener("click", () => onClickVaga(vaga));
     }
 

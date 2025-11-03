@@ -1,44 +1,87 @@
-import React, { useState } from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { OperacoesVaga } from '@/lib/types/vaga';
+import React, { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { OperacoesVaga } from "@/lib/types/vaga";
 
-{/* Definição das propriedades esperadas pelo componente */ }
+{
+  /* Definição das propriedades esperadas pelo componente */
+}
 interface DiaSemanaProps {
   name?: string;
   operacoesVaga?: OperacoesVaga[];
 }
 
-export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: DiaSemanaProps) {
+export default function DiaSemana({
+  name = "diaSemana",
+  operacoesVaga = [],
+}: DiaSemanaProps) {
   const diasDaSemana = [
-    { id: 'dom', label: 'Domingo', value: '1', abrev: 'Dom', enum: 'DOMINGO' },
-    { id: 'seg', label: 'Segunda-feira', value: '2', abrev: 'Seg', enum: 'SEGUNDA' },
-    { id: 'ter', label: 'Terça-feira', value: '3', abrev: 'Ter', enum: 'TERCA' },
-    { id: 'qua', label: 'Quarta-feira', value: '4', abrev: 'Qua', enum: 'QUARTA' },
-    { id: 'qui', label: 'Quinta-feira', value: '5', abrev: 'Qui', enum: 'QUINTA' },
-    { id: 'sex', label: 'Sexta-feira', value: '6', abrev: 'Sex', enum: 'SEXTA' },
-    { id: 'sab', label: 'Sábado', value: '7', abrev: 'Sáb', enum: 'SABADO' }
+    { id: "dom", label: "Domingo", value: "1", abrev: "Dom", enum: "DOMINGO" },
+    {
+      id: "seg",
+      label: "Segunda-feira",
+      value: "2",
+      abrev: "Seg",
+      enum: "SEGUNDA",
+    },
+    {
+      id: "ter",
+      label: "Terça-feira",
+      value: "3",
+      abrev: "Ter",
+      enum: "TERCA",
+    },
+    {
+      id: "qua",
+      label: "Quarta-feira",
+      value: "4",
+      abrev: "Qua",
+      enum: "QUARTA",
+    },
+    {
+      id: "qui",
+      label: "Quinta-feira",
+      value: "5",
+      abrev: "Qui",
+      enum: "QUINTA",
+    },
+    {
+      id: "sex",
+      label: "Sexta-feira",
+      value: "6",
+      abrev: "Sex",
+      enum: "SEXTA",
+    },
+    { id: "sab", label: "Sábado", value: "7", abrev: "Sáb", enum: "SABADO" },
   ];
 
-  {/* Estado para gerenciar os dias e horários selecionados */ }
+  {
+    /* Estado para gerenciar os dias e horários selecionados */
+  }
   type DiaConfig = {
     ativo: boolean;
     horarioInicio: string;
     horarioFim: string;
   };
 
-  {/* Mapeamento dos dias para suas configurações */ }
+  {
+    /* Mapeamento dos dias para suas configurações */
+  }
   type DiasConfig = {
     [key: string]: DiaConfig;
   };
 
-  {/* Função para converter as operações da vaga em configuração inicial */ }
+  {
+    /* Função para converter as operações da vaga em configuração inicial */
+  }
   const getInitialConfig = () => {
     const config: DiasConfig = {};
 
     diasDaSemana.forEach((dia) => {
-      const operacao = operacoesVaga.find(op => op.diaSemanaEnum === dia.enum);
+      const operacao = operacoesVaga.find(
+        (op) => op.diaSemanaAsEnum === dia.enum
+      );
 
       if (operacao) {
         config[dia.value] = {
@@ -50,7 +93,7 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
         config[dia.value] = {
           ativo: false,
           horarioInicio: "00:00",
-          horarioFim: "13:00"
+          horarioFim: "13:00",
         };
       }
     });
@@ -58,47 +101,57 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
     return config;
   };
 
-  {/* Inicializa o estado com os valores da vaga ou valores padrão */ }
+  {
+    /* Inicializa o estado com os valores da vaga ou valores padrão */
+  }
   const [diasConfig, setDiasConfig] = useState<DiasConfig>(getInitialConfig());
 
-  {/* Função para alternar o estado ativo de um dia */ }
+  {
+    /* Função para alternar o estado ativo de um dia */
+  }
   const handleDayToggle = (dayValue: string) => {
-    setDiasConfig(prev => ({
+    setDiasConfig((prev) => ({
       ...prev,
       [dayValue]: {
         ...prev[dayValue],
-        ativo: !prev[dayValue].ativo
-      }
+        ativo: !prev[dayValue].ativo,
+      },
     }));
   };
 
-  {/* Função para atualizar os horários de início e fim */ }
+  {
+    /* Função para atualizar os horários de início e fim */
+  }
   const handleHorarioChange = (
     dayValue: string,
     tipo: "horarioInicio" | "horarioFim",
     valor: string
   ) => {
-    setDiasConfig(prev => ({
+    setDiasConfig((prev) => ({
       ...prev,
       [dayValue]: {
         ...prev[dayValue],
-        [tipo]: valor
-      }
+        [tipo]: valor,
+      },
     }));
   };
 
-  {/* Gera o valor JSON para o input hidden com os dias ativos e seus horários */ }
+  {
+    /* Gera o valor JSON para o input hidden com os dias ativos e seus horários */
+  }
   const hiddenValue = JSON.stringify(
     Object.entries(diasConfig)
       .filter(([, config]) => config.ativo)
       .map(([dia, config]) => ({
         dia,
         horarioInicio: config.horarioInicio,
-        horarioFim: config.horarioFim
+        horarioFim: config.horarioFim,
       }))
   );
 
-  {/* Renderiza o componente */ }
+  {
+    /* Renderiza o componente */
+  }
   return (
     <div className="w-full space-y-2 md:space-y-3">
       {diasDaSemana.map((dia) => (
@@ -140,7 +193,13 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
                     type="time"
                     id={`${dia.id}-inicio`}
                     value={diasConfig[dia.value].horarioInicio}
-                    onChange={(e) => handleHorarioChange(dia.value, 'horarioInicio', e.target.value)}
+                    onChange={(e) =>
+                      handleHorarioChange(
+                        dia.value,
+                        "horarioInicio",
+                        e.target.value
+                      )
+                    }
                   />
                 </div>
 
@@ -156,7 +215,13 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
                     type="time"
                     id={`${dia.id}-fim`}
                     value={diasConfig[dia.value].horarioFim}
-                    onChange={(e) => handleHorarioChange(dia.value, "horarioFim", e.target.value)}
+                    onChange={(e) =>
+                      handleHorarioChange(
+                        dia.value,
+                        "horarioFim",
+                        e.target.value
+                      )
+                    }
                   />
                 </div>
               </div>
@@ -166,11 +231,7 @@ export default function DiaSemana({ name = "diaSemana", operacoesVaga = [] }: Di
       ))}
 
       {/* Input hidden para enviar os dados dos dias e horários selecionados */}
-      <input
-        type="hidden"
-        name={name}
-        value={hiddenValue}
-      />
+      <input type="hidden" name={name} value={hiddenValue} />
     </div>
   );
 }

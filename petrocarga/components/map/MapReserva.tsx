@@ -7,48 +7,39 @@ import "mapbox-gl/dist/mapbox-gl.css";
 
 import { useVagas } from "./hooks/useVagas";
 import { useMapbox } from "./hooks/useMapbox";
-import { addVagaMarkers } from "./utils/markerUtils";
+import { addVagaMarkersReserva } from "./utils/markerUtilsReserva";
 import { Vaga } from "@/lib/types/vaga";
 
-interface MapboxFeature {
-  id: string;
-  place_name: string;
-  geometry: { type: "Point"; coordinates: [number, number] };
+interface MapReservaProps {
+  onClickVaga?: (vaga: Vaga) => void;
 }
 
-interface MapProps {
-  selectedPlace: MapboxFeature | null;
-  onSelectPlace?: (place: MapboxFeature) => void;
-}
-
-export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
+export function MapReserva({ onClickVaga }: MapReservaProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
-  const markerRef = useRef<mapboxgl.Marker | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  // Hooks
   const { vagas, loading, error } = useVagas();
   const { map, mapLoaded } = useMapbox({
     containerRef: mapContainer,
-    onSelectPlace,
+    enableSearch: true,
+    enableNavigation: false, // desativa os botões
+    expandSearch: true,
+    onSelectPlace: (place) => console.log(place),
   });
-
-  // Atualiza marcador do endereço selecionado
-  useEffect(() => {
-    if (!map || !selectedPlace) return;
-
-    const [lng, lat] = selectedPlace.geometry.coordinates;
-    map.flyTo({ center: [lng, lat], zoom: 14 });
-
-    if (markerRef.current) markerRef.current.remove();
-    markerRef.current = new mapboxgl.Marker().setLngLat([lng, lat]).addTo(map);
-  }, [selectedPlace, map]);
 
   // Cria marcadores das vagas
   useEffect(() => {
-    if (!map || !mapLoaded || vagas.length === 0) return;
-    addVagaMarkers(map, vagas as Vaga[], markersRef);
-  }, [vagas, map, mapLoaded]);
+    if (!map || !mapLoaded) return;
+
+    // Limpa marcadores antigos
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = [];
+
+    // Cria novos marcadores se houver vagas
+    if (vagas.length > 0) {
+      addVagaMarkersReserva(map, vagas, markersRef, onClickVaga);
+    }
+  }, [vagas, map, mapLoaded, onClickVaga]);
 
   return (
     <div className="w-full h-full rounded-lg overflow-visible relative">

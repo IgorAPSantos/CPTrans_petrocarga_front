@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import CardMap from "@/components/map/cardMap";
 import { deleteVaga } from "@/lib/actions/vagaActions";
+import { useAuth } from "@/context/AuthContext"; // importe o AuthContext
 
 type VagaDetalhesProps = {
   vaga: Vaga;
@@ -26,26 +27,31 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   const [diaSelecionado, setDiaSelecionado] = useState<DiaSemana | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
   const router = useRouter();
+  const { token } = useAuth(); // pega token do contexto
 
   const horariosPorDia = new Map<DiaSemana, string>();
   vaga.operacoesVaga.forEach((op) => {
     horariosPorDia.set(
-      op.diaSemanaEnum,
+      op.diaSemanaAsEnum,
       `${op.horaInicio.slice(0, 5)} - ${op.horaFim.slice(0, 5)}`
     );
   });
 
   const handleExcluir = async () => {
-  try {
-    await deleteVaga(vaga.id);
+    if (!token) {
+      alert("Você precisa estar logado para excluir a vaga.");
+      return;
+    }
 
-    setModalAberto(false);
-    router.back();
-  } catch (err) {
-    console.error(err);
-    alert("Erro ao excluir vaga.");
-  }
-};
+    try {
+      await deleteVaga(vaga.id, token);
+      setModalAberto(false);
+      router.back();
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir vaga.");
+    }
+  };
 
   return (
     <article className="relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl border-l-8 border-blue-500 transition-shadow max-w-4xl mx-auto">
@@ -67,7 +73,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         </div>
         <div className="flex gap-2 mt-2 sm:mt-5">
           <Link
-            href={`/visualizar-vagas/${vaga.id}/editar`}
+            href={`/gestor/visualizar-vagas/${vaga.id}/editar`}
             className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition inline-block"
           >
             Alterar
@@ -131,7 +137,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
 
       <section className="border-t pt-4 text-xs text-gray-500 space-y-1">
         <p>
-          <strong>Código PMP:</strong> {vaga.endereco.codidoPmp}
+          <strong>Código PMP:</strong> {vaga.endereco.codigoPmp}
         </p>
         <p>
           <strong>ID da vaga:</strong> {vaga.id}
@@ -150,12 +156,11 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
         </p>
       </section>
 
-      {/* Modal de confirmação DELETE */}
       {modalAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
             className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
-            onClick={() => setModalAberto(false)} // fecha clicando no fundo
+            onClick={() => setModalAberto(false)}
           />
           <div className="relative bg-white rounded-2xl p-6 w-96 max-w-full shadow-2xl transform transition-all duration-300 scale-95 animate-scaleIn">
             <h3 className="text-xl font-semibold text-gray-800 mb-3">
