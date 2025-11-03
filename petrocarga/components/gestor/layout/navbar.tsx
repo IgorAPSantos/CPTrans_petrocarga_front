@@ -4,36 +4,55 @@ import Link from "next/link";
 import { useState } from "react";
 import Logo from "@/public/Logo.png";
 import Image from "next/image";
+import { logout } from "@/lib/actions/auth";
+import { useRouter } from "next/navigation";
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const links = [
-    { href: "/relatorio", label: "Relatório" },
-    { href: "/visualizar-vagas", label: "Visualizar Vagas" },
-    { href: "/registrar-vagas", label: "Registrar Vagas" },
-    { href: "/guia", label: "Guia" },
-    { href: "/", label: "Sair" },
+    { href: "/gestor/relatorio", label: "Relatório" },
+    { href: "/gestor/visualizar-vagas", label: "Visualizar Vagas" },
+    { href: "/gestor/registrar-vagas", label: "Registrar Vagas" },
+    { href: "/gestor/guia", label: "Guia" },
   ];
+
+  async function handleLogout() {
+    setLoading(true);
+    await logout();
+    router.push("/");
+  }
 
   return (
     <header className="bg-blue-800 text-white relative">
       <nav className="flex items-center justify-between p-4 max-w-6xl mx-auto">
         {/* Logo */}
         <Link
-          href="/"
+          href="/gestor"
           className="flex items-center space-x-2 text-xl font-bold hover:text-gray-300"
         >
           <Image src={Logo} alt="Logo da Cptrans" className="w-16 h-auto" />
         </Link>
 
         {/* MENU DESKTOP */}
-        <ul className="hidden md:flex gap-6 text-lg">
+        <ul className="hidden md:flex gap-6 text-lg items-center">
           {links.map(({ href, label }) => (
             <li key={href} className="hover:text-gray-300">
               <Link href={href}>{label}</Link>
             </li>
           ))}
+          {/* Sair simples */}
+          <li className="hover:text-gray-300">
+            <button 
+              onClick={handleLogout} 
+              disabled={loading}
+              className="hover:text-gray-300 disabled:opacity-50"
+            >
+              {loading ? "Saindo..." : "Sair"}
+            </button>
+          </li>
         </ul>
 
         {/* BOTÃO HAMBURGUER (mobile) */}
@@ -55,12 +74,25 @@ export function Navbar() {
       >
         <ul className="flex flex-col gap-4 bg-blue-500 p-4 shadow-md">
           {links.map(({ href, label }) => (
-            <li key={href} className="hover:bg-blue-700 rounded px-2">
-              <Link href={href} onClick={() => setMenuAberto(false)}>
+            <li key={href} className="hover:bg-blue-700 rounded">
+              <Link href={href} onClick={() => setMenuAberto(false)} className="block px-2 py-1 w-full">
                 {label}
               </Link>
             </li>
           ))}
+          {/* Logout no Mobile */}
+          <li className="hover:bg-blue-700 rounded">
+            <button 
+              onClick={() => {
+                setMenuAberto(false);
+                handleLogout();
+              }}
+              disabled={loading}
+              className="block px-2 py-1 w-full text-left text-red-600 hover:text-red-700 disabled:opacity-50"
+            >
+              {loading ? "Saindo..." : "Sair"}
+            </button>
+          </li>
         </ul>
       </div>
     </header>

@@ -7,7 +7,6 @@ import Image from "next/image";
 
 export function Navbar() {
     const [menuAberto, setMenuAberto] = useState(false);
-    const [logado, setDeslogado] = useState(false);
 
     const links = [
         { href: "/", label: "Introdução" },

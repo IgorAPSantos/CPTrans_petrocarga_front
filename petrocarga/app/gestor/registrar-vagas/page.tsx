@@ -1,10 +1,10 @@
 "use client"; 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { addVaga } from "@/lib/actions/vagaActions";
-import { CircleAlert } from "lucide-react";
+import { CircleAlert, ParkingSquare } from "lucide-react";
 import Form from "next/form";
 import { useActionState } from "react";
 import FormItem from "../../../components/form/form-item";
@@ -19,6 +19,17 @@ export default function Cadastro() {
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
       <Card className="w-full max-w-5xl mx-auto">
+        <CardHeader className="space-y-3 text-center pb-6">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <ParkingSquare className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                    Cadastro de Veículo
+                </CardTitle>
+                <CardDescription className="text-base">
+                    Forneça os dados para adicionar uma nova vaga.
+                </CardDescription>
+            </CardHeader>
         <Form action={addVagaAction}>
           <CardContent className="p-4 md:p-6 lg:p-8">
             {/* Mensagem de erro */}

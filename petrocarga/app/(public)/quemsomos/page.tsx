@@ -13,7 +13,7 @@ export default function QuemSomos() {
                     <Card className="mb-8 md:mb-12">
                         <div className="flex items-start gap-4 md:gap-6">
                             <h1 className="text-sm md:text-lg font-bold mb-8 md:mb-12 text-center max-w-3xl mx-auto">
-                                Conheça a CPTrans - Companhia de Planejamento e Gestão do Transporte
+                                Conheça a CPTrans - Companhia Petropolitana de Trânsito e Transporte.
                             </h1>
                         </div>
                     </Card>
@@ -144,8 +144,8 @@ export default function QuemSomos() {
                 </div>
             </section>
 
-            {/* Estatísticas
-            <section className="container mx-auto px-4 py-8 md:py-16">
+            
+            {/* <section className="container mx-auto px-4 py-8 md:py-16">
                 <div className="w-full max-w-5xl mx-auto">
                 <h2 className="text-xl md:text-3xl font-bold text-center mb-8 md:mb-12">
                     Números que Representam Nosso Trabalho
@@ -199,9 +199,6 @@ export default function QuemSomos() {
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
                     <button className="bg-white text-blue-600 hover:bg-gray-100 px-4 md:px-6 py-2 md:py-3 rounded-sm text-sm md:text-base font-medium transition-colors">
                         Conhecer Nossos Projetos
-                    </button>
-                    <button className="border border-white text-white hover:bg-white hover:text-blue-600 px-4 md:px-6 py-2 md:py-3 rounded-sm text-sm md:text-base font-medium transition-colors">
-                        Trabalhe Conosco
                     </button>
                     </div>
                 </div>
