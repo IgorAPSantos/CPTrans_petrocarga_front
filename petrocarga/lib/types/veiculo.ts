@@ -3,7 +3,8 @@ export type Veiculo = {
     placa: string;
     marca: string;
     modelo: string;
-    tipo: "CARRO" | "VUC" | "CAMINHONETA" | "CAMINHAOMEDIO" | "CAMINHAOLONGO" | "CARRETA" | string;
-    cpfProprietario: string | null;
-    cnpjProprietario: string | null;
-}
+    tipo: string;
+    usuarioId?: string;
+    cpfProprietario?: string | null;
+    cnpjProprietario?: string | null;
+};

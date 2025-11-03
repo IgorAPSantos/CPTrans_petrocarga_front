@@ -24,7 +24,6 @@ export function Navbar() {
             >
             <Image src={Logo} alt="Logo da Cptrans" className="w-16 h-auto" />
             </Link>
-
             {/* MENU DESKTOP */}
             <ul className="hidden md:flex gap-6 text-lg">
             {links.map(({ href, label }) => (
@@ -33,7 +32,6 @@ export function Navbar() {
                 </li>
             ))}
             </ul>
-
             {/* BOTÃO HAMBURGUER (mobile) */}
             <button
             className="md:hidden text-2xl hover:text-gray-300"
@@ -44,7 +42,6 @@ export function Navbar() {
             ☰
             </button>
         </nav>
-
         {/* MENU MOBILE COM ANIMAÇÃO */}
         <div
             className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${

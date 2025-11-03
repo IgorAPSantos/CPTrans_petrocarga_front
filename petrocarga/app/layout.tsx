@@ -1,6 +1,7 @@
 import { Maven_Pro } from 'next/font/google';
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import "./globals.css";
+import { AuthProvider } from '@/context/AuthContext';
 
 const mavenPro = Maven_Pro({
     weight: "variable",
@@ -21,7 +22,9 @@ export default function RootLayout({
     return (
         <html lang="pt-br" className={mavenPro.variable}>
             <body>
-                {children}
+                <AuthProvider>
+                    {children}
+                </AuthProvider>
             </body>
         </html>
     );
