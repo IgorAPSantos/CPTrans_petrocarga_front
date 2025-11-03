@@ -1,14 +1,8 @@
 import Footer from "@/components/gestor/layout/footer";
 import { Metadata } from "next";
-import { Maven_Pro } from "next/font/google";
 import { MapProvider } from "@/context/MapContext";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-
-const mavenPro = Maven_Pro({
-  weight: "variable",
-  subsets: ["latin"],
-  variable: "--font-maven-pro",
-});
+import { Navbar } from "@/components/gestor/layout/navbar";
 
 export const metadata: Metadata = {
   title: "PetroCarga",
@@ -22,7 +16,8 @@ export default function GestorLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className={`flex min-h-screen flex-col ${mavenPro.variable}`}>
+    <div className="flex min-h-screen flex-col">
+      <Navbar />
       <main className="flex-1 relative">
         <MapProvider>{children}</MapProvider>
       </main>

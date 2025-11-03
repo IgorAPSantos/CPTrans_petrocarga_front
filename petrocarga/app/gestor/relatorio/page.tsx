@@ -1,7 +1,7 @@
-export default function Dados() {
+export default function Relatorio() {
   return (
     <h1>
-      dado
+      Relatorios
     </h1>
   )
 }

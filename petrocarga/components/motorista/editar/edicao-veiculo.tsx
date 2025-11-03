@@ -1,18 +1,19 @@
-"use client"; 
+"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { atualizarVeiculo } from "@/lib/actions/veiculoActions";
 import { CircleAlert, TruckIcon } from "lucide-react";
 import Form from "next/form";
 import { useActionState } from "react";
 import FormItem from "@/components/form/form-item";
 import React from "react";
-import { addVeiculo } from "@/lib/actions/veiculoActions";
+import { Veiculo } from "@/lib/types/veiculo";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
 
-export default function CadastroVeiculo() {
-    {/* Hook para gerenciar o estado da ação de adicionar vaga */}
-    const [state, addVeiculoAction, pending] = useActionState(addVeiculo, null);
+export default function EditarVeiculo({ veiculo }: { veiculo: Veiculo }) {
+    {/* Hook para gerenciar o estado da ação de atualizar veículo */}
+    const [state, atualizarVeiculoAction, pending] = useActionState(atualizarVeiculo, null);
 
     return (
         <main className="container mx-auto px-4 py-4 md:py-8">
@@ -22,13 +23,13 @@ export default function CadastroVeiculo() {
                     <TruckIcon className="w-8 h-8 text-white" />
                 </div>
                 <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                    Cadastro de Veículo
+                    Edição de Veículo
                 </CardTitle>
                 <CardDescription className="text-base">
-                    Forneça os dados para adicionar um novo veículo.
+                    Altere os dados para editar as Informações do veículo.
                 </CardDescription>
             </CardHeader>
-            <Form action={addVeiculoAction}>
+            <Form action={atualizarVeiculoAction}>
             <CardContent className="p-4 md:p-6 lg:p-8">
                 {/* Mensagem de erro */}
                 {state?.error && (
@@ -39,7 +40,7 @@ export default function CadastroVeiculo() {
                 )}
 
                 <CardDescription className="text-base text-center mb-6 text-blue-800 font-bold">
-                    Primeiro, alguns dados do veículo
+                    Primeiro, cheque os dados do veículo
                 </CardDescription> 
                 
                 {/* Placa */}
@@ -105,7 +106,7 @@ export default function CadastroVeiculo() {
                 </FormItem>
 
                 <CardDescription className="text-base text-center mb-6 text-blue-800 font-bold">
-                    Por fim, preencha apenas um dos campos com os dados do proprietário do veículo.
+                    Se houver necessidade, altere apenas um dos campos com os novos dados do proprietário do veículo, e apague o outro.
                 </CardDescription>
                 
                 {/* CPF do Proprietário */}
@@ -123,7 +124,7 @@ export default function CadastroVeiculo() {
                         inputMode="numeric"
                         onInput={(e) => {
                             const target = e.target as HTMLInputElement;
-                            target.value = target.value.replace(/\D/g, ""); // Remove tudo que não é número
+                            target.value = target.value.replace(/\D/g, ''); // Remove tudo que não é número
                         }}
                     />
                 </FormItem>

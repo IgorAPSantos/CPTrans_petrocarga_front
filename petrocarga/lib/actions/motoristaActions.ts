@@ -2,8 +2,24 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-/* ==============================
-   Funções de cadastro/edição
+export async function addMotorista(formData: FormData) {
+  const payload = {
+    nome: formData.get("nome") as string,
+    cpf: formData.get("cpf") as string,
+    telefone: formData.get("telefone") as string,
+    email: formData.get("email") as string,
+    senha: formData.get("senha") as string,
+    numero_cnh: formData.get("numeroCnh") as string,
+    categoria_cnh: (formData.get("categoriaCnh") as string)?.toUpperCase(),
+    data_validade_cnh: formData.get("dataValidadeCnh") as string,
+  };
+
+  const res = await fetch(
+    "https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
     }
   );
 
@@ -74,9 +90,6 @@ export async function atualizarMotorista(formData: FormData) {
 
   redirect("/motoristas/perfil");
 }
-
-/* ==============================
-   Server Action para buscar motorista
 
 export async function getMotoristaByUserId(token: string, userId: string) {
   if (!token || !userId) {
