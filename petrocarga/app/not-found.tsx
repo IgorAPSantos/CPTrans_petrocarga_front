@@ -1,9 +1,12 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import coneImg from "@/public/cone.png";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function NotFound() {
+    const router = useRouter();
+    
     return (
         <main className="mx-auto w-full max-w-5xl py-20 text-center">
             <h2 className="font-display text-4xl font-black">
@@ -20,14 +23,14 @@ export default function NotFound() {
             
             {/* Container para centralizar o botão */}
             <div className="flex justify-center mt-10">
-                <Link href="/">
                     <Button 
+                        onClick={() => router.back()}
                         size="lg" 
                         className="bg-blue-600 hover:bg-blue-700 text-sm md:text-base px-6 md:px-8 py-3 md:py-4"
                     >
-                        Voltar para a página inicial
+                        Retornar para a página anterior
                     </Button>
-                </Link>
+                
             </div>
         </main>
     );
