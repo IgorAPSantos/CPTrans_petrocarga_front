@@ -12,8 +12,9 @@ interface MapboxFeature {
 interface UseMapboxProps {
   containerRef: MutableRefObject<HTMLDivElement | null>;
   onSelectPlace?: (place: MapboxFeature) => void;
-  enableSearch?: boolean; // Ativa barra de pesquisa
-  enableNavigation?: boolean; // Ativa botões de navegação
+  enableSearch?: boolean;
+  enableNavigation?: boolean;
+  expandSearch?: boolean;
 }
 
 interface GeocoderResultEvent {
@@ -24,13 +25,14 @@ interface GeocoderResultEvent {
   };
 }
 
-let globalMap: mapboxgl.Map | null = null; // instância global reutilizável
+let globalMap: mapboxgl.Map | null = null;
 
 export function useMapbox({
   containerRef,
   onSelectPlace,
   enableSearch = true,
   enableNavigation = true,
+  expandSearch = false,
 }: UseMapboxProps) {
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -57,12 +59,10 @@ export function useMapbox({
         zoom: 13,
       });
 
-      // Botões de navegação
       if (enableNavigation) {
         globalMap.addControl(new mapboxgl.NavigationControl(), "top-right");
       }
 
-      // Barra de pesquisa
       if (enableSearch) {
         const geocoder = new MapboxGeocoder({
           accessToken: mapboxgl.accessToken,
@@ -72,6 +72,53 @@ export function useMapbox({
         });
 
         globalMap.addControl(geocoder, "top-left");
+
+        if (expandSearch) {
+          const adjustGeocoder = () => {
+            const wrapper = document.querySelector(
+              ".mapboxgl-ctrl-top-left"
+            ) as HTMLElement;
+            const geocoderContainer = document.querySelector(
+              ".mapboxgl-ctrl-geocoder"
+            ) as HTMLElement;
+            if (geocoderContainer) {
+              geocoderContainer.classList.add("my-custom-geocoder");
+            }
+
+            if (wrapper && geocoderContainer) {
+              // Centraliza horizontalmente
+              wrapper.style.width = "100%";
+              wrapper.style.display = "flex";
+              wrapper.style.justifyContent = "center"; // centraliza
+              wrapper.style.position = "absolute";
+              wrapper.style.top = "10px";
+              wrapper.style.left = "0";
+
+              geocoderContainer.style.width = "80%"; // largura da barra
+              geocoderContainer.style.maxWidth = "800px"; // limite máximo
+              geocoderContainer.style.boxSizing = "border-box";
+
+              const input = geocoderContainer.querySelector(
+                "input"
+              ) as HTMLInputElement;
+              if (input) input.style.width = "100%";
+
+              const dropdown = geocoderContainer.querySelector(
+                ".suggestions"
+              ) as HTMLElement;
+              if (dropdown) dropdown.style.width = "100%";
+            }
+          };
+
+          setTimeout(adjustGeocoder, 50);
+          requestAnimationFrame(adjustGeocoder);
+
+          const handleResize = () => {
+            globalMap?.resize();
+            adjustGeocoder();
+          };
+          window.addEventListener("resize", handleResize);
+        }
 
         geocoder.on("result", (e: GeocoderResultEvent) => {
           const [lng, lat] = e.result.geometry.coordinates;
@@ -99,7 +146,13 @@ export function useMapbox({
         container.appendChild(globalMap.getContainer());
       }
     };
-  }, [containerRef, onSelectPlace, enableSearch, enableNavigation]);
+  }, [
+    containerRef,
+    onSelectPlace,
+    enableSearch,
+    enableNavigation,
+    expandSearch,
+  ]);
 
   return { map, mapLoaded };
 }

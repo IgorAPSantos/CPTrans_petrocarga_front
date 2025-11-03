@@ -23,6 +23,8 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
     containerRef: mapContainer,
     enableSearch: true,
     enableNavigation: false, // desativa os botões
+    expandSearch: true,
+    onSelectPlace: (place) => console.log(place),
   });
 
   // Cria marcadores das vagas

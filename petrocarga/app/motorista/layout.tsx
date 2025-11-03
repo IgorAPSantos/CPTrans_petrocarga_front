@@ -1,7 +1,6 @@
 import Footer from "../../components/motorista/layout/footer";
 import { MapProvider } from "@/context/MapContext";
 import { Maven_Pro } from "next/font/google";
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 
 const mavenPro = Maven_Pro({
   weight: "variable",

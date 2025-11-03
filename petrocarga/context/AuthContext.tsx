@@ -33,9 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUserState] = useState<User | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
-  /**
-   * 🔹 Carregar dados do sessionStorage ao iniciar
-   */
   useEffect(() => {
     const savedToken = sessionStorage.getItem("token") || undefined;
     const savedUser = sessionStorage.getItem("user");
@@ -53,9 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false);
   }, []);
 
-  /**
-   * 🔹 Sincroniza automaticamente o token e usuário com o sessionStorage
-   */
   useEffect(() => {
     if (token) {
       sessionStorage.setItem("token", token);
