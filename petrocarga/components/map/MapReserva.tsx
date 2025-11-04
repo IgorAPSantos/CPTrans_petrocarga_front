@@ -31,15 +31,21 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
   useEffect(() => {
     if (!map || !mapLoaded) return;
 
-    // Limpa marcadores antigos
+    // 🔹 Remove todos os marcadores antigos antes de criar novos
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
-    // Cria novos marcadores se houver vagas
-    if (vagas.length > 0) {
+    // 🔹 Recria os marcadores (vagas atualizadas)
+    if (vagas && vagas.length > 0) {
       addVagaMarkersReserva(map, vagas, markersRef, onClickVaga);
     }
-  }, [vagas, map, mapLoaded, onClickVaga]);
+
+    // 🔹 Quando desmontar, remove os marcadores (não o mapa)
+    return () => {
+      markersRef.current.forEach((marker) => marker.remove());
+      markersRef.current = [];
+    };
+  }, [map, mapLoaded, vagas, onClickVaga]);
 
   return (
     <div className="w-full h-full rounded-lg overflow-visible relative">
