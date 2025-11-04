@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+"use client";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { VeiculoAPI } from "@/lib/types/veiculo";
+import { useMapboxSuggestions } from "../map/hooks/useMapboxSuggestions";
 
 interface OriginVehicleStepProps {
   vehicles: VeiculoAPI[];
@@ -24,16 +26,15 @@ export default function OriginVehicleStep({
   const router = useRouter();
   const [localOrigin, setLocalOrigin] = useState(origin);
   const [localVehicleId, setLocalVehicleId] = useState(selectedVehicleId || "");
+  const [isFocused, setIsFocused] = useState(false);
 
-  // Atualiza quando a origem externa muda
-  useEffect(() => {
-    setLocalOrigin(origin);
-  }, [origin]);
+  const suggestions = useMapboxSuggestions(localOrigin);
 
-  // Atualiza quando o veículo selecionado externo muda
-  useEffect(() => {
-    setLocalVehicleId(selectedVehicleId || "");
-  }, [selectedVehicleId]);
+  const handleSelectSuggestion = (place: string) => {
+    setLocalOrigin(place);
+    onOriginChange(place);
+    setIsFocused(false);
+  };
 
   const handleVehicleChange = (value: string) => {
     if (value === "add-new") {
@@ -52,17 +53,36 @@ export default function OriginVehicleStep({
 
   return (
     <div className="flex flex-col gap-4">
-      <div>
+      {/* Campo de origem com sugestões do Mapbox */}
+      <div className="relative">
         <label className="block font-semibold mb-1">Local de origem:</label>
         <input
           type="text"
           value={localOrigin}
           onChange={(e) => setLocalOrigin(e.target.value)}
-          placeholder="Digite de onde você está vindo (Juiz de Fora - MG)"
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 150)} // pequeno delay permite clicar
+          placeholder="Digite de onde você está vindo (Ex: Rua do Imperador, Petrópolis - RJ)"
           className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+
+        {/* Sugestões do Mapbox */}
+        {isFocused && suggestions.length > 0 && (
+          <ul className="absolute z-10 bg-white border rounded mt-1 w-full max-h-40 overflow-y-auto shadow">
+            {suggestions.map((place, index) => (
+              <li
+                key={index}
+                className="p-2 hover:bg-blue-100 cursor-pointer"
+                onMouseDown={() => handleSelectSuggestion(place)} // evita perder foco antes do clique
+              >
+                {place}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
+      {/* Select de veículos */}
       <div>
         <label className="block font-semibold mb-1">Selecione o veículo:</label>
         <select
@@ -84,6 +104,7 @@ export default function OriginVehicleStep({
         </select>
       </div>
 
+      {/* Botões */}
       <div className="flex justify-between mt-4">
         {onBack && (
           <button
