@@ -1,11 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { Veiculo } from "@/lib/types/veiculo";
+import { Vaga } from "@/lib/types/vaga";
+import { ReservaState } from "@/lib/types/reservaState";
 import { getMotoristaByUserId } from "@/lib/actions/motoristaActions";
 import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
-import { reservarVaga, getReservasAtivas } from "@/lib/actions/reservaActions";
-import { useAuth } from "@/context/AuthContext";
-import { Vaga, DiaSemana, OperacoesVaga } from "@/lib/types/vaga";
-import { Veiculo } from "@/lib/types/veiculo";
-import { Reserva } from "@/lib/types/reserva";
+
+import {
+  gerarHorariosDia,
+  gerarHorariosOcupados,
+  getOperacaoDia,
+  formatDateTime,
+} from "./reservaHelpers";
+import { fetchReservasAtivasDoDia, confirmarReserva } from "./reservaService";
 
 interface GetVeiculosResult {
   error: boolean;
@@ -16,150 +23,68 @@ interface GetVeiculosResult {
 export function useReserva(selectedVaga: Vaga | null) {
   const { user, setUser, token } = useAuth();
 
-  const [step, setStep] = useState(1);
-  const [selectedDay, setSelectedDay] = useState<Date>();
-  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [reservedTimes, setReservedTimes] = useState<string[]>([]);
-  const [startHour, setStartHour] = useState<string | null>(null);
-  const [endHour, setEndHour] = useState<string | null>(null);
-  const [origin, setOrigin] = useState("");
-  const [selectedVehicleId, setSelectedVehicleId] = useState<string>();
+  const [reservaState, setReservaState] = useState<ReservaState>({
+    step: 1,
+    selectedDay: undefined,
+    availableTimes: [],
+    reservedTimes: [],
+    startHour: null,
+    endHour: null,
+    origin: "",
+    selectedVehicleId: undefined,
+  });
+
   const [vehicles, setVehicles] = useState<Veiculo[]>([]);
   const [loadingMotorista, setLoadingMotorista] = useState(true);
 
-  // Buscar motorista
-  useEffect(() => {
-    async function fetchMotorista() {
-      if (!user?.id || !token) return;
-      if (!user.motoristaId) {
-        try {
-          const result = await getMotoristaByUserId(token, user.id);
-          if (result.motoristaId)
-            setUser({ ...user, motoristaId: result.motoristaId });
-        } finally {
-          setLoadingMotorista(false);
-        }
-      } else setLoadingMotorista(false);
-    }
-    fetchMotorista();
-  }, [user, token, setUser]);
+  // ================= Funções principais =================
 
-  // Buscar veículos
-  useEffect(() => {
-    if (!user?.id || !token) return;
-    async function fetchVehicles() {
-      const result: GetVeiculosResult = await getVeiculosUsuario(
-        user!.id,
-        token!
-      );
-      if (!result.error) setVehicles(result.veiculos);
-    }
-    fetchVehicles();
-  }, [user, token]);
-
-  const reset = () => {
-    setStep(1);
-    setSelectedDay(undefined);
-    setAvailableTimes([]);
-    setReservedTimes([]);
-    setStartHour(null);
-    setEndHour(null);
-    setOrigin("");
-    setSelectedVehicleId(undefined);
-  };
-
-  // Buscar reservas ativas do dia
-  const fetchReservasAtivasDoDia = async (
-    vagaId: string,
-    day: Date
-  ): Promise<Reserva[]> => {
-    if (!token) return [];
-    try {
-      const reservas = await getReservasAtivas(vagaId, token);
-      return reservas.filter(
-        (r: Reserva) => new Date(r.inicio).toDateString() === day.toDateString()
-      );
-    } catch {
-      return [];
-    }
-  };
-
-  // Gerar horários disponíveis e reservados
-  const fetchHorariosDisponiveis = async (
-    day: Date,
-    vaga: Vaga
-  ): Promise<string[]> => {
-    if (!token) return [];
-
-    const reservasAtivas = await fetchReservasAtivasDoDia(vaga.id, day);
-
-    // Cria uma lista de todos os horários ocupados dentro do range da reserva
-    const reservasHoras: string[] = [];
-    reservasAtivas.forEach((r: Reserva) => {
-      const inicio = new Date(r.inicio);
-      const fim = new Date(r.fim);
-
-      while (inicio < fim) {
-        const h = inicio.getHours().toString().padStart(2, "0");
-        const m = inicio.getMinutes() >= 30 ? "30" : "00";
-        reservasHoras.push(`${h}:${m}`);
-        inicio.setMinutes(inicio.getMinutes() + 30);
-      }
+  const reset = useCallback(() => {
+    setReservaState({
+      step: 1,
+      selectedDay: undefined,
+      availableTimes: [],
+      reservedTimes: [],
+      startHour: null,
+      endHour: null,
+      origin: "",
+      selectedVehicleId: undefined,
     });
+  }, []);
 
-    // Gerar todos os horários do dia
-    const dias: DiaSemana[] = [
-      "DOMINGO",
-      "SEGUNDA",
-      "TERCA",
-      "QUARTA",
-      "QUINTA",
-      "SEXTA",
-      "SABADO",
-    ];
-    const diaSemana = dias[day.getDay()];
-    const operacao: OperacoesVaga | undefined = vaga.operacoesVaga?.find(
-      (op) => op.diaSemanaAsEnum === diaSemana
-    );
-    if (!operacao) return [];
+  const fetchHorariosDisponiveis = useCallback(
+    async (day: Date, vaga: Vaga): Promise<string[]> => {
+      if (!token) return [];
 
-    const [hInicio, mInicio] = operacao.horaInicio.split(":").map(Number);
-    const [hFim, mFim] = operacao.horaFim.split(":").map(Number);
+      const operacao = getOperacaoDia(day, vaga);
+      if (!operacao) return [];
 
-    const times: string[] = [];
-    let h = hInicio,
-      m = mInicio;
-    while (h < hFim || (h === hFim && m < mFim)) {
-      const pad = (n: number) => n.toString().padStart(2, "0");
-      times.push(`${pad(h)}:${pad(m)}`);
-      m += 30;
-      if (m >= 60) {
-        h += 1;
-        m -= 60;
-      }
-    }
+      const reservasAtivas = await fetchReservasAtivasDoDia(
+        vaga.id,
+        day,
+        token
+      );
+      const horariosOcupados = reservasAtivas.flatMap(gerarHorariosOcupados);
+      const todosHorarios = gerarHorariosDia(operacao);
 
-    setAvailableTimes(times);
-    setReservedTimes(reservasHoras); // marcar todos os horários ocupados
-    return times;
-  };
+      setReservaState((prev) => ({
+        ...prev,
+        availableTimes: todosHorarios,
+        reservedTimes: horariosOcupados,
+      }));
 
-  const formatDateTime = (day: Date, hour: string): string => {
-    const [h, m] = hour.split(":").map(Number);
-    const date = new Date(day);
-    date.setHours(h, m, 0, 0);
-    return date.toISOString();
-  };
+      return todosHorarios;
+    },
+    [token]
+  );
 
-  const handleConfirm = async (): Promise<boolean> => {
-    if (!token || !user?.motoristaId) return false;
-    if (
-      !selectedVaga ||
-      !selectedVehicleId ||
-      !startHour ||
-      !endHour ||
-      !origin
-    )
+  const handleConfirm = useCallback(async (): Promise<boolean> => {
+    if (!token || !user?.motoristaId || !selectedVaga) return false;
+
+    const { selectedDay, selectedVehicleId, startHour, endHour, origin } =
+      reservaState;
+
+    if (!selectedDay || !selectedVehicleId || !startHour || !endHour || !origin)
       return false;
 
     const formData = new FormData();
@@ -167,40 +92,106 @@ export function useReserva(selectedVaga: Vaga | null) {
     formData.append("motoristaId", user.motoristaId);
     formData.append("veiculoId", selectedVehicleId);
     formData.append("cidadeOrigem", origin);
-    formData.append("inicio", formatDateTime(selectedDay!, startHour));
-    formData.append("fim", formatDateTime(selectedDay!, endHour));
+    formData.append("inicio", formatDateTime(selectedDay, startHour));
+    formData.append("fim", formatDateTime(selectedDay, endHour));
 
-    try {
-      await reservarVaga(formData, token);
-      reset();
-      return true;
-    } catch {
-      return false;
-    }
-  };
+    const success = await confirmarReserva(formData, token);
+    if (success) reset();
+    return success;
+  }, [token, user, selectedVaga, reservaState, reset]);
+
+  // ================= Effects =================
 
   useEffect(() => {
-    if (selectedVaga && selectedDay)
-      fetchHorariosDisponiveis(selectedDay, selectedVaga);
-  }, [selectedVaga, selectedDay]);
+    if (!user?.id || !token) return;
+
+    const fetchMotorista = async () => {
+      if (!user.motoristaId) {
+        try {
+          const result = await getMotoristaByUserId(token, user.id);
+          if (result.motoristaId) {
+            setUser({ ...user, motoristaId: result.motoristaId });
+          }
+        } catch (error) {
+          console.error("Erro ao buscar motorista:", error);
+        } finally {
+          setLoadingMotorista(false);
+        }
+      } else {
+        setLoadingMotorista(false);
+      }
+    };
+
+    fetchMotorista();
+  }, [user, token, setUser]);
+
+  useEffect(() => {
+    if (!user?.id || !token) return;
+
+    const fetchVehicles = async () => {
+      try {
+        const result: GetVeiculosResult = await getVeiculosUsuario(
+          user.id,
+          token
+        );
+        if (!result.error) setVehicles(result.veiculos);
+      } catch (error) {
+        console.error("Erro ao buscar veículos:", error);
+      }
+    };
+
+    fetchVehicles();
+  }, [user, token]);
+
+  useEffect(() => {
+    if (selectedVaga && reservaState.selectedDay) {
+      fetchHorariosDisponiveis(reservaState.selectedDay, selectedVaga);
+    }
+  }, [selectedVaga, reservaState.selectedDay, fetchHorariosDisponiveis]);
+
+  // ================= Setters =================
+
+  const setStep = useCallback(
+    (step: number) => setReservaState((prev) => ({ ...prev, step })),
+    []
+  );
+  const setSelectedDay = useCallback(
+    (selectedDay?: Date) =>
+      setReservaState((prev) => ({ ...prev, selectedDay })),
+    []
+  );
+  const setStartHour = useCallback(
+    (startHour: string | null) =>
+      setReservaState((prev) => ({ ...prev, startHour })),
+    []
+  );
+  const setEndHour = useCallback(
+    (endHour: string | null) =>
+      setReservaState((prev) => ({ ...prev, endHour })),
+    []
+  );
+  const setOrigin = useCallback(
+    (origin: string) => setReservaState((prev) => ({ ...prev, origin })),
+    []
+  );
+  const setSelectedVehicleId = useCallback(
+    (selectedVehicleId?: string) =>
+      setReservaState((prev) => ({ ...prev, selectedVehicleId })),
+    []
+  );
+
+  // ================= Return =================
 
   return {
-    step,
-    setStep,
-    selectedDay,
-    setSelectedDay,
-    availableTimes,
-    reservedTimes,
-    startHour,
-    setStartHour,
-    endHour,
-    setEndHour,
-    origin,
-    setOrigin,
-    selectedVehicleId,
-    setSelectedVehicleId,
+    ...reservaState,
     vehicles,
     loadingMotorista,
+    setStep,
+    setSelectedDay,
+    setStartHour,
+    setEndHour,
+    setOrigin,
+    setSelectedVehicleId,
     fetchHorariosDisponiveis,
     handleConfirm,
     reset,
