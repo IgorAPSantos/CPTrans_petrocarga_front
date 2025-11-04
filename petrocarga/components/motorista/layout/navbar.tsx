@@ -51,7 +51,7 @@ export function Navbar() {
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
                                 <DropdownMenuItem asChild>
-                                    <Link href="/motorista/veiculos/veiculosMotorista" className="flex items-center gap-2 cursor-pointer w-full">
+                                    <Link href="/motorista/veiculos/veiculos" className="flex items-center gap-2 cursor-pointer w-full">
                                         <User className="h-4 w-4" />
                                         Meu Veículo
                                     </Link>
