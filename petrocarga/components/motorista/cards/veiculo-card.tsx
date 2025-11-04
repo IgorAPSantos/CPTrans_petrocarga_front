@@ -1,68 +1,109 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { FileText, Truck } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+import { useState } from "react";
 import { Veiculo } from "@/lib/types/veiculo";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { deleteVeiculo } from "@/lib/actions/veiculoActions";
+import { useAuth } from "@/context/AuthContext";
 
-interface VeiculoCardProps {
+type VeiculoDetalhesProps = {
   veiculo: Veiculo;
-  onGerarDocumento?: (veiculo: Veiculo) => void;
-}
+};
 
-export default function VeiculoCard({
-  veiculo,
-  onGerarDocumento,
-}: VeiculoCardProps) {
+export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
+  const [modalAberto, setModalAberto] = useState(false);
+  const router = useRouter();
+  const { token } = useAuth();
+
+  const handleExcluir = async () => {
+    if (!token) {
+      alert("Você precisa estar logado para excluir o veículo.");
+      return;
+    }
+
+    try {
+      await deleteVeiculo(veiculo.id);
+      setModalAberto(false);
+      router.back();
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao excluir veículo.");
+    }
+  };
+
   return (
-    <article
-      className={cn(
-        "flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full",
-        "border-blue-500"
-      )}
-    >
-      {/* Conteúdo principal */}
-      <div className="flex-1 flex flex-col gap-2 min-w-0">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <h3 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
+    <article className="relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl border-l-8 border-blue-500 transition-shadow max-w-4xl mx-auto">
+      <header className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-2xl font-bold text-gray-800 truncate">
             {veiculo.marca} {veiculo.modelo}
-          </h3>
-          <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-xs sm:text-sm font-semibold shadow-sm bg-gray-100 text-gray-800">
-            {veiculo.tipo}
-          </span>
+          </h2>
+          <p className="text-gray-600 mt-1 truncate">Placa: {veiculo.placa}</p>
         </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm text-gray-600">
-          <span className="flex items-center gap-1">
-            <Truck className="w-4 h-4 text-gray-400" />
-            Placa: {veiculo.placa}
-          </span>
-          {veiculo.cpfProprietario && (
-            <span>CPF: {veiculo.cpfProprietario}</span>
-          )}
-          {veiculo.cnpjProprietario && (
-            <span>CNPJ: {veiculo.cnpjProprietario}</span>
-          )}
+        <div className="flex gap-2 mt-2 sm:mt-5">
+          <Link
+            href={`/veiculos/meus-veiculos/${veiculo.id}/editar`}
+            className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition inline-block"
+          >
+            Alterar
+          </Link>
+          <button
+            onClick={() => setModalAberto(true)}
+            className="px-4 py-1 bg-red-500 hover:bg-red-600 text-white rounded-md transition"
+          >
+            Excluir
+          </button>
         </div>
-      </div>
+      </header>
 
-      {/* Container botão */}
-      <div className="flex flex-col items-stretch sm:items-end gap-2 mt-2 sm:mt-0 w-full sm:w-auto">
-        <span className="sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center bg-gray-100 text-gray-800">
-          {veiculo.tipo}
-        </span>
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700 text-sm mb-4">
+        <p>
+          <strong>Tipo:</strong> {veiculo.tipo}
+        </p>
+        {veiculo.cpfProprietario && (
+          <p>
+            <strong>CPF:</strong> {veiculo.cpfProprietario}
+          </p>
+        )}
+        {veiculo.cnpjProprietario && (
+          <p>
+            <strong>CNPJ:</strong> {veiculo.cnpjProprietario}
+          </p>
+        )}
+      </section>
 
-        <button
-          onClick={() => onGerarDocumento?.(veiculo)}
-          className={cn(
-            buttonVariants({ variant: "outline" }),
-            "text-sm sm:text-base w-full sm:w-auto text-center flex items-center justify-center gap-2"
-          )}
-        >
-          <FileText className="w-4 h-4" />
-          Gerar Documento
-        </button>
-      </div>
+      {modalAberto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+            onClick={() => setModalAberto(false)}
+          />
+          <div className="relative bg-white rounded-2xl p-6 w-96 max-w-full shadow-2xl transform transition-all duration-300 scale-95 animate-scaleIn">
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">
+              Confirmar exclusão
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Tem certeza que deseja excluir este veículo? Esta ação não pode
+              ser desfeita.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setModalAberto(false)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleExcluir}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </article>
   );
 }

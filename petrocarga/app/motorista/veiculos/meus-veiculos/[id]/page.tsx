@@ -1,52 +1,98 @@
-import EditarVeiculo from "@/components/motorista/editar/edicao-veiculo";
+"use client";
+
+import { useEffect, useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
+import { Loader2 } from "lucide-react";
 import { Veiculo } from "@/lib/types/veiculo";
-import { ArrowLeft } from "lucide-react";
+import VeiculoDetalhes from "@/components/motorista/cards/veiculo-card";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
-{/* Busca uma veiculo específica pelo ID */ }
-async function buscarVeiculo(id: string): Promise<Veiculo | undefined> {
-    const res = await fetch(`https://cptranspetrocargaback-production.up.railway.app/petrocarga/veiculos/${id}`, {
-        cache: "no-store",
-    });
+export default function EditarVeiculoPage() {
+  const { user, token } = useAuth();
+  const params = useParams() as { id: string };
 
-    if (!res.ok) {
-        console.error(`Erro ao buscar veículo ${id}:`, res.status); // Debug
-        return undefined;
+  const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    if (!user?.id || !token) {
+      setError("Usuário não autenticado.");
+      setLoading(false);
+      return;
     }
 
-    const veiculo: Veiculo = await res.json();
-    return veiculo;
-}
+    const userId = user.id;
+    if (!userId) return;
 
-export default async function EditarVeiculoPage({
-    params,
-}: {
-    params: Promise<{ id: string }>;
-}) {
-    const { id } = await params;
-    console.log("Tentando buscar veiculo com ID:", id); // Debug
+    async function fetchVeiculo() {
+      setLoading(true);
+      setError("");
 
-    const veiculo = await buscarVeiculo(id);
+      try {
+        const result = await getVeiculosUsuario(userId, token!);
 
-    if (!veiculo) {
-        console.error("Veiculo não encontrada, chamando notFound()"); // Debug
-        notFound();
+        if (result.error) {
+          setError(result.message);
+          setVeiculo(null);
+        } else {
+          const v = result.veiculos.find((v) => v.id === params.id);
+          if (!v) {
+            setError("Veículo não encontrado.");
+          } else {
+            setVeiculo(v);
+          }
+        }
+      } catch (err) {
+        console.error("Erro ao buscar veículo:", err);
+        setError("Erro ao buscar veículo.");
+      } finally {
+        setLoading(false);
+      }
     }
 
+    fetchVeiculo();
+  }, [user?.id, token, params.id]);
+
+  if (loading) {
     return (
-        <div className="mx-auto max-w-5xl p-6">
-            <div className="mb-6">
-                <Link
-                    href={`/veiculos/${id}`}
-                    className="text-muted-foreground hover:text-foreground inline-flex items-center"
-                >
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Voltar para todos os veículos
-                </Link>
-            </div>
-
-            <EditarVeiculo veiculo={veiculo} />
-        </div>
+      <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
+        <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
+        <span className="text-gray-600">Carregando veículo...</span>
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] text-red-600 text-center gap-2">
+        <p>{error}</p>
+        <Link
+          href="/motorista/veiculos/meus-veiculos"
+          className="text-blue-600 underline"
+        >
+          Voltar para todos os veículos
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-4 flex flex-col items-center justify-center w-full min-h-screen bg-gray-50">
+      <div className="mb-6 w-full max-w-2xl">
+        <Link
+          href="/motorista/veiculos/meus-veiculos"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar para todos os veículos
+        </Link>
+      </div>
+
+      {veiculo && <VeiculoDetalhes veiculo={veiculo} />}
+    </div>
+  );
 }
