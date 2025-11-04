@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
-
-interface Vehicle {
-  id: string;
-  name: string;
-}
+import { useRouter } from "next/navigation";
+import { VeiculoAPI } from "@/lib/types/veiculo";
 
 interface OriginVehicleStepProps {
-  vehicles: Vehicle[];
+  vehicles: VeiculoAPI[];
   origin: string;
   selectedVehicleId?: string;
   onOriginChange: (value: string) => void;
@@ -24,17 +21,27 @@ export default function OriginVehicleStep({
   onNext,
   onBack,
 }: OriginVehicleStepProps) {
+  const router = useRouter();
   const [localOrigin, setLocalOrigin] = useState(origin);
   const [localVehicleId, setLocalVehicleId] = useState(selectedVehicleId || "");
 
-  // Sincroniza se a prop mudar
+  // Atualiza quando a origem externa muda
   useEffect(() => {
     setLocalOrigin(origin);
   }, [origin]);
 
+  // Atualiza quando o veículo selecionado externo muda
   useEffect(() => {
     setLocalVehicleId(selectedVehicleId || "");
   }, [selectedVehicleId]);
+
+  const handleVehicleChange = (value: string) => {
+    if (value === "add-new") {
+      router.push("/motorista/veiculos/cadastrar-veiculos");
+      return;
+    }
+    setLocalVehicleId(value);
+  };
 
   const handleNext = () => {
     if (!localOrigin || !localVehicleId) return;
@@ -51,7 +58,7 @@ export default function OriginVehicleStep({
           type="text"
           value={localOrigin}
           onChange={(e) => setLocalOrigin(e.target.value)}
-          placeholder="Digite de onde você está vindo"
+          placeholder="Digite de onde você está vindo (Juiz de Fora - MG)"
           className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
@@ -60,7 +67,7 @@ export default function OriginVehicleStep({
         <label className="block font-semibold mb-1">Selecione o veículo:</label>
         <select
           value={localVehicleId}
-          onChange={(e) => setLocalVehicleId(e.target.value)}
+          onChange={(e) => handleVehicleChange(e.target.value)}
           className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="" disabled>
@@ -68,9 +75,12 @@ export default function OriginVehicleStep({
           </option>
           {vehicles.map((v) => (
             <option key={v.id} value={v.id}>
-              {v.name}
+              {`${v.name} (${v.plate})`}
             </option>
           ))}
+          <option value="add-new" className="text-blue-600 font-semibold">
+            Adicionar novo veículo
+          </option>
         </select>
       </div>
 
