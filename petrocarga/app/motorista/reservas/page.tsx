@@ -4,19 +4,8 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { getReservasPorUsuario } from "@/lib/actions/reservaActions";
 import { Loader2 } from "lucide-react";
-
-interface Reserva {
-  id: number;
-  vaga?: {
-    endereco?: {
-      logradouro?: string;
-    };
-  };
-  cidadeOrigem: string;
-  inicio: string;
-  fim: string;
-  status: string;
-}
+import ReservaCard from "@/components/reserva/minhasReservas/ReservaCard";
+import { Reserva } from "@/lib/types/reserva";
 
 export default function MinhasReservas() {
   const { user, token } = useAuth();
@@ -25,7 +14,6 @@ export default function MinhasReservas() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Só tenta buscar se tiver user e token
     if (!user?.id || !token) return;
 
     const fetchReservas = async () => {
@@ -33,9 +21,13 @@ export default function MinhasReservas() {
       setError(null);
 
       try {
-        // Aqui usamos user.id diretamente, que é o esperado pela API
         const data = await getReservasPorUsuario(user.id, token);
-        setReservas(data);
+        if ("veiculos" in data) {
+          // caso use algum retorno com wrapper
+          setReservas(data.reservas || []);
+        } else {
+          setReservas(data);
+        }
       } catch (err) {
         console.error("Erro ao carregar reservas:", err);
         setError("Erro ao buscar suas reservas. Tente novamente mais tarde.");
@@ -47,61 +39,38 @@ export default function MinhasReservas() {
     fetchReservas();
   }, [user?.id, token]);
 
-  // 🔹 Renderizações condicionais
   if (loading) {
     return (
-      <div className="p-4 flex items-center gap-2">
-        <Loader2 className="animate-spin" />
-        <span>Carregando suas reservas...</span>
+      <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
+        <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
+        <span className="text-gray-600">Carregando suas reservas...</span>
       </div>
     );
   }
 
   if (error) {
-    return <div className="p-4 text-red-600">{error}</div>;
+    return (
+      <div className="p-4 flex items-center justify-center text-red-600 min-h-[60vh] text-center">
+        {error}
+      </div>
+    );
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">
+    <div className="p-4 flex flex-col items-center justify-center w-full min-h-screen bg-gray-50">
+      <h1 className="text-2xl font-bold mb-6 text-center">
         Bem-vindo às suas Reservas, {user?.nome || "motorista"}!
       </h1>
 
       {reservas.length === 0 ? (
-        <p>Nenhuma reserva encontrada.</p>
+        <p className="text-gray-600 text-center">Nenhuma reserva encontrada.</p>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-4 w-full max-w-2xl">
           {reservas.map((reserva) => (
             <ReservaCard key={reserva.id} reserva={reserva} />
           ))}
         </div>
       )}
-    </div>
-  );
-}
-
-// 🔹 Componente isolado para um card de reserva
-function ReservaCard({ reserva }: { reserva: Reserva }) {
-  const formatarData = (data: string) => new Date(data).toLocaleString("pt-BR");
-
-  return (
-    <div className="p-4 border rounded-lg shadow-sm bg-white">
-      <p>
-        <strong>Vaga:</strong>{" "}
-        {reserva.vaga?.endereco?.logradouro || "Não informado"}
-      </p>
-      <p>
-        <strong>Origem:</strong> {reserva.cidadeOrigem}
-      </p>
-      <p>
-        <strong>Início:</strong> {formatarData(reserva.inicio)}
-      </p>
-      <p>
-        <strong>Fim:</strong> {formatarData(reserva.fim)}
-      </p>
-      <p>
-        <strong>Status:</strong> {reserva.status}
-      </p>
     </div>
   );
 }

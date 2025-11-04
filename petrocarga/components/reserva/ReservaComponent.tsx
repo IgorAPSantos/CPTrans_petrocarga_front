@@ -35,7 +35,6 @@ export default function ReservaComponent({
     setOrigin,
     selectedVehicleId,
     setSelectedVehicleId,
-    setAvailableTimes,
     vehicles,
     fetchHorariosDisponiveis,
     handleConfirm,
@@ -76,13 +75,14 @@ export default function ReservaComponent({
       {step < 6 && <StepIndicator step={step} />}
 
       <div className="flex-1 overflow-y-auto pb-4">
-        {/* STEPS NORMAIS */}
+        {/* STEP 1 - Seleção do dia */}
         {step === 1 && (
           <DaySelection
             selected={selectedDay}
-            onSelect={(day) => {
+            onSelect={async (day) => {
               setSelectedDay(day);
-              setAvailableTimes(fetchHorariosDisponiveis(day, selectedVaga));
+              // Buscar horários disponíveis de forma assíncrona
+              await fetchHorariosDisponiveis(day, selectedVaga);
               setStep(2);
             }}
             availableDays={selectedVaga.operacoesVaga?.map(
@@ -91,6 +91,7 @@ export default function ReservaComponent({
           />
         )}
 
+        {/* STEP 2 - Seleção do horário inicial */}
         {step === 2 && selectedDay && (
           <TimeSelection
             times={availableTimes}
@@ -106,6 +107,7 @@ export default function ReservaComponent({
           />
         )}
 
+        {/* STEP 3 - Seleção do horário final */}
         {step === 3 && startHour && (
           <TimeSelection
             times={availableTimes.filter(
@@ -123,6 +125,7 @@ export default function ReservaComponent({
           />
         )}
 
+        {/* STEP 4 - Origem e veículo */}
         {step === 4 && (
           <OriginVehicleStep
             vehicles={vehiclesForStep}
@@ -135,6 +138,7 @@ export default function ReservaComponent({
           />
         )}
 
+        {/* STEP 5 - Confirmação */}
         {step === 5 && (
           <Confirmation
             day={selectedDay!}
@@ -152,7 +156,7 @@ export default function ReservaComponent({
           />
         )}
 
-        {/* STEP DE FEEDBACK */}
+        {/* STEP 6 - Feedback */}
         {step === 6 && success === true && (
           <div className="text-center p-6 bg-green-100 text-green-800 rounded-lg">
             <p className="mb-4 font-semibold text-lg">Reserva confirmada ✅</p>
