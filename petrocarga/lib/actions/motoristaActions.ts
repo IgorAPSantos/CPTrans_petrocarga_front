@@ -2,16 +2,16 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function addMotorista(formData: FormData) {
+export async function addMotorista(prevState: unknown, formData: FormData) {
   const payload = {
     nome: formData.get("nome") as string,
     cpf: formData.get("cpf") as string,
     telefone: formData.get("telefone") as string,
     email: formData.get("email") as string,
     senha: formData.get("senha") as string,
-    numero_cnh: formData.get("numeroCnh") as string,
-    categoria_cnh: (formData.get("categoriaCnh") as string)?.toUpperCase(),
-    data_validade_cnh: formData.get("dataValidadeCnh") as string,
+    numero_cnh: formData.get("numeroCNH") as string,
+    tipo_cnh: (formData.get("tipoCNH") as string)?.toUpperCase(),
+    data_validade_cnh: formData.get("dataValidadeCNH") as string,
   };
 
   const res = await fetch(
@@ -62,9 +62,9 @@ export async function atualizarMotorista(formData: FormData) {
     telefone: formData.get("telefone") as string,
     email: formData.get("email") as string,
     senha: formData.get("senha") as string,
-    numero_cnh: formData.get("numeroCnh") as string,
-    categoria_cnh: (formData.get("categoriaCnh") as string)?.toUpperCase(),
-    data_validade_cnh: formData.get("dataValidadeCnh") as string,
+    numero_cnh: formData.get("numeroCNH") as string,
+    tipo_cnh: (formData.get("tipoCNH") as string)?.toUpperCase(),
+    data_validade_cnh: formData.get("dataValidadeCNH") as string,
   };
 
   const res = await fetch(
