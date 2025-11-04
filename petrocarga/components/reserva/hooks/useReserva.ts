@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { getMotoristaByUserId } from "@/lib/actions/motoristaActions";
 import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
-import { reservarVaga } from "@/lib/actions/reservaActions";
+import { reservarVaga, getReservasAtivas } from "@/lib/actions/reservaActions";
 import { useAuth } from "@/context/AuthContext";
-import { Vaga, DiaSemana } from "@/lib/types/vaga";
+import { Vaga, DiaSemana, OperacoesVaga } from "@/lib/types/vaga";
 import { Veiculo } from "@/lib/types/veiculo";
+import { Reserva } from "@/lib/types/reserva";
 
 interface GetVeiculosResult {
   error: boolean;
@@ -26,43 +27,35 @@ export function useReserva(selectedVaga: Vaga | null) {
   const [vehicles, setVehicles] = useState<Veiculo[]>([]);
   const [loadingMotorista, setLoadingMotorista] = useState(true);
 
-  // 🔹 Buscar motorista
+  // Buscar motorista
   useEffect(() => {
     async function fetchMotorista() {
       if (!user?.id || !token) return;
       if (!user.motoristaId) {
         try {
           const result = await getMotoristaByUserId(token, user.id);
-          if (result.motoristaId) {
+          if (result.motoristaId)
             setUser({ ...user, motoristaId: result.motoristaId });
-          }
         } finally {
           setLoadingMotorista(false);
         }
-      } else {
-        setLoadingMotorista(false);
-      }
+      } else setLoadingMotorista(false);
     }
     fetchMotorista();
   }, [user, token, setUser]);
 
-  // 🔹 Buscar veículos
+  // Buscar veículos
   useEffect(() => {
     if (!user?.id || !token) return;
-    const fetchVehicles = async () => {
+    async function fetchVehicles() {
       const result: GetVeiculosResult = await getVeiculosUsuario(
-        user.id,
-        token
+        user!.id,
+        token!
       );
       if (!result.error) setVehicles(result.veiculos);
-    };
+    }
     fetchVehicles();
   }, [user, token]);
-
-  // 🔹 Reset ao trocar vaga
-  useEffect(() => {
-    reset();
-  }, [selectedVaga]);
 
   const reset = () => {
     setStep(1);
@@ -75,7 +68,46 @@ export function useReserva(selectedVaga: Vaga | null) {
     setSelectedVehicleId(undefined);
   };
 
-  const fetchHorariosDisponiveis = (day: Date, vaga: Vaga): string[] => {
+  // Buscar reservas ativas do dia
+  const fetchReservasAtivasDoDia = async (
+    vagaId: string,
+    day: Date
+  ): Promise<Reserva[]> => {
+    if (!token) return [];
+    try {
+      const reservas = await getReservasAtivas(vagaId, token);
+      return reservas.filter(
+        (r: Reserva) => new Date(r.inicio).toDateString() === day.toDateString()
+      );
+    } catch {
+      return [];
+    }
+  };
+
+  // Gerar horários disponíveis e reservados
+  const fetchHorariosDisponiveis = async (
+    day: Date,
+    vaga: Vaga
+  ): Promise<string[]> => {
+    if (!token) return [];
+
+    const reservasAtivas = await fetchReservasAtivasDoDia(vaga.id, day);
+
+    // Cria uma lista de todos os horários ocupados dentro do range da reserva
+    const reservasHoras: string[] = [];
+    reservasAtivas.forEach((r: Reserva) => {
+      const inicio = new Date(r.inicio);
+      const fim = new Date(r.fim);
+
+      while (inicio < fim) {
+        const h = inicio.getHours().toString().padStart(2, "0");
+        const m = inicio.getMinutes() >= 30 ? "30" : "00";
+        reservasHoras.push(`${h}:${m}`);
+        inicio.setMinutes(inicio.getMinutes() + 30);
+      }
+    });
+
+    // Gerar todos os horários do dia
     const dias: DiaSemana[] = [
       "DOMINGO",
       "SEGUNDA",
@@ -86,7 +118,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       "SABADO",
     ];
     const diaSemana = dias[day.getDay()];
-    const operacao = vaga.operacoesVaga?.find(
+    const operacao: OperacoesVaga | undefined = vaga.operacoesVaga?.find(
       (op) => op.diaSemanaAsEnum === diaSemana
     );
     if (!operacao) return [];
@@ -107,7 +139,9 @@ export function useReserva(selectedVaga: Vaga | null) {
       }
     }
 
-    return times.filter((t) => !reservedTimes.includes(t));
+    setAvailableTimes(times);
+    setReservedTimes(reservasHoras); // marcar todos os horários ocupados
+    return times;
   };
 
   const formatDateTime = (day: Date, hour: string): string => {
@@ -145,13 +179,17 @@ export function useReserva(selectedVaga: Vaga | null) {
     }
   };
 
+  useEffect(() => {
+    if (selectedVaga && selectedDay)
+      fetchHorariosDisponiveis(selectedDay, selectedVaga);
+  }, [selectedVaga, selectedDay]);
+
   return {
     step,
     setStep,
     selectedDay,
     setSelectedDay,
     availableTimes,
-    setAvailableTimes,
     reservedTimes,
     startHour,
     setStartHour,

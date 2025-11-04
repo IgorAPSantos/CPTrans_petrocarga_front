@@ -3,19 +3,7 @@
 import { cn } from "@/lib/utils";
 import { FileText, MapPin, Clock } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-
-interface Reserva {
-  id: number;
-  vaga?: {
-    endereco?: {
-      logradouro?: string;
-    };
-  };
-  cidadeOrigem: string;
-  inicio: string;
-  fim: string;
-  status: string;
-}
+import { Reserva } from "@/lib/types/reserva";
 
 interface ReservaCardProps {
   reserva: Reserva;
@@ -45,7 +33,7 @@ export default function ReservaCard({
       <div className="flex-1 flex flex-col gap-2 min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
-            {reserva.vaga?.endereco?.logradouro || "Local não informado"}
+            {reserva.vagaId || "Local não informado"}
           </h3>
 
           {/* Status (desktop) */}

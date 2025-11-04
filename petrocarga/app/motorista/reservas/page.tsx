@@ -5,19 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { getReservasPorUsuario } from "@/lib/actions/reservaActions";
 import { Loader2 } from "lucide-react";
 import ReservaCard from "@/components/reserva/minhasReservas/ReservaCard";
-
-interface Reserva {
-  id: number;
-  vaga?: {
-    endereco?: {
-      logradouro?: string;
-    };
-  };
-  cidadeOrigem: string;
-  inicio: string;
-  fim: string;
-  status: string;
-}
+import { Reserva } from "@/lib/types/reserva";
 
 export default function MinhasReservas() {
   const { user, token } = useAuth();
@@ -34,7 +22,12 @@ export default function MinhasReservas() {
 
       try {
         const data = await getReservasPorUsuario(user.id, token);
-        setReservas(data);
+        if ("veiculos" in data) {
+          // caso use algum retorno com wrapper
+          setReservas(data.reservas || []);
+        } else {
+          setReservas(data);
+        }
       } catch (err) {
         console.error("Erro ao carregar reservas:", err);
         setError("Erro ao buscar suas reservas. Tente novamente mais tarde.");
