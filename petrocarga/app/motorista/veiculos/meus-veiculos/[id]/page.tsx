@@ -81,7 +81,7 @@ export default function EditarVeiculoPage() {
   }
 
   return (
-    <div className="p-4 flex flex-col items-center justify-center w-full min-h-screen bg-gray-50">
+    <div className="p-4 flex flex-col items-center  w-full min-h-screen bg-gray-50">
       <div className="mb-6 w-full max-w-2xl">
         <Link
           href="/motorista/veiculos/meus-veiculos"
