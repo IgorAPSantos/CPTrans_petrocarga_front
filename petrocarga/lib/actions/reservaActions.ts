@@ -67,3 +67,29 @@ export async function getReservasPorUsuario(usuarioId: string, token: string) {
     throw error;
   }
 }
+
+export async function getReservasAtivas(vagaId: string, token: string) {
+  try {
+    const response = await fetch(
+      `https://cptranspetrocargaback-production.up.railway.app/petrocarga/reservas/ativas/${vagaId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      const err = await response.text();
+      throw new Error(`Erro: ${response.status} - ${err}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erro ao buscar reservas ativas da vaga:", error);
+    throw error;
+  }
+}
