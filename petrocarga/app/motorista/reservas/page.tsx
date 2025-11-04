@@ -48,16 +48,16 @@ export default function MinhasReservas() {
 
   if (loading) {
     return (
-      <div className="p-4 flex flex-col items-center justify-center h-full gap-2 text-center">
-        <Loader2 className="animate-spin w-6 h-6" />
-        <span>Carregando suas reservas...</span>
+      <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
+        <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
+        <span className="text-gray-600">Carregando suas reservas...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 flex items-center justify-center text-red-600 h-full text-center">
+      <div className="p-4 flex items-center justify-center text-red-600 min-h-[60vh] text-center">
         {error}
       </div>
     );
