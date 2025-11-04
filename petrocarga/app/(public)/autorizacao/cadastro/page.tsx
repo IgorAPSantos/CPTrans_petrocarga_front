@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/input";
 import { addMotorista } from "@/lib/actions/motoristaActions";
 import { CircleAlert, Eye, EyeOff, UserIcon, CheckCircle } from "lucide-react";
 import Form from "next/form";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
+import React, { useState } from "react";
 import FormItem from "@/components/form/form-item";
-import React from "react";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
 
 export default function CadastroUsuario() {
@@ -60,7 +60,6 @@ export default function CadastroUsuario() {
                                 id="nome"
                                 name="nome"
                                 placeholder="João Alves da Silva"
-                                defaultValue={state?.valores?.nome || ""}
                                 required
                             />
                         </FormItem>
@@ -78,7 +77,6 @@ export default function CadastroUsuario() {
                                 maxLength={11}
                                 type="text"
                                 inputMode="numeric"
-                                defaultValue={state?.valores?.cpf || ""}
                                 required
                                 onInput={(e) => {
                                     const target = e.target as HTMLInputElement;
@@ -100,7 +98,6 @@ export default function CadastroUsuario() {
                                 maxLength={11}
                                 type="text"
                                 inputMode="numeric"
-                                defaultValue={state?.valores?.telefone || ""}
                                 required
                                 onInput={(e) => {
                                     const target = e.target as HTMLInputElement;
@@ -123,7 +120,6 @@ export default function CadastroUsuario() {
                                 id="numeroCnh"
                                 name="numeroCnh"
                                 placeholder="123456789-0"
-                                defaultValue={state?.valores?.numeroCnh || ""}
                                 required
                             />
                         </FormItem>
@@ -137,13 +133,12 @@ export default function CadastroUsuario() {
                                 id="categoriaCnh"
                                 name="categoriaCnh"
                                 placeholder="Selecione a categoria"
-                                defaultValue={state?.valores?.categoriaCnh || ""}
                                 options={[
-                                    { value: "categoriaA", label: "Categoria A" },
-                                    { value: "categoriaB", label: "Categoria B" },
-                                    { value: "categoriaC", label: "Categoria C" },
-                                    { value: "categoriaD", label: "Categoria D" },
-                                    { value: "categoriaE", label: "Categoria E" }
+                                    { value: "A", label: "Categoria A" },
+                                    { value: "B", label: "Categoria B" },
+                                    { value: "C", label: "Categoria C" },
+                                    { value: "D", label: "Categoria D" },
+                                    { value: "E", label: "Categoria E" }
                                 ]}
                             />
                         </FormItem>
@@ -158,7 +153,6 @@ export default function CadastroUsuario() {
                                 type="date"
                                 id="dataVencimentoCnh"
                                 name="dataVencimentoCnh"
-                                defaultValue={state?.valores?.dataVencimentoCnh || ""}
                                 required
                             />
                         </FormItem>
@@ -178,12 +172,11 @@ export default function CadastroUsuario() {
                                 id="email"
                                 name="email"
                                 placeholder="seu@email.com"
-                                defaultValue={state?.valores?.email || ""}
                                 required
                             />
                         </FormItem>
 
-                        {/* Confirmação do Email */}
+                        {/* Confirmação do Email
                         <FormItem
                             name="Confirmar Email"
                             description="Redigite seu email"
@@ -194,10 +187,9 @@ export default function CadastroUsuario() {
                                 id="confirmacaoEmail"
                                 name="confirmacaoEmail"
                                 placeholder="seu@email.com"
-                                defaultValue={state?.valores?.confirmacaoEmail || ""}
                                 required
                             />
-                        </FormItem>
+                        </FormItem> */}
                         
                         {/* Senha */}
                         <FormItem
@@ -211,7 +203,6 @@ export default function CadastroUsuario() {
                                     id="senha"
                                     name="senha"
                                     placeholder="••••••••"
-                                    defaultValue={state?.valores?.senha || ""}
                                     required
                                 />
                                 <button
@@ -228,7 +219,7 @@ export default function CadastroUsuario() {
                             </div>
                         </FormItem>
 
-                        {/* Confirme sua Senha */}
+                        {/* Confirme sua Senha
                         <FormItem
                             name="Confirmar Senha"
                             description="Confirme sua senha"
@@ -240,7 +231,6 @@ export default function CadastroUsuario() {
                                     id="confirmacaoSenha"
                                     name="confirmacaoSenha"
                                     placeholder="••••••••"
-                                    defaultValue={state?.valores?.confirmacaoSenha || ""}
                                     required
                                 />
                                 <button
@@ -255,7 +245,7 @@ export default function CadastroUsuario() {
                                     )}
                                 </button>
                             </div>
-                        </FormItem>
+                        </FormItem> */}
                     </CardContent>
 
                     {/* Footer com botão */}
