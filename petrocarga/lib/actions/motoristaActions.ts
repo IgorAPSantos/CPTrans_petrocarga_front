@@ -35,7 +35,7 @@ export async function addMotorista(prevState: unknown, formData: FormData) {
   revalidatePath("/gestor/lista-motoristas");
 }
 
-export async function deleteMotorista(motoristaId: string) {
+export async function deleteMotorista(motoristaId: string, token: string) {
   const res = await fetch(
     `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas/${motoristaId}`,
     { method: "DELETE" }
@@ -53,7 +53,7 @@ export async function deleteMotorista(motoristaId: string) {
   return { error: false, message: "Motorista deletado com sucesso!" };
 }
 
-export async function atualizarMotorista(formData: FormData) {
+export async function atualizarMotorista(prevState: unknown, formData: FormData) {
   const id = formData.get("id") as string;
 
   const payload = {
