@@ -36,7 +36,7 @@ export async function addVaga(prevState: unknown, formData: FormData) {
   };
 
   const res = await fetch(
-    "https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas",
+    "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas",
     {
       method: "POST",
       headers: {
@@ -71,7 +71,7 @@ export async function deleteVaga(id: string, token: string) {
   if (!token) throw new Error("Token de autenticação não fornecido");
 
   const res = await fetch(
-    `https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`,
+    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas/${id}`,
     {
       method: "DELETE",
       headers: {
@@ -126,7 +126,7 @@ export async function atualizarVaga(prevState: unknown, formData: FormData) {
   };
 
   const res = await fetch(
-    `https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`,
+    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas/${id}`,
     {
       method: "PATCH",
       headers: {
@@ -160,7 +160,7 @@ export async function atualizarVaga(prevState: unknown, formData: FormData) {
 export async function getVagas(token?: string) {
   try {
     const res = await fetch(
-      "https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/all",
+      "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas/all",
       {
         method: "GET",
         headers: {
@@ -182,7 +182,7 @@ export async function getVagas(token?: string) {
 export async function getVagaById(id: string, token?: string) {
   try {
     const res = await fetch(
-      `https://cptranspetrocargaback-production.up.railway.app/petrocarga/vagas/${id}`,
+      `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas/${id}`,
       {
         method: "GET",
         headers: {

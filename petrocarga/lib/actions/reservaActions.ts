@@ -20,7 +20,7 @@ export async function reservarVaga(formData: FormData, token: string) {
 
   try {
     const response = await fetch(
-      "https://cptranspetrocargaback-production.up.railway.app/petrocarga/reservas",
+      "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/reservas",
       {
         method: "POST",
         headers: {
@@ -45,7 +45,7 @@ export async function reservarVaga(formData: FormData, token: string) {
 export async function getReservasPorUsuario(usuarioId: string, token: string) {
   try {
     const response = await fetch(
-      `https://cptranspetrocargaback-production.up.railway.app/petrocarga/reservas/usuario/${usuarioId}`,
+      `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/reservas/usuario/${usuarioId}`,
       {
         method: "GET",
         headers: {
@@ -71,7 +71,7 @@ export async function getReservasPorUsuario(usuarioId: string, token: string) {
 export async function getReservasAtivas(vagaId: string, token: string) {
   try {
     const response = await fetch(
-      `https://cptranspetrocargaback-production.up.railway.app/petrocarga/reservas/ativas/${vagaId}`,
+      `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/reservas/ativas/${vagaId}`,
       {
         method: "GET",
         headers: {

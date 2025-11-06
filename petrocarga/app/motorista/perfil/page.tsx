@@ -3,78 +3,113 @@
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/context/AuthContext";
-import { deleteMotorista } from "@/lib/actions/motoristaActions";
-import { Motorista} from "@/lib/types/motorista";
+import { deleteMotorista, getMotoristaByUserId } from "@/lib/actions/motoristaActions";
+import { Motorista } from "@/lib/types/motorista";
 import { cn } from "@/lib/utils";
-import { UserIcon, Mail, Phone, FileText, Edit, Trash2, Key, Badge, Fingerprint, UserCheck, Barcode, IdCardIcon } from "lucide-react";
+import { UserIcon, Mail, Phone, FileText, Trash2, Fingerprint, IdCardIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
-import router from "next/router";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
-type PerfilMotoristaProps = {
-    motorista: Motorista;
-};
-
-export default function PerfilMotorista({ motorista }: PerfilMotoristaProps) {
-    const [isEditing, setIsEditing] = useState(false);
-    const [showChangePassword, setShowChangePassword] = useState(false);
+export default function PerfilMotorista() {
+    const [motorista, setMotorista] = useState<Motorista | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [modalAberto, setModalAberto] = useState(false);
-    const { token } = useAuth();
+    const { token, user } = useAuth(); // user deve conter o userId
+    const router = useRouter();
 
-    // Estados para edição
-    const [formData, setFormData] = useState({
-        email: motorista?.email,
-        senha: "",
-        novaSenha: "",
-        confirmarSenha: ""
-    });
+    // Buscar dados do motorista usando a server action existente
+    useEffect(() => {
+        if (!token || !user?.id) return; 
+        const fetchMotorista = async () => {
+            setLoading(true);
+            setError(null);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const handleSaveChanges = () => {
-        // Aqui você implementaria a lógica para salvar as alterações
-        console.log("Dados a serem salvos:", formData);
-        
-        // Validações básicas
-        if (showChangePassword) {
-            if (formData.novaSenha !== formData.confirmarSenha) {
-                alert("As senhas não coincidem!");
-                return;
-            }
-            if (formData.novaSenha.length < 6) {
-                alert("A nova senha deve ter pelo menos 6 caracteres!");
-                return;
-            }
-        }
-
-        // Simulação de sucesso
-        alert("Alterações salvas com sucesso!");
-        setIsEditing(false);
-        setShowChangePassword(false);
-        setFormData(prev => ({ ...prev, senha: "", novaSenha: "", confirmarSenha: "" }));
-    };
-
-    const handleExcluir = async () => {
-        if (!token) {
-            alert("Você precisa estar logado para excluir a vaga.");
-            return;
-            }
-        
             try {
-            await deleteMotorista(motorista.id, token);
-            setModalAberto(false);
-            router.back();
+                const resultado = await getMotoristaByUserId(user.id, token);
+                if (resultado.error) {
+                    setError(resultado.message || "Erro ao buscar perfil");
+                } else {
+                    setMotorista(resultado.motorista);
+                }
             } catch (err) {
-            console.error(err);
-            alert("Erro ao excluir vaga.");
+                console.error('Erro ao carregar motorista:', err);
+                setError('Erro ao carregar informações do perfil. Tente novamente.');
+            } finally {
+                setLoading(false);
             }
         };
+
+        fetchMotorista();
+    }, [token, user]);
+
+    const handleExcluir = async () => {
+        if (!token || !motorista) {
+            alert("Você precisa estar logado para excluir a conta.");
+            return;
+        }
+        
+        try {
+            const resultado = await deleteMotorista(motorista.id, token);
+            
+            if (resultado?.error) {
+                alert(resultado.message || "Erro ao excluir conta.");
+            } else {
+                setModalAberto(false);
+                alert("Conta excluída com sucesso!");
+                // Redirecionar para home ou login após excluir
+                router.push('/');
+            }
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao excluir conta.");
+        }
+    };
+
+    // Estado de carregamento
+    if (loading) {
+        return (
+            <main className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+                    <p className="text-gray-600">Carregando perfil...</p>
+                </div>
+            </main>
+        );
+    }
+
+    // Estado de erro
+    if (error) {
+        return (
+            <main className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <UserIcon className="w-8 h-8 text-red-600" />
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-800 mb-2">Erro ao carregar perfil</h2>
+                    <p className="text-gray-600 mb-4">{error}</p>
+                    <button
+                        onClick={() => router.push('/autorizacao/login')}
+                        className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition"
+                    >
+                        Fazer Login
+                    </button>
+                </div>
+            </main>
+        );
+    }
+
+    // Se não houver motorista
+    if (!motorista) {
+        return (
+            <main className="container mx-auto px-4 py-8 flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <p className="text-gray-600">Nenhum dado encontrado.</p>
+                </div>
+            </main>
+        );
+    }
 
     return (
         <main className="container mx-auto px-4 py-4 md:py-8">
@@ -84,7 +119,7 @@ export default function PerfilMotorista({ motorista }: PerfilMotoristaProps) {
                         <UserIcon className="w-8 h-8 text-white" />
                     </div>
                     <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                        Olá, {motorista?.nome}!
+                        Olá, {motorista.usuario.nome}!
                     </CardTitle>
                     <CardDescription className="text-base">
                         Este é o seu perfil. Aqui você pode ver suas informações e atualizar seus dados conforme necessário.
@@ -99,7 +134,7 @@ export default function PerfilMotorista({ motorista }: PerfilMotoristaProps) {
                             <UserIcon className="w-5 h-5 text-blue-600" />
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Nome</p>
-                                <p className="text-lg font-semibold text-gray-900">{motorista?.nome}</p>
+                                <p className="text-lg font-semibold text-gray-900">{motorista.usuario.nome}</p>
                             </div>
                         </div>
 
@@ -108,7 +143,7 @@ export default function PerfilMotorista({ motorista }: PerfilMotoristaProps) {
                             <Phone className="w-5 h-5 text-blue-600" />
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Telefone</p>
-                                <p className="text-lg font-semibold text-gray-900">{motorista?.telefone}</p>
+                                <p className="text-lg font-semibold text-gray-900">{motorista.usuario.telefone}</p>
                             </div>
                         </div>
 
@@ -117,7 +152,7 @@ export default function PerfilMotorista({ motorista }: PerfilMotoristaProps) {
                             <IdCardIcon className="w-5 h-5 text-blue-600" />
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Número da CNH</p>
-                                <p className="text-lg font-semibold text-gray-900">{motorista?.numeroCNH}</p>
+                                <p className="text-lg font-semibold text-gray-900">{motorista.numeroCNH}</p>
                             </div>
                         </div>
 
@@ -126,7 +161,7 @@ export default function PerfilMotorista({ motorista }: PerfilMotoristaProps) {
                             <FileText className="w-5 h-5 text-blue-600" />
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Tipo da CNH</p>
-                                <p className="text-lg font-semibold text-gray-900">{motorista?.tipoCNH}</p>
+                                <p className="text-lg font-semibold text-gray-900">{motorista.tipoCNH}</p>
                             </div>
                         </div>
 
@@ -135,7 +170,7 @@ export default function PerfilMotorista({ motorista }: PerfilMotoristaProps) {
                             <Fingerprint className="w-5 h-5 text-blue-600" />
                             <div>
                                 <p className="text-sm font-medium text-gray-500">CPF</p>
-                                <p className="text-lg font-semibold text-gray-900">{motorista?.cpf}</p>
+                                <p className="text-lg font-semibold text-gray-900">{motorista.usuario.cpf}</p>
                             </div>
                         </div>
 
@@ -144,35 +179,35 @@ export default function PerfilMotorista({ motorista }: PerfilMotoristaProps) {
                             <Mail className="w-5 h-5 text-blue-600" />
                             <div className="flex-1">
                                 <p className="text-sm font-medium text-gray-500">Email</p>
-                                <p className="text-lg font-semibold text-gray-900">{motorista?.email}</p>
-                                
+                                <p className="text-lg font-semibold text-gray-900">{motorista.usuario.email}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Botões de Ação */}
                     <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-                            <Link
-                                href={`/motorista/perfil/editar-perfil`}
-                                className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition inline-block"
-                            >
-                                Editar Perfil
-                            </Link>
-                                
-                            <button
-                                onClick={() => setModalAberto(true)}
-                                className={cn(
-                                    buttonVariants({ variant: "destructive" }),
-                                    "flex items-center gap-2"
-                                )}
-                            >
-                                <Trash2 className="w-4 h-4" />
-                                Excluir Conta
-                            </button>
+                        <Link
+                            href={`/motorista/perfil/editar-perfil`}
+                            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition inline-flex items-center justify-center"
+                        >
+                            Editar Perfil
+                        </Link>
+                            
+                        <button
+                            onClick={() => setModalAberto(true)}
+                            className={cn(
+                                buttonVariants({ variant: "destructive" }),
+                                "flex items-center gap-2 justify-center"
+                            )}
+                        >
+                            <Trash2 className="w-4 h-4" />
+                            Excluir Conta
+                        </button>
                     </div>
                 </div>
             </Card>
 
+            {/* Modal de Confirmação */}
             {modalAberto && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center">
                     <div
@@ -181,25 +216,24 @@ export default function PerfilMotorista({ motorista }: PerfilMotoristaProps) {
                     />
                     <div className="relative bg-white rounded-2xl p-6 w-96 max-w-full shadow-2xl transform transition-all duration-300 scale-95 animate-scaleIn">
                         <h3 className="text-xl font-semibold text-gray-800 mb-3">
-                        Confirmar exclusão
+                            Confirmar exclusão
                         </h3>
                         <p className="text-gray-600 mb-6">
-                        Tem certeza que deseja excluir esta vaga? Esta ação não pode ser
-                        desfeita.
+                            Tem certeza que deseja excluir sua conta? Esta ação não pode ser desfeita e todos os seus dados serão permanentemente removidos.
                         </p>
                         <div className="flex justify-end gap-3">
-                        <button
-                            onClick={() => setModalAberto(false)}
-                            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            onClick={handleExcluir}
-                            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
-                        >
-                            Excluir
-                        </button>
+                            <button
+                                onClick={() => setModalAberto(false)}
+                                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleExcluir}
+                                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+                            >
+                                Excluir
+                            </button>
                         </div>
                     </div>
                 </div>
