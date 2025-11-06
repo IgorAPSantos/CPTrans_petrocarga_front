@@ -4,18 +4,20 @@ import { redirect } from "next/navigation";
 
 export async function addMotorista(prevState: unknown, formData: FormData) {
   const payload = {
-    nome: formData.get("nome") as string,
-    cpf: formData.get("cpf") as string,
-    telefone: formData.get("telefone") as string,
-    email: formData.get("email") as string,
-    senha: formData.get("senha") as string,
-    numero_cnh: formData.get("numeroCNH") as string,
-    tipo_cnh: (formData.get("tipoCNH") as string)?.toUpperCase(),
-    data_validade_cnh: formData.get("dataValidadeCNH") as string,
+    usuario: {
+      nome: formData.get("nome") as string,
+      cpf: formData.get("cpf") as string,
+      telefone: formData.get("telefone") as string,
+      email: formData.get("email") as string,
+      senha: formData.get("senha") as string,
+    },
+    tipoCNH: (formData.get("tipoCNH") as string)?.toUpperCase(),
+    numeroCNH: formData.get("numeroCNH") as string,
+    dataValidadeCNH: formData.get("dataValidadeCNH") as string,
   };
 
   const res = await fetch(
-    "https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas",
+    "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motoristas/cadastro",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -24,21 +26,37 @@ export async function addMotorista(prevState: unknown, formData: FormData) {
   );
 
   if (!res.ok) {
-    const errorData = await res.json();
+    let errorMessage = "Erro ao cadastrar motorista";
+
+    try {
+      const errorData = await res.json();
+      errorMessage = errorData.message || errorMessage;
+    } catch {
+      console.error("⚠️ Erro ao ler resposta da API (não era JSON).");
+    }
+
     return {
       error: true,
-      message: errorData.message || "Erro ao cadastrar motorista",
+      message: errorMessage,
       valores: payload,
     };
   }
 
-  revalidatePath("/gestor/lista-motoristas");
+  return {
+    error: false,
+    message: "Motorista cadastrado com sucesso!",
+  };
 }
 
 export async function deleteMotorista(motoristaId: string, token: string) {
   const res = await fetch(
-    `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas/${motoristaId}`,
-    { method: "DELETE" }
+    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motoristas/${motoristaId}`,
+    { method: "DELETE",
+      headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+    }
   );
 
   if (!res.ok) {
@@ -53,26 +71,32 @@ export async function deleteMotorista(motoristaId: string, token: string) {
   return { error: false, message: "Motorista deletado com sucesso!" };
 }
 
-export async function atualizarMotorista(prevState: unknown, formData: FormData) {
+export async function atualizarMotorista(formData: FormData, token: string) {
   const id = formData.get("id") as string;
 
   const payload = {
-    nome: formData.get("nome") as string,
-    cpf: formData.get("cpf") as string,
-    telefone: formData.get("telefone") as string,
-    email: formData.get("email") as string,
-    senha: formData.get("senha") as string,
-    numero_cnh: formData.get("numeroCNH") as string,
-    tipo_cnh: (formData.get("tipoCNH") as string)?.toUpperCase(),
-    data_validade_cnh: formData.get("dataValidadeCNH") as string,
+    usuario: {
+      nome: formData.get("nome") as string,
+      cpf: formData.get("cpf") as string,
+      telefone: formData.get("telefone") as string,
+      email: formData.get("email") as string,
+      senha: formData.get("senha") as string,
+    },
+    tipoCNH: (formData.get("tipoCNH") as string)?.toUpperCase(),
+    numeroCNH: formData.get("numeroCNH") as string,
+    dataValidadeCNH: formData.get("dataValidadeCNH") as string,
+    empresaId: null, // substitua pelo ID correto se necessário
   };
 
   const res = await fetch(
-    `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas/${id}`,
+    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motoristas/${id}`,
     {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
     }
   );
 
@@ -91,14 +115,14 @@ export async function atualizarMotorista(prevState: unknown, formData: FormData)
   redirect("/motoristas/perfil");
 }
 
-export async function getMotoristaByUserId(token: string, userId: string) {
+export async function getMotoristaByUserId(userId: string, token: string) {
   if (!token || !userId) {
     return { error: true, message: "Usuário ou token não fornecido" };
   }
 
   try {
     const res = await fetch(
-      `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motoristas/${userId}`,
+      `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motoristas/${userId}`,
       {
         method: "GET",
         headers: {

@@ -30,7 +30,7 @@ export default function LoginPage() {
         try {
         // Login normal
         const res = await fetch(
-            "https://cptranspetrocargaback-production.up.railway.app/petrocarga/auth/login",
+            "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/auth/login",
             {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -53,7 +53,7 @@ export default function LoginPage() {
         let motoristaId: string | undefined = undefined;
         if (usuario.permissao === "MOTORISTA") {
             const motoristaRes = await fetch(
-            `https://cptranspetrocargaback-production.up.railway.app/petrocarga/motorista/${usuario.id}`,
+            `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motorista/${usuario.id}`,
             {
                 headers: { Authorization: `Bearer ${token}` },
             }

@@ -5,15 +5,26 @@ import { Input } from "@/components/ui/input";
 import { atualizarVeiculo } from "@/lib/actions/veiculoActions";
 import { CircleAlert, TruckIcon } from "lucide-react";
 import Form from "next/form";
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import FormItem from "@/components/form/form-item";
 import React from "react";
 import { Veiculo } from "@/lib/types/veiculo";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
+import { useAuth } from "@/context/AuthContext";
 
 export default function EditarVeiculo({ veiculo }: { veiculo: Veiculo }) {
-    {/* Hook para gerenciar o estado da ação de atualizar veículo */}
-    const [state, atualizarVeiculoAction, pending] = useActionState(atualizarVeiculo, null);
+    const { token } = useAuth(); // Pega o token do contexto
+        
+        // Wrapper para passar o token na action
+        const atualizarComToken = async (prevState: any, formData: FormData) => {
+            if (!token) {
+                return { error: true, message: "Token não encontrado" };
+            }
+            return atualizarVeiculo(formData, token);
+        };
+    
+        const [state, atualizarVeiculoAction, pending] = useActionState(atualizarComToken, null);
+        const [exibirSenha, setExibirSenha] = useState(false);
 
     return (
         <main className="container mx-auto px-4 py-4 md:py-8">

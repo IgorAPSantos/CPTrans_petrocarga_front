@@ -2,12 +2,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function addVeiculo(prevState: unknown, formData: FormData) {
+export async function addVeiculo(formData: FormData, token: string) {
   {
     /* Extrair dados para validação */
   }
-  const cpf = formData.get("cpfProprietarioVeiculo") as string;
-  const cnpj = formData.get("cnpjProprietarioVeiculo") as string;
+  let cpf = formData.get("cpfProprietario") as string || null;
+  let cnpj = formData.get("cnpjProprietario") as string || null;
 
   {
     /* ✅ VALIDAÇÃO: Um dos dois deve ser preenchido */
@@ -31,6 +31,18 @@ export async function addVeiculo(prevState: unknown, formData: FormData) {
     };
   }
 
+  if (cpf && !cnpj) {
+    return ( 
+      cnpj = null
+    );
+  }
+
+  if (cnpj && !cpf) {
+    return (
+      cpf = null
+    );
+  }
+
   {
     /* Extrair e montar o payload JSON */
   }
@@ -40,18 +52,17 @@ export async function addVeiculo(prevState: unknown, formData: FormData) {
     modelo: formData.get("modelo") as string,
     tipo: (formData.get("tipo") as string)?.toUpperCase(),
     comprimento: Number(formData.get("comprimento")),
-    dono: {
-      cpfProprietarioVeiculo: cpf || null,
-      cnpjProprietarioVeiculo: cnpj || null,
-    },
+    cpfProprietario: formData.get("cpfProprietario") as string || null,
+    cnpjProprietario: formData.get("cnpjProprietario") as string || null,
+    usuarioId: formData.get("usuarioId"),
   };
 
   const res = await fetch(
-    "https://cptranspetrocargaback-production.up.railway.app/petrocarga/veiculos",
+    "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/veiculos",
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json",  Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     }
@@ -78,11 +89,15 @@ export async function addVeiculo(prevState: unknown, formData: FormData) {
   };
 }
 
-export async function deleteVeiculo(veiculoId: string) {
+export async function deleteVeiculo(veiculoId: string, token: string) {
   const res = await fetch(
-    `https://cptranspetrocargaback-production.up.railway.app/petrocarga/veiculos/${veiculoId}`,
+    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/veiculos/${veiculoId}`,
     {
       method: "DELETE",
+      headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
     }
   );
 
@@ -101,13 +116,13 @@ export async function deleteVeiculo(veiculoId: string) {
   };
 }
 
-export async function atualizarVeiculo(prevState: unknown, formData: FormData) {
+export async function atualizarVeiculo(formData: FormData, token: string) {
   {
     /* Certifique-se de enviar o ID no formData */
   }
   const id = formData.get("id") as string;
-  const cpf = formData.get("cpfProprietarioVeiculo") as string;
-  const cnpj = formData.get("cnpjProprietarioVeiculo") as string;
+  const cpf = formData.get("cpfProprietario") as string;
+  const cnpj = formData.get("cnpjProprietario") as string;
 
   {
     /* ✅ VALIDAÇÃO: Um dos dois deve ser preenchido */
@@ -140,18 +155,17 @@ export async function atualizarVeiculo(prevState: unknown, formData: FormData) {
     modelo: formData.get("modelo") as string,
     tipo: (formData.get("tipo") as string)?.toUpperCase(),
     comprimento: Number(formData.get("comprimento")),
-    dono: {
-      cpfProprietarioVeiculo: cpf || null,
-      cnpjProprietarioVeiculo: cnpj || null,
-    },
+    cpfProprietario: formData.get("cpf") as string || null,
+    cnpjProprietario: formData.get("cnpj") as string || null,
+    usuarioId: formData.get("usuarioId"),
   };
 
   const res = await fetch(
-    `https://cptranspetrocargaback-production.up.railway.app/petrocarga/veiculos/${id}`,
+    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/veiculos/${id}`,
     {
       method: "PATCH",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json", Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     }
@@ -199,7 +213,7 @@ export async function getVeiculosUsuario(
 ): Promise<GetVeiculosResult> {
   try {
     const res = await fetch(
-      `https://cptranspetrocargaback-production.up.railway.app/petrocarga/veiculos/usuario/${usuarioId}`,
+      `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/veiculos/usuario/${usuarioId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
