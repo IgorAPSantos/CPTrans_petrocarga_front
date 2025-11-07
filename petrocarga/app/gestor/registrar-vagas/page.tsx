@@ -1,9 +1,17 @@
-"use client"; 
+"use client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { addVaga } from "@/lib/actions/vagaActions";
+import { useAuth } from "@/context/AuthContext";
 import { CircleAlert, ParkingSquare } from "lucide-react";
 import Form from "next/form";
 import { useActionState } from "react";
@@ -13,23 +21,37 @@ import DiaSemana from "../../../components/gestor/dia-semana/dia-semana";
 import SelecaoCustomizada from "../../../components/gestor/selecaoItem/selecao-customizada";
 
 export default function Cadastro() {
-  {/* Hook para gerenciar o estado da ação de adicionar vaga */}
-  const [state, addVagaAction, pending] = useActionState(addVaga, null);
+  const { token } = useAuth();
+  {
+    /* Hook para gerenciar o estado da ação de adicionar vaga */
+  }
+  const [state, addVagaAction, pending] = useActionState(
+    async (prevState: unknown, formData: FormData) => {
+      if (!token) {
+        return {
+          error: true,
+          message: "Token de autenticação não encontrado.",
+        };
+      }
+      return await addVaga(formData, token);
+    },
+    null
+  );
 
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
       <Card className="w-full max-w-5xl mx-auto">
         <CardHeader className="space-y-3 text-center pb-6">
-                <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                    <ParkingSquare className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                    Cadastro de Veículo
-                </CardTitle>
-                <CardDescription className="text-base">
-                    Forneça os dados para adicionar uma nova vaga.
-                </CardDescription>
-            </CardHeader>
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+            <ParkingSquare className="w-8 h-8 text-white" />
+          </div>
+          <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+            Cadastro de Veículo
+          </CardTitle>
+          <CardDescription className="text-base">
+            Forneça os dados para adicionar uma nova vaga.
+          </CardDescription>
+        </CardHeader>
         <Form action={addVagaAction}>
           <CardContent className="p-4 md:p-6 lg:p-8">
             {/* Mensagem de erro */}
@@ -39,7 +61,7 @@ export default function Cadastro() {
                 <span className="text-sm md:text-base">{state.message}</span>
               </div>
             )}
-            
+
             {/* Código */}
             <FormItem
               name="Código"
@@ -81,10 +103,7 @@ export default function Cadastro() {
             </FormItem>
 
             {/* Cor da Vaga */}
-            <FormItem
-              name="Área"
-              description="Selecione a cor da área da vaga"
-            >
+            <FormItem name="Área" description="Selecione a cor da área da vaga">
               <SelecaoCustomizada
                 id="area"
                 name="area"
@@ -93,32 +112,26 @@ export default function Cadastro() {
                   { value: "vermelha", label: "Vermelha" },
                   { value: "amarela", label: "Amarela" },
                   { value: "azul", label: "Azul" },
-                  { value: "branca", label: "Branca" }
+                  { value: "branca", label: "Branca" },
                 ]}
               />
             </FormItem>
 
             {/* Tipo da Vaga */}
-            <FormItem
-              name="Tipo"
-              description="Perpendicular ou Paralela à rua"
-            >
+            <FormItem name="Tipo" description="Perpendicular ou Paralela à rua">
               <SelecaoCustomizada
                 id="tipo"
                 name="tipo"
                 placeholder="Selecione o tipo"
                 options={[
                   { value: "paralela", label: "Paralela" },
-                  { value: "perpendicular", label: "Perpendicular" }
+                  { value: "perpendicular", label: "Perpendicular" },
                 ]}
               />
             </FormItem>
 
             {/* Bairro */}
-            <FormItem
-              name="Bairro"
-              description="Exemplo: Centro"
-            >
+            <FormItem name="Bairro" description="Exemplo: Centro">
               <Input
                 className="rounded-sm border-gray-400 text-sm md:text-base"
                 id="bairro"
@@ -128,8 +141,8 @@ export default function Cadastro() {
             </FormItem>
 
             {/* Comprimento */}
-            <FormItem 
-              name="Comprimento" 
+            <FormItem
+              name="Comprimento"
               description="Comprimento em metros da vaga"
             >
               <Input
@@ -183,9 +196,9 @@ export default function Cadastro() {
 
             {/* Dias da semana */}
             <FormItem
-              name="Dias da semana" 
+              name="Dias da semana"
               description="Selecione os dias em que a vaga estará disponível e defina os horários"
-            > 
+            >
               <DiaSemana name="diaSemana" />
             </FormItem>
           </CardContent>

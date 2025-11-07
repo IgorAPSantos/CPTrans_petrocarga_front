@@ -10,15 +10,16 @@ export type DiaSemana =
 
 // Tipo para operações da vaga (horários por dia)
 export type OperacoesVaga = {
-  id: string;
-  diaSemanaAsEnum: DiaSemana;
+  id?: string;
+  codigoDiaSemana?: number;
+  diaSemanaAsEnum?: DiaSemana;
   horaInicio: string; // ex: "00:00:00"
   horaFim: string; // ex: "13:00:00"
 };
 
 // Endereço da vaga
 export type Endereco = {
-  id: string;
+  id?: string;
   codigoPmp: string;
   logradouro: string;
   bairro: string;
