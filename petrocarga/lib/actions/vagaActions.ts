@@ -11,9 +11,10 @@ export async function addVaga(formData: FormData, token: string) {
   console.log("diasSemanaRaw:", diasSemanaRaw);
 
   const diasSemana: {
+    codigoDiaSemana?: number;
     dia: string;
-    horarioInicio: string;
-    horarioFim: string;
+    horaInicio: string;
+    horaFim: string;
   }[] = diasSemanaRaw ? JSON.parse(diasSemanaRaw) : [];
   console.log("diasSemana parsed:", diasSemana);
 
@@ -32,9 +33,9 @@ export async function addVaga(formData: FormData, token: string) {
     referenciaGeoFim: formData.get("localizacao-fim") as string,
     comprimento: Number(formData.get("comprimento")),
     operacoesVaga: diasSemana.map((dia) => ({
-      codigoDiaSemana: Number(dia.dia),
-      horaInicio: dia.horarioInicio,
-      horaFim: dia.horarioFim,
+      codigoDiaSemana: Number(dia.codigoDiaSemana),
+      horaInicio: dia.horaInicio,
+      horaFim: dia.horaFim,
     })),
   };
 
