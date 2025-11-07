@@ -12,13 +12,21 @@ import React from "react";
 import DiaSemana from "@/components/gestor/dia-semana/dia-semana";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
 import { Vaga } from "@/lib/types/vaga";
+import { useAuth } from "@/context/AuthContext";
 
 export default function EditarVaga({ vaga }: { vaga: Vaga }) {
-  {
-    /* Hook para gerenciar o estado da ação de atualizar vaga */
-  }
+  const { token } = useAuth();
+
   const [state, atualizarVagaAction, pending] = useActionState(
-    atualizarVaga,
+    async (prevState: unknown, formData: FormData) => {
+      if (!token) {
+        return {
+          error: true,
+          message: "Token de autenticação não encontrado.",
+        };
+      }
+      return await atualizarVaga(formData, token);
+    },
     null
   );
 
@@ -26,11 +34,9 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
     <main className="container mx-auto px-4 py-4 md:py-8">
       <Card className="w-full max-w-5xl mx-auto">
         <Form action={atualizarVagaAction}>
-          {/* Campo hidden com o ID da vaga */}
           <input type="hidden" name="id" value={vaga.id} />
 
           <CardContent className="p-4 md:p-6 lg:p-8">
-            {/* Mensagem de erro */}
             {state?.error && (
               <div className="flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-4 mb-6 text-red-900">
                 <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" />
@@ -38,15 +44,15 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
               </div>
             )}
 
-            {/* Código */}
+            {/* Código PMP */}
             <FormItem
               name="Código"
               description="Ponha o código PMP da rua. Exemplo: Md-1234"
             >
               <Input
                 className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="codigo"
-                name="codigo"
+                id="codigoPmp"
+                name="codigoPmp"
                 maxLength={30}
                 placeholder="Md-1234"
                 defaultValue={vaga.endereco.codigoPmp}
@@ -67,7 +73,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
               />
             </FormItem>
 
-            {/* Número da Referência da Vaga  */}
+            {/* Número da Referência da Vaga */}
             <FormItem
               name="Número Referência"
               description="Números de locais por onde passa a área da vaga. Exemplo: 90 ao 130"
@@ -104,7 +110,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                 id="area"
                 name="area"
                 placeholder="Selecione a área"
-                defaultValue={vaga.area.toLowerCase()} // ← Adicione .toLowerCase() //
+                defaultValue={vaga.area.toLowerCase()}
                 options={[
                   { value: "vermelha", label: "Vermelha" },
                   { value: "amarela", label: "Amarela" },
@@ -117,10 +123,10 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
             {/* Tipo da Vaga */}
             <FormItem name="Tipo" description="Perpendicular ou Paralela à rua">
               <SelecaoCustomizada
-                id="tipo"
-                name="tipo"
+                id="tipoVaga"
+                name="tipoVaga"
                 placeholder="Selecione o tipo"
-                defaultValue={vaga.tipoVaga.toLowerCase()} // ← Adicione .toLowerCase() //
+                defaultValue={vaga.tipoVaga.toLowerCase()}
                 options={[
                   { value: "paralela", label: "Paralela" },
                   { value: "perpendicular", label: "Perpendicular" },
@@ -156,14 +162,14 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
               />
             </FormItem>
 
-            {/* Descrição */}
+            {/* Descrição / Referência */}
             <FormItem
               name="Descrição"
               description="Coloque pontos de referência ou outras informações relevantes"
             >
               <Textarea
-                id="descricao"
-                name="descricao"
+                id="referenciaEndereco"
+                name="referenciaEndereco"
                 className="min-h-[100px] md:min-h-[120px] rounded-sm border-gray-400 text-sm md:text-base resize-none"
                 placeholder="Ex: Em frente à praça, próximo ao mercado..."
                 defaultValue={vaga.referenciaEndereco}
@@ -177,8 +183,8 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
             >
               <Input
                 className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="localizacao-inicio"
-                name="localizacao-inicio"
+                id="referenciaGeoInicio"
+                name="referenciaGeoInicio"
                 placeholder="-23.55052, -46.633308"
                 defaultValue={vaga.referenciaGeoInicio}
               />
@@ -191,8 +197,8 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
             >
               <Input
                 className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="localizacao-fim"
-                name="localizacao-fim"
+                id="referenciaGeoFim"
+                name="referenciaGeoFim"
                 placeholder="-23.55052, -46.633308"
                 defaultValue={vaga.referenciaGeoFim}
               />
@@ -207,7 +213,6 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
             </FormItem>
           </CardContent>
 
-          {/* Footer com botão */}
           <CardFooter className="px-4 md:px-6 lg:px-8 pb-6 pt-2">
             <Button
               type="submit"

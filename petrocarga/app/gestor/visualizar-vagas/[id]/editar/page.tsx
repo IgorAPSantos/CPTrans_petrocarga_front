@@ -12,7 +12,9 @@ import Link from "next/link";
 export default function EditarVagaPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
+
   const { token, loading: authLoading } = useAuth();
+
   const [vaga, setVaga] = useState<Vaga | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -25,7 +27,6 @@ export default function EditarVagaPage() {
       try {
         const vagaData = await getVagaById(id, token);
         if (!vagaData) {
-          // Redireciona para lista de vagas se não encontrar
           router.replace("/gestor/visualizar-vagas");
         } else {
           setVaga(vagaData);
