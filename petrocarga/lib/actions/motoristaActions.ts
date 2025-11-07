@@ -51,11 +51,12 @@ export async function addMotorista(prevState: unknown, formData: FormData) {
 export async function deleteMotorista(motoristaId: string, token: string) {
   const res = await fetch(
     `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motoristas/${motoristaId}`,
-    { method: "DELETE",
+    {
+      method: "DELETE",
       headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -93,10 +94,10 @@ export async function atualizarMotorista(formData: FormData, token: string) {
     {
       method: "PATCH",
       headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
     }
   );
 
@@ -115,7 +116,7 @@ export async function atualizarMotorista(formData: FormData, token: string) {
   redirect("/motoristas/perfil");
 }
 
-export async function getMotoristaByUserId(userId: string, token: string) {
+export async function getMotoristaByUserId(token: string, userId: string) {
   if (!token || !userId) {
     return { error: true, message: "Usuário ou token não fornecido" };
   }
