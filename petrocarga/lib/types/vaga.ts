@@ -12,7 +12,7 @@ export type DiaSemana =
 export type OperacoesVaga = {
   id?: string;
   codigoDiaSemana?: number;
-  diaSemanaAsEnum?: DiaSemana;
+  diaSemanaAsEnum: DiaSemana;
   horaInicio: string; // ex: "00:00:00"
   horaFim: string; // ex: "13:00:00"
 };
