@@ -53,8 +53,8 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
             >
               <Input
                 className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="codigo"
-                name="codigo"
+                id="codigoPmp"
+                name="codigoPmp"
                 maxLength={30}
                 placeholder="Md-1234"
                 defaultValue={vaga.endereco.codigoPmp}

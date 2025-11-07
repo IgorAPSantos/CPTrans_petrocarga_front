@@ -109,20 +109,19 @@ export async function atualizarVaga(
   formData: FormData,
   token: string
 ) {
-  {
-    /* Certifique-se de enviar o ID no formData */
-  }
-  const id = formData.get("id") as string;
+  console.log("Token recebido:", token);
 
-  {
-    /* Extrair e montar o payload JSON */
-  }
+  // Certifique-se de enviar o ID no formData
+  const id = formData.get("id") as string;
+  console.log("ID da vaga:", id);
+
+  // Extrair e montar o payload JSON
   const diasSemanaRaw = formData.get("diaSemana") as string;
   const diasSemana = diasSemanaRaw ? JSON.parse(diasSemanaRaw) : [];
 
   const payload = {
     endereco: {
-      codigoPMP: formData.get("codigo") as string,
+      codigoPmp: formData.get("codigoPmp") as string,
       logradouro: formData.get("logradouro") as string,
       bairro: formData.get("bairro") as string,
     },
@@ -141,20 +140,25 @@ export async function atualizarVaga(
     })),
   };
 
+  console.log("Payload montado:", payload);
+
   const res = await fetch(
     `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas/${id}`,
     {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // <-- adiciona o token aqui
+        Authorization: `Bearer ${token}`, // token no header
       },
       body: JSON.stringify(payload),
     }
   );
 
+  console.log("Status da resposta:", res.status);
+
   if (!res.ok) {
     const errorData = await res.json();
+    console.error("Erro ao atualizar vaga:", errorData);
     return {
       error: true,
       message: errorData.message || "Erro ao atualizar vaga",
@@ -162,16 +166,14 @@ export async function atualizarVaga(
     };
   }
 
-  {
-    /* Revalida a lista e a página específica da vaga */
-  }
-  revalidatePath("/visualizar-vagas");
-  revalidatePath(`/visualizar-vagas/${id}`);
+  // Revalida a lista e a página específica da vaga
+  console.log("Atualização bem-sucedida! Revalidando páginas...");
+  revalidatePath("/gestor/visualizar-vagas");
+  revalidatePath(`/gestor/visualizar-vagas/${id}`);
 
-  {
-    /* Redireciona após sucesso */
-  }
-  redirect(`/visualizar-vagas/${id}`);
+  // Redireciona após sucesso
+  console.log("Redirecionando para a vaga:", `/gestor/visualizar-vagas/${id}`);
+  redirect(`/gestor/visualizar-vagas/${id}`);
 }
 
 // Funções para buscar vagas
