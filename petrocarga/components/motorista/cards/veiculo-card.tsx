@@ -23,7 +23,7 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
     }
 
     try {
-      await deleteVeiculo(veiculo.id);
+      await deleteVeiculo(veiculo.id, token);
       setModalAberto(false);
       router.back();
     } catch (err) {
