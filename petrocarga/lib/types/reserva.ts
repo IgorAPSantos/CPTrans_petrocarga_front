@@ -2,6 +2,8 @@ export type Reserva = {
   id: string;
   vagaId: string;
   referenciaGeoInicio: string;
+  logradouro: string;
+  bairro: string;
   referenciaGeoFim: string;
   motoristaId: string;
   veiculoId: string;

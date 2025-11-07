@@ -3,15 +3,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function addVeiculo(formData: FormData, token: string) {
-  {
-    /* Extrair dados para validação */
-  }
-  let cpf = formData.get("cpfProprietario") as string || null;
-  let cnpj = formData.get("cnpjProprietario") as string || null;
+  let cpf = (formData.get("cpfProprietario") as string) || null;
+  let cnpj = (formData.get("cnpjProprietario") as string) || null;
 
-  {
-    /* ✅ VALIDAÇÃO: Um dos dois deve ser preenchido */
-  }
   if (!cpf && !cnpj) {
     return {
       error: true,
@@ -20,9 +14,6 @@ export async function addVeiculo(formData: FormData, token: string) {
     };
   }
 
-  {
-    /* ✅ VALIDAÇÃO: Apenas um deve ser preenchido */
-  }
   if (cpf && cnpj) {
     return {
       error: true,
@@ -32,28 +23,21 @@ export async function addVeiculo(formData: FormData, token: string) {
   }
 
   if (cpf && !cnpj) {
-    return ( 
-      cnpj = null
-    );
+    cnpj = null;
   }
 
   if (cnpj && !cpf) {
-    return (
-      cpf = null
-    );
+    cpf = null;
   }
 
-  {
-    /* Extrair e montar o payload JSON */
-  }
   const payload = {
     placa: formData.get("placa") as string,
     marca: formData.get("marca") as string,
     modelo: formData.get("modelo") as string,
     tipo: (formData.get("tipo") as string)?.toUpperCase(),
     comprimento: Number(formData.get("comprimento")),
-    cpfProprietario: formData.get("cpfProprietario") as string || null,
-    cnpjProprietario: formData.get("cnpjProprietario") as string || null,
+    cpfProprietario: cpf,
+    cnpjProprietario: cnpj,
     usuarioId: formData.get("usuarioId"),
   };
 
@@ -62,7 +46,8 @@ export async function addVeiculo(formData: FormData, token: string) {
     {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",  Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     }
@@ -79,9 +64,6 @@ export async function addVeiculo(formData: FormData, token: string) {
 
   revalidatePath("/motoristas/veiculos&reservas");
 
-  {
-    /* Retornar sucesso */
-  }
   return {
     error: false,
     message: "Veículo cadastrado com sucesso!",
@@ -95,9 +77,9 @@ export async function deleteVeiculo(veiculoId: string, token: string) {
     {
       method: "DELETE",
       headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     }
   );
 
@@ -155,8 +137,8 @@ export async function atualizarVeiculo(formData: FormData, token: string) {
     modelo: formData.get("modelo") as string,
     tipo: (formData.get("tipo") as string)?.toUpperCase(),
     comprimento: Number(formData.get("comprimento")),
-    cpfProprietario: formData.get("cpf") as string || null,
-    cnpjProprietario: formData.get("cnpj") as string || null,
+    cpfProprietario: (formData.get("cpf") as string) || null,
+    cnpjProprietario: (formData.get("cnpj") as string) || null,
     usuarioId: formData.get("usuarioId"),
   };
 
@@ -165,7 +147,8 @@ export async function atualizarVeiculo(formData: FormData, token: string) {
     {
       method: "PATCH",
       headers: {
-        "Content-Type": "application/json", Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(payload),
     }

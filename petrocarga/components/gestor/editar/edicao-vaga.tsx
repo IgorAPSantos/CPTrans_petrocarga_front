@@ -12,16 +12,24 @@ import React from "react";
 import DiaSemana from "@/components/gestor/dia-semana/dia-semana";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
 import { Vaga } from "@/lib/types/vaga";
+import { useAuth } from "@/context/AuthContext";
 
 export default function EditarVaga({ vaga }: { vaga: Vaga }) {
+  const { token } = useAuth();
   {
     /* Hook para gerenciar o estado da ação de atualizar vaga */
   }
+  const atualizarVagaComToken = async (
+    prevState: unknown,
+    formData: FormData
+  ) => {
+    return atualizarVaga(prevState, formData, token || "");
+  };
+
   const [state, atualizarVagaAction, pending] = useActionState(
-    atualizarVaga,
+    atualizarVagaComToken,
     null
   );
-
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
       <Card className="w-full max-w-5xl mx-auto">
@@ -45,8 +53,8 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
             >
               <Input
                 className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="codigo"
-                name="codigo"
+                id="codigoPmp"
+                name="codigoPmp"
                 maxLength={30}
                 placeholder="Md-1234"
                 defaultValue={vaga.endereco.codigoPmp}

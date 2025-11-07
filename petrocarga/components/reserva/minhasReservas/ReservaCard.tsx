@@ -33,7 +33,8 @@ export default function ReservaCard({
       <div className="flex-1 flex flex-col gap-2 min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800 truncate">
-            {reserva.vagaId || "Local não informado"}
+            {`${reserva.logradouro} - ${reserva.bairro}` ||
+              "Local não informado"}
           </h3>
 
           {/* Status (desktop) */}
@@ -52,7 +53,7 @@ export default function ReservaCard({
         {/* Cidade de origem */}
         <p className="text-sm sm:text-base text-gray-500 flex items-center gap-1 truncate">
           <MapPin className="w-4 h-4 text-gray-400" />
-          {reserva.cidadeOrigem}
+          {`Local de Origem: ${reserva.cidadeOrigem}`}
         </p>
 
         {/* Informações adicionais */}
