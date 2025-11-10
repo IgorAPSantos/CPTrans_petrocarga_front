@@ -11,6 +11,7 @@ export function useVagas() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (token === undefined) return;
     if (!token) {
       setLoading(false);
       setVagas([]);
