@@ -58,7 +58,7 @@ export default function Cadastro() {
             <ParkingSquare className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-            Cadastro de Veículo
+            Cadastro de Vaga
           </CardTitle>
           <CardDescription className="text-base">
             Forneça os dados para adicionar uma nova vaga.
