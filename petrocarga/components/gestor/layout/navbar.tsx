@@ -26,7 +26,7 @@ export function Navbar() {
       <nav className="flex items-center justify-between p-4 max-w-6xl mx-auto">
         {/* Logo */}
         <Link
-          href="/gestor"
+          href="/gestor/relatorio"
           className="flex items-center space-x-2 text-xl font-bold hover:text-gray-300"
         >
           <Image src={Logo} alt="Logo da Cptrans" className="w-16 h-auto" />

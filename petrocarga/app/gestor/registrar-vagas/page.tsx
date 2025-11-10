@@ -12,13 +12,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { addVaga } from "@/lib/actions/vagaActions";
 import { useAuth } from "@/context/AuthContext";
-import { CircleAlert, ParkingSquare } from "lucide-react";
+import { ArrowLeft, CircleAlert, ParkingSquare } from "lucide-react";
 import Form from "next/form";
 import { useActionState } from "react";
 import FormItem from "../../../components/form/form-item";
 import React from "react";
 import DiaSemana from "../../../components/gestor/dia-semana/dia-semana";
 import SelecaoCustomizada from "../../../components/gestor/selecaoItem/selecao-customizada";
+import Link from "next/link";
 
 export default function Cadastro() {
   const { token } = useAuth();
@@ -40,6 +41,17 @@ export default function Cadastro() {
 
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
+      <div className="mx-auto max-w-5xl p-6">
+                <div className="mb-6">
+                    <Link
+                    href="/gestor/visualizar-vagas"
+                    className="text-muted-foreground hover:text-foreground inline-flex items-center"
+                    >
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        Voltar para visualizar vagas
+                    </Link>
+                </div>
+        </div>
       <Card className="w-full max-w-5xl mx-auto">
         <CardHeader className="space-y-3 text-center pb-6">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">

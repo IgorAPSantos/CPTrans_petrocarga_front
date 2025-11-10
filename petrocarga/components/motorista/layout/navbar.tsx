@@ -28,7 +28,7 @@ export function Navbar() {
         <nav className="flex items-center justify-between p-4 max-w-6xl mx-auto">
             {/* Logo */}
             <Link
-            href="/"
+            href="/motorista/reservar-vaga"
             className="flex items-center space-x-2 text-xl font-bold hover:text-gray-300"
             >
             <Image src={Logo} alt="Logo da Cptrans" className="w-16 h-auto" />
@@ -127,6 +127,28 @@ export function Navbar() {
                 </Link>
                 </li>
             ))}
+
+            {/* Meus Veículos no Mobile */}
+            <li className="hover:bg-blue-700 rounded">
+                <Link
+                href="/motorista/veiculos/meus-veiculos"
+                onClick={() => setMenuAberto(false)}
+                className="block px-2 py-1 w-full"
+                >
+                Meus Veículos
+                </Link>
+            </li>
+
+            {/* Meus Veículos no Mobile */}
+            <li className="hover:bg-blue-700 rounded">
+                <Link
+                href="/motorista/veiculos/cadastrar-veiculos"
+                onClick={() => setMenuAberto(false)}
+                className="block px-2 py-1 w-full"
+                >
+                Adicionar Veículo
+                </Link>
+            </li>
 
             {/* Meu Perfil no Mobile */}
             <li className="hover:bg-blue-700 rounded">
