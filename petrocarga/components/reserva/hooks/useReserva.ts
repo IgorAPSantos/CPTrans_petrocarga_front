@@ -108,7 +108,7 @@ export function useReserva(selectedVaga: Vaga | null) {
     const fetchMotorista = async () => {
       if (!user.motoristaId) {
         try {
-          const result = await getMotoristaByUserId(token, user.id);
+          const result = await getMotoristaByUserId(user.id, token);
           if (result.motoristaId) {
             setUser({ ...user, motoristaId: result.motoristaId });
           }

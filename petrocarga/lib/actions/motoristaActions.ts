@@ -116,7 +116,7 @@ export async function atualizarMotorista(formData: FormData, token: string) {
   redirect("/motoristas/perfil");
 }
 
-export async function getMotoristaByUserId(token: string, userId: string) {
+export async function getMotoristaByUserId(userId: string, token: string) {
   if (!token || !userId) {
     return { error: true, message: "Usuário ou token não fornecido" };
   }
