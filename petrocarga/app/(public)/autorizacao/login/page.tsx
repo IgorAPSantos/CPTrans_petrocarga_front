@@ -76,6 +76,9 @@ export default function LoginPage() {
         case "ADMIN":
           window.location.href = "/gestor/visualizar-vagas";
           break;
+        case "GESTOR":
+          window.location.href = "/gestor/visualizar-vagas";
+          break;
         case "MOTORISTA":
           window.location.href = "/motorista/reservar-vaga";
           break;
