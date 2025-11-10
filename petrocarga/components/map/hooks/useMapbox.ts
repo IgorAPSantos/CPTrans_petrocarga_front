@@ -62,8 +62,14 @@ export function useMapbox({
 
       globalMap.resize();
 
-      if (!mapLoaded && globalMap.isStyleLoaded()) {
-        setMapLoaded(true);
+      if (!mapLoaded) {
+        if (globalMap.isStyleLoaded()) {
+          setMapLoaded(true);
+        } else {
+          globalMap.once("styledata", () => {
+            setMapLoaded(true);
+          });
+        }
       }
 
       setMap(globalMap);
