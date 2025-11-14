@@ -72,8 +72,9 @@ export async function deleteMotorista(motoristaId: string, token: string) {
   return { error: false, message: "Motorista deletado com sucesso!" };
 }
 
-export async function atualizarMotorista(formData: FormData, token: string) {
+export async function atualizarMotorista(formData: FormData, token: string, userId: string) {
   const id = formData.get("id") as string;
+  const senha = formData.get("senha") as string;
 
   const payload = {
     usuario: {
@@ -81,18 +82,20 @@ export async function atualizarMotorista(formData: FormData, token: string) {
       cpf: formData.get("cpf") as string,
       telefone: formData.get("telefone") as string,
       email: formData.get("email") as string,
-      senha: formData.get("senha") as string,
+      ...(senha && { senha }),
     },
     tipoCNH: (formData.get("tipoCNH") as string)?.toUpperCase(),
     numeroCNH: formData.get("numeroCNH") as string,
     dataValidadeCNH: formData.get("dataValidadeCNH") as string,
-    empresaId: null, // substitua pelo ID correto se necessário
   };
+
+  console.log("🔐 Tentando atualizar motorista ID:", id);
+  console.log("📤 Payload:", JSON.stringify(payload, null, 2));
 
   const res = await fetch(
     `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motoristas/${id}`,
     {
-      method: "PATCH",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
@@ -101,12 +104,15 @@ export async function atualizarMotorista(formData: FormData, token: string) {
     }
   );
 
+  console.log("📥 Status:", res.status);
+
   if (!res.ok) {
     const errorData = await res.json();
+    console.error("❌ Erro completo:", errorData);
+    
     return {
       error: true,
-      message: errorData.message || "Erro ao atualizar motorista",
-      valores: payload,
+      message: `${errorData.erro || "Erro"}: ${errorData.cause || "Verifique suas permissões"}`,
     };
   }
 
