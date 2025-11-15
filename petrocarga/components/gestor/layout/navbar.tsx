@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import Logo from "@/public/Logo.png";
 import Image from "next/image";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/components/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { LogoutButton } from "@/components/logoutButton/logoutButton";
 
@@ -65,14 +65,18 @@ export function Navbar() {
         <ul className="flex flex-col gap-4 bg-blue-500 p-4 shadow-md">
           {links.map(({ href, label }) => (
             <li key={href} className="hover:bg-blue-700 rounded">
-              <Link href={href} onClick={() => setMenuAberto(false)} className="block px-2 py-1 w-full">
+              <Link
+                href={href}
+                onClick={() => setMenuAberto(false)}
+                className="block px-2 py-1 w-full"
+              >
                 {label}
               </Link>
             </li>
           ))}
           {/* Logout no Mobile */}
           <li className="hover:bg-blue-700 rounded">
-            < LogoutButton mobile={true} />
+            <LogoutButton mobile={true} />
           </li>
         </ul>
       </div>

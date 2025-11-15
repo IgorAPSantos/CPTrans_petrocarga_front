@@ -5,7 +5,6 @@ import VagaItem from "@/components/gestor/cards/vagas-item";
 import { Vaga } from "@/lib/types/vaga";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import * as vagaActions from "@/lib/actions/vagaActions";
-import { useAuth } from "@/context/AuthContext";
 
 // Hook simples de debounce
 function useDebounce(value: string, delay = 300) {
@@ -26,29 +25,27 @@ export function ListaVagas() {
   const [disponiveisPrimeiro, setDisponiveisPrimeiro] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { token } = useAuth(); // <-- pega o token do contexto
   const filtroDebounced = useDebounce(filtro, 300);
 
   // Buscar dados usando vagaActions.getVagas
   useEffect(() => {
-    if (!token) return; // evita chamar sem token
-
     const fetchVagas = async () => {
       setLoading(true);
       try {
-        const data: Vaga[] = await vagaActions.getVagas(token);
+        const data: Vaga[] = await vagaActions.getVagas();
         setVagas(data);
       } catch (err) {
         console.error("Erro ao carregar vagas:", err);
         setError(err instanceof Error ? err.message : "Erro desconhecido");
-        setVagas([]); // garante array vazio
+        setVagas([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchVagas();
-  }, [token]);
+  }, []);
+
   // Filtra as vagas
   const vagasFiltradas = vagas.filter((vaga) => {
     const filtroLower = filtroDebounced.toLowerCase();
