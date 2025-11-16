@@ -4,6 +4,16 @@ import { jwtDecode } from "jwt-decode";
 
 type UserRole = "gestor" | "motorista" | "agente" | "admin";
 
+interface JwtPayload {
+  nome: string;
+  id: string;
+  permissao: "ADMIN" | "GESTOR" | "MOTORISTA" | "AGENTE";
+  email: string;
+  sub: string;
+  iat: number;
+  exp: number;
+}
+
 // Rotas públicas
 const publicRoutes = [
   "/",
@@ -19,26 +29,25 @@ function isPublicRoute(pathname: string) {
   );
 }
 
-// Rotas autorizadas por role
 function hasRolePermission(pathname: string, role: UserRole) {
-  if (role === "admin") return true; // ADMIN pode tudo
-
+  if (role === "admin") return true;
   if (pathname.startsWith("/gestor") && role === "gestor") return true;
   if (pathname.startsWith("/motorista") && role === "motorista") return true;
   if (pathname.startsWith("/agente") && role === "agente") return true;
-
   return false;
 }
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  console.log("[Middleware] Rota acessada:", pathname);
 
-  // libera públicas
   if (isPublicRoute(pathname)) {
+    console.log("[Middleware] Rota pública, acesso liberado");
     return NextResponse.next();
   }
 
   const token = request.cookies.get("auth-token")?.value;
+  console.log("[Middleware] Token encontrado:", token);
 
   if (!token) {
     const redirectUrl = new URL("/autorizacao/login", request.url);
@@ -46,18 +55,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Decodifica o token
-  let decoded: any = null;
-
+  let decoded: JwtPayload;
   try {
-    decoded = jwtDecode(token);
-  } catch {
+    decoded = jwtDecode<JwtPayload>(token);
+    console.log("[Middleware] Payload JWT:", decoded);
+  } catch (err) {
     const redirectUrl = new URL("/autorizacao/login", request.url);
     redirectUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Verifica expiração
   const now = Date.now() / 1000;
   if (decoded.exp && decoded.exp < now) {
     const redirectUrl = new URL("/autorizacao/login", request.url);
@@ -65,20 +72,18 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  const userRole = decoded.permissao?.toLowerCase() as UserRole;
-
+  const userRole = decoded.permissao.toLowerCase() as UserRole;
   if (!userRole) {
     return NextResponse.redirect(new URL("/autorizacao/login", request.url));
   }
 
   if (!hasRolePermission(pathname, userRole)) {
     const home = {
-      gestor: "/gestor/relatorios",
+      gestor: "/gestor/visualizar-vagas",
       motorista: "/motorista/reservar-vaga",
       agente: "/agente/home",
-      admin: "/gestor/relatorios", // admin cai no dashboard gestor
+      admin: "/gestor/visualizar-vagas",
     }[userRole];
-
     return NextResponse.redirect(new URL(home, request.url));
   }
 
@@ -86,5 +91,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|_next).*)"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*).*)"],
 };
