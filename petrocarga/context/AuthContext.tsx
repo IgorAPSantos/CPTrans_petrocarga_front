@@ -72,6 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   function logout() {
     removeAuthToken();
     setUser(null);
+    window.location.href = "/autorizacao/login"; 
   }
 
   return (

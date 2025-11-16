@@ -38,5 +38,6 @@ export const setAuthToken = (newToken: string) => {
 };
 
 export const removeAuthToken = () => {
-  destroyCookie(undefined, TOKEN_COOKIE_NAME);
+  destroyCookie(undefined, TOKEN_COOKIE_NAME, { path: "/" });
 };
+

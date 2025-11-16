@@ -87,7 +87,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(home, request.url));
   }
 
-  return NextResponse.next();
+  return NextResponse.next({
+  headers: {
+    "Cache-Control": "no-store",
+  },
+});
 }
 
 export const config = {
