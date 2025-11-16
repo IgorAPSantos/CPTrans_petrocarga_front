@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useTransition } from "react";
-import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,18 +8,18 @@ import Form from "next/form";
 import FormItem from "@/components/form/form-item";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
 import { addVeiculo } from "@/lib/actions/veiculoActions";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/components/hooks/useAuth";
 import Link from "next/link";
 
 export default function CadastroVeiculo() {
-    const { token, user } = useAuth();
+    const { user } = useAuth();
     const [message, setMessage] = useState<{ error?: boolean; text?: string }>({});
     const [isPending, startTransition] = useTransition();
 
     async function handleAction(formData: FormData) {
         startTransition(async () => {
         try {
-            if (!token || !user) {
+            if (!user) {
             setMessage({
                 error: true,
                 text: "Usuário não autenticado. Faça login novamente.",
@@ -29,7 +28,7 @@ export default function CadastroVeiculo() {
             }
 
             formData.append("usuarioId", user.id);
-            const result = await addVeiculo(formData, token);
+            const result = await addVeiculo(formData);
 
             setMessage({
             error: result?.error,

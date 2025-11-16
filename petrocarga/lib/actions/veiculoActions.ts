@@ -1,36 +1,31 @@
 "use server";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { serverApi } from "../serverApi";
 
-export async function addVeiculo(formData: FormData, token: string) {
-  let cpf = (formData.get("cpfProprietario") as string) || null;
-  let cnpj = (formData.get("cnpjProprietario") as string) || null;
+
+function getCpfCnpj(formData: FormData) {
+  const cpf = (formData.get("cpfProprietario") as string) || null;
+  const cnpj = (formData.get("cnpjProprietario") as string) || null;
 
   if (!cpf && !cnpj) {
-    return {
-      error: true,
-      message: "Preencha o CPF ou CNPJ do proprietário",
-      valores: null,
-    };
+    return { error: "Preencha o CPF ou CNPJ do proprietário" };
   }
 
   if (cpf && cnpj) {
-    return {
-      error: true,
-      message: "Preencha apenas CPF ou CNPJ, não ambos",
-      valores: null,
-    };
+    return { error: "Preencha apenas CPF ou CNPJ, não ambos" };
   }
 
-  if (cpf && !cnpj) {
-    cnpj = null;
-  }
+  return {
+    cpf: cpf || null,
+    cnpj: cnpj || null,
+  };
+}
 
-  if (cnpj && !cpf) {
-    cpf = null;
-  }
 
-  const payload = {
+function buildVeiculoPayload(formData: FormData, cpf: string | null, cnpj: string | null) {
+  return {
     placa: formData.get("placa") as string,
     marca: formData.get("marca") as string,
     modelo: formData.get("modelo") as string,
@@ -40,21 +35,26 @@ export async function addVeiculo(formData: FormData, token: string) {
     cnpjProprietario: cnpj,
     usuarioId: formData.get("usuarioId"),
   };
+}
 
-  const res = await fetch(
-    "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/veiculos",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    }
-  );
+// ----------------------
+// POST VEICULO
+// ----------------------
+export async function addVeiculo(formData: FormData) {
+  const doc = getCpfCnpj(formData);
+  if ("error" in doc) {
+    return { error: true, message: doc.error, valores: null };
+  }
+
+  const payload = buildVeiculoPayload(formData, doc.cpf, doc.cnpj);
+
+  const res = await serverApi("/petrocarga/veiculos", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 
   if (!res.ok) {
-    const errorData = await res.json();
+    const errorData = await res.json().catch(() => ({}));
     return {
       error: true,
       message: errorData.message || "Erro ao cadastrar veículo",
@@ -64,27 +64,19 @@ export async function addVeiculo(formData: FormData, token: string) {
 
   revalidatePath("/motoristas/veiculos&reservas");
 
-  return {
-    error: false,
-    message: "Veículo cadastrado com sucesso!",
-    valores: null,
-  };
+  return { error: false, message: "Veículo cadastrado com sucesso!", valores: null };
 }
 
-export async function deleteVeiculo(veiculoId: string, token: string) {
-  const res = await fetch(
-    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/veiculos/${veiculoId}`,
-    {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+// ----------------------
+// DELETE VEICULO
+// ----------------------
+export async function deleteVeiculo(veiculoId: string) {
+  const res = await serverApi(`/petrocarga/veiculos/${veiculoId}`, {
+    method: "DELETE",
+  });
 
   if (!res.ok) {
-    const errorData = await res.json();
+    const errorData = await res.json().catch(() => ({}));
     return {
       error: true,
       message: errorData.message || "Erro ao deletar veículo",
@@ -92,70 +84,29 @@ export async function deleteVeiculo(veiculoId: string, token: string) {
   }
 
   revalidatePath("/motoristas/veiculos&reservas");
-  return {
-    error: false,
-    message: "Veículo deletado com sucesso!",
-  };
+  return { error: false, message: "Veículo deletado com sucesso!" };
 }
 
-export async function atualizarVeiculo(formData: FormData, token: string) {
-  {
-    /* Certifique-se de enviar o ID no formData */
-  }
+// ----------------------
+// PATCH VEICULO
+// ----------------------
+export async function atualizarVeiculo(formData: FormData) {
   const id = formData.get("id") as string;
-  const cpf = formData.get("cpfProprietario") as string;
-  const cnpj = formData.get("cnpjProprietario") as string;
 
-  {
-    /* ✅ VALIDAÇÃO: Um dos dois deve ser preenchido */
-  }
-  if (!cpf && !cnpj) {
-    return {
-      error: true,
-      message: "Preencha o CPF ou CNPJ do proprietário",
-      valores: null,
-    };
+  const doc = getCpfCnpj(formData);
+  if ("error" in doc) {
+    return { error: true, message: doc.error, valores: null };
   }
 
-  {
-    /* ✅ VALIDAÇÃO: Apenas um deve ser preenchido */
-  }
-  if (cpf && cnpj) {
-    return {
-      error: true,
-      message: "Preencha apenas CPF ou CNPJ, não ambos",
-      valores: null,
-    };
-  }
+  const payload = buildVeiculoPayload(formData, doc.cpf, doc.cnpj);
 
-  {
-    /* Extrair e montar o payload JSON */
-  }
-  const payload = {
-    placa: formData.get("placa") as string,
-    marca: formData.get("marca") as string,
-    modelo: formData.get("modelo") as string,
-    tipo: (formData.get("tipo") as string)?.toUpperCase(),
-    comprimento: Number(formData.get("comprimento")),
-    cpfProprietario: (formData.get("cpf") as string) || null,
-    cnpjProprietario: (formData.get("cnpj") as string) || null,
-    usuarioId: formData.get("usuarioId"),
-  };
-
-  const res = await fetch(
-    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/veiculos/${id}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    }
-  );
+  const res = await serverApi(`/petrocarga/veiculos/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
 
   if (!res.ok) {
-    const errorData = await res.json();
+    const errorData = await res.json().catch(() => ({}));
     return {
       error: true,
       message: errorData.message || "Erro ao atualizar veículo",
@@ -164,14 +115,34 @@ export async function atualizarVeiculo(formData: FormData, token: string) {
   }
 
   revalidatePath("/motoristas/veiculos&reservas");
-
-  {
-    /* Redirecionar após sucesso */
-  }
   redirect("/motoristas/veiculos&reservas");
 }
 
-type Veiculo = {
+// ----------------------
+// GET VEICULO POR USUARIO
+// ----------------------
+export async function getVeiculosUsuario(usuarioId: string): Promise<GetVeiculosResult> {
+  const res = await serverApi(`/petrocarga/veiculos/usuario/${usuarioId}`);
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    return {
+      error: true,
+      message: errorData.message || "Erro ao buscar veículos do usuário",
+      veiculos: [],
+    };
+  }
+
+  const data: Veiculo[] = await res.json();
+  return {
+    error: false,
+    message: "Veículos carregados com sucesso",
+    veiculos: data,
+  };
+}
+
+
+export type Veiculo = {
   id: string;
   placa: string;
   marca: string;
@@ -190,40 +161,3 @@ interface GetVeiculosResult {
   veiculos: Veiculo[];
 }
 
-export async function getVeiculosUsuario(
-  usuarioId: string,
-  token: string
-): Promise<GetVeiculosResult> {
-  try {
-    const res = await fetch(
-      `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/veiculos/usuario/${usuarioId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      return {
-        error: true,
-        message: errorData.message || "Erro ao buscar veículos do usuário",
-        veiculos: [],
-      };
-    }
-
-    const data: Veiculo[] = await res.json();
-    return {
-      error: false,
-      message: "Veículos carregados com sucesso",
-      veiculos: data,
-    };
-  } catch (err) {
-    return {
-      error: true,
-      message: (err as Error).message || "Erro desconhecido ao buscar veículos",
-      veiculos: [],
-    };
-  }
-}

@@ -5,7 +5,6 @@ import { Veiculo } from "@/lib/types/veiculo";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { deleteVeiculo } from "@/lib/actions/veiculoActions";
-import { useAuth } from "@/context/AuthContext";
 
 type VeiculoDetalhesProps = {
   veiculo: Veiculo;
@@ -14,16 +13,11 @@ type VeiculoDetalhesProps = {
 export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
   const [modalAberto, setModalAberto] = useState(false);
   const router = useRouter();
-  const { token } = useAuth();
 
   const handleExcluir = async () => {
-    if (!token) {
-      alert("Você precisa estar logado para excluir o veículo.");
-      return;
-    }
-
+  
     try {
-      await deleteVeiculo(veiculo.id, token);
+      await deleteVeiculo(veiculo.id);
       setModalAberto(false);
       router.back();
     } catch (err) {

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/components/hooks/useAuth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -21,81 +21,38 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { setToken, setUser } = useAuth();
+  const { login } = useAuth();
 
   async function handleLogin() {
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
-      // Login normal
-      const res = await fetch(
-        "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, senha }),
-        }
-      );
+  try {
+    const decodedUser = await login({ email, senha });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.erro || "Email ou senha incorretos");
-        setLoading(false);
-        return;
-      }
-
-      // Pega token e usuário
-      const { token, usuario } = data;
-
-      // Busca motorista pelo usuário logado (se for motorista)
-      let motoristaId: string | undefined = undefined;
-      if (usuario.permissao === "MOTORISTA") {
-        const motoristaRes = await fetch(
-          `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motorista/${usuario.id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (motoristaRes.ok) {
-          const motoristaData = await motoristaRes.json();
-          motoristaId = motoristaData.id; // esse é o ID que você precisa
-        } else {
-          console.warn("Motorista não encontrado para este usuário.");
-        }
-      }
-
-      // Salva no AuthContext
-      setToken(token);
-      setUser({ ...usuario, motoristaId });
-
-      // Redireciona conforme permissão
-      switch (usuario.permissao) {
-        case "ADMIN":
-          window.location.href = "/gestor/visualizar-vagas";
-          break;
-        case "GESTOR":
-          window.location.href = "/gestor/visualizar-vagas";
-          break;
-        case "MOTORISTA":
-          window.location.href = "/motorista/reservar-vaga";
-          break;
-        case "AGENTE":
-          window.location.href = "/agente/home";
-          break;
-        default:
-          setError("Permissão desconhecida");
-          break;
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Erro ao tentar entrar. Tente novamente.");
-    } finally {
-      setLoading(false);
+    // Redirecionamento baseado na permissão
+    switch (decodedUser.permissao) {
+      case "ADMIN":
+      case "GESTOR":
+        window.location.href = "/gestor/visualizar-vagas";
+        break;
+      case "MOTORISTA":
+        window.location.href = "/motorista/reservar-vaga";
+        break;
+      case "AGENTE":
+        window.location.href = "/agente/home";
+        break;
+      default:
+        setError("Permissão desconhecida");
     }
+  } catch (err: unknown) {
+    console.error(err);
+    setError("Email ou senha incorretos");
+  } finally {
+    setLoading(false);
   }
+}
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100">

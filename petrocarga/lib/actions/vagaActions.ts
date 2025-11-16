@@ -1,219 +1,129 @@
 "use server";
+
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Vaga, OperacoesVaga } from "../types/vaga";
+import { serverApi } from "../serverApi";
 
-// Função para cadastrar vaga
-export async function addVaga(formData: FormData, token: string) {
-  console.log("FormData recebida:", formData);
 
+function buildVagaPayload(formData: FormData) {
   const diasSemanaRaw = formData.get("diaSemana") as string;
-  console.log("diasSemanaRaw:", diasSemanaRaw);
+  const diasSemana: OperacoesVaga[] = diasSemanaRaw
+    ? JSON.parse(diasSemanaRaw)
+    : [];
 
-  const diasSemana: {
-    codigoDiaSemana?: number;
-    dia: string;
-    horaInicio: string;
-    horaFim: string;
-  }[] = diasSemanaRaw ? JSON.parse(diasSemanaRaw) : [];
-  console.log("diasSemana parsed:", diasSemana);
-
-  const payload = {
+  return {
     endereco: {
-      codigoPmp: formData.get("codigo") as string,
-      logradouro: formData.get("logradouro") as string,
-      bairro: formData.get("bairro") as string,
+      codigoPmp: formData.get("codigo") ?? formData.get("codigoPmp"),
+      logradouro: formData.get("logradouro"),
+      bairro: formData.get("bairro"),
     },
     area: (formData.get("area") as string)?.toUpperCase(),
-    numeroEndereco: formData.get("numeroEndereco") as string,
-    referenciaEndereco: formData.get("descricao") as string,
+    numeroEndereco: formData.get("numeroEndereco"),
+    referenciaEndereco: formData.get("descricao"),
     tipoVaga: (formData.get("tipo") as string)?.toUpperCase(),
-    status: "DISPONIVEL",
-    referenciaGeoInicio: formData.get("localizacao-inicio") as string,
-    referenciaGeoFim: formData.get("localizacao-fim") as string,
+    status: (formData.get("status") as string)?.toUpperCase() ?? "DISPONIVEL",
+    referenciaGeoInicio: formData.get("localizacao-inicio"),
+    referenciaGeoFim: formData.get("localizacao-fim"),
     comprimento: Number(formData.get("comprimento")),
     operacoesVaga: diasSemana.map((dia) => ({
-      codigoDiaSemana: Number(dia.codigoDiaSemana),
+      codigoDiaSemana: dia.codigoDiaSemana
+        ? Number(dia.codigoDiaSemana)
+        : undefined,
       horaInicio: dia.horaInicio,
       horaFim: dia.horaFim,
+      ...(dia.diaSemanaAsEnum ? { diaSemanaAsEnum: dia.diaSemanaAsEnum } : {}),
     })),
   };
-
-  console.log("Payload final:", payload);
-  console.log("Token usado:", token);
-
-  try {
-    const res = await fetch(
-      "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      }
-    );
-
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      console.log("Erro do backend:", errorData);
-      return {
-        error: true,
-        message: errorData.message || "Erro ao cadastrar vaga",
-        valores: payload,
-      };
-    }
-
-    console.log("Vaga cadastrada com sucesso!");
-    revalidatePath("/gestor/visualizar-vagas");
-
-    return {
-      error: false,
-      message: "Vaga cadastrada com sucesso!",
-      valores: null,
-    };
-  } catch (err) {
-    console.error("Erro ao fazer fetch:", err);
-    return {
-      error: true,
-      message: "Erro ao cadastrar vaga",
-      valores: payload,
-    };
-  }
 }
 
-// Função para deletar vaga
-export async function deleteVaga(id: string, token: string) {
-  if (!token) throw new Error("Token de autenticação não fornecido");
+// ----------------------
+// POST VAGA
+// ----------------------
+export async function addVaga(formData: FormData) {
+  const payload = buildVagaPayload(formData);
 
-  const res = await fetch(
-    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas/${id}`,
-    {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+  const res = await serverApi("/petrocarga/vagas", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 
-  if (!res.ok) throw new Error("Erro ao deletar a vaga");
+  if (!res.ok) {
+    console.error("Erro ao cadastrar vaga:", await res.text());
+    return { error: true, message: "Erro ao cadastrar vaga", valores: payload };
+    console.log("Vaga enviada:", Object.fromEntries(formData));
+  }
 
-  revalidatePath("/visualizar-vagas");
+  revalidatePath("/gestor/visualizar-vagas");
+  return { error: false, message: "Vaga cadastrada com sucesso!", valores: null };
+  console.log("Vaga enviada:", Object.fromEntries(formData));
+
+}
+
+// ----------------------
+// DELETE VAGA
+// ----------------------
+export async function deleteVaga(id: string) {
+  const res = await serverApi(`/petrocarga/vagas/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    console.error("Erro ao deletar vaga:", await res.text());
+    return { error: true, message: "Erro ao deletar vaga" };
+  }
+
+  revalidatePath("/gestor/visualizar-vagas");
   return { error: false, message: "Vaga deletada com sucesso!" };
 }
 
-// Função para atualizar vaga
-export async function atualizarVaga(
-  prevState: unknown,
-  formData: FormData,
-  token: string
-) {
-  console.log("Token recebido:", token);
-
-  // Certifique-se de enviar o ID no formData
+// ----------------------
+// PATCH VAGA
+// ----------------------
+export async function atualizarVaga(formData: FormData) {
   const id = formData.get("id") as string;
-  console.log("ID da vaga:", id);
+  const payload = buildVagaPayload(formData);
 
-  // Extrair e montar o payload JSON
-  const diasSemanaRaw = formData.get("diaSemana") as string;
-  const diasSemana = diasSemanaRaw ? JSON.parse(diasSemanaRaw) : [];
-
-  const payload = {
-    endereco: {
-      codigoPmp: formData.get("codigoPmp") as string,
-      logradouro: formData.get("logradouro") as string,
-      bairro: formData.get("bairro") as string,
-    },
-    area: (formData.get("area") as string)?.toUpperCase(),
-    numeroEndereco: formData.get("numeroEndereco") as string,
-    referenciaEndereco: formData.get("descricao") as string,
-    tipoVaga: (formData.get("tipo") as string)?.toUpperCase(),
-    status: (formData.get("status") as string)?.toUpperCase(),
-    referenciaGeoInicio: formData.get("localizacao-inicio") as string,
-    referenciaGeoFim: formData.get("localizacao-fim") as string,
-    comprimento: Number(formData.get("comprimento")),
-    operacoesVaga: diasSemana.map((dia: OperacoesVaga) => ({
-      codigoDiaSemana: Number(dia.codigoDiaSemana),
-      horaInicio: dia.horaInicio,
-      horaFim: dia.horaFim,
-    })),
-  };
-
-  console.log("Payload montado:", payload);
-
-  const res = await fetch(
-    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas/${id}`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`, // token no header
-      },
-      body: JSON.stringify(payload),
-    }
-  );
-
-  console.log("Status da resposta:", res.status);
+  const res = await serverApi(`/petrocarga/vagas/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
 
   if (!res.ok) {
-    const errorData = await res.json();
-    console.error("Erro ao atualizar vaga:", errorData);
-    return {
-      error: true,
-      message: errorData.message || "Erro ao atualizar vaga",
-      valores: payload,
-    };
+    console.error("Erro ao atualizar vaga:", await res.text());
+    return { error: true, message: "Erro ao atualizar vaga", valores: payload };
   }
 
-  // Revalida a lista e a página específica da vaga
-  console.log("Atualização bem-sucedida! Revalidando páginas...");
   revalidatePath("/gestor/visualizar-vagas");
   revalidatePath(`/gestor/visualizar-vagas/${id}`);
-
-  // Redireciona após sucesso
-  console.log("Redirecionando para a vaga:", `/gestor/visualizar-vagas/${id}`);
   redirect(`/gestor/visualizar-vagas/${id}`);
 }
 
-// Funções para buscar vagas
-export async function getVagas(token?: string): Promise<Vaga[]> {
-  try {
-    const res = await fetch(
-      "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas/all",
-      {
-        method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      }
-    );
-    if (!res.ok) throw new Error("Erro ao buscar vagas");
+// ----------------------
+// GET VAGAS
+// ----------------------
+export async function getVagas(): Promise<Vaga[]> {
+  const res = await serverApi("/petrocarga/vagas/all");
 
-    const data = await res.json().catch(() => []);
-    return Array.isArray(data) ? data : data?.vagas ?? [];
-  } catch (err) {
-    console.error("Erro em getVagas:", err);
+  if (!res.ok) {
+    console.error("Erro em getVagas:", await res.text());
     return [];
   }
+
+  const data = await res.json();
+  return Array.isArray(data) ? data : data?.vagas ?? [];
 }
 
-export async function getVagaById(
-  id: string,
-  token?: string
-): Promise<Vaga | null> {
-  try {
-    const res = await fetch(
-      `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/vagas/${id}`,
-      {
-        method: "GET",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      }
-    );
-    if (!res.ok) throw new Error(`Erro ao buscar vaga de ID ${id}`);
+// ----------------------
+// GET VAGAS POR ID
+// ----------------------
+export async function getVagaById(id: string): Promise<Vaga | null> {
+  const res = await serverApi(`/petrocarga/vagas/${id}`);
 
-    return await res.json().catch(() => null);
-  } catch (err) {
-    console.error(`Erro em getVagaById(${id}):`, err);
+  if (!res.ok) {
+    console.error(`Erro em getVagaById(${id}):`, await res.text());
     return null;
   }
+
+  return (await res.json()) ?? null;
 }

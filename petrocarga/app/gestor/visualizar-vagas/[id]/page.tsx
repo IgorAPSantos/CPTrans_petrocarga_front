@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import VagaDetalhes from "@/components/gestor/cards/vaga-card";
-import { useAuth } from "@/context/AuthContext";
 import * as vagaActions from "@/lib/actions/vagaActions";
 import { Vaga } from "@/lib/types/vaga";
 import { useParams } from "next/navigation";
@@ -10,7 +9,6 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function VagaPosting() {
-  const { token } = useAuth();
   const params = useParams() as { id: string };
 
   const [vaga, setVaga] = useState<Vaga | null>(null);
@@ -18,18 +16,13 @@ export default function VagaPosting() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!token) {
-      setError("Usuário não autenticado.");
-      setLoading(false);
-      return;
-    }
 
     async function fetchVaga() {
       setLoading(true);
       setError("");
 
       try {
-        const vagaData = await vagaActions.getVagaById(params.id, token);
+        const vagaData = await vagaActions.getVagaById(params.id);
 
         if (!vagaData) {
           setError("Vaga não encontrada.");
@@ -45,7 +38,7 @@ export default function VagaPosting() {
     }
 
     fetchVaga();
-  }, [params.id, token]);
+  }, [params.id]);
 
   if (loading) return <p className="text-center mt-6">Carregando vaga...</p>;
 

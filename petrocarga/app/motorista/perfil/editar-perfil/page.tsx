@@ -5,12 +5,12 @@ import { Motorista } from "@/lib/types/motorista";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/components/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { getMotoristaByUserId } from "@/lib/actions/motoristaActions";
 
 export default function EditarMotoristaPage() {
-    const { user, token } = useAuth();
+    const { user } = useAuth();
     const params = useParams() as { id: string };
 
     const [motorista, setMotorista] = useState<Motorista | null>(null);
@@ -18,7 +18,7 @@ export default function EditarMotoristaPage() {
     const [error, setError] = useState<string>("");
 
     useEffect(() => {
-        if (!user?.id || !token) {
+        if (!user?.id) {
             setError("Usuário não autenticado.");
             setLoading(false);
             return;
@@ -31,10 +31,10 @@ export default function EditarMotoristaPage() {
             setError("");
 
         try {
-            const result = await getMotoristaByUserId(userId, token!);
+            const result = await getMotoristaByUserId(userId);
 
             if (result.error) {
-            setError(result.message);
+            setError(result.motorista);
             setMotorista(null);
             } else {
                 const m = result.motorista;
@@ -53,7 +53,7 @@ export default function EditarMotoristaPage() {
         }
 
         fetchMotorista();
-    }, [user?.id, token, params.id]);
+    }, [user?.id, params.id]);
 
     if (loading) {
         return (
