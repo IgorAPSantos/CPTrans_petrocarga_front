@@ -2,6 +2,10 @@
 
 import { serverApi } from "@/lib/serverApi";
 
+// ----------------------
+// POST RESERVA
+// ----------------------
+
 export async function reservarVaga(formData: FormData) {
   const body = {
     vagaId: formData.get("vagaId"),
@@ -26,6 +30,9 @@ export async function reservarVaga(formData: FormData) {
   return res.json();
 }
 
+// ----------------------
+// GET RESERVAS
+// ----------------------
 export async function getReservasPorUsuario(usuarioId: string) {
   const res = await serverApi(`/petrocarga/reservas/usuario/${usuarioId}`);
 
@@ -36,6 +43,9 @@ export async function getReservasPorUsuario(usuarioId: string) {
   return res.json();
 }
 
+// ----------------------
+// GET RESERVAS ATIVAS
+// ----------------------
 export async function getReservasAtivas(vagaId: string) {
   const res = await serverApi(`/petrocarga/reservas/ativas/${vagaId}`);
 

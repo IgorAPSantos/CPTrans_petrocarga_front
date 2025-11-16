@@ -21,44 +21,38 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const { login, user } = useAuth();
+  const { login } = useAuth();
 
   async function handleLogin() {
-    setLoading(true);
-    setError("");
+  setLoading(true);
+  setError("");
 
-    try {
-      // Executa o login (salva token → decodifica → salva o user)
-      await login({ email, senha });
+  try {
+    const decodedUser = await login({ email, senha });
 
-      // usuário agora está disponível aqui:
-      if (!user) {
-        setError("Erro inesperado: usuário não encontrado após login.");
-        return;
-      }
-
-      // Redirecionamento baseado na permissão
-      switch (user.permissao) {
-        case "ADMIN":
-        case "GESTOR":
-          window.location.href = "/gestor/visualizar-vagas";
-          break;
-        case "MOTORISTA":
-          window.location.href = "/motorista/reservar-vaga";
-          break;
-        case "AGENTE":
-          window.location.href = "/agente/home";
-          break;
-        default:
-          setError("Permissão desconhecida");
-      }
-    } catch (err: any) {
-      console.error(err);
-      setError("Email ou senha incorretos");
-    } finally {
-      setLoading(false);
+    // Redirecionamento baseado na permissão
+    switch (decodedUser.permissao) {
+      case "ADMIN":
+      case "GESTOR":
+        window.location.href = "/gestor/visualizar-vagas";
+        break;
+      case "MOTORISTA":
+        window.location.href = "/motorista/reservar-vaga";
+        break;
+      case "AGENTE":
+        window.location.href = "/agente/home";
+        break;
+      default:
+        setError("Permissão desconhecida");
     }
+  } catch (err: unknown) {
+    console.error(err);
+    setError("Email ou senha incorretos");
+  } finally {
+    setLoading(false);
   }
+}
+
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100">

@@ -39,15 +39,12 @@ function hasRolePermission(pathname: string, role: UserRole) {
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  console.log("[Middleware] Rota acessada:", pathname);
 
   if (isPublicRoute(pathname)) {
-    console.log("[Middleware] Rota pública, acesso liberado");
     return NextResponse.next();
   }
 
   const token = request.cookies.get("auth-token")?.value;
-  console.log("[Middleware] Token encontrado:", token);
 
   if (!token) {
     const redirectUrl = new URL("/autorizacao/login", request.url);
@@ -58,7 +55,6 @@ export function middleware(request: NextRequest) {
   let decoded: JwtPayload;
   try {
     decoded = jwtDecode<JwtPayload>(token);
-    console.log("[Middleware] Payload JWT:", decoded);
   } catch (err) {
     const redirectUrl = new URL("/autorizacao/login", request.url);
     redirectUrl.searchParams.set("redirect", pathname);

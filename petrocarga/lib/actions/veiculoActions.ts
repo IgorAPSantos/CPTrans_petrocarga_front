@@ -4,9 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { serverApi } from "../serverApi";
 
-/* ------------------------------------------------------
-📌 Função auxiliar — normaliza CPF/CNPJ
------------------------------------------------------- */
+
 function getCpfCnpj(formData: FormData) {
   const cpf = (formData.get("cpfProprietario") as string) || null;
   const cnpj = (formData.get("cnpjProprietario") as string) || null;
@@ -25,9 +23,7 @@ function getCpfCnpj(formData: FormData) {
   };
 }
 
-/* ------------------------------------------------------
-📌 Função auxiliar — cria payload do veículo
------------------------------------------------------- */
+
 function buildVeiculoPayload(formData: FormData, cpf: string | null, cnpj: string | null) {
   return {
     placa: formData.get("placa") as string,
@@ -41,9 +37,9 @@ function buildVeiculoPayload(formData: FormData, cpf: string | null, cnpj: strin
   };
 }
 
-/* ------------------------------------------------------
-📌 Cadastrar veículo
------------------------------------------------------- */
+// ----------------------
+// POST VEICULO
+// ----------------------
 export async function addVeiculo(formData: FormData) {
   const doc = getCpfCnpj(formData);
   if ("error" in doc) {
@@ -71,9 +67,9 @@ export async function addVeiculo(formData: FormData) {
   return { error: false, message: "Veículo cadastrado com sucesso!", valores: null };
 }
 
-/* ------------------------------------------------------
-📌 Deletar veículo
------------------------------------------------------- */
+// ----------------------
+// DELETE VEICULO
+// ----------------------
 export async function deleteVeiculo(veiculoId: string) {
   const res = await serverApi(`/petrocarga/veiculos/${veiculoId}`, {
     method: "DELETE",
@@ -91,9 +87,9 @@ export async function deleteVeiculo(veiculoId: string) {
   return { error: false, message: "Veículo deletado com sucesso!" };
 }
 
-/* ------------------------------------------------------
-📌 Atualizar veículo
------------------------------------------------------- */
+// ----------------------
+// PATCH VEICULO
+// ----------------------
 export async function atualizarVeiculo(formData: FormData) {
   const id = formData.get("id") as string;
 
@@ -122,31 +118,9 @@ export async function atualizarVeiculo(formData: FormData) {
   redirect("/motoristas/veiculos&reservas");
 }
 
-/* ------------------------------------------------------
-📌 Tipos
------------------------------------------------------- */
-export type Veiculo = {
-  id: string;
-  placa: string;
-  marca: string;
-  modelo: string;
-  tipo: string;
-  comprimento: number;
-  dono: {
-    cpfProprietarioVeiculo: string | null;
-    cnpjProprietarioVeiculo: string | null;
-  };
-};
-
-interface GetVeiculosResult {
-  error: boolean;
-  message: string;
-  veiculos: Veiculo[];
-}
-
-/* ------------------------------------------------------
-📌 Buscar veículos por usuário
------------------------------------------------------- */
+// ----------------------
+// GET VEICULO POR USUARIO
+// ----------------------
 export async function getVeiculosUsuario(usuarioId: string): Promise<GetVeiculosResult> {
   const res = await serverApi(`/petrocarga/veiculos/usuario/${usuarioId}`);
 
@@ -166,3 +140,24 @@ export async function getVeiculosUsuario(usuarioId: string): Promise<GetVeiculos
     veiculos: data,
   };
 }
+
+
+export type Veiculo = {
+  id: string;
+  placa: string;
+  marca: string;
+  modelo: string;
+  tipo: string;
+  comprimento: number;
+  dono: {
+    cpfProprietarioVeiculo: string | null;
+    cnpjProprietarioVeiculo: string | null;
+  };
+};
+
+interface GetVeiculosResult {
+  error: boolean;
+  message: string;
+  veiculos: Veiculo[];
+}
+

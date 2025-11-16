@@ -5,9 +5,7 @@ import { redirect } from "next/navigation";
 import { Vaga, OperacoesVaga } from "../types/vaga";
 import { serverApi } from "../serverApi";
 
-/* -----------------------------------------------------
-📌 Função auxiliar — monta payload da vaga
------------------------------------------------------ */
+
 function buildVagaPayload(formData: FormData) {
   const diasSemanaRaw = formData.get("diaSemana") as string;
   const diasSemana: OperacoesVaga[] = diasSemanaRaw
@@ -39,9 +37,9 @@ function buildVagaPayload(formData: FormData) {
   };
 }
 
-/* -----------------------------------------------------
-📌 Cadastrar vaga
------------------------------------------------------ */
+// ----------------------
+// POST VAGA
+// ----------------------
 export async function addVaga(formData: FormData) {
   const payload = buildVagaPayload(formData);
 
@@ -62,9 +60,9 @@ export async function addVaga(formData: FormData) {
 
 }
 
-/* -----------------------------------------------------
-📌 Deletar vaga
------------------------------------------------------ */
+// ----------------------
+// DELETE VAGA
+// ----------------------
 export async function deleteVaga(id: string) {
   const res = await serverApi(`/petrocarga/vagas/${id}`, {
     method: "DELETE",
@@ -79,9 +77,9 @@ export async function deleteVaga(id: string) {
   return { error: false, message: "Vaga deletada com sucesso!" };
 }
 
-/* -----------------------------------------------------
-📌 Atualizar vaga
------------------------------------------------------ */
+// ----------------------
+// PATCH VAGA
+// ----------------------
 export async function atualizarVaga(formData: FormData) {
   const id = formData.get("id") as string;
   const payload = buildVagaPayload(formData);
@@ -101,9 +99,9 @@ export async function atualizarVaga(formData: FormData) {
   redirect(`/gestor/visualizar-vagas/${id}`);
 }
 
-/* -----------------------------------------------------
-📌 Buscar todas as vagas
------------------------------------------------------ */
+// ----------------------
+// GET VAGAS
+// ----------------------
 export async function getVagas(): Promise<Vaga[]> {
   const res = await serverApi("/petrocarga/vagas/all");
 
@@ -116,9 +114,9 @@ export async function getVagas(): Promise<Vaga[]> {
   return Array.isArray(data) ? data : data?.vagas ?? [];
 }
 
-/* -----------------------------------------------------
-📌 Buscar vaga por ID
------------------------------------------------------ */
+// ----------------------
+// GET VAGAS POR ID
+// ----------------------
 export async function getVagaById(id: string): Promise<Vaga | null> {
   const res = await serverApi(`/petrocarga/vagas/${id}`);
 

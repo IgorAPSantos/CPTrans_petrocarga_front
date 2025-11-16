@@ -18,7 +18,7 @@ interface AuthContextData {
   isAuthenticated: boolean;
   user: DecodedToken | null;
   loading: boolean;
-  login: (data: { email: string; senha: string }) => Promise<void>;
+  login: (data: { email: string; senha: string }) => Promise<DecodedToken>;
   logout: () => void;
 }
 
@@ -35,9 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (token) {
       try {
         const decoded = jwtDecode<DecodedToken>(token);
-
         setUser(decoded);
-
         api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       } catch (err) {
         console.error("Token inválido:", err);
@@ -60,19 +58,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // salva cookie + header
     setAuthToken(token);
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
     // decodifica token
     const decoded = jwtDecode<DecodedToken>(token);
-
     setUser(decoded);
 
-    // TODO: redirecionar usuário para dashboard correto
+    return decoded; // 🔹 retorna o usuário decodificado
   }
 
   function logout() {
     removeAuthToken();
     setUser(null);
-    window.location.href = "/autorizacao/login"; 
+    window.location.href = "/autorizacao/login";
   }
 
   return (
