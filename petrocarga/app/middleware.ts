@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtDecode } from "jwt-decode";
 
-type UserRole = "gestor" | "motorista" | "agente";
+type UserRole = "gestor" | "motorista" | "agente" | "admin";
 
-// Rotas públicas que não precisam de autenticação
+// Rotas públicas
 const publicRoutes = [
   "/",
   "/quem-somos",
@@ -13,82 +13,78 @@ const publicRoutes = [
   "/autorizacao/cadastro",
 ];
 
-function isPublicRoute(pathname: string): boolean {
-  return publicRoutes.some((route) => {
-    if (route === "/") return pathname === "/";
-    return pathname.startsWith(route);
-  });
+function isPublicRoute(pathname: string) {
+  return publicRoutes.some((route) =>
+    route === "/" ? pathname === "/" : pathname.startsWith(route)
+  );
 }
 
-// Verifica se usuário pode acessar rota conforme sua role
-function hasRoutePermission(pathname: string, userRole: UserRole): boolean {
-  if (pathname.startsWith("/gestor") && userRole === "gestor") return true;
-  if (pathname.startsWith("/motorista") && userRole === "motorista")
-    return true;
-  if (pathname.startsWith("/agente") && userRole === "agente") return true;
+// Rotas autorizadas por role
+function hasRolePermission(pathname: string, role: UserRole) {
+  if (role === "admin") return true; // ADMIN pode tudo
+
+  if (pathname.startsWith("/gestor") && role === "gestor") return true;
+  if (pathname.startsWith("/motorista") && role === "motorista") return true;
+  if (pathname.startsWith("/agente") && role === "agente") return true;
+
   return false;
 }
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Liberar rotas públicas
+  // libera públicas
   if (isPublicRoute(pathname)) {
     return NextResponse.next();
   }
 
-  // Pega token do cookie
   const token = request.cookies.get("auth-token")?.value;
 
   if (!token) {
-    const url = new URL("/autorizacao/login", request.url);
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    const redirectUrl = new URL("/autorizacao/login", request.url);
+    redirectUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
-  // Decodificar token para obter role
-  let userRole: UserRole | null = null;
+  // Decodifica o token
+  let decoded: any = null;
 
   try {
-    const decoded: any = jwtDecode(token);
-    userRole = decoded.permissao?.toLowerCase();
-  } catch (err) {
-    console.error("Erro ao decodificar JWT no middleware:", err);
-
-    const url = new URL("/autorizacao/login", request.url);
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    decoded = jwtDecode(token);
+  } catch {
+    const redirectUrl = new URL("/autorizacao/login", request.url);
+    redirectUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(redirectUrl);
   }
+
+  // Verifica expiração
+  const now = Date.now() / 1000;
+  if (decoded.exp && decoded.exp < now) {
+    const redirectUrl = new URL("/autorizacao/login", request.url);
+    redirectUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  const userRole = decoded.permissao?.toLowerCase() as UserRole;
 
   if (!userRole) {
-    const url = new URL("/autorizacao/login", request.url);
-    url.searchParams.set("redirect", pathname);
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(new URL("/autorizacao/login", request.url));
   }
 
-  // Verifica autorização
-  if (!hasRoutePermission(pathname, userRole)) {
-    let homeRoute = "/";
+  if (!hasRolePermission(pathname, userRole)) {
+    const home = {
+      gestor: "/gestor/relatorios",
+      motorista: "/motorista/reservar-vaga",
+      agente: "/agente/home",
+      admin: "/gestor/relatorios", // admin cai no dashboard gestor
+    }[userRole];
 
-    switch (userRole) {
-      case "gestor":
-        homeRoute = "/gestor/relatorios";
-        break;
-      case "motorista":
-        homeRoute = "/motorista/reservar-vaga";
-        break;
-      case "agente":
-        homeRoute = "/agente/home";
-        break;
-    }
-
-    return NextResponse.redirect(new URL(homeRoute, request.url));
+    return NextResponse.redirect(new URL(home, request.url));
   }
 
   return NextResponse.next();
 }
 
-// Middleware aplicado a todas as rotas (exceto arquivos estáticos)
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\..*|_next).*)"],
 };

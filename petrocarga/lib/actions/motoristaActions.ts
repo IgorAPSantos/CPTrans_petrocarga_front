@@ -1,8 +1,13 @@
 "use server";
+
+import { serverApi } from "@/lib/serverApi";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function addMotorista(prevState: unknown, formData: FormData) {
+// ----------------------
+// ADD MOTORISTA
+// ----------------------
+export async function addMotorista(_: unknown, formData: FormData) {
   const payload = {
     usuario: {
       nome: formData.get("nome") as string,
@@ -16,63 +21,51 @@ export async function addMotorista(prevState: unknown, formData: FormData) {
     dataValidadeCNH: formData.get("dataValidadeCNH") as string,
   };
 
-  const res = await fetch(
-    "https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motoristas/cadastro",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    }
-  );
+  const res = await serverApi("/petrocarga/motoristas/cadastro", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 
   if (!res.ok) {
-    let errorMessage = "Erro ao cadastrar motorista";
+    let msg = "Erro ao cadastrar motorista";
 
     try {
-      const errorData = await res.json();
-      errorMessage = errorData.message || errorMessage;
-    } catch {
-      console.error("⚠️ Erro ao ler resposta da API (não era JSON).");
-    }
+      const data = await res.json();
+      msg = data.message ?? msg;
+    } catch {}
 
-    return {
-      error: true,
-      message: errorMessage,
-      valores: payload,
-    };
+    return { error: true, message: msg, valores: payload };
   }
 
-  return {
-    error: false,
-    message: "Motorista cadastrado com sucesso!",
-  };
+  return { error: false, message: "Motorista cadastrado com sucesso!" };
 }
 
-export async function deleteMotorista(motoristaId: string, token: string) {
-  const res = await fetch(
-    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motoristas/${motoristaId}`,
-    {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+// ----------------------
+// DELETE MOTORISTA
+// ----------------------
+export async function deleteMotorista(motoristaId: string) {
+  const res = await serverApi(`/petrocarga/motoristas/${motoristaId}`, {
+    method: "DELETE",
+  });
 
   if (!res.ok) {
-    const errorData = await res.json();
-    return {
-      error: true,
-      message: errorData.message || "Erro ao deletar motorista",
-    };
+    let msg = "Erro ao deletar motorista";
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
   }
 
   revalidatePath("/motoristas/veiculos&reservas");
   return { error: false, message: "Motorista deletado com sucesso!" };
 }
 
-export async function atualizarMotorista(formData: FormData, token: string, userId: string) {
+// ----------------------
+// ATUALIZAR MOTORISTA
+// ----------------------
+export async function atualizarMotorista(formData: FormData) {
   const id = formData.get("id") as string;
   const senha = formData.get("senha") as string;
 
@@ -82,38 +75,27 @@ export async function atualizarMotorista(formData: FormData, token: string, user
       cpf: formData.get("cpf") as string,
       telefone: formData.get("telefone") as string,
       email: formData.get("email") as string,
-      ...(senha && { senha }),
+      ...(senha ? { senha } : {}),
     },
     tipoCNH: (formData.get("tipoCNH") as string)?.toUpperCase(),
     numeroCNH: formData.get("numeroCNH") as string,
     dataValidadeCNH: formData.get("dataValidadeCNH") as string,
   };
 
-  console.log("🔐 Tentando atualizar motorista ID:", id);
-  console.log("📤 Payload:", JSON.stringify(payload, null, 2));
-
-  const res = await fetch(
-    `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motoristas/${id}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    }
-  );
-
-  console.log("📥 Status:", res.status);
+  const res = await serverApi(`/petrocarga/motoristas/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
 
   if (!res.ok) {
-    const errorData = await res.json();
-    console.error("❌ Erro completo:", errorData);
-    
-    return {
-      error: true,
-      message: `${errorData.erro || "Erro"}: ${errorData.cause || "Verifique suas permissões"}`,
-    };
+    let msg = "Erro ao atualizar motorista";
+
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
   }
 
   revalidatePath("/gestor/lista-motoristas");
@@ -122,35 +104,23 @@ export async function atualizarMotorista(formData: FormData, token: string, user
   redirect("/motoristas/perfil");
 }
 
-export async function getMotoristaByUserId(userId: string, token: string) {
-  if (!token || !userId) {
-    return { error: true, message: "Usuário ou token não fornecido" };
+// ----------------------
+// GET MOTORISTA BY USER ID
+// ----------------------
+export async function getMotoristaByUserId(userId: string) {
+  const res = await serverApi(`/petrocarga/motoristas/${userId}`);
+
+  if (!res.ok) {
+    let msg = "Erro ao buscar motorista";
+
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
   }
 
-  try {
-    const res = await fetch(
-      `https://cptranspetrocargaback-production-ccd6.up.railway.app/petrocarga/motoristas/${userId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (!res.ok) {
-      const errorData = await res.json();
-      return {
-        error: true,
-        message: errorData.message || "Erro ao buscar motorista",
-      };
-    }
-
-    const motorista = await res.json();
-    return { error: false, motoristaId: motorista.id, motorista };
-  } catch (error) {
-    console.error("Erro ao buscar motorista:", error);
-    return { error: true, message: "Erro interno ao buscar motorista" };
-  }
+  const data = await res.json();
+  return { error: false, motoristaId: data.id, motorista: data };
 }

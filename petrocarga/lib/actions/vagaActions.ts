@@ -3,28 +3,30 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Vaga, OperacoesVaga } from "../types/vaga";
-import { api } from "@/service/api";
+import { serverApi } from "../serverApi";
 
-// Função para cadastrar vaga
-export async function addVaga(formData: FormData) {
+/* -----------------------------------------------------
+📌 Função auxiliar — monta payload da vaga
+----------------------------------------------------- */
+function buildVagaPayload(formData: FormData) {
   const diasSemanaRaw = formData.get("diaSemana") as string;
   const diasSemana: OperacoesVaga[] = diasSemanaRaw
     ? JSON.parse(diasSemanaRaw)
     : [];
 
-  const payload = {
+  return {
     endereco: {
-      codigoPmp: formData.get("codigo") as string,
-      logradouro: formData.get("logradouro") as string,
-      bairro: formData.get("bairro") as string,
+      codigoPmp: formData.get("codigo") ?? formData.get("codigoPmp"),
+      logradouro: formData.get("logradouro"),
+      bairro: formData.get("bairro"),
     },
     area: (formData.get("area") as string)?.toUpperCase(),
-    numeroEndereco: formData.get("numeroEndereco") as string,
-    referenciaEndereco: formData.get("descricao") as string,
+    numeroEndereco: formData.get("numeroEndereco"),
+    referenciaEndereco: formData.get("descricao"),
     tipoVaga: (formData.get("tipo") as string)?.toUpperCase(),
-    status: "DISPONIVEL",
-    referenciaGeoInicio: formData.get("localizacao-inicio") as string,
-    referenciaGeoFim: formData.get("localizacao-fim") as string,
+    status: (formData.get("status") as string)?.toUpperCase() ?? "DISPONIVEL",
+    referenciaGeoInicio: formData.get("localizacao-inicio"),
+    referenciaGeoFim: formData.get("localizacao-fim"),
     comprimento: Number(formData.get("comprimento")),
     operacoesVaga: diasSemana.map((dia) => ({
       codigoDiaSemana: dia.codigoDiaSemana
@@ -35,94 +37,92 @@ export async function addVaga(formData: FormData) {
       diaSemanaAsEnum: dia.diaSemanaAsEnum,
     })),
   };
+}
 
-  try {
-    const { data } = await api.post("/petrocarga/vagas", payload);
-    revalidatePath("/gestor/visualizar-vagas");
-    return {
-      error: false,
-      message: "Vaga cadastrada com sucesso!",
-      valores: null,
-    };
-  } catch (err: unknown) {
-    console.error("Erro ao cadastrar vaga:", err);
+/* -----------------------------------------------------
+📌 Cadastrar vaga
+----------------------------------------------------- */
+export async function addVaga(formData: FormData) {
+  const payload = buildVagaPayload(formData);
+
+  const res = await serverApi("/petrocarga/vagas", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    console.error("Erro ao cadastrar vaga:", await res.text());
     return { error: true, message: "Erro ao cadastrar vaga", valores: payload };
   }
+
+  revalidatePath("/gestor/visualizar-vagas");
+  return { error: false, message: "Vaga cadastrada com sucesso!", valores: null };
 }
 
-// Função para deletar vaga
+/* -----------------------------------------------------
+📌 Deletar vaga
+----------------------------------------------------- */
 export async function deleteVaga(id: string) {
-  try {
-    await api.delete(`/petrocarga/vagas/${id}`);
-    revalidatePath("/gestor/visualizar-vagas");
-    return { error: false, message: "Vaga deletada com sucesso!" };
-  } catch (err: unknown) {
-    console.error("Erro ao deletar vaga:", err);
+  const res = await serverApi(`/petrocarga/vagas/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    console.error("Erro ao deletar vaga:", await res.text());
     return { error: true, message: "Erro ao deletar vaga" };
   }
+
+  revalidatePath("/gestor/visualizar-vagas");
+  return { error: false, message: "Vaga deletada com sucesso!" };
 }
 
-// Função para atualizar vaga
+/* -----------------------------------------------------
+📌 Atualizar vaga
+----------------------------------------------------- */
 export async function atualizarVaga(formData: FormData) {
   const id = formData.get("id") as string;
-  const diasSemanaRaw = formData.get("diaSemana") as string;
-  const diasSemana: OperacoesVaga[] = diasSemanaRaw
-    ? JSON.parse(diasSemanaRaw)
-    : [];
+  const payload = buildVagaPayload(formData);
 
-  const payload = {
-    endereco: {
-      codigoPmp: formData.get("codigoPmp") as string,
-      logradouro: formData.get("logradouro") as string,
-      bairro: formData.get("bairro") as string,
-    },
-    area: (formData.get("area") as string)?.toUpperCase(),
-    numeroEndereco: formData.get("numeroEndereco") as string,
-    referenciaEndereco: formData.get("descricao") as string,
-    tipoVaga: (formData.get("tipo") as string)?.toUpperCase(),
-    status: (formData.get("status") as string)?.toUpperCase(),
-    referenciaGeoInicio: formData.get("localizacao-inicio") as string,
-    referenciaGeoFim: formData.get("localizacao-fim") as string,
-    comprimento: Number(formData.get("comprimento")),
-    operacoesVaga: diasSemana.map((dia) => ({
-      codigoDiaSemana: dia.codigoDiaSemana
-        ? Number(dia.codigoDiaSemana)
-        : undefined,
-      horaInicio: dia.horaInicio,
-      horaFim: dia.horaFim,
-      diaSemanaAsEnum: dia.diaSemanaAsEnum,
-    })),
-  };
+  const res = await serverApi(`/petrocarga/vagas/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
 
-  try {
-    await api.patch(`/petrocarga/vagas/${id}`, payload);
-    revalidatePath("/gestor/visualizar-vagas");
-    revalidatePath(`/gestor/visualizar-vagas/${id}`);
-    redirect(`/gestor/visualizar-vagas/${id}`);
-  } catch (err: unknown) {
-    console.error("Erro ao atualizar vaga:", err);
+  if (!res.ok) {
+    console.error("Erro ao atualizar vaga:", await res.text());
     return { error: true, message: "Erro ao atualizar vaga", valores: payload };
   }
+
+  revalidatePath("/gestor/visualizar-vagas");
+  revalidatePath(`/gestor/visualizar-vagas/${id}`);
+  redirect(`/gestor/visualizar-vagas/${id}`);
 }
 
-// Função para buscar todas as vagas
+/* -----------------------------------------------------
+📌 Buscar todas as vagas
+----------------------------------------------------- */
 export async function getVagas(): Promise<Vaga[]> {
-  try {
-    const { data } = await api.get("/petrocarga/vagas/all");
-    return Array.isArray(data) ? data : data?.vagas ?? [];
-  } catch (err: unknown) {
-    console.error("Erro em getVagas:", err);
+  const res = await serverApi("/petrocarga/vagas/all");
+
+  if (!res.ok) {
+    console.error("Erro em getVagas:", await res.text());
     return [];
   }
+
+  const data = await res.json();
+  return Array.isArray(data) ? data : data?.vagas ?? [];
 }
 
-// Função para buscar vaga por ID
+/* -----------------------------------------------------
+📌 Buscar vaga por ID
+----------------------------------------------------- */
 export async function getVagaById(id: string): Promise<Vaga | null> {
-  try {
-    const { data } = await api.get(`/petrocarga/vagas/${id}`);
-    return data ?? null;
-  } catch (err: unknown) {
-    console.error(`Erro em getVagaById(${id}):`, err);
+  const res = await serverApi(`/petrocarga/vagas/${id}`);
+
+  if (!res.ok) {
+    console.error(`Erro em getVagaById(${id}):`, await res.text());
     return null;
   }
+
+  return (await res.json()) ?? null;
 }
