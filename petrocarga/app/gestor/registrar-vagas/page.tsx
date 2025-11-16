@@ -11,7 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { addVaga } from "@/lib/actions/vagaActions";
-import { useAuth } from "@/context/AuthContext";
 import { ArrowLeft, CircleAlert, ParkingSquare } from "lucide-react";
 import Form from "next/form";
 import { useActionState } from "react";
@@ -22,19 +21,11 @@ import SelecaoCustomizada from "../../../components/gestor/selecaoItem/selecao-c
 import Link from "next/link";
 
 export default function Cadastro() {
-  const { token } = useAuth();
-  {
-    /* Hook para gerenciar o estado da ação de adicionar vaga */
-  }
+
   const [state, addVagaAction, pending] = useActionState(
     async (prevState: unknown, formData: FormData) => {
-      if (!token) {
-        return {
-          error: true,
-          message: "Token de autenticação não encontrado.",
-        };
-      }
-      return await addVaga(formData, token);
+
+      return await addVaga(formData);
     },
     null
   );

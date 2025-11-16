@@ -17,21 +17,17 @@ import FormItem from "@/components/form/form-item";
 import React from "react";
 import { Motorista } from "@/lib/types/motorista";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
-import { useAuth } from "@/context/AuthContext";
 
 export default function EditarMotorista({
   motorista,
 }: {
   motorista: Motorista;
 }) {
-  const { token } = useAuth(); // Pega o token do contexto
 
   // Wrapper para passar o token na action
   const atualizarComToken = async (prevState: unknown, formData: FormData) => {
-    if (!token) {
-      return { error: true, message: "Token não encontrado" };
-    }
-    return atualizarMotorista(formData, token);
+  
+    return atualizarMotorista(formData);
   };
 
   const [state, atualizarMotoristaAction, pending] = useActionState(

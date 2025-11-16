@@ -4,12 +4,10 @@ import { Reserva } from "@/lib/types/reserva";
 export const fetchReservasAtivasDoDia = async (
   vagaId: string,
   day: Date,
-  token?: string
 ): Promise<Reserva[]> => {
-  if (!token) return [];
 
   try {
-    const reservas = await getReservasAtivas(vagaId, token);
+    const reservas = await getReservasAtivas(vagaId);
     return reservas.filter(
       (r: Reserva) => new Date(r.inicio).toDateString() === day.toDateString()
     );
@@ -19,9 +17,9 @@ export const fetchReservasAtivasDoDia = async (
   }
 };
 
-export const confirmarReserva = async (formData: FormData, token: string) => {
+export const confirmarReserva = async (formData: FormData) => {
   try {
-    await reservarVaga(formData, token);
+    await reservarVaga(formData);
     return true;
   } catch (error) {
     console.error("Erro ao confirmar reserva:", error);

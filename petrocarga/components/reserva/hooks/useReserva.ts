@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/components/hooks/useAuth";
 import { Veiculo } from "@/lib/types/veiculo";
 import { Vaga } from "@/lib/types/vaga";
 import { ReservaState } from "@/lib/types/reservaState";
@@ -12,7 +12,11 @@ import {
   getOperacaoDia,
   formatDateTime,
 } from "./reservaHelpers";
-import { fetchReservasAtivasDoDia, confirmarReserva } from "./reservaService";
+
+import {
+  fetchReservasAtivasDoDia,
+  confirmarReserva,
+} from "./reservaService";
 
 interface GetVeiculosResult {
   error: boolean;
@@ -21,7 +25,7 @@ interface GetVeiculosResult {
 }
 
 export function useReserva(selectedVaga: Vaga | null) {
-  const { user, setUser, token } = useAuth();
+  const { user } = useAuth();
 
   const [reservaState, setReservaState] = useState<ReservaState>({
     step: 1,
@@ -34,6 +38,7 @@ export function useReserva(selectedVaga: Vaga | null) {
     selectedVehicleId: undefined,
   });
 
+  const [motoristaId, setMotoristaId] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<Veiculo[]>([]);
   const [loadingMotorista, setLoadingMotorista] = useState(true);
 
@@ -54,16 +59,14 @@ export function useReserva(selectedVaga: Vaga | null) {
 
   const fetchHorariosDisponiveis = useCallback(
     async (day: Date, vaga: Vaga): Promise<string[]> => {
-      if (!token) return [];
-
       const operacao = getOperacaoDia(day, vaga);
       if (!operacao) return [];
 
       const reservasAtivas = await fetchReservasAtivasDoDia(
         vaga.id,
         day,
-        token
       );
+
       const horariosOcupados = reservasAtivas.flatMap(gerarHorariosOcupados);
       const todosHorarios = gerarHorariosDia(operacao);
 
@@ -75,73 +78,77 @@ export function useReserva(selectedVaga: Vaga | null) {
 
       return todosHorarios;
     },
-    [token]
+    []
   );
 
   const handleConfirm = useCallback(async (): Promise<boolean> => {
-    if (!token || !user?.motoristaId || !selectedVaga) return false;
+  if (!user?.id || !selectedVaga || !motoristaId) return false;
 
-    const { selectedDay, selectedVehicleId, startHour, endHour, origin } =
-      reservaState;
+  const { selectedDay, selectedVehicleId, startHour, endHour, origin } = reservaState;
 
-    if (!selectedDay || !selectedVehicleId || !startHour || !endHour || !origin)
-      return false;
+  if (!selectedDay || !selectedVehicleId || !startHour || !endHour || !origin)
+    return false;
 
-    const formData = new FormData();
-    formData.append("vagaId", selectedVaga.id);
-    formData.append("motoristaId", user.motoristaId);
-    formData.append("veiculoId", selectedVehicleId);
-    formData.append("cidadeOrigem", origin);
-    formData.append("inicio", formatDateTime(selectedDay, startHour));
-    formData.append("fim", formatDateTime(selectedDay, endHour));
+  const formData = new FormData();
+  formData.append("vagaId", selectedVaga.id);
+  formData.append("motoristaId", motoristaId); // <<< ID CORRETO
+  formData.append("veiculoId", selectedVehicleId);
+  formData.append("cidadeOrigem", origin);
+  formData.append("inicio", formatDateTime(selectedDay, startHour));
+  formData.append("fim", formatDateTime(selectedDay, endHour));
 
-    const success = await confirmarReserva(formData, token);
-    if (success) reset();
-    return success;
-  }, [token, user, selectedVaga, reservaState, reset]);
+  const success = await confirmarReserva(formData);
+  if (success) reset();
+
+  return success;
+}, [user, selectedVaga, motoristaId, reservaState, reset]);
+
 
   // ================= Effects =================
 
   useEffect(() => {
-    if (!user?.id || !token) return;
+  if (!user?.id) return;
 
-    const fetchMotorista = async () => {
-      if (!user.motoristaId) {
-        try {
-          const result = await getMotoristaByUserId(user.id, token);
-          if (result.motoristaId) {
-            setUser({ ...user, motoristaId: result.motoristaId });
-          }
-        } catch (error) {
-          console.error("Erro ao buscar motorista:", error);
-        } finally {
-          setLoadingMotorista(false);
-        }
-      } else {
-        setLoadingMotorista(false);
+  const fetchMotorista = async () => {
+    try {
+      const result = await getMotoristaByUserId(user.id);
+
+      if (!result.error) {
+        setMotoristaId(result.motoristaId);  
       }
-    };
 
-    fetchMotorista();
-  }, [user, token, setUser]);
+      console.log("TOKEN NO COOKIE:", document.cookie);
+    } catch (error) {
+      console.error("Erro ao buscar motorista:", error);
+      console.log("TOKEN NO COOKIE:", document.cookie);
+    } finally {
+      setLoadingMotorista(false);
+    }
+  };
+
+  fetchMotorista();
+}, [user]);
+
+
 
   useEffect(() => {
-    if (!user?.id || !token) return;
+    if (!user?.id) return;
 
     const fetchVehicles = async () => {
       try {
-        const result: GetVeiculosResult = await getVeiculosUsuario(
-          user.id,
-          token
-        );
+        const result: GetVeiculosResult = await getVeiculosUsuario(user.id);
+        console.log("TOKEN NO COOKIE:", document.cookie);
+
         if (!result.error) setVehicles(result.veiculos);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
+        console.log("TOKEN NO COOKIE:", document.cookie);
+
       }
     };
 
     fetchVehicles();
-  }, [user, token]);
+  }, [user]);
 
   useEffect(() => {
     if (selectedVaga && reservaState.selectedDay) {
@@ -155,25 +162,31 @@ export function useReserva(selectedVaga: Vaga | null) {
     (step: number) => setReservaState((prev) => ({ ...prev, step })),
     []
   );
+
   const setSelectedDay = useCallback(
     (selectedDay?: Date) =>
       setReservaState((prev) => ({ ...prev, selectedDay })),
     []
   );
+
   const setStartHour = useCallback(
     (startHour: string | null) =>
       setReservaState((prev) => ({ ...prev, startHour })),
     []
   );
+
   const setEndHour = useCallback(
     (endHour: string | null) =>
       setReservaState((prev) => ({ ...prev, endHour })),
     []
   );
+
   const setOrigin = useCallback(
-    (origin: string) => setReservaState((prev) => ({ ...prev, origin })),
+    (origin: string) =>
+      setReservaState((prev) => ({ ...prev, origin })),
     []
   );
+
   const setSelectedVehicleId = useCallback(
     (selectedVehicleId?: string) =>
       setReservaState((prev) => ({ ...prev, selectedVehicleId })),

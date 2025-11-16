@@ -34,7 +34,7 @@ function buildVagaPayload(formData: FormData) {
         : undefined,
       horaInicio: dia.horaInicio,
       horaFim: dia.horaFim,
-      diaSemanaAsEnum: dia.diaSemanaAsEnum,
+      ...(dia.diaSemanaAsEnum ? { diaSemanaAsEnum: dia.diaSemanaAsEnum } : {}),
     })),
   };
 }
@@ -53,10 +53,13 @@ export async function addVaga(formData: FormData) {
   if (!res.ok) {
     console.error("Erro ao cadastrar vaga:", await res.text());
     return { error: true, message: "Erro ao cadastrar vaga", valores: payload };
+    console.log("Vaga enviada:", Object.fromEntries(formData));
   }
 
   revalidatePath("/gestor/visualizar-vagas");
   return { error: false, message: "Vaga cadastrada com sucesso!", valores: null };
+  console.log("Vaga enviada:", Object.fromEntries(formData));
+
 }
 
 /* -----------------------------------------------------

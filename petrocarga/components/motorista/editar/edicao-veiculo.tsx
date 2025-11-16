@@ -17,17 +17,12 @@ import FormItem from "@/components/form/form-item";
 import React from "react";
 import { Veiculo } from "@/lib/types/veiculo";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
-import { useAuth } from "@/context/AuthContext";
 
 export default function EditarVeiculo({ veiculo }: { veiculo: Veiculo }) {
-  const { token } = useAuth(); // Pega o token do contexto
 
   // Wrapper para passar o token na action
   const atualizarComToken = async (prevState: unknown, formData: FormData) => {
-    if (!token) {
-      return { error: true, message: "Token não encontrado" };
-    }
-    return atualizarVeiculo(formData, token);
+    return atualizarVeiculo(formData);
   };
 
   const [state, atualizarVeiculoAction, pending] = useActionState(

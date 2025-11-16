@@ -4,15 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import Logo from "@/public/Logo.png";
 import Image from "next/image";
-import { useAuth } from "@/components/hooks/useAuth";
-import { useRouter } from "next/navigation";
 import { LogoutButton } from "@/components/logoutButton/logoutButton";
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
-  const { logout } = useAuth();
+
 
   const links = [
     { href: "/gestor/relatorio", label: "Relatório" },

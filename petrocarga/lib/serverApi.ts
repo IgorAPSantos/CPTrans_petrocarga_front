@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 
 export async function serverApi(path: string, options: RequestInit = {}) {
-  const cookieStore = await cookies();   
+  const cookieStore = await cookies();
   const token = cookieStore.get("auth-token")?.value;
 
   const isJson =
@@ -20,8 +20,7 @@ export async function serverApi(path: string, options: RequestInit = {}) {
   });
 
   if (!res.ok) {
-    const errorText = await res.text();
-    console.error(`Erro na serverApi: [${res.status}] ${path} →`, errorText);
+    console.error(`Erro na serverApi: [${res.status}] ${path}`);
   }
 
   return res;

@@ -2,7 +2,7 @@
 
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/components/hooks/useAuth";
 import { deleteMotorista, getMotoristaByUserId } from "@/lib/actions/motoristaActions";
 import { Motorista } from "@/lib/types/motorista";
 import { cn } from "@/lib/utils";
@@ -16,18 +16,18 @@ export default function PerfilMotorista() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [modalAberto, setModalAberto] = useState(false);
-    const { token, user } = useAuth(); // user deve conter o userId
+    const { user } = useAuth(); // user deve conter o userId
     const router = useRouter();
 
     // Buscar dados do motorista usando a server action existente
     useEffect(() => {
-        if (!token || !user?.id) return; 
+        if (!user?.id) return; 
         const fetchMotorista = async () => {
             setLoading(true);
             setError(null);
 
             try {
-                const resultado = await getMotoristaByUserId(user.id, token);
+                const resultado = await getMotoristaByUserId(user.id);
                 if (resultado.error) {
                     setError(resultado.message || "Erro ao buscar perfil");
                 } else {
@@ -42,16 +42,16 @@ export default function PerfilMotorista() {
         };
 
         fetchMotorista();
-    }, [token, user]);
+    }, [user]);
 
     const handleExcluir = async () => {
-        if (!token || !motorista) {
+        if (!motorista) {
             alert("Você precisa estar logado para excluir a conta.");
             return;
         }
         
         try {
-            const resultado = await deleteMotorista(motorista.id, token);
+            const resultado = await deleteMotorista(motorista.id);
             
             if (resultado?.error) {
                 alert(resultado.message || "Erro ao excluir conta.");

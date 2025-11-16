@@ -7,7 +7,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import CardMap from "@/components/map/cardMap";
 import { deleteVaga } from "@/lib/actions/vagaActions";
-import { useAuth } from "@/context/AuthContext"; // importe o AuthContext
 
 type VagaDetalhesProps = {
   vaga: Vaga;
@@ -27,7 +26,6 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   const [diaSelecionado, setDiaSelecionado] = useState<DiaSemana | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
   const router = useRouter();
-  const { token } = useAuth(); // pega token do contexto
 
   const horariosPorDia = new Map<DiaSemana, string>();
   vaga.operacoesVaga.forEach((op) => {
@@ -38,13 +36,9 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   });
 
   const handleExcluir = async () => {
-    if (!token) {
-      alert("Você precisa estar logado para excluir a vaga.");
-      return;
-    }
 
     try {
-      await deleteVaga(vaga.id, token);
+      await deleteVaga(vaga.id,);
       setModalAberto(false);
       router.back();
     } catch (err) {

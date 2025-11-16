@@ -1,27 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/components/hooks/useAuth";
 import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
 import { Loader2 } from "lucide-react";
 import { Veiculo } from "@/lib/types/veiculo";
 import VeiculoCard from "@/components/motorista/cards/veiculo-item"; // 🔹 futuro componente de card
 
 export default function VeiculosPage() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [veiculos, setVeiculos] = useState<Veiculo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user?.id || !token) return;
+    if (!user?.id) return;
 
     const fetchVeiculos = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const result = await getVeiculosUsuario(user.id, token);
+        const result = await getVeiculosUsuario(user.id);
         setVeiculos(result.veiculos);
       } catch (err) {
         console.error("Erro ao carregar veículos:", err);
@@ -32,7 +32,7 @@ export default function VeiculosPage() {
     };
 
     fetchVeiculos();
-  }, [user?.id, token]);
+  }, [user?.id]);
 
   if (loading) {
     return (

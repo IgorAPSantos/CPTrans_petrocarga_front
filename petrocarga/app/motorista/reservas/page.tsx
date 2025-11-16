@@ -1,27 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/components/hooks/useAuth";
 import { getReservasPorUsuario } from "@/lib/actions/reservaActions";
 import { Loader2 } from "lucide-react";
 import ReservaCard from "@/components/reserva/minhasReservas/ReservaCard";
 import { Reserva } from "@/lib/types/reserva";
 
 export default function MinhasReservas() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!user?.id || !token) return;
+    if (!user?.id) return;
 
     const fetchReservas = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const data = await getReservasPorUsuario(user.id, token);
+        const data = await getReservasPorUsuario(user.id);
         if ("veiculos" in data) {
           // caso use algum retorno com wrapper
           setReservas(data.reservas || []);
@@ -37,7 +37,7 @@ export default function MinhasReservas() {
     };
 
     fetchReservas();
-  }, [user?.id, token]);
+  }, [user?.id]);
 
   if (loading) {
     return (

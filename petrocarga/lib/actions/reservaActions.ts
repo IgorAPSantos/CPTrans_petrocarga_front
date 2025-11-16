@@ -20,6 +20,7 @@ export async function reservarVaga(formData: FormData) {
 
   if (!res.ok) {
     throw new Error(await res.text());
+    
   }
 
   return res.json();

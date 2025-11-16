@@ -12,22 +12,17 @@ import React from "react";
 import DiaSemana from "@/components/gestor/dia-semana/dia-semana";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
 import { Vaga } from "@/lib/types/vaga";
-import { useAuth } from "@/context/AuthContext";
 
 export default function EditarVaga({ vaga }: { vaga: Vaga }) {
-  const { token } = useAuth();
-  {
-    /* Hook para gerenciar o estado da ação de atualizar vaga */
-  }
-  const atualizarVagaComToken = async (
+  const atualizar = async (
     prevState: unknown,
     formData: FormData
   ) => {
-    return atualizarVaga(prevState, formData, token || "");
+    return atualizarVaga(formData);
   };
 
   const [state, atualizarVagaAction, pending] = useActionState(
-    atualizarVagaComToken,
+    atualizar,
     null
   );
   return (

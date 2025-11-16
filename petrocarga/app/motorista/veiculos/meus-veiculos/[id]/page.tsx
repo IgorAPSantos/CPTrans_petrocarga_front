@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/components/hooks/useAuth";
 import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
 import { Loader2 } from "lucide-react";
 import { Veiculo } from "@/lib/types/veiculo";
@@ -11,7 +11,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 export default function EditarVeiculoPage() {
-  const { user, token } = useAuth();
+  const { user } = useAuth();
   const params = useParams() as { id: string };
 
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
@@ -19,7 +19,7 @@ export default function EditarVeiculoPage() {
   const [error, setError] = useState<string>("");
 
   useEffect(() => {
-    if (!user?.id || !token) {
+    if (!user?.id) {
       setError("Usuário não autenticado.");
       setLoading(false);
       return;
@@ -33,7 +33,7 @@ export default function EditarVeiculoPage() {
       setError("");
 
       try {
-        const result = await getVeiculosUsuario(userId, token!);
+        const result = await getVeiculosUsuario(userId);
 
         if (result.error) {
           setError(result.message);
@@ -55,7 +55,7 @@ export default function EditarVeiculoPage() {
     }
 
     fetchVeiculo();
-  }, [user?.id, token, params.id]);
+  }, [user?.id, params.id]);
 
   if (loading) {
     return (
