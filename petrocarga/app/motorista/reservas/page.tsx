@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/hooks/useAuth";
-import { getReservasPorUsuario } from "@/lib/actions/reservaActions";
+import {
+  getReservasPorUsuario,
+  getDocumentoReserva,
+} from "@/lib/actions/reservaActions";
 import { Loader2 } from "lucide-react";
 import ReservaCard from "@/components/reserva/minhasReservas/ReservaCard";
 import { Reserva } from "@/lib/types/reserva";
+import jsPDF from "jspdf";
 
 export default function MinhasReservas() {
   const { user } = useAuth();
@@ -23,7 +27,6 @@ export default function MinhasReservas() {
       try {
         const data = await getReservasPorUsuario(user.id);
         if ("veiculos" in data) {
-          // caso use algum retorno com wrapper
           setReservas(data.reservas || []);
         } else {
           setReservas(data);
@@ -38,6 +41,37 @@ export default function MinhasReservas() {
 
     fetchReservas();
   }, [user?.id]);
+
+  const handleGerarDocumento = async (reserva: Reserva) => {
+    try {
+      const dados = await getDocumentoReserva(reserva.id);
+
+      const doc = new jsPDF();
+
+      doc.setFontSize(18);
+      doc.text("Documento da Reserva", 20, 20);
+
+      doc.setFontSize(12);
+
+      doc.text(`ID: ${dados.id}`, 20, 40);
+      doc.text(`Motorista: ${dados.motoristaNome}`, 20, 50);
+      doc.text(
+        `Veículo: ${dados.veiculoPlaca} - ${dados.veiculoModelo}`,
+        20,
+        60
+      );
+      doc.text(`Local: ${dados.logradouro}, ${dados.bairro}`, 20, 70);
+      doc.text(`Origem: ${dados.cidadeOrigem}`, 20, 80);
+      doc.text(`Início: ${dados.inicio}`, 20, 90);
+      doc.text(`Fim: ${dados.fim}`, 20, 100);
+      doc.text(`Status: ${dados.status}`, 20, 110);
+
+      doc.output("dataurlnewwindow");
+    } catch (err) {
+      console.error("Erro ao gerar documento:", err);
+      alert("Erro ao gerar documento.");
+    }
+  };
 
   if (loading) {
     return (
@@ -67,7 +101,11 @@ export default function MinhasReservas() {
       ) : (
         <div className="grid gap-4 w-full max-w-2xl">
           {reservas.map((reserva) => (
-            <ReservaCard key={reserva.id} reserva={reserva} />
+            <ReservaCard
+              key={reserva.id}
+              reserva={reserva}
+              onGerarDocumento={handleGerarDocumento}
+            />
           ))}
         </div>
       )}
