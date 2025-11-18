@@ -29,18 +29,18 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
 
   // Cria marcadores das vagas
   useEffect(() => {
-    if (!map || !mapLoaded) return;
+    if (!map || !map.isStyleLoaded()) return;
 
-    // 🔹 Remove todos os marcadores antigos antes de criar novos
+    // Remove todos os marcadores antigos antes de criar novos
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
-    // 🔹 Recria os marcadores (vagas atualizadas)
+    // Recria os marcadores (vagas atualizadas)
     if (vagas && vagas.length > 0) {
       addVagaMarkersReserva(map, vagas, markersRef, onClickVaga);
     }
 
-    // 🔹 Quando desmontar, remove os marcadores (não o mapa)
+    // Quando desmontar, remove os marcadores (não o mapa)
     return () => {
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];

@@ -33,9 +33,8 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
     onSelectPlace,
   });
 
-  // Atualiza marcador do endereço selecionado
   useEffect(() => {
-    if (!map || !selectedPlace) return;
+    if (!map || !selectedPlace || !map.isStyleLoaded()) return;
 
     const [lng, lat] = selectedPlace.geometry.coordinates;
     map.flyTo({ center: [lng, lat], zoom: 14 });
