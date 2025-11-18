@@ -24,35 +24,34 @@ export default function LoginPage() {
   const { login } = useAuth();
 
   async function handleLogin() {
-  setLoading(true);
-  setError("");
+    setLoading(true);
+    setError("");
 
-  try {
-    const decodedUser = await login({ email, senha });
+    try {
+      const decodedUser = await login({ email, senha });
 
-    // Redirecionamento baseado na permissão
-    switch (decodedUser.permissao) {
-      case "ADMIN":
-      case "GESTOR":
-        window.location.href = "/gestor/visualizar-vagas";
-        break;
-      case "MOTORISTA":
-        window.location.href = "/motorista/reservar-vaga";
-        break;
-      case "AGENTE":
-        window.location.href = "/agente/home";
-        break;
-      default:
-        setError("Permissão desconhecida");
+      // Redirecionamento baseado na permissão
+      switch (decodedUser.permissao) {
+        case "ADMIN":
+        case "GESTOR":
+          window.location.href = "/gestor/visualizar-vagas";
+          break;
+        case "MOTORISTA":
+          window.location.href = "/motorista/reservar-vaga";
+          break;
+        case "AGENTE":
+          window.location.href = "/agente";
+          break;
+        default:
+          setError("Permissão desconhecida");
+      }
+    } catch (err: unknown) {
+      console.error(err);
+      setError("Email ou senha incorretos");
+    } finally {
+      setLoading(false);
     }
-  } catch (err: unknown) {
-    console.error(err);
-    setError("Email ou senha incorretos");
-  } finally {
-    setLoading(false);
   }
-}
-
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100">
