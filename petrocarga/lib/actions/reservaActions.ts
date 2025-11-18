@@ -24,7 +24,6 @@ export async function reservarVaga(formData: FormData) {
 
   if (!res.ok) {
     throw new Error(await res.text());
-    
   }
 
   return res.json();
@@ -48,6 +47,20 @@ export async function getReservasPorUsuario(usuarioId: string) {
 // ----------------------
 export async function getReservasAtivas(vagaId: string) {
   const res = await serverApi(`/petrocarga/reservas/ativas/${vagaId}`);
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json();
+}
+
+// ----------------------
+// DOCUMENTO RESERVA
+// ----------------------
+
+export async function getDocumentoReserva(reservaID: string) {
+  const res = await serverApi(`/petrocarga/documentos/reservas/${reservaID}`);
 
   if (!res.ok) {
     throw new Error(await res.text());
