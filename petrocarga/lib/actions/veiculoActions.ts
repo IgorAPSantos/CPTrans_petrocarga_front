@@ -1,9 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { serverApi } from "../serverApi";
-
 
 function getCpfCnpj(formData: FormData) {
   const cpf = (formData.get("cpfProprietario") as string) || null;
@@ -23,8 +21,11 @@ function getCpfCnpj(formData: FormData) {
   };
 }
 
-
-function buildVeiculoPayload(formData: FormData, cpf: string | null, cnpj: string | null) {
+function buildVeiculoPayload(
+  formData: FormData,
+  cpf: string | null,
+  cnpj: string | null
+) {
   return {
     placa: formData.get("placa") as string,
     marca: formData.get("marca") as string,
@@ -37,6 +38,21 @@ function buildVeiculoPayload(formData: FormData, cpf: string | null, cnpj: strin
   };
 }
 
+function PutVeiculoPayload(
+  formData: FormData,
+  cpf: string | null,
+  cnpj: string | null
+) {
+  return {
+    placa: formData.get("placa") as string,
+    marca: formData.get("marca") as string,
+    modelo: formData.get("modelo") as string,
+    tipo: (formData.get("tipo") as string)?.toUpperCase(),
+    cpfProprietario: cpf || null,
+    cnpjProprietario: cnpj || null,
+    usuarioId: formData.get("usuarioId"),
+  };
+}
 // ----------------------
 // POST VEICULO
 // ----------------------
@@ -64,7 +80,11 @@ export async function addVeiculo(formData: FormData) {
 
   revalidatePath("/motoristas/veiculos&reservas");
 
-  return { error: false, message: "Veículo cadastrado com sucesso!", valores: null };
+  return {
+    error: false,
+    message: "Veículo cadastrado com sucesso!",
+    valores: null,
+  };
 }
 
 // ----------------------
@@ -88,7 +108,7 @@ export async function deleteVeiculo(veiculoId: string) {
 }
 
 // ----------------------
-// PATCH VEICULO
+// PUT VEICULO
 // ----------------------
 export async function atualizarVeiculo(formData: FormData) {
   const id = formData.get("id") as string;
@@ -98,10 +118,10 @@ export async function atualizarVeiculo(formData: FormData) {
     return { error: true, message: doc.error, valores: null };
   }
 
-  const payload = buildVeiculoPayload(formData, doc.cpf, doc.cnpj);
+  const payload = PutVeiculoPayload(formData, doc.cpf, doc.cnpj);
 
   const res = await serverApi(`/petrocarga/veiculos/${id}`, {
-    method: "PATCH",
+    method: "PUT",
     body: JSON.stringify(payload),
   });
 
@@ -114,14 +134,16 @@ export async function atualizarVeiculo(formData: FormData) {
     };
   }
 
-  revalidatePath("/motoristas/veiculos&reservas");
-  redirect("/motoristas/veiculos&reservas");
+  revalidatePath(`/motorista/veiculos/meus-veiculos/${id}`);
+  revalidatePath(`/motorista/veiculos/meus-veiculos`);
 }
 
 // ----------------------
 // GET VEICULO POR USUARIO
 // ----------------------
-export async function getVeiculosUsuario(usuarioId: string): Promise<GetVeiculosResult> {
+export async function getVeiculosUsuario(
+  usuarioId: string
+): Promise<GetVeiculosResult> {
   const res = await serverApi(`/petrocarga/veiculos/usuario/${usuarioId}`);
 
   if (!res.ok) {
@@ -141,7 +163,6 @@ export async function getVeiculosUsuario(usuarioId: string): Promise<GetVeiculos
   };
 }
 
-
 export type Veiculo = {
   id: string;
   placa: string;
@@ -160,4 +181,3 @@ interface GetVeiculosResult {
   message: string;
   veiculos: Veiculo[];
 }
-
