@@ -12,10 +12,6 @@ export function addVagaMarkersReserva(
   markersRef: React.MutableRefObject<mapboxgl.Marker[]>,
   onClickVaga?: (vaga: Vaga) => void
 ) {
-  // Remove marcadores antigos
-  markersRef.current.forEach((marker) => marker.remove());
-  markersRef.current = [];
-
   vagas.forEach((vaga) => {
     if (!vaga.referenciaGeoInicio) return;
 
