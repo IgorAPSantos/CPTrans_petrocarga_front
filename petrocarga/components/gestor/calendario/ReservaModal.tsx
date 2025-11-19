@@ -147,11 +147,12 @@ export const ReservaModal = ({
   };
 
   return (
-    <Dialog open={!!modalState.type} onOpenChange={close}>
-      <DialogContent>
-        {renderContent()}
-        {renderFooter()}
-      </DialogContent>
-    </Dialog>
-  );
+  <Dialog open={!!modalState.type} onOpenChange={close}>
+    <DialogContent aria-describedby={undefined}>
+      {renderContent()}
+      {renderFooter()}
+    </DialogContent>
+  </Dialog>
+);
+
 };
