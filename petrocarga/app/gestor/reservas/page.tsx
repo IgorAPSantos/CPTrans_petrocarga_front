@@ -1,4 +1,4 @@
-import CalendarioReservas from "@/components/gestor/calendario/calendarioReservas"
+import CalendarioReservas from "@/components/gestor/calendario/CalendarioReservasGestor";
 export default function Reserva() {
   return (
     <div className="flex flex-col items-center">
