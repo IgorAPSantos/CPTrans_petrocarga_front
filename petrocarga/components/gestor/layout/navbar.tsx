@@ -14,6 +14,7 @@ export function Navbar() {
   const links = [
     { href: "/gestor/relatorio", label: "Relatório" },
     { href: "/gestor/visualizar-vagas", label: "Visualizar Vagas" },
+    { href: "/gestor/reservas", label: "Reservas" },
     { href: "/gestor/registrar-vagas", label: "Registrar Vagas" },
     { href: "/gestor/cadastrar-agente", label: "Cadastrar Agente" },
     { href: "/gestor/guia", label: "Guia" },
