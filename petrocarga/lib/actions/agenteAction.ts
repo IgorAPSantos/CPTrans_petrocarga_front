@@ -1,0 +1,124 @@
+"use server";
+import { serverApi } from "../serverApi";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+
+// ----------------------
+// ADD AGENTE
+// ----------------------
+export async function addAgente(_: unknown, formData: FormData) {
+  const payload = {
+    usuario: {
+      nome: formData.get("nome") as string,
+      cpf: formData.get("cpf") as string,
+      telefone: formData.get("telefone") as string,
+      email: formData.get("email") as string,
+      senha: formData.get("senha") as string,
+    },
+    matricula: formData.get("matricula") as string,
+  };
+
+  const res = await serverApi("/petrocarga/agentes", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    let msg = "Erro ao cadastrar agente";
+
+    try {
+      const data = await res.json();
+      msg = data.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg, valores: payload };
+  }
+
+  return { error: false, message: "Agente cadastrado com sucesso!" };
+}
+
+// ----------------------
+// DELETE AGENTE
+// ----------------------
+export async function deleteagente(agenteId: string) {
+  const res = await serverApi(`/petrocarga/agentes/${agenteId}`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    let msg = "Erro ao deletar agente";
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
+  }
+
+  revalidatePath("/agentes/veiculos&reservas");
+  return { error: false, message: "agente deletado com sucesso!" };
+}
+
+// ----------------------
+// ATUALIZAR AGENTE
+// ----------------------
+export async function atualizaragente(formData: FormData) {
+  const id = formData.get("id") as string;
+  const senha = formData.get("senha") as string;
+
+  const payload = {
+    usuario: {
+      nome: formData.get("nome") as string,
+      cpf: formData.get("cpf") as string,
+      telefone: formData.get("telefone") as string,
+      email: formData.get("email") as string,
+      ...(senha ? { senha } : {}),
+    },
+    tipoCNH: (formData.get("tipoCNH") as string)?.toUpperCase(),
+    numeroCNH: formData.get("numeroCNH") as string,
+    dataValidadeCNH: formData.get("dataValidadeCNH") as string,
+  };
+
+  const res = await serverApi(`/petrocarga/agentes/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    let msg = "Erro ao atualizar agente";
+
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
+  }
+
+  revalidatePath("/gestor/lista-agentes");
+  revalidatePath("/agentes/perfil");
+
+  redirect("/agentes/perfil");
+}
+
+// ----------------------
+// GET AGENTE BY USER ID
+// ----------------------
+export async function getagenteByUserId(userId: string) {
+  const res = await serverApi(`/petrocarga/agentes/${userId}`);
+
+  if (!res.ok) {
+    let msg = "Erro ao buscar agente";
+
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
+  }
+
+  const data = await res.json();
+  return { error: false, agenteId: data.id, agente: data };
+}

@@ -5,32 +5,21 @@ import { useState } from "react";
 import Logo from "@/public/Logo.png";
 import Image from "next/image";
 import { LogoutButton } from "@/components/logoutButton/logoutButton";
-import { useAuth } from "@/components/hooks/useAuth";
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
-  const { user } = useAuth();
 
   const links = [
-    { href: "/gestor/relatorio", label: "Relatório" },
-    { href: "/gestor/visualizar-vagas", label: "Visualizar Vagas" },
-    { href: "/gestor/registrar-vagas", label: "Registrar Vagas" },
-    { href: "/gestor/cadastrar-agente", label: "Cadastrar Agente" },
-    { href: "/gestor/guia", label: "Guia" },
+    { href: "/agente/reserva-rapida", label: "Reserva Rapida" },
+    { href: "/agente/guia", label: "Guia" },
   ];
-
-  // 🔥 Link extra somente se for ADMIN
-  const adminLink =
-    user?.permissao === "ADMIN"
-      ? { href: "/gestor/adicionar-gestores", label: "Adicionar Gestores" }
-      : null;
 
   return (
     <header className="bg-blue-800 text-white relative">
       <nav className="flex items-center justify-between p-4 max-w-6xl mx-auto">
         {/* Logo */}
         <Link
-          href="/gestor/relatorio"
+          href="/agente"
           className="flex items-center space-x-2 text-xl font-bold hover:text-gray-300"
         >
           <Image src={Logo} alt="Logo da Cptrans" className="w-16 h-auto" />
@@ -43,13 +32,6 @@ export function Navbar() {
               <Link href={href}>{label}</Link>
             </li>
           ))}
-
-          {/* 🔥 Link ADMIN no desktop */}
-          {adminLink && (
-            <li className="hover:text-gray-300 font-semibold text-yellow-300">
-              <Link href={adminLink.href}>{adminLink.label}</Link>
-            </li>
-          )}
 
           {/* Sair simples */}
           <li className="hover:text-gray-300">
@@ -86,19 +68,6 @@ export function Navbar() {
               </Link>
             </li>
           ))}
-
-          {/* 🔥 Link ADMIN no mobile */}
-          {adminLink && (
-            <li className="hover:bg-blue-700 rounded font-semibold text-yellow-300">
-              <Link
-                href={adminLink.href}
-                onClick={() => setMenuAberto(false)}
-                className="block px-2 py-1 w-full"
-              >
-                {adminLink.label}
-              </Link>
-            </li>
-          )}
 
           {/* Logout mobile */}
           <li className="hover:bg-blue-700 rounded">
