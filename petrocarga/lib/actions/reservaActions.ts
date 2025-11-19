@@ -30,10 +30,23 @@ export async function reservarVaga(formData: FormData) {
 }
 
 // ----------------------
-// GET RESERVAS
+// GET RESERVAS POR USUARIO
 // ----------------------
 export async function getReservasPorUsuario(usuarioId: string) {
   const res = await serverApi(`/petrocarga/reservas/usuario/${usuarioId}`);
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json();
+}
+
+// ----------------------
+// GET RESERVAS 
+// ----------------------
+export async function getReservas() {
+  const res = await serverApi(`/petrocarga/reservas`);
 
   if (!res.ok) {
     throw new Error(await res.text());

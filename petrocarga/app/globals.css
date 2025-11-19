@@ -3,6 +3,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@media (max-width: 640px) {
+  .fc {
+    font-size: 0.75rem; /* text-sm */
+  }
+
+  .fc-toolbar-title {
+    font-size: 1rem !important;
+  }
+
+  .fc-button {
+    padding: 2px 6px !important;
+    font-size: 0.75rem !important;
+  }
+}
+
 .my-custom-geocoder {
   border-radius: 16px;
   background-color: #f9fafb;
