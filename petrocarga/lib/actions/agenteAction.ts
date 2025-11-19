@@ -14,7 +14,6 @@ export async function addAgente(_: unknown, formData: FormData) {
       cpf: formData.get("cpf") as string,
       telefone: formData.get("telefone") as string,
       email: formData.get("email") as string,
-      senha: formData.get("senha") as string,
     },
     matricula: formData.get("matricula") as string,
   };

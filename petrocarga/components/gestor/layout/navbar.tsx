@@ -16,6 +16,7 @@ export function Navbar() {
   const links = [
     { href: "/gestor/relatorio", label: "Relatório" },
     { href: "/gestor/guia", label: "Guia" },
+    { href: "/gestor/reservas", label: "Reservas" },
   ];
 
   // 🔥 Link extra somente se for ADMIN
@@ -53,7 +54,7 @@ export function Navbar() {
                 <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
                     <DropdownMenuItem asChild>
                     <Link
-                        href="/gestor/cadastrar-agente"
+                        href="/gestor/visualizar-vagas"
                         className="flex items-center gap-2 cursor-pointer w-full"
                     >
                         <User className="h-4 w-4" />
@@ -83,7 +84,7 @@ export function Navbar() {
                 <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
                     <DropdownMenuItem asChild>
                     <Link
-                        href="/gestor/visualizar-vagas"
+                        href="/gestor/agentes"
                         className="flex items-center gap-2 cursor-pointer w-full"
                     >
                         <User className="h-4 w-4" />
@@ -92,7 +93,7 @@ export function Navbar() {
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                     <Link
-                        href="/gestor/agentes"
+                        href="/gestor/cadastrar-agente"
                         className="flex items-center gap-2 cursor-pointer w-full"
                     >
                         <User className="h-4 w-4" />

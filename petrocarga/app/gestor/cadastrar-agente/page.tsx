@@ -129,31 +129,6 @@ export default function CadastroAgentes() {
               />
             </FormItem>
 
-            {/* Senha */}
-            <FormItem name="Senha" description="Digite sua senha">
-              <div className="relative">
-                <Input
-                  type={exibirSenha ? "text" : "password"}
-                  className="rounded-sm border-gray-400 text-sm md:text-base pr-10"
-                  id="senha"
-                  name="senha"
-                  placeholder="••••••••"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setExibirSenha(!exibirSenha)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {exibirSenha ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
-            </FormItem>
-
             {/* Matricula */}
             <FormItem
               name="Matricula"
