@@ -108,22 +108,10 @@ export default function CalendarioReservasGestor() {
           }
           setModalState({ type: "reserva", data: { reserva, vagaInfo: vagaCache[reserva.vagaId] ?? null } });
         }}
-        checkoutForcado={async reservaId => {
-          try {
-            const res = await fetch("/api/reservas/checkout-forcado", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ reservaId }),
-            });
-            if (!res.ok) throw new Error(await res.text());
-            setReservas(prev => prev.filter(r => r.id !== reservaId));
-            closeModal();
-            alert("Checkout forçado executado com sucesso.");
-          } catch (err) {
-            console.error(err);
-            alert("Erro ao executar checkout forçado.");
-          }
-        }}
+       checkoutForcado={reservaId => {
+  alert("Checkout forçado concluído para a reserva " + reservaId);
+}}
+
       />
 
       <FullCalendar
