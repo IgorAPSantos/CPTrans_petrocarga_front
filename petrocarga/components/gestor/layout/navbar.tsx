@@ -1,17 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Logo from "@/public/Logo.png";
 import Image from "next/image";
 import { LogoutButton } from "@/components/logoutButton/logoutButton";
 import { useAuth } from "@/components/hooks/useAuth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronDown, User } from "lucide-react";
+import { ChevronDown, ParkingSquare, User } from "lucide-react";
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
+
+  // Garante que o componente só renderiza completamente no cliente
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const links = [
     { href: "/gestor/relatorio", label: "Relatório" },
@@ -19,9 +25,9 @@ export function Navbar() {
     { href: "/gestor/reservas", label: "Reservas" },
   ];
 
-  // 🔥 Link extra somente se for ADMIN
+  // 🔥 Link extra somente se for ADMIN (só verifica após mounted)
   const adminLink =
-    user?.permissao === "ADMIN"
+    mounted && user?.permissao === "ADMIN"
       ? { href: "/gestor/adicionar-gestores", label: "Adicionar Gestores" }
       : null;
 
@@ -57,7 +63,7 @@ export function Navbar() {
                         href="/gestor/visualizar-vagas"
                         className="flex items-center gap-2 cursor-pointer w-full"
                     >
-                        <User className="h-4 w-4" />
+                        <ParkingSquare className="h-4 w-4" />
                         Vagas
                     </Link>
                     </DropdownMenuItem>
@@ -66,7 +72,7 @@ export function Navbar() {
                         href="/gestor/registrar-vagas"
                         className="flex items-center gap-2 cursor-pointer w-full"
                     >
-                        <User className="h-4 w-4" />
+                        <ParkingSquare className="h-4 w-4" />
                         Adicionar Vaga
                     </Link>
                     </DropdownMenuItem>

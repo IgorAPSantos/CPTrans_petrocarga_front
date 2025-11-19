@@ -22,7 +22,7 @@ export function LogoutButton({ mobile = false }: LogoutButtonProps) {
         return (
             <button
                 onClick={handleLogout}
-                className="block w-full text-left text-red-600 hover:text-red-700 text-base"
+                className="block w-full text-left text-white hover:text-white text-base"
             >
                 {loading ? "Saindo..." : "Sair"}
             </button>
@@ -32,9 +32,8 @@ export function LogoutButton({ mobile = false }: LogoutButtonProps) {
     return (
         <button
             onClick={handleLogout}
-            className="flex items-center gap-2 cursor-pointer text-red-600 hover:text-red-700 w-full text-left text-base"
+            className="flex items-center gap-2 cursor-pointer text-white hover:text-white w-full text-left text-base"
         >
-            <LogOut className="w-4 h-4" />
             {loading ? "Saindo..." : "Sair"}
         </button>
     );
