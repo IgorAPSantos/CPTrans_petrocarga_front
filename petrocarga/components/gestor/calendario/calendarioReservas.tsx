@@ -2,7 +2,6 @@
 
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 
 import ptBr from "@fullcalendar/core/locales/pt-br";
@@ -27,7 +26,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 /* ---------------------------
-   cores por área (cinza/azul/amarelo)
+   cores por área 
    --------------------------- */
 const areaColors: Record<string, string> = {
   VERMELHA: "#ef4444",
@@ -96,7 +95,6 @@ export default function CalendarioReservas() {
   );
 
   const [loading, setLoading] = useState<boolean>(false);
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
   /* 1) buscar reservas */
   useEffect(() => {
@@ -154,13 +152,10 @@ export default function CalendarioReservas() {
   const ensureVagasInCache = async (vagaIds: string[]) => {
     const missing = vagaIds.filter((id) => !vagaCache[id]);
     if (missing.length === 0) return;
-    // fetch sequencialmente (pode paralelizar se quiser)
     for (const id of missing) {
       try {
         const v = await getVagaById(id);
-        if (v) {
-          setVagaCache((prev) => ({ ...prev, [id]: v }));
-        }
+        if (v) setVagaCache((prev) => ({ ...prev, [id]: v }));
       } catch (err) {
         console.error("Erro ao buscar vaga", id, err);
       }
@@ -168,38 +163,44 @@ export default function CalendarioReservas() {
   };
 
   /* 4) clique no agrupamento (logradouro) -> abrir modal com vagas daquele logradouro/dia */
-  const handleGroupClick = async (info: EventClickArg) => {
-    const props = info.event.extendedProps as {
-      logradouro: string;
-      dateStr: string;
-    };
+ const handleGroupClick = async (info: EventClickArg) => {
+  // remove popovers existentes
+  const popovers = document.querySelectorAll('.fc-popover');
+  popovers.forEach(p => p.remove());
 
-    const logradouro = props.logradouro;
-    const dateStr = props.dateStr;
+  // previne o comportamento padrão
+  info.jsEvent.preventDefault();
+  info.jsEvent.stopPropagation();
 
-    // filtrar reservas para esse logradouro e dia
-    const reservasDoGrupo = reservas.filter(
-      (r) => r.logradouro === logradouro && toDateKey(r.inicio) === dateStr
-    );
-
-    const vagaIdsUnicos = Array.from(
-      new Set(reservasDoGrupo.map((r) => r.vagaId))
-    );
-
-    // garantir cache
-    await ensureVagasInCache(vagaIdsUnicos);
-
-    setGroupModal({
-      logradouro,
-      dateStr,
-      vagas: vagaIdsUnicos,
-      reservas: reservasDoGrupo,
-    });
+  const props = info.event.extendedProps as {
+    logradouro: string;
+    dateStr: string;
   };
+
+  const logradouro = props.logradouro;
+  const dateStr = props.dateStr;
+
+  const reservasDoGrupo = reservas.filter(
+    (r) => r.logradouro === logradouro && toDateKey(r.inicio) === dateStr
+  );
+
+  const vagaIdsUnicos = Array.from(
+    new Set(reservasDoGrupo.map((r) => r.vagaId))
+  );
+
+  await ensureVagasInCache(vagaIdsUnicos);
+
+  setGroupModal({
+    logradouro,
+    dateStr,
+    vagas: vagaIdsUnicos,
+    reservas: reservasDoGrupo,
+  });
+};
+
 
   /* 5) ao clicar em vaga dentro do modal do logradouro -> abrir modal de vaga com reservas do dia */
   const openVagaModal = async (vagaId: string, dateStr: string) => {
-    // garante vaga no cache
     await ensureVagasInCache([vagaId]);
     const v = vagaCache[vagaId] ?? (await getVagaById(vagaId)) ?? null;
 
@@ -216,7 +217,6 @@ export default function CalendarioReservas() {
 
   /* 6) abrir modal de reserva específica */
   const openReservaModal = async (reserva: Reserva) => {
-    // garantir vaga no cache
     if (!vagaCache[reserva.vagaId]) {
       const v = await getVagaById(reserva.vagaId);
       if (v) setVagaCache((prev) => ({ ...prev, [reserva.vagaId]: v }));
@@ -227,7 +227,6 @@ export default function CalendarioReservas() {
     });
   };
 
-  /* 7) checkout forçado - exemplo de chamada, ajuste endpoint se necessário */
   const checkoutForcado = async (reservaId: string) => {
     try {
       const res = await fetch("/api/reservas/checkout-forcado", {
@@ -239,7 +238,6 @@ export default function CalendarioReservas() {
         const text = await res.text();
         throw new Error(text || "Erro no checkout");
       }
-      // atualizar UI: remover reserva localmente ou refetch
       setReservas((prev) => prev.filter((r) => r.id !== reservaId));
       setReservaModal(null);
       setVagaModal(null);
@@ -251,7 +249,6 @@ export default function CalendarioReservas() {
     }
   };
 
-  /* formatação simples de horário */
   const formatTime = (iso?: string) => {
     if (!iso) return "";
     const d = new Date(iso);
@@ -325,7 +322,7 @@ export default function CalendarioReservas() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal: horários da vaga (vagas -> reservas do dia) */}
+      {/* Modal: horários da vaga */}
       <Dialog open={!!vagaModal} onOpenChange={() => setVagaModal(null)}>
         <DialogContent>
           <DialogHeader>
@@ -346,7 +343,10 @@ export default function CalendarioReservas() {
 
               {vagaModal.reservas
                 .slice()
-                .sort((a, b) => new Date(a.inicio).getTime() - new Date(b.inicio).getTime())
+                .sort(
+                  (a, b) =>
+                    new Date(a.inicio).getTime() - new Date(b.inicio).getTime()
+                )
                 .map((r) => (
                   <div
                     key={r.id}
@@ -377,7 +377,7 @@ export default function CalendarioReservas() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal: reserva específica (detalhes + checkout) */}
+      {/* Modal: reserva específica */}
       <Dialog open={!!reservaModal} onOpenChange={() => setReservaModal(null)}>
         <DialogContent>
           <DialogHeader>
@@ -396,10 +396,12 @@ export default function CalendarioReservas() {
                 <strong>Área:</strong> {reservaModal.vagaInfo?.area ?? "—"}
               </p>
               <p>
-                <strong>Início:</strong> {new Date(reservaModal.reserva.inicio).toLocaleString()}
+                <strong>Início:</strong>{" "}
+                {new Date(reservaModal.reserva.inicio).toLocaleString()}
               </p>
               <p>
-                <strong>Fim:</strong> {new Date(reservaModal.reserva.fim).toLocaleString()}
+                <strong>Fim:</strong>{" "}
+                {new Date(reservaModal.reserva.fim).toLocaleString()}
               </p>
               <p>
                 <strong>Status:</strong> {reservaModal.reserva.status}
@@ -413,7 +415,7 @@ export default function CalendarioReservas() {
             </div>
           )}
 
-          <DialogFooter>
+          <DialogFooter className="flex gap-2">
             <Button
               variant="destructive"
               onClick={() => {
@@ -428,45 +430,31 @@ export default function CalendarioReservas() {
       </Dialog>
 
       {/* ------------------------------------------- */}
-      {/* CALENDÁRIO: eventos por logradouro/dia */}
+      {/* CALENDÁRIO: apenas mês */}
       {/* ------------------------------------------- */}
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+        plugins={[dayGridPlugin, interactionPlugin]}
         locale={ptBr}
-        initialView={isMobile ? "timeGridDay" : "dayGridMonth"}
-        height={isMobile ? "auto" : "82vh"}
+        initialView="dayGridMonth"
+        height="82vh"
         events={eventosCalendario}
-        eventClick={handleGroupClick} /* clique abre o modal de logradouro */
+        eventClick={handleGroupClick}
         headerToolbar={{
           left: "prev,next today",
           center: "title",
-          right: isMobile ? "timeGridDay" : "dayGridMonth,timeGridWeek,timeGridDay",
+          right: "dayGridMonth",
         }}
         buttonText={{
           today: "Hoje",
           month: "Mês",
-          week: "Semana",
-          day: "Dia",
         }}
+        dayMaxEventRows={2}
         eventDidMount={(info) => {
-          // color by first vaga area if available
-          const props = info.event.extendedProps as { logradouro: string; dateStr: string };
-          const gKey = `${props.logradouro}::${props.dateStr}`;
-          const group = groupedByLogradouroAndDay.find(
-            (x) => x.logradouro === props.logradouro && x.dateStr === props.dateStr
-          );
-          const firstVagaId = group?.vagaIds?.[0];
-          const firstVaga = firstVagaId ? vagaCache[firstVagaId] : undefined;
-          const color = firstVaga ? getColorByArea(firstVaga.area) : "#9ca3af";
-
-          info.el.style.backgroundColor = color;
-          info.el.style.borderColor = "#1F2937";
-          info.el.style.color = "#111827";
+          // removido alteração de cor no calendário
           info.el.style.fontWeight = "600";
           info.el.style.borderRadius = "6px";
           info.el.style.padding = "4px";
         }}
-        dayMaxEventRows={2}
       />
     </div>
   );
