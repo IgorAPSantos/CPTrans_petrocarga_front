@@ -76,7 +76,13 @@ export default function LoginPage() {
         </CardHeader>
 
         <CardContent>
-          <div className="space-y-4">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleLogin();
+            }}
+            className="space-y-4"
+          >
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-lg flex items-start gap-2">
                 <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
@@ -140,7 +146,7 @@ export default function LoginPage() {
             </div>
 
             <Button
-              onClick={handleLogin}
+              type="submit"
               disabled={loading || !email || !senha}
               className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70"
             >
@@ -153,7 +159,9 @@ export default function LoginPage() {
                 "Entrar"
               )}
             </Button>
+          </form>
 
+          <div className="mt-4 space-y-4">
             <div className="flex items-center">
               <div className="flex-1 border-t border-gray-300"></div>
               <span className="px-4 text-sm text-gray-500">ou</span>

@@ -1,28 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Logo from "@/public/Logo.png";
 import Image from "next/image";
 import { LogoutButton } from "@/components/logoutButton/logoutButton";
 import { useAuth } from "@/components/hooks/useAuth";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ChevronDown, ParkingSquare, User } from "lucide-react";
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
+
+  // Garante que o componente só renderiza completamente no cliente
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const links = [
     { href: "/gestor/relatorio", label: "Relatório" },
-    { href: "/gestor/visualizar-vagas", label: "Visualizar Vagas" },
-    { href: "/gestor/reservas", label: "Reservas" },
-    { href: "/gestor/registrar-vagas", label: "Registrar Vagas" },
-    { href: "/gestor/cadastrar-agente", label: "Cadastrar Agente" },
     { href: "/gestor/guia", label: "Guia" },
+    { href: "/gestor/reservas", label: "Reservas" },
   ];
 
-  // 🔥 Link extra somente se for ADMIN
+  // 🔥 Link extra somente se for ADMIN (só verifica após mounted)
   const adminLink =
-    user?.permissao === "ADMIN"
+    mounted && user?.permissao === "ADMIN"
       ? { href: "/gestor/adicionar-gestores", label: "Adicionar Gestores" }
       : null;
 
@@ -45,10 +50,96 @@ export function Navbar() {
             </li>
           ))}
 
+          {/* Dropdown Vagas */}
+            <li>
+                <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                    Vaga
+                    <ChevronDown className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                    <DropdownMenuItem asChild>
+                    <Link
+                        href="/gestor/visualizar-vagas"
+                        className="flex items-center gap-2 cursor-pointer w-full"
+                    >
+                        <ParkingSquare className="h-4 w-4" />
+                        Vagas
+                    </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                    <Link
+                        href="/gestor/registrar-vagas"
+                        className="flex items-center gap-2 cursor-pointer w-full"
+                    >
+                        <ParkingSquare className="h-4 w-4" />
+                        Adicionar Vaga
+                    </Link>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+                </DropdownMenu>
+            </li>
+
+            {/* Dropdown Agente */}
+            <li>
+                <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                    Agente
+                    <ChevronDown className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                    <DropdownMenuItem asChild>
+                    <Link
+                        href="/gestor/agentes"
+                        className="flex items-center gap-2 cursor-pointer w-full"
+                    >
+                        <User className="h-4 w-4" />
+                        Agentes
+                    </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                    <Link
+                        href="/gestor/cadastrar-agente"
+                        className="flex items-center gap-2 cursor-pointer w-full"
+                    >
+                        <User className="h-4 w-4" />
+                        Adicionar Agente
+                    </Link>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+                </DropdownMenu>
+            </li>
+
           {/* 🔥 Link ADMIN no desktop */}
           {adminLink && (
-            <li className="hover:text-gray-300 font-semibold text-yellow-300">
-              <Link href={adminLink.href}>{adminLink.label}</Link>
+            //Dropdown Gestores
+            <li>
+                <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                    Gestor
+                    <ChevronDown className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                    <DropdownMenuItem asChild>
+                    <Link
+                        href="/gestor/gestores"
+                        className="flex items-center gap-2 cursor-pointer w-full"
+                    >
+                        <User className="h-4 w-4" />
+                        Gestores
+                    </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                    <Link
+                        href="/gestor/adicionar-gestores"
+                        className="flex items-center gap-2 cursor-pointer w-full"
+                    >
+                        <User className="h-4 w-4" />
+                        Adicionar Gestor
+                    </Link>
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+                </DropdownMenu>
             </li>
           )}
 

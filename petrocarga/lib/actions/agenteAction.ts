@@ -14,7 +14,6 @@ export async function addAgente(_: unknown, formData: FormData) {
       cpf: formData.get("cpf") as string,
       telefone: formData.get("telefone") as string,
       email: formData.get("email") as string,
-      senha: formData.get("senha") as string,
     },
     matricula: formData.get("matricula") as string,
   };
@@ -122,3 +121,25 @@ export async function getagenteByUserId(userId: string) {
   const data = await res.json();
   return { error: false, agenteId: data.id, agente: data };
 }
+
+// ----------------------
+// GET AGENTES
+// ----------------------
+export async function getAgentes() {
+  const res = await serverApi(`/petrocarga/agentes`); 
+  
+  if (!res.ok) {
+    let msg = "Erro ao buscar agentes";
+    
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
+  }
+
+  const data = await res.json();
+  return { error: false, agentes: data };
+}
+// ----------------------
