@@ -1,23 +1,23 @@
 "use client";
 
-import { deleteagente } from "@/lib/actions/agenteAction";
-import { Agente } from "@/lib/types/agente";
+import { deleteGestor } from "@/lib/actions/gestorActions";
+import { Gestor } from "@/lib/types/gestor";
 import { cn } from "@/lib/utils";
 import { IdCard, Mail, Phone, UserCircle } from "lucide-react";
 import Link from "next/link";
 import router from "next/router";
 import { useState } from "react";
 
-interface AgenteCardProps {
-  agente: Agente;
+interface GestorCardProps {
+  gestor: Gestor;
 }
 
-export default function AgenteCard({ agente }: AgenteCardProps) {
+export default function GestorCard({ gestor }: GestorCardProps) {
   const [modalAberto, setModalAberto] = useState(false);
 
   const handleExcluir = async () => {
     try {
-      await deleteagente(agente.usuario.id);
+      await deleteGestor(gestor.id);
       setModalAberto(false);
       router.back();
     } catch (err) {
@@ -38,24 +38,19 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
         {/* Nome */}
         <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
           <UserCircle className="w-5 h-5 text-gray-400" />
-          {agente.usuario.nome}
+          {gestor.nome}
         </h3>
 
         {/* Infos (responsivas) */}
         <div className="flex flex-wrap gap-4">
           <span className="text-sm text-gray-600 flex items-center gap-1">
-            <IdCard className="w-4 h-4 text-gray-400" />
-            {agente.matricula}
-          </span>
-
-          <span className="text-sm text-gray-600 flex items-center gap-1">
             <Mail className="w-4 h-4 text-gray-400" />
-            {agente.usuario.email}
+            {gestor.email}
           </span>
 
           <span className="text-sm text-gray-600 flex items-center gap-1">
             <Phone className="w-4 h-4 text-gray-400" />
-            {agente.usuario.telefone}
+            {gestor.telefone}
           </span>
         </div>
       </section>
@@ -63,7 +58,7 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
       {/* Botões */}
       <div className="flex sm:flex-col flex-row gap-2 sm:w-auto w-full sm:max-w-none">
         <Link
-          href={`/gestor/agentes/${agente.usuario.id}`}
+          href={`/gestor/${gestor.id}`}
           className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition text-center w-full sm:w-auto"
         >
           Alterar
@@ -88,7 +83,7 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
               Confirmar exclusão
             </h3>
             <p className="text-gray-600 mb-6">
-              Tem certeza que deseja excluir este agente? Esta ação não pode ser
+              Tem certeza que deseja excluir este gestor? Esta ação não pode ser
               desfeita.
             </p>
             <div className="flex justify-end gap-3">
