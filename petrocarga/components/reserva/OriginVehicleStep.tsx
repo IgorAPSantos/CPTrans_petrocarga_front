@@ -26,7 +26,9 @@ export default function OriginVehicleStep({
   const router = useRouter();
   const [localOrigin, setLocalOrigin] = useState(origin);
   const [localVehicleId, setLocalVehicleId] = useState(selectedVehicleId || "");
+  const [entradaId, setEntradaId] = useState(""); // NOVO estado para a entrada
   const [isFocused, setIsFocused] = useState(false);
+  const [origem, setOrigem] = useState("");
 
   const suggestions = useMapboxSuggestions(localOrigin);
 
@@ -45,7 +47,11 @@ export default function OriginVehicleStep({
   };
 
   const handleNext = () => {
-    if (!localOrigin || !localVehicleId) return;
+    if (!localVehicleId) return;
+    
+    // Se vier de outro município, precisa ter origem e entrada
+    if (origem === "outro-municipio" && (!localOrigin || !entradaId)) return;
+    
     onOriginChange(localOrigin);
     onVehicleChange(localVehicleId);
     onNext();
@@ -53,34 +59,82 @@ export default function OriginVehicleStep({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Campo de origem com sugestões do Mapbox */}
-      <div className="relative">
-        <label className="block font-semibold mb-1">Local de origem:</label>
-        <input
-          type="text"
-          value={localOrigin}
-          onChange={(e) => setLocalOrigin(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setTimeout(() => setIsFocused(false), 150)} // pequeno delay permite clicar
-          placeholder="Digite de onde você está vindo (Ex: Rua do Imperador, Petrópolis - RJ)"
+      {/* Select de Origem */}
+      <div>
+        <label className="block font-semibold mb-1">A carga vem de Petrópolis?</label>
+        <select 
+          value={origem}
+          onChange={(e) => setOrigem(e.target.value)}
           className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        {/* Sugestões do Mapbox */}
-        {isFocused && suggestions.length > 0 && (
-          <ul className="absolute z-10 bg-white border rounded mt-1 w-full max-h-40 overflow-y-auto shadow">
-            {suggestions.map((place, index) => (
-              <li
-                key={index}
-                className="p-2 hover:bg-blue-100 cursor-pointer"
-                onMouseDown={() => handleSelectSuggestion(place)} // evita perder foco antes do clique
-              >
-                {place}
-              </li>
-            ))}
-          </ul>
-        )}
+        >
+          <option value="" disabled>
+            Selecione uma opção
+          </option>
+          <option value="proprio-municipio">Sim, já está em Petrópolis</option>
+          <option value="outro-municipio">Não, vem de outro local</option>
+        </select>
       </div>
+
+      {/* Campo de origem com sugestões do Mapbox - só aparece se "Outro Município" */}
+      {origem === "outro-municipio" && (
+        <>
+          <div className="relative">
+            <label className="block font-semibold mb-1">Local de origem:</label>
+            <input
+              type="text"
+              value={localOrigin}
+              onChange={(e) => setLocalOrigin(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setTimeout(() => setIsFocused(false), 150)}
+              placeholder="Digite de onde você está vindo (Ex: Rio de Janeiro - RJ)"
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+
+            {/* Sugestões do Mapbox */}
+            {isFocused && suggestions.length > 0 && (
+              <ul className="absolute z-10 bg-white border rounded mt-1 w-full max-h-40 overflow-y-auto shadow">
+                {suggestions.map((place, index) => (
+                  <li
+                    key={index}
+                    className="p-2 hover:bg-blue-100 cursor-pointer"
+                    onMouseDown={() => handleSelectSuggestion(place)}
+                  >
+                    {place}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Select de Entrada */}
+          <div>
+            <label className="block font-semibold mb-1">Qual entrada irá utilizar para chegar à Petrópolis?</label>
+            <select 
+              value={entradaId}
+              onChange={(e) => setEntradaId(e.target.value)}
+              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>
+                Selecione a Entrada
+              </option>
+              <option value="br040-quitandinha">BR-040 - Pórtico do Quitandinha</option>
+              <option value="br040-bingen">BR-040 - Pórtico do Bingen</option>
+              <option value="br040-duarte">BR-040 - Duarte da Silveira</option>
+              <option value="br040-mosela">BR-040 - Mosela</option>
+              <option value="br040-bonsucesso">BR-040 - Trevo de Bonsucesso</option>
+              <option value="br040-itaipava">BR-040 - Itaipava (Arranha-Céu)</option>
+              <option value="br040-pedro">BR-040 - Pedro do Rio</option>
+              <option value="br040-barra">BR-040 - Barra Mansa</option>
+              <option value="br495-teresopolis">BR-495 - Est. Teresópolis</option>
+              <option value="rj107-serra">RJ-107 - Serra da Estrela (Serra Velha)</option>
+              <option value="rj117-videiras">RJ-117 - Vale das Videiras</option>
+              <option value="rj123-secretario">RJ-123 - Secretário</option>
+              <option value="rj134-silveira">RJ-134 - Silveira da Motta (Posse)</option>
+              <option value="est-uniao">Est. União e Indústria (Posse-Gaby)</option>
+            </select>
+          </div>
+        </>
+      )}
 
       {/* Select de veículos */}
       <div>
@@ -117,7 +171,10 @@ export default function OriginVehicleStep({
         <button
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           onClick={handleNext}
-          disabled={!localOrigin || !localVehicleId}
+          disabled={
+            !localVehicleId || 
+            (origem === "outro-municipio" && (!localOrigin || !entradaId))
+          }
         >
           Próximo
         </button>

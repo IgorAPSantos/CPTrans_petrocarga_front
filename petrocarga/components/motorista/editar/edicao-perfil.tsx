@@ -163,11 +163,14 @@ export default function EditarMotorista({
                 placeholder="Selecione a categoria"
                 defaultValue={motorista.tipoCNH}
                 options={[
-                  { value: "A", label: "Categoria A" },
                   { value: "B", label: "Categoria B" },
+                  { value: "AB", label: "Categoria AB" },
                   { value: "C", label: "Categoria C" },
+                  { value: "AC", label: "Categoria AC" },
                   { value: "D", label: "Categoria D" },
+                  { value: "AD", label: "Categoria AD" },
                   { value: "E", label: "Categoria E" },
+                  { value: "AE", label: "Categoria AE" },
                 ]}
               />
             </FormItem>

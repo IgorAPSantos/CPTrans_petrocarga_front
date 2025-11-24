@@ -149,9 +149,8 @@ export default function CadastroVeiculo() {
                     { value: "AUTOMOVEL", label: "Carro - Até 5 metros" },
                     { value: "VUC", label: "VUC - 5 a 7 metros" },
                     { value: "CAMINHONETA", label: "Caminhoneta - Até 8 metros" },
-                    { value: "CAMINHAO_MEDIO", label: "Caminhão Médio - 8 a 12 metros" },
-                    { value: "CAMINHAO_LONGO", label: "Caminhão Longo - 12 a 18 metros" },
-                    { value: "CARRETA", label: "Carreta - Acima de 18 metros" },
+                    { value: "CAMINHAO_MEDIO", label: "Caminhão Médio - 9 a 12 metros" },
+                    { value: "CAMINHAO_LONGO", label: "Caminhão Longo - 13 a 19 metros" },
                     ]}
                 />
                 </FormItem>

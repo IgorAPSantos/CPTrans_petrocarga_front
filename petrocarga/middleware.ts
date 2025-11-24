@@ -17,7 +17,7 @@ interface JwtPayload {
 // Rotas públicas
 const publicRoutes = [
   "/",
-  "/quem-somos",
+  "/quemsomos",
   "/contato",
   "/autorizacao/login",
   "/autorizacao/cadastro",
