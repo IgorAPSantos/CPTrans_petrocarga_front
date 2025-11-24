@@ -139,18 +139,21 @@ export default function CadastroUsuario() {
                 name="Categoria da CNH"
                 description="Selecione a categoria da sua CNH"
                 >
-                <SelecaoCustomizada
-                    id="tipoCNH"
-                    name="tipoCNH"
-                    placeholder="Selecione a categoria"
-                    options={[
-                    { value: "A", label: "Categoria A" },
-                    { value: "B", label: "Categoria B" },
-                    { value: "C", label: "Categoria C" },
-                    { value: "D", label: "Categoria D" },
-                    { value: "E", label: "Categoria E" },
-                    ]}
-                />
+                  <SelecaoCustomizada
+                      id="tipoCNH"
+                      name="tipoCNH"
+                      placeholder="Selecione a categoria"
+                      options={[
+                      { value: "B", label: "Categoria B" },
+                      { value: "AB", label: "Categoria AB" },
+                      { value: "C", label: "Categoria C" },
+                      { value: "AC", label: "Categoria AC" },
+                      { value: "D", label: "Categoria D" },
+                      { value: "AD", label: "Categoria AD" },
+                      { value: "E", label: "Categoria E" },
+                      { value: "AE", label: "Categoria AE" },
+                      ]}
+                  />
                 </FormItem>
 
                 {/* Data de Vencimento da CNH */}

@@ -60,6 +60,7 @@ export default function MinhasReservas() {
         20,
         60
       );
+      //doc.text(`Entrada: ${dados.entradaCidade}`, 20, 70); // ALTERAÇÃO AQUI
       doc.text(`Local: ${dados.logradouro}, ${dados.bairro}`, 20, 70);
       doc.text(`Origem: ${dados.cidadeOrigem}`, 20, 80);
       doc.text(`Início: ${dados.inicio}`, 20, 90);

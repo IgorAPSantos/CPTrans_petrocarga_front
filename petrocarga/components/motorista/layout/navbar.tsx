@@ -10,7 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, User } from "lucide-react";
+import { CarIcon, ChevronDown, User } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { LogoutButton } from "@/components/logoutButton/logoutButton";
 
@@ -55,7 +55,7 @@ export function Navbar() {
                         href="/motorista/veiculos/meus-veiculos"
                         className="flex items-center gap-2 cursor-pointer w-full"
                     >
-                        <User className="h-4 w-4" />
+                        <CarIcon className="h-4 w-4" />
                         Meu Veículo
                     </Link>
                     </DropdownMenuItem>
@@ -64,7 +64,7 @@ export function Navbar() {
                         href="/motorista/veiculos/cadastrar-veiculos"
                         className="flex items-center gap-2 cursor-pointer w-full"
                     >
-                        <User className="h-4 w-4" />
+                        <CarIcon className="h-4 w-4" />
                         Adicionar Veículo
                     </Link>
                     </DropdownMenuItem>
