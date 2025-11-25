@@ -81,8 +81,6 @@ export default function ReservaComponent({
             selected={selectedDay}
             onSelect={async (day) => {
               setSelectedDay(day);
-              // Buscar horários disponíveis de forma assíncrona
-              await fetchHorariosDisponiveis(day, selectedVaga);
               setStep(2);
             }}
             availableDays={selectedVaga.operacoesVaga?.map(
@@ -91,8 +89,32 @@ export default function ReservaComponent({
           />
         )}
 
-        {/* STEP 2 - Seleção do horário inicial */}
-        {step === 2 && selectedDay && (
+        {/* STEP 2 - Origem e veículo */}
+        {step === 2 && (
+          <OriginVehicleStep
+            vehicles={vehiclesForStep}
+            origin={origin}
+            selectedVehicleId={selectedVehicleId}
+            onOriginChange={setOrigin}
+            onVehicleChange={setSelectedVehicleId}
+            onNext={async (origin, vehicleId) => {
+              if (!selectedDay) return;
+              setOrigin(origin);
+              setSelectedVehicleId(vehicleId);
+              await fetchHorariosDisponiveis(
+                selectedDay,
+                selectedVaga,
+                vehicleId
+              );
+
+              setStep(3);
+            }}
+            onBack={() => setStep(1)}
+          />
+        )}
+
+        {/* STEP 3 - Seleção do horário inicial */}
+        {step === 3 && selectedDay && (
           <TimeSelection
             times={availableTimes}
             reserved={reservedTimes}
@@ -100,15 +122,15 @@ export default function ReservaComponent({
             onSelect={(t) => {
               setStartHour(t);
               setEndHour(null);
-              setStep(3);
+              setStep(4);
             }}
-            onBack={() => setStep(1)}
+            onBack={() => setStep(2)}
             color="blue"
           />
         )}
 
-        {/* STEP 3 - Seleção do horário final */}
-        {step === 3 && startHour && (
+        {/* STEP 4 - Seleção do horário final */}
+        {step === 4 && startHour && (
           <TimeSelection
             times={availableTimes.filter(
               (t) =>
@@ -118,23 +140,10 @@ export default function ReservaComponent({
             selected={endHour}
             onSelect={(t) => {
               setEndHour(t);
-              setStep(4);
+              setStep(5);
             }}
-            onBack={() => setStep(2)}
-            color="blue"
-          />
-        )}
-
-        {/* STEP 4 - Origem e veículo */}
-        {step === 4 && (
-          <OriginVehicleStep
-            vehicles={vehiclesForStep}
-            origin={origin}
-            selectedVehicleId={selectedVehicleId}
-            onOriginChange={setOrigin}
-            onVehicleChange={setSelectedVehicleId}
-            onNext={() => setStep(5)}
             onBack={() => setStep(3)}
+            color="blue"
           />
         )}
 

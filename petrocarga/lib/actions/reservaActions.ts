@@ -56,6 +56,31 @@ export async function getReservas() {
 }
 
 // ----------------------
+// GET RESERVAS BLOQUEIOS
+// ----------------------
+export async function getReservasBloqueios(
+  vagaId: string,
+  data: string,
+  tipoVeiculo: "AUTOMOVEL" | "VUC" | "CAMINHONETA" | "CAMINHAO_MEDIO" | "CAMINHAO_LONGO"
+) {
+  const queryParams = new URLSearchParams({
+    data,
+    tipoVeiculo,
+  }).toString();
+
+  const res = await serverApi(`/petrocarga/reservas/bloqueios/${vagaId}?${queryParams}`, {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json();
+}
+
+
+// ----------------------
 // GET RESERVAS ATIVAS
 // ----------------------
 export async function getReservasAtivas(vagaId: string) {

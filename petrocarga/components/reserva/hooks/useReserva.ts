@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/hooks/useAuth";
 import { Veiculo } from "@/lib/types/veiculo";
+export type { Veiculo };
 import { Vaga } from "@/lib/types/vaga";
 import { ReservaState } from "@/lib/types/reservaState";
 import { getMotoristaByUserId } from "@/lib/actions/motoristaActions";
@@ -14,7 +15,7 @@ import {
 } from "./reservaHelpers";
 
 import {
-  fetchReservasAtivasDoDia,
+  fetchReservasBloqueios,
   confirmarReserva,
 } from "./reservaService";
 
@@ -42,7 +43,7 @@ export function useReserva(selectedVaga: Vaga | null) {
   const [vehicles, setVehicles] = useState<Veiculo[]>([]);
   const [loadingMotorista, setLoadingMotorista] = useState(true);
 
-  // ================= Funções principais =================
+  // ================= Funções =================
 
   const reset = useCallback(() => {
     setReservaState({
@@ -58,16 +59,24 @@ export function useReserva(selectedVaga: Vaga | null) {
   }, []);
 
   const fetchHorariosDisponiveis = useCallback(
-    async (day: Date, vaga: Vaga): Promise<string[]> => {
+    async (day: Date, vaga: Vaga, vehicleId: string): Promise<string[]> => {
       const operacao = getOperacaoDia(day, vaga);
       if (!operacao) return [];
 
-      const reservasAtivas = await fetchReservasAtivasDoDia(
+      const vehicle = vehicles.find((v) => v.id === vehicleId);
+      if (!vehicle) return [];
+
+      const tipoVeiculo = vehicle.tipo;
+
+      const dataFormatada = day.toISOString().split("T")[0];
+
+      const bloqueios = await fetchReservasBloqueios(
         vaga.id,
-        day,
+        dataFormatada,
+        tipoVeiculo
       );
 
-      const horariosOcupados = reservasAtivas.flatMap(gerarHorariosOcupados);
+      const horariosOcupados = bloqueios.flatMap(gerarHorariosOcupados);
       const todosHorarios = gerarHorariosDia(operacao);
 
       setReservaState((prev) => ({
@@ -78,58 +87,54 @@ export function useReserva(selectedVaga: Vaga | null) {
 
       return todosHorarios;
     },
-    []
+    [vehicles]
   );
 
   const handleConfirm = useCallback(async (): Promise<boolean> => {
-  if (!user?.id || !selectedVaga || !motoristaId) return false;
+    if (!user?.id || !selectedVaga || !motoristaId) return false;
 
-  const { selectedDay, selectedVehicleId, startHour, endHour, origin } = reservaState;
+    const { selectedDay, selectedVehicleId, startHour, endHour, origin } =
+      reservaState;
 
-  if (!selectedDay || !selectedVehicleId || !startHour || !endHour || !origin)
-    return false;
+    if (!selectedDay || !selectedVehicleId || !startHour || !endHour || !origin)
+      return false;
 
-  const formData = new FormData();
-  formData.append("vagaId", selectedVaga.id);
-  formData.append("motoristaId", motoristaId); // <<< ID CORRETO
-  formData.append("veiculoId", selectedVehicleId);
-  formData.append("cidadeOrigem", origin);
-  formData.append("inicio", formatDateTime(selectedDay, startHour));
-  formData.append("fim", formatDateTime(selectedDay, endHour));
+    const formData = new FormData();
+    formData.append("vagaId", selectedVaga.id);
+    formData.append("motoristaId", motoristaId);
+    formData.append("veiculoId", selectedVehicleId);
+    formData.append("cidadeOrigem", origin);
+    formData.append("inicio", formatDateTime(selectedDay, startHour));
+    formData.append("fim", formatDateTime(selectedDay, endHour));
 
-  const success = await confirmarReserva(formData);
-  if (success) reset();
+    const success = await confirmarReserva(formData);
+    if (success) reset();
 
-  return success;
-}, [user, selectedVaga, motoristaId, reservaState, reset]);
-
+    return success;
+  }, [user, selectedVaga, motoristaId, reservaState, reset]);
 
   // ================= Effects =================
 
   useEffect(() => {
-  if (!user?.id) return;
+    if (!user?.id) return;
 
-  const fetchMotorista = async () => {
-    try {
-      const result = await getMotoristaByUserId(user.id);
+    const fetchMotorista = async () => {
+      try {
+        const result = await getMotoristaByUserId(user.id);
 
-      if (!result.error) {
-        setMotoristaId(result.motoristaId);  
+        if (!result.error) {
+          setMotoristaId(result.motoristaId);
+        }
+
+      } catch (error) {
+        console.error("Erro ao buscar motorista:", error);
+      } finally {
+        setLoadingMotorista(false);
       }
+    };
 
-      console.log("TOKEN NO COOKIE:", document.cookie);
-    } catch (error) {
-      console.error("Erro ao buscar motorista:", error);
-      console.log("TOKEN NO COOKIE:", document.cookie);
-    } finally {
-      setLoadingMotorista(false);
-    }
-  };
-
-  fetchMotorista();
-}, [user]);
-
-
+    fetchMotorista();
+  }, [user]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -137,13 +142,10 @@ export function useReserva(selectedVaga: Vaga | null) {
     const fetchVehicles = async () => {
       try {
         const result: GetVeiculosResult = await getVeiculosUsuario(user.id);
-        console.log("TOKEN NO COOKIE:", document.cookie);
 
         if (!result.error) setVehicles(result.veiculos);
       } catch (error) {
         console.error("Erro ao buscar veículos:", error);
-        console.log("TOKEN NO COOKIE:", document.cookie);
-
       }
     };
 
@@ -151,10 +153,23 @@ export function useReserva(selectedVaga: Vaga | null) {
   }, [user]);
 
   useEffect(() => {
-    if (selectedVaga && reservaState.selectedDay) {
-      fetchHorariosDisponiveis(reservaState.selectedDay, selectedVaga);
+    if (
+      selectedVaga &&
+      reservaState.selectedDay &&
+      reservaState.selectedVehicleId
+    ) {
+      fetchHorariosDisponiveis(
+        reservaState.selectedDay,
+        selectedVaga,
+        reservaState.selectedVehicleId
+      );
     }
-  }, [selectedVaga, reservaState.selectedDay, fetchHorariosDisponiveis]);
+  }, [
+    selectedVaga,
+    reservaState.selectedDay,
+    reservaState.selectedVehicleId,
+    fetchHorariosDisponiveis,
+  ]);
 
   // ================= Setters =================
 
