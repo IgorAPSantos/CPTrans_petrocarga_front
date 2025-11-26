@@ -77,6 +77,7 @@ export default function EditarGestor({
                 id="nome"
                 name="nome"
                 placeholder="Ex.: Maria Souza"
+                defaultValue={gestor.nome}
                 required
               />
             </FormItem>
@@ -89,6 +90,7 @@ export default function EditarGestor({
                 id="email"
                 name="email"
                 placeholder="gestor@email.com"
+                defaultValue={gestor.email}
                 required
               />
             </FormItem>
@@ -103,6 +105,7 @@ export default function EditarGestor({
                 id="cpf"
                 name="cpf"
                 placeholder="00000000000"
+                defaultValue={gestor.cpf}
                 maxLength={11}
                 inputMode="numeric"
                 required
@@ -125,6 +128,7 @@ export default function EditarGestor({
                 id="telefone"
                 name="telefone"
                 placeholder="21999998888"
+                defaultValue={gestor.telefone}
                 maxLength={11}
                 inputMode="numeric"
                 required
@@ -144,7 +148,7 @@ export default function EditarGestor({
               disabled={pending}
               className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium text-blue-800 bg-blue-200 hover:bg-blue-300 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {pending ? "Salvando..." : "Cadastrar"}
+              {pending ? "Salvando..." : "Atualizar"}
             </Button>
           </CardFooter>
         </Form>

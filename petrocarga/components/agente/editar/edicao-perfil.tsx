@@ -36,15 +36,18 @@ export default function EditarAgente({
             </div>
 
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              Cadastrar Agente
+              Editar Agente
             </CardTitle>
 
             <CardDescription className="text-base">
-              Preencha os dados abaixo para adicionar um agente ao sistema.
+              Atualize os dados do agente conforme necessário.
             </CardDescription>
           </CardHeader>
 
           <Form action={atualizarAgenteAction}>
+            {/* Campo hidden com o ID do agente */}
+            <input type="hidden" name="id" value={agente.usuario.id} />
+
             <CardContent className="p-4 md:p-6 lg:p-8">
               {(state?.error || state?.message) && (
                 <div
@@ -77,6 +80,7 @@ export default function EditarAgente({
                   id="nome"
                   name="nome"
                   placeholder="Ex.: Eduardo Dantas"
+                  defaultValue={agente.usuario.nome}
                   required
                 />
               </FormItem>
@@ -89,6 +93,7 @@ export default function EditarAgente({
                   id="email"
                   name="email"
                   placeholder="agente@email.com"
+                  defaultValue={agente.usuario.email}
                   required
                 />
               </FormItem>
@@ -105,6 +110,7 @@ export default function EditarAgente({
                   placeholder="00000000000"
                   maxLength={11}
                   inputMode="numeric"
+                  defaultValue={agente.usuario.cpf}
                   required
                   onInput={(e) => {
                     e.currentTarget.value = e.currentTarget.value.replace(
@@ -127,6 +133,7 @@ export default function EditarAgente({
                   placeholder="21999998888"
                   maxLength={11}
                   inputMode="numeric"
+                  defaultValue={agente.usuario.telefone}
                   required
                   onInput={(e) => {
                     e.currentTarget.value = e.currentTarget.value.replace(
@@ -140,13 +147,14 @@ export default function EditarAgente({
               {/* Matricula */}
               <FormItem
                 name="Matricula"
-                description="Insira a matricula completo do agente."
+                description="Insira a matricula completa do agente."
               >
                 <Input
                   className="rounded-sm border-gray-400 text-sm md:text-base"
                   id="matricula"
                   name="matricula"
                   placeholder="Ex.: MSD20231"
+                  defaultValue={agente.matricula}
                   required
                 />
               </FormItem>
@@ -158,7 +166,7 @@ export default function EditarAgente({
                 disabled={pending}
                 className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium text-blue-800 bg-blue-200 hover:bg-blue-300 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                {pending ? "Salvando..." : "Cadastrar"}
+                {pending ? "Salvando..." : "Atualizar"}
               </Button>
             </CardFooter>
           </Form>
