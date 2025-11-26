@@ -1,6 +1,8 @@
 "use server";
 
 import { serverApi } from "@/lib/serverApi";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 // ----------------------
 // ADD GESTOR
@@ -57,7 +59,9 @@ export async function deleteGestor(gestorId: string) {
 // ----------------------
 // ATUALIZAR GESTOR
 // ----------------------
-export async function atualizarGestor(gestorId: string, formData: FormData) {
+export async function atualizarGestor(formData: FormData) {
+  const gestorId = formData.get("id") as string;
+
   const payload = {
     nome: formData.get("nome") as string,
     cpf: formData.get("cpf") as string,
@@ -81,6 +85,11 @@ export async function atualizarGestor(gestorId: string, formData: FormData) {
   }
   
   return { error: false, message: "Gestor atualizado com sucesso!" };
+
+  revalidatePath("/gestor/perfil");
+  revalidatePath("/gestor/gestores");
+  
+  redirect("/gestor/perfil");
 }
 
 
@@ -104,4 +113,25 @@ export async function getGestor() {
 
   const gestor = await res.json();
   return { error: false, gestor };
+}
+
+// ----------------------
+// GET GESTOR BY USER ID
+// ----------------------
+export async function getGestorByUserId(userId: string) {
+  const res = await serverApi(`/petrocarga/gestor/${userId}`);
+
+  if (!res.ok) {
+    let msg = "Erro ao buscar gestor";
+    
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
+  }
+
+  const data = await res.json();
+  return { error: false, gestorId: data.id, gestor: data };
 }

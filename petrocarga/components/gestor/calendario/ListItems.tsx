@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Reserva } from "@/lib/types/reserva";
 import { Vaga } from "@/lib/types/vaga";
+import { Veiculo } from "@/lib/types/veiculo";
 import { formatTime } from "./utils/utils";
 
 export const LogradouroItem = ({
@@ -53,11 +54,16 @@ export const VagaItem = ({
   );
 };
 
-export const ReservaItem = ({ reserva, onClick }: { reserva: Reserva; onClick: () => void }) => (
+export const ReservaItem = ({ reserva, veiculo, onClick }: { reserva: Reserva; veiculo?: Veiculo; onClick: () => void }) => (
   <div className="flex items-center justify-between p-2 rounded-md bg-gray-50">
     <div>
       <div className="font-medium">{formatTime(reserva.inicio)} — {formatTime(reserva.fim)}</div>
       <div className="text-sm text-muted-foreground">{reserva.bairro} • {reserva.cidadeOrigem}</div>
+      {/* {veiculo && (
+        <div className="text-sm text-muted-foreground">
+          Placa: {veiculo.placa}
+        </div>
+      )} */}
     </div>
     <Button variant="ghost" onClick={onClick}>Detalhes</Button>
   </div>
