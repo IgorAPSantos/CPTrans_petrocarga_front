@@ -1,11 +1,12 @@
 import { getReservasAtivas, getReservasBloqueios, reservarVaga } from "@/lib/actions/reservaActions";
+import { reservarVagaAgente } from "@/lib/actions/reservaActions"; // importa a função do agente
 import { Reserva } from "@/lib/types/reserva";
 
+// ----------------- RESERVAS -----------------
 export const fetchReservasAtivasDoDia = async (
   vagaId: string,
   day: Date,
 ): Promise<Reserva[]> => {
-
   try {
     const reservas = await getReservasAtivas(vagaId);
     return reservas.filter(
@@ -31,13 +32,24 @@ export const fetchReservasBloqueios = async (
   }
 };
 
-
+// ----------------- CONFIRMAR RESERVA MOTORISTA -----------------
 export const confirmarReserva = async (formData: FormData) => {
   try {
     await reservarVaga(formData);
     return true;
   } catch (error) {
     console.error("Erro ao confirmar reserva:", error);
+    return false;
+  }
+};
+
+// ----------------- CONFIRMAR RESERVA AGENTE -----------------
+export const confirmarReservaAgente = async (formData: FormData) => {
+  try {
+    await reservarVagaAgente(formData);
+    return true;
+  } catch (error) {
+    console.error("Erro ao confirmar reserva do agente:", error);
     return false;
   }
 };
