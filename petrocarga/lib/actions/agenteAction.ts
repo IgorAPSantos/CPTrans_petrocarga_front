@@ -9,12 +9,10 @@ import { redirect } from "next/navigation";
 // ----------------------
 export async function addAgente(_: unknown, formData: FormData) {
   const payload = {
-    usuario: {
-      nome: formData.get("nome") as string,
-      cpf: formData.get("cpf") as string,
-      telefone: formData.get("telefone") as string,
-      email: formData.get("email") as string,
-    },
+    nome: formData.get("nome") as string,
+    cpf: formData.get("cpf") as string,
+    telefone: formData.get("telefone") as string,
+    email: formData.get("email") as string,
     matricula: formData.get("matricula") as string,
   };
 
@@ -64,19 +62,13 @@ export async function deleteAgente(agenteId: string) {
 // ----------------------
 export async function atualizarAgente(formData: FormData) {
   const id = formData.get("id") as string;
-  const senha = formData.get("senha") as string;
-
+  
   const payload = {
-    usuario: {
-      nome: formData.get("nome") as string,
-      cpf: formData.get("cpf") as string,
-      telefone: formData.get("telefone") as string,
-      email: formData.get("email") as string,
-      ...(senha ? { senha } : {}),
-    },
-    tipoCNH: (formData.get("tipoCNH") as string)?.toUpperCase(),
-    numeroCNH: formData.get("numeroCNH") as string,
-    dataValidadeCNH: formData.get("dataValidadeCNH") as string,
+    nome: formData.get("nome") as string,
+    cpf: formData.get("cpf") as string,
+    telefone: formData.get("telefone") as string,
+    email: formData.get("email") as string,
+    matricula: formData.get("matricula") as string,
   };
 
   const res = await serverApi(`/petrocarga/agentes/${id}`, {
@@ -95,7 +87,7 @@ export async function atualizarAgente(formData: FormData) {
     return { error: true, message: msg };
   }
 
-  revalidatePath("/gestor/lista-agentes");
+  revalidatePath("/gestor/agentes");
   revalidatePath("/agentes/perfil");
 
   redirect("/agentes/perfil");

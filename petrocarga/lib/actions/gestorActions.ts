@@ -97,7 +97,7 @@ export async function atualizarGestor(formData: FormData) {
 // GET GESTOR
 // ----------------------
 export async function getGestor() {
-  const res = await serverApi(`/petrocarga/gestor/gestores`, {
+  const res = await serverApi(`/petrocarga/gestores`, {
     method: "GET",
   });
   if (!res.ok) {
@@ -119,7 +119,7 @@ export async function getGestor() {
 // GET GESTOR BY USER ID
 // ----------------------
 export async function getGestorByUserId(userId: string) {
-  const res = await serverApi(`/petrocarga/gestor/${userId}`);
+  const res = await serverApi(`/petrocarga/gestores/${userId}`);
 
   if (!res.ok) {
     let msg = "Erro ao buscar gestor";
