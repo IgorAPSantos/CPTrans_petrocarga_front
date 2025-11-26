@@ -179,7 +179,6 @@ export const ReservaModal = ({
 
     return (
       <DialogFooter className="flex flex-row items-center justify-between gap-2">
-        {/* ESQUERDA → Botão Voltar */}
         <div className="flex flex-row gap-2">
           {modalState.type !== "group" && (
             <Button
@@ -191,8 +190,6 @@ export const ReservaModal = ({
             </Button>
           )}
         </div>
-
-        {/* DIREITA → Botões finais */}
         <div className="flex flex-row gap-2">
           {modalState.type === "reserva" && (
             <Button
