@@ -40,7 +40,7 @@ export async function addAgente(_: unknown, formData: FormData) {
 // ----------------------
 // DELETE AGENTE
 // ----------------------
-export async function deleteagente(agenteId: string) {
+export async function deleteAgente(agenteId: string) {
   const res = await serverApi(`/petrocarga/agentes/${agenteId}`, {
     method: "DELETE",
   });
@@ -62,7 +62,7 @@ export async function deleteagente(agenteId: string) {
 // ----------------------
 // ATUALIZAR AGENTE
 // ----------------------
-export async function atualizaragente(formData: FormData) {
+export async function atualizarAgente(formData: FormData) {
   const id = formData.get("id") as string;
   const senha = formData.get("senha") as string;
 
@@ -104,7 +104,7 @@ export async function atualizaragente(formData: FormData) {
 // ----------------------
 // GET AGENTE BY USER ID
 // ----------------------
-export async function getagenteByUserId(userId: string) {
+export async function getAgenteByUserId(userId: string) {
   const res = await serverApi(`/petrocarga/agentes/${userId}`);
 
   if (!res.ok) {

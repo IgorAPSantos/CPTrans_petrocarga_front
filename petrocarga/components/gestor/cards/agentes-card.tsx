@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteagente } from "@/lib/actions/agenteAction";
+import { deleteAgente } from "@/lib/actions/agenteAction";
 import { Agente } from "@/lib/types/agente";
 import { cn } from "@/lib/utils";
 import { IdCard, Mail, Phone, UserCircle } from "lucide-react";
@@ -17,7 +17,7 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
 
   const handleExcluir = async () => {
     try {
-      await deleteagente(agente.usuario.id);
+      await deleteAgente(agente.usuario.id);
       setModalAberto(false);
       router.back();
     } catch (err) {

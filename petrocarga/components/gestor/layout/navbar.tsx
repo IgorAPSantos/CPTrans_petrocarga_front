@@ -143,10 +143,30 @@ export function Navbar() {
             </li>
           )}
 
-          {/* Sair simples */}
-          <li className="hover:text-gray-300">
-            <LogoutButton />
-          </li>
+          {/* Dropdown Meu Perfil */}
+            <li>
+                <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                    Perfil
+                    <ChevronDown className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                    <DropdownMenuItem asChild>
+                    <Link
+                        href="/gestor/perfil"
+                        className="flex items-center gap-2 cursor-pointer w-full"
+                    >
+                        <User className="h-4 w-4" />
+                        Meu Perfil
+                    </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="p-0 m-0 focus:bg-gray-100">
+                    {/* Redirect após logout */}
+                    <LogoutButton />
+                    </DropdownMenuItem>
+                </DropdownMenuContent>
+                </DropdownMenu>
+            </li>
         </ul>
 
         {/* BOTÃO HAMBURGUER (mobile) */}
