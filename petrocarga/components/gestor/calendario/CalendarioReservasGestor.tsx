@@ -5,7 +5,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 import ptBr from "@fullcalendar/core/locales/pt-br";
 import { useReservas } from "./hooks/useReservas";
 import { ReservaModal } from "./ReservaModal";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { toDateKey, dayStartISO } from "./utils/utils";
 import type { EventClickArg, EventInput } from "@fullcalendar/core";
 import { getVagaById } from "@/lib/actions/vagaActions";
@@ -22,21 +22,57 @@ interface ReservasPorDia {
 }
 
 type ModalState =
-  | { type: "group"; data: { dateStr: string; logradouros: ReservasPorLogradouro } }
-  | { type: "vagasLogradouro"; data: { logradouro: string; reservasDoLogradouro: Reserva[] } }
-  | { type: "vaga"; data: { vagaId: string; vagaInfo: Vaga | null; reservas: Reserva[] } }
+  | {
+      type: "group";
+      data: { dateStr: string; logradouros: ReservasPorLogradouro };
+    }
+  | {
+      type: "vagasLogradouro";
+      data: { logradouro: string; reservasDoLogradouro: Reserva[] };
+    }
+  | {
+      type: "vaga";
+      data: { vagaId: string; vagaInfo: Vaga | null; reservas: Reserva[] };
+    }
   | { type: "reserva"; data: { reserva: Reserva; vagaInfo: Vaga | null } }
   | { type: null; data: null };
 
 /* -------------------- Componente -------------------- */
 export default function CalendarioReservasGestor() {
-  const { reservas, setReservas } = useReservas();
+  const { reservas } = useReservas();
   const [vagaCache, setVagaCache] = useState<Record<string, Vaga | null>>({});
-  const [modalState, setModalState] = useState<ModalState>({ type: null, data: null });
+  const [modalState, setModalState] = useState<ModalState>({
+    type: null,
+    data: null,
+  });
 
+  /* -------------------- Histórico para VOLTAR -------------------- */
+  const lastGroupRef = useRef<ModalState>({ type: null, data: null });
+  const lastVagasLogradouroRef = useRef<ModalState>({ type: null, data: null });
+  const lastVagaRef = useRef<ModalState>({ type: null, data: null });
+
+  const goBack = () => {
+    setModalState((prev) => {
+      switch (prev.type) {
+        case "vagasLogradouro":
+          return lastGroupRef.current;
+
+        case "vaga":
+          return lastVagasLogradouroRef.current;
+
+        case "reserva":
+          return lastVagaRef.current;
+
+        default:
+          return prev;
+      }
+    });
+  };
+
+  /* -------------------- Agrupar reservas -------------------- */
   const reservasPorDia = useMemo<ReservasPorDia>(() => {
     const map: ReservasPorDia = {};
-    reservas.forEach(r => {
+    reservas.forEach((r) => {
       const dateKey = toDateKey(r.inicio);
       if (!map[dateKey]) map[dateKey] = {};
       if (!map[dateKey][r.logradouro]) map[dateKey][r.logradouro] = [];
@@ -47,7 +83,9 @@ export default function CalendarioReservasGestor() {
 
   const eventosCalendario: EventInput[] = useMemo(() => {
     return Object.entries(reservasPorDia).map(([dateStr, logradouros]) => {
-      const todasFinalizadas = Object.values(logradouros).flat().every(r => r.status === "FINALIZADA");
+      const todasFinalizadas = Object.values(logradouros)
+        .flat()
+        .every((r) => r.status === "FINALIZADA");
       return {
         id: dateStr,
         title: "● Reservas",
@@ -59,14 +97,16 @@ export default function CalendarioReservasGestor() {
     });
   }, [reservasPorDia]);
 
+  /* -------------------- Garantir que vagas estejam no cache -------------------- */
   const ensureVagasInCache = async (vagaIds: string[]) => {
-    const missing = vagaIds.filter(id => !vagaCache[id]);
+    const missing = vagaIds.filter((id) => !vagaCache[id]);
     if (!missing.length) return;
+
     await Promise.all(
-      missing.map(async id => {
+      missing.map(async (id) => {
         try {
           const v = await getVagaById(id);
-          if (v) setVagaCache(prev => ({ ...prev, [id]: v }));
+          if (v) setVagaCache((prev) => ({ ...prev, [id]: v }));
         } catch (err) {
           console.error("Erro ao buscar vaga", id, err);
         }
@@ -74,44 +114,74 @@ export default function CalendarioReservasGestor() {
     );
   };
 
+  /* -------------------- Ao clicar no evento do calendário -------------------- */
   const handleGroupClick = async (info: EventClickArg) => {
     info.jsEvent.preventDefault();
     info.jsEvent.stopPropagation();
-    const logradouros = (info.event.extendedProps as { logradouros: ReservasPorLogradouro }).logradouros;
-    const todosVagaIds = Array.from(new Set(Object.values(logradouros).flat().map(r => r.vagaId)));
+
+    const logradouros = (
+      info.event.extendedProps as { logradouros: ReservasPorLogradouro }
+    ).logradouros;
+
+    const todosVagaIds = Array.from(
+      new Set(Object.values(logradouros).flat().map((r) => r.vagaId))
+    );
+
     await ensureVagasInCache(todosVagaIds);
-    setModalState({ type: "group", data: { dateStr: info.event.startStr.slice(0, 10), logradouros } });
+
+    setModalState({
+      type: "group",
+      data: { dateStr: info.event.startStr.slice(0, 10), logradouros },
+    });
   };
 
   const closeModal = () => setModalState({ type: null, data: null });
 
+  /* -------------------- Render -------------------- */
   return (
     <div className="p-2 md:p-4">
       <ReservaModal
         modalState={modalState}
         vagaCache={vagaCache}
         close={closeModal}
-        openVagasLogradouro={(l, r) =>
-          setModalState({ type: "vagasLogradouro", data: { logradouro: l, reservasDoLogradouro: r } })
-        }
-        openVagaModal={async (vagaId, reservasDoLogradouro) => {
-          await ensureVagasInCache([vagaId]);
+        goBack={goBack}
+        openVagasLogradouro={(l, r) => {
+          lastGroupRef.current = modalState; // <--- SALVA STEP ANTERIOR
           setModalState({
-            type: "vaga",
-            data: { vagaId, vagaInfo: vagaCache[vagaId] ?? null, reservas: reservasDoLogradouro.filter(r => r.vagaId === vagaId) },
+            type: "vagasLogradouro",
+            data: { logradouro: l, reservasDoLogradouro: r },
           });
         }}
-        openReservaModal={async reserva => {
+        openVagaModal={async (vagaId, reservasDoLogradouro) => {
+          lastVagasLogradouroRef.current = modalState; // <--- SALVA STEP ANTERIOR
+
+          await ensureVagasInCache([vagaId]);
+
+          setModalState({
+            type: "vaga",
+            data: {
+              vagaId,
+              vagaInfo: vagaCache[vagaId] ?? null,
+              reservas: reservasDoLogradouro.filter((r) => r.vagaId === vagaId),
+            },
+          });
+        }}
+        openReservaModal={async (reserva) => {
+          lastVagaRef.current = modalState; // <--- SALVA STEP ANTERIOR
+
           if (!vagaCache[reserva.vagaId]) {
             const v = await getVagaById(reserva.vagaId);
-            if (v) setVagaCache(prev => ({ ...prev, [reserva.vagaId]: v }));
+            if (v) setVagaCache((prev) => ({ ...prev, [reserva.vagaId]: v }));
           }
-          setModalState({ type: "reserva", data: { reserva, vagaInfo: vagaCache[reserva.vagaId] ?? null } });
-        }}
-       checkoutForcado={reservaId => {
-  alert("Checkout forçado concluído para a reserva " + reservaId);
-}}
 
+          setModalState({
+            type: "reserva",
+            data: { reserva, vagaInfo: vagaCache[reserva.vagaId] ?? null },
+          });
+        }}
+        checkoutForcado={(reservaId) => {
+          alert("Checkout forçado concluído para a reserva " + reservaId);
+        }}
       />
 
       <FullCalendar
@@ -121,20 +191,12 @@ export default function CalendarioReservasGestor() {
         height="82vh"
         events={eventosCalendario}
         eventClick={handleGroupClick}
-        headerToolbar={{ left: "prev,next today", center: "title", right: "dayGridMonth" }}
-        buttonText={{ today: "Hoje", month: "Mês" }}
-        dayMaxEventRows={false}
-        eventDidMount={info => {
-          Object.assign(info.el.style, {
-            fontWeight: "600",
-            borderRadius: "6px",
-            padding: "4px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "2px",
-          });
+        headerToolbar={{
+          left: "prev,next today",
+          center: "title",
+          right: "dayGridMonth",
         }}
+        buttonText={{ today: "Hoje", month: "Mês" }}
       />
     </div>
   );
