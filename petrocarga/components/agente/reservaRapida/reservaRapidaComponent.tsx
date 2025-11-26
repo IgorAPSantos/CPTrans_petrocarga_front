@@ -115,7 +115,7 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
           <div>
             <DaySelection
               selected={selectedDay}
-              onSelect={(day) => {
+              onSelect={async (day) => {
                 setSelectedDay(day);
                 setStep(3);
               }}

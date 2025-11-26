@@ -25,10 +25,15 @@ export default function DaySelection({
     "SABADO",
   ];
 
-  // Função que retorna true se o dia deve ser desabilitado
+  const isBeforeDay = (date1: Date, date2: Date) => {
+    const d1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate());
+    const d2 = new Date(date2.getFullYear(), date2.getMonth(), date2.getDate());
+    return d1 < d2;
+  };
+
   const isDisabled = (date: Date) => {
     const dayName = diasSemanaMap[date.getDay()];
-    return !availableDays.includes(dayName) || date < today;
+    return !availableDays.includes(dayName) || isBeforeDay(date, today);
   };
 
   return (
