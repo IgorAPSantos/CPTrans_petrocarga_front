@@ -31,12 +31,11 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
     setEndHour,
     fetchHorariosDisponiveis,
     handleConfirm,
-    reset,
   } = reserva;
 
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState<boolean | null>(null);
-  const [loadingTimes, setLoadingTimes] = useState(false);
+  const [, setLoadingTimes] = useState(false);
 
   const onConfirm = async () => {
     const result = await handleConfirm();
@@ -55,7 +54,7 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
     };
 
     loadTimes();
-  }, [step, selectedDay, tipoVeiculoAgente]);
+  },);
 
   return (
     <div className="p-4 sm:p-6 border rounded-xl shadow-lg max-w-2xl mx-auto bg-white min-h-[80vh] flex flex-col gap-4">
