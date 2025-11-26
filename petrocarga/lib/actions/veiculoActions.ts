@@ -1,5 +1,5 @@
 "use server";
-
+import { Veiculo } from "@/lib/types/veiculo";
 import { revalidatePath } from "next/cache";
 import { serverApi } from "../serverApi";
 
@@ -163,18 +163,6 @@ export async function getVeiculosUsuario(
   };
 }
 
-export type Veiculo = {
-  id: string;
-  placa: string;
-  marca: string;
-  modelo: string;
-  tipo: string;
-  comprimento: number;
-  dono: {
-    cpfProprietarioVeiculo: string | null;
-    cnpjProprietarioVeiculo: string | null;
-  };
-};
 
 interface GetVeiculosResult {
   error: boolean;

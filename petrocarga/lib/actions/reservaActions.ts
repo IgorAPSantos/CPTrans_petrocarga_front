@@ -3,7 +3,7 @@
 import { serverApi } from "@/lib/serverApi";
 
 // ----------------------
-// POST RESERVA
+// POST RESERVA MOTORISTA
 // ----------------------
 
 export async function reservarVaga(formData: FormData) {
@@ -28,6 +28,33 @@ export async function reservarVaga(formData: FormData) {
 
   return res.json();
 }
+// ----------------------
+// POST RESERVA AGENTE
+// ----------------------
+export async function reservarVagaAgente(formData: FormData) {
+  const body = {
+    vagaId: formData.get("vagaId"),
+    tipoVeiculo: formData.get("tipoVeiculo"),
+    placa: formData.get("placa"),
+    inicio: formData.get("inicio"),
+    fim: formData.get("fim"),
+  };
+
+  const res = await serverApi("/petrocarga/reserva-rapida", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json();
+}
+
 
 // ----------------------
 // GET RESERVAS POR USUARIO
@@ -54,6 +81,31 @@ export async function getReservas() {
 
   return res.json();
 }
+
+// ----------------------
+// GET RESERVAS BLOQUEIOS
+// ----------------------
+export async function getReservasBloqueios(
+  vagaId: string,
+  data: string,
+  tipoVeiculo: "AUTOMOVEL" | "VUC" | "CAMINHONETA" | "CAMINHAO_MEDIO" | "CAMINHAO_LONGO"
+) {
+  const queryParams = new URLSearchParams({
+    data,
+    tipoVeiculo,
+  }).toString();
+
+  const res = await serverApi(`/petrocarga/reservas/bloqueios/${vagaId}?${queryParams}`, {
+    method: "GET",
+  });
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json();
+}
+
 
 // ----------------------
 // GET RESERVAS ATIVAS

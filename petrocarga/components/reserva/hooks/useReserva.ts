@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/components/hooks/useAuth";
 import { Veiculo } from "@/lib/types/veiculo";
+export type { Veiculo };
 import { Vaga } from "@/lib/types/vaga";
 import { ReservaState } from "@/lib/types/reservaState";
 import { getMotoristaByUserId } from "@/lib/actions/motoristaActions";
@@ -14,8 +15,9 @@ import {
 } from "./reservaHelpers";
 
 import {
-  fetchReservasAtivasDoDia,
+  fetchReservasBloqueios,
   confirmarReserva,
+  confirmarReservaAgente
 } from "./reservaService";
 
 interface GetVeiculosResult {
@@ -26,6 +28,7 @@ interface GetVeiculosResult {
 
 export function useReserva(selectedVaga: Vaga | null) {
   const { user } = useAuth();
+  const isAgente = user?.permissao === "AGENTE";
 
   const [reservaState, setReservaState] = useState<ReservaState>({
     step: 1,
@@ -36,13 +39,15 @@ export function useReserva(selectedVaga: Vaga | null) {
     endHour: null,
     origin: "",
     selectedVehicleId: undefined,
+    tipoVeiculoAgente: undefined,
+    placaAgente: "",
   });
 
   const [motoristaId, setMotoristaId] = useState<string | null>(null);
   const [vehicles, setVehicles] = useState<Veiculo[]>([]);
   const [loadingMotorista, setLoadingMotorista] = useState(true);
 
-  // ================= Funções principais =================
+  // ================= Funções =================
 
   const reset = useCallback(() => {
     setReservaState({
@@ -54,20 +59,45 @@ export function useReserva(selectedVaga: Vaga | null) {
       endHour: null,
       origin: "",
       selectedVehicleId: undefined,
+      tipoVeiculoAgente: undefined,
+      placaAgente: "",
     });
   }, []);
 
   const fetchHorariosDisponiveis = useCallback(
-    async (day: Date, vaga: Vaga): Promise<string[]> => {
+    async (
+      day: Date,
+      vaga: Vaga,
+      vehicleId?: string
+    ): Promise<string[]> => {
       const operacao = getOperacaoDia(day, vaga);
       if (!operacao) return [];
 
-      const reservasAtivas = await fetchReservasAtivasDoDia(
+      let tipoVeiculo: Veiculo["tipo"] | undefined;
+
+      // motorista
+      if (!isAgente) {
+        const v = vehicles.find((x) => x.id === vehicleId);
+        if (!v) return [];
+        tipoVeiculo = v.tipo;
+      }
+
+      // agente
+      if (isAgente) {
+        tipoVeiculo = reservaState.tipoVeiculoAgente;
+      }
+
+      if (!tipoVeiculo) return [];
+
+      const dataFormatada = day.toISOString().split("T")[0];
+
+      const bloqueios = await fetchReservasBloqueios(
         vaga.id,
-        day,
+        dataFormatada,
+        tipoVeiculo
       );
 
-      const horariosOcupados = reservasAtivas.flatMap(gerarHorariosOcupados);
+      const horariosOcupados = bloqueios.flatMap(gerarHorariosOcupados);
       const todosHorarios = gerarHorariosDia(operacao);
 
       setReservaState((prev) => ({
@@ -78,88 +108,118 @@ export function useReserva(selectedVaga: Vaga | null) {
 
       return todosHorarios;
     },
-    []
+    [vehicles, reservaState.tipoVeiculoAgente, isAgente]
   );
 
   const handleConfirm = useCallback(async (): Promise<boolean> => {
-  if (!user?.id || !selectedVaga || !motoristaId) return false;
+  if (!user?.id || !selectedVaga) return false;
 
-  const { selectedDay, selectedVehicleId, startHour, endHour, origin } = reservaState;
+  const {
+    selectedDay,
+    selectedVehicleId,
+    tipoVeiculoAgente,
+    placaAgente,
+    startHour,
+    endHour,
+    origin,
+  } = reservaState;
 
-  if (!selectedDay || !selectedVehicleId || !startHour || !endHour || !origin)
-    return false;
+  if (!selectedDay || !startHour || !endHour) return false;
 
   const formData = new FormData();
   formData.append("vagaId", selectedVaga.id);
-  formData.append("motoristaId", motoristaId); // <<< ID CORRETO
-  formData.append("veiculoId", selectedVehicleId);
-  formData.append("cidadeOrigem", origin);
+
+  if (isAgente) {
+    // AGENTE
+    if (!tipoVeiculoAgente || !placaAgente) return false;
+    formData.append("tipoVeiculo", tipoVeiculoAgente);
+    formData.append("placa", placaAgente);
+  } else {
+    // MOTORISTA
+    if (!motoristaId || !selectedVehicleId || !origin) return false;
+    formData.append("motoristaId", motoristaId);
+    formData.append("veiculoId", selectedVehicleId);
+    formData.append("cidadeOrigem", origin);
+  }
+
+  // Ambos usam inicio/fim
   formData.append("inicio", formatDateTime(selectedDay, startHour));
   formData.append("fim", formatDateTime(selectedDay, endHour));
 
-  const success = await confirmarReserva(formData);
+  const success = isAgente
+    ? await confirmarReservaAgente(formData)
+    : await confirmarReserva(formData);
+
   if (success) reset();
 
   return success;
-}, [user, selectedVaga, motoristaId, reservaState, reset]);
+}, [user, selectedVaga, motoristaId, reservaState, isAgente, reset]);
 
 
   // ================= Effects =================
 
   useEffect(() => {
-  if (!user?.id) return;
+    if (!user?.id || isAgente) return;
 
-  const fetchMotorista = async () => {
-    try {
-      const result = await getMotoristaByUserId(user.id);
-
-      if (!result.error) {
-        setMotoristaId(result.motoristaId);  
-      }
-
-      console.log("TOKEN NO COOKIE:", document.cookie);
-    } catch (error) {
-      console.error("Erro ao buscar motorista:", error);
-      console.log("TOKEN NO COOKIE:", document.cookie);
-    } finally {
-      setLoadingMotorista(false);
-    }
-  };
-
-  fetchMotorista();
-}, [user]);
-
-
-
-  useEffect(() => {
-    if (!user?.id) return;
-
-    const fetchVehicles = async () => {
+    const fetchMotorista = async () => {
       try {
-        const result: GetVeiculosResult = await getVeiculosUsuario(user.id);
-        console.log("TOKEN NO COOKIE:", document.cookie);
-
-        if (!result.error) setVehicles(result.veiculos);
-      } catch (error) {
-        console.error("Erro ao buscar veículos:", error);
-        console.log("TOKEN NO COOKIE:", document.cookie);
-
+        const result = await getMotoristaByUserId(user.id);
+        if (!result.error) {
+          setMotoristaId(result.motoristaId);
+        }
+      } catch (e) {
+        console.error("Erro ao buscar motorista:", e);
+      } finally {
+        setLoadingMotorista(false);
       }
     };
 
-    fetchVehicles();
-  }, [user]);
+    fetchMotorista();
+  }, [user, isAgente]);
 
   useEffect(() => {
-    if (selectedVaga && reservaState.selectedDay) {
+    if (!user?.id || isAgente) return;
+
+    const loadVehicles = async () => {
+      try {
+        const r: GetVeiculosResult = await getVeiculosUsuario(user.id);
+        if (!r.error) setVehicles(r.veiculos);
+      } catch (e) {
+        console.error("Erro ao buscar veículos:", e);
+      }
+    };
+
+    loadVehicles();
+  }, [user, isAgente]);
+
+  useEffect(() => {
+    if (!selectedVaga || !reservaState.selectedDay) return;
+
+    if (isAgente && reservaState.tipoVeiculoAgente) {
       fetchHorariosDisponiveis(reservaState.selectedDay, selectedVaga);
     }
-  }, [selectedVaga, reservaState.selectedDay, fetchHorariosDisponiveis]);
+
+    if (!isAgente && reservaState.selectedVehicleId) {
+      fetchHorariosDisponiveis(
+        reservaState.selectedDay,
+        selectedVaga,
+        reservaState.selectedVehicleId
+      );
+    }
+  }, [
+    selectedVaga,
+    reservaState.selectedDay,
+    reservaState.selectedVehicleId,
+    reservaState.tipoVeiculoAgente,
+    fetchHorariosDisponiveis,
+    isAgente,
+  ]);
 
   // ================= Setters =================
 
   const setStep = useCallback(
-    (step: number) => setReservaState((prev) => ({ ...prev, step })),
+    (step: number) =>
+      setReservaState((prev) => ({ ...prev, step })),
     []
   );
 
@@ -193,18 +253,36 @@ export function useReserva(selectedVaga: Vaga | null) {
     []
   );
 
+  const setTipoVeiculoAgente = useCallback(
+    (tipo: Veiculo["tipo"]) =>
+      setReservaState((prev) => ({ ...prev, tipoVeiculoAgente: tipo })),
+    []
+  );
+
+  const setPlacaAgente = useCallback(
+    (placa: string) =>
+      setReservaState((prev) => ({ ...prev, placaAgente: placa })),
+    []
+  );
+
   // ================= Return =================
 
   return {
     ...reservaState,
+    isAgente,
     vehicles,
     loadingMotorista,
+
+    // setters
     setStep,
     setSelectedDay,
     setStartHour,
     setEndHour,
     setOrigin,
     setSelectedVehicleId,
+    setTipoVeiculoAgente,
+    setPlacaAgente,
+
     fetchHorariosDisponiveis,
     handleConfirm,
     reset,

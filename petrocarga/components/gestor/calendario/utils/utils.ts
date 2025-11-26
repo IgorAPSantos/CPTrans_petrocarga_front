@@ -1,12 +1,10 @@
 export const toDateKey = (iso: string) => {
-  const d = new Date(iso);
-  const y = d.getFullYear();
-  const m = `${d.getMonth() + 1}`.padStart(2, "0");
-  const day = `${d.getDate()}`.padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  return iso.split("T")[0]; 
 };
 
-export const dayStartISO = (dateKey: string) => `${dateKey}T00:00:00.000Z`;
+export const dayStartISO = (dateKey: string) => {
+  return `${dateKey}T00:00:00`;
+};
 
 export const formatTime = (iso?: string) =>
   iso ? new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "";

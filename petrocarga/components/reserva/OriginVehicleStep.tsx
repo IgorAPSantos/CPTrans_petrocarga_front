@@ -10,7 +10,7 @@ interface OriginVehicleStepProps {
   selectedVehicleId?: string;
   onOriginChange: (value: string) => void;
   onVehicleChange: (id: string) => void;
-  onNext: () => void;
+  onNext: (origin: string, vehicleId: string) => void
   onBack?: () => void;
 }
 
@@ -47,15 +47,18 @@ export default function OriginVehicleStep({
   };
 
   const handleNext = () => {
-    if (!localVehicleId) return;
-    
-    // Se vier de outro município, precisa ter origem e entrada
-    if (origem === "outro-municipio" && (!localOrigin || !entradaId)) return;
-    
-    onOriginChange(localOrigin);
-    onVehicleChange(localVehicleId);
-    onNext();
-  };
+  if (!localVehicleId) return;
+
+  if (origem === "outro-municipio" && (!localOrigin || !entradaId)) return;
+
+  const cidadeOrigemFinal =
+    origem === "proprio-municipio" ? "Petrópolis - RJ" : localOrigin;
+
+  onOriginChange(cidadeOrigemFinal);
+  onVehicleChange(localVehicleId);
+  onNext(cidadeOrigemFinal, localVehicleId);
+};
+
 
   return (
     <div className="flex flex-col gap-4">

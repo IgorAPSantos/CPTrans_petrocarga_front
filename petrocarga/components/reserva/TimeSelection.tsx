@@ -3,7 +3,7 @@ interface TimeSelectionProps {
   reserved: string[];
   selected: string | null;
   onSelect: (time: string) => void;
-  onBack: () => void;
+  onBack?: () => void;
   color?: "blue" | "green";
 }
 

@@ -6,7 +6,7 @@ interface ConfirmationProps {
   destination?: string;
   vehicleName?: string;
   onConfirm: () => void;
-  onReset: () => void;
+  onReset?: () => void;
 }
 
 export default function Confirmation({
