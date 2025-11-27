@@ -8,6 +8,7 @@ export type Usuario = {
 }
 
 export type Agente = {
+  id: string;
   matricula: string;
   usuario: Usuario;
 }

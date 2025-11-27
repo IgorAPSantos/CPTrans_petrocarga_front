@@ -21,7 +21,7 @@ export async function addMotorista(_: unknown, formData: FormData) {
     dataValidadeCNH: formData.get("dataValidadeCNH") as string,
   };
 
-  const res = await serverApi("/petrocarga/motoristas/cadastro", {
+  const res = await serverApi(`/petrocarga/motoristas/cadastro`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -100,8 +100,7 @@ export async function atualizarMotorista(formData: FormData) {
 
   revalidatePath("/gestor/lista-motoristas");
   revalidatePath("/motoristas/perfil");
-
-  redirect("/motoristas/perfil");
+  redirect("/motorista/perfil");
 }
 
 // ----------------------
