@@ -12,5 +12,5 @@ export type Reserva = {
   criadoEm: string;
   inicio: string;
   fim: string;
-  status: "ATIVA" | "CANCELADA" | "FINALIZADA";
+  status: "ATIVA" | "CONCLUIDA";
 };

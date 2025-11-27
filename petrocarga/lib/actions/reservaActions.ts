@@ -55,6 +55,25 @@ export async function reservarVagaAgente(formData: FormData) {
   return res.json();
 }
 
+// ----------------------
+// POST RESERVA CHECKOUT-FORÇADO
+// ----------------------
+
+export async function finalizarForcado(reservaID: string) {
+
+  const res = await serverApi(`/petrocarga/reservas/${reservaID}/finalizar-forcado`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    }
+  });
+
+  if (!res.ok) {
+    throw new Error(await res.text());
+  }
+
+  return res.json();
+}
 
 // ----------------------
 // GET RESERVAS POR USUARIO
