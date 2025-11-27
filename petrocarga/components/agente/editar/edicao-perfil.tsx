@@ -4,7 +4,7 @@ import { Agente } from "@/lib/types/agente";
 import { useActionState, useState } from "react";
 import { atualizarAgente } from "@/lib/actions/agenteAction";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, CircleAlert, UserIcon } from "lucide-react";
+import { CheckCircle, CircleAlert, Eye, EyeOff, UserIcon } from "lucide-react";
 import Form from "next/form";
 import FormItem from "@/components/form/form-item";
 import { Input } from "@/components/ui/input";
@@ -16,16 +16,16 @@ export default function EditarAgente({
   agente: Agente;
 }) {
     // Wrapper para passar o token na action
-      const atualizarComToken = async (prevState: unknown, formData: FormData) => {
-      
-        return atualizarAgente(formData);
-      };
-    
-      const [state, atualizarAgenteAction, pending] = useActionState(
-        atualizarComToken,
-        null
-      );
-      const [exibirSenha, setExibirSenha] = useState(false);
+    const atualizar = async (prevState: unknown, formData: FormData) => {
+      return atualizarAgente(formData);
+    };
+        
+    const [state, atualizarAgenteAction, pending] = useActionState(
+      atualizar,
+      null
+    );
+
+    const [exibirSenha, setExibirSenha] = useState(false);
 
     return (
       <main className="container mx-auto px-4 py-4 md:py-8">
@@ -36,11 +36,11 @@ export default function EditarAgente({
             </div>
 
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              Editar Agente
+              Edição de Perfil
             </CardTitle>
 
             <CardDescription className="text-base">
-              Atualize os dados do agente conforme necessário.
+              Atualize os seus dados conforme necessário.
             </CardDescription>
           </CardHeader>
 
@@ -67,7 +67,7 @@ export default function EditarAgente({
               )}
 
               <CardDescription className="text-base text-center mb-6 text-blue-800 font-bold">
-                Dados do agente
+                Seus Dados
               </CardDescription>
 
               {/* Nome */}
@@ -157,6 +157,33 @@ export default function EditarAgente({
                   defaultValue={agente.matricula}
                   required
                 />
+              </FormItem>
+
+              {/* Senha - OPCIONAL para edição */}
+              <FormItem
+                name="Nova Senha"
+                description="Deixe em branco para manter a senha atual"
+              >
+                <div className="relative">
+                  <Input
+                    type={exibirSenha ? "text" : "password"}
+                    className="rounded-sm border-gray-400 text-sm md:text-base pr-10"
+                    id="senha"
+                    name="senha"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setExibirSenha(!exibirSenha)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    {exibirSenha ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </FormItem>
             </CardContent>
 

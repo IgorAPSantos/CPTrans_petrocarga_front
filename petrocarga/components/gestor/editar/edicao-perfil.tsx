@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { atualizarGestor } from "@/lib/actions/gestorActions";
 import { Gestor } from "@/lib/types/gestor";
-import { CheckCircle, CircleAlert, UserIcon } from "lucide-react";
+import { CheckCircle, CircleAlert, Eye, EyeOff, UserIcon } from "lucide-react";
 import Form from "next/form";
 import { useActionState, useState } from "react";
 
@@ -16,15 +16,15 @@ export default function EditarGestor({
   gestor: Gestor;
 }) {
     // Wrapper para passar o token na action
-    const atualizarComToken = async (prevState: unknown, formData: FormData) => {
-    
+    const atualizar = async (prevState: unknown, formData: FormData) => {
       return atualizarGestor(formData);
     };
-  
+    
     const [state, atualizarGestorAction, pending] = useActionState(
-      atualizarComToken,
+      atualizar,
       null
     );
+
     const [exibirSenha, setExibirSenha] = useState(false);
   
   return (
@@ -36,15 +36,18 @@ export default function EditarGestor({
           </div>
 
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-            Cadastrar Gestor
+            Edição de Perfil
           </CardTitle>
 
           <CardDescription className="text-base">
-            Preencha os dados abaixo para adicionar um gestor ao sistema.
+            Preencha os dados abaixo para editar seu perfil.
           </CardDescription>
         </CardHeader>
 
         <Form action={atualizarGestorAction}>
+          {/* Campo hidden com o ID da vaga */}
+          <input type="hidden" name="id" value={gestor.id} />
+
           <CardContent className="p-4 md:p-6 lg:p-8">
             {(state?.error || state?.message) && (
               <div
@@ -64,7 +67,7 @@ export default function EditarGestor({
             )}
 
             <CardDescription className="text-base text-center mb-6 text-blue-800 font-bold">
-              Dados do Gestor
+              Seus Dados
             </CardDescription>
 
             {/* Nome */}
@@ -76,7 +79,6 @@ export default function EditarGestor({
                 className="rounded-sm border-gray-400 text-sm md:text-base"
                 id="nome"
                 name="nome"
-                placeholder="Ex.: Maria Souza"
                 defaultValue={gestor.nome}
                 required
               />
@@ -89,7 +91,6 @@ export default function EditarGestor({
                 type="email"
                 id="email"
                 name="email"
-                placeholder="gestor@email.com"
                 defaultValue={gestor.email}
                 required
               />
@@ -104,7 +105,6 @@ export default function EditarGestor({
                 className="rounded-sm border-gray-400 text-sm md:text-base"
                 id="cpf"
                 name="cpf"
-                placeholder="00000000000"
                 defaultValue={gestor.cpf}
                 maxLength={11}
                 inputMode="numeric"
@@ -127,7 +127,6 @@ export default function EditarGestor({
                 className="rounded-sm border-gray-400 text-sm md:text-base"
                 id="telefone"
                 name="telefone"
-                placeholder="21999998888"
                 defaultValue={gestor.telefone}
                 maxLength={11}
                 inputMode="numeric"
@@ -139,6 +138,33 @@ export default function EditarGestor({
                   );
                 }}
               />
+            </FormItem>
+
+            {/* Senha - OPCIONAL para edição */}
+            <FormItem
+              name="Nova Senha"
+              description="Deixe em branco para manter a senha atual"
+            >
+              <div className="relative">
+                <Input
+                  type={exibirSenha ? "text" : "password"}
+                  className="rounded-sm border-gray-400 text-sm md:text-base pr-10"
+                  id="senha"
+                  name="senha"
+                  defaultValue={gestor.senha}
+                />
+                <button
+                  type="button"
+                  onClick={() => setExibirSenha(!exibirSenha)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {exibirSenha ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </FormItem>
           </CardContent>
 

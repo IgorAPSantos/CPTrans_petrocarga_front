@@ -12,28 +12,24 @@ import { Input } from "@/components/ui/input";
 import { atualizarMotorista } from "@/lib/actions/motoristaActions";
 import { CheckCircle, CircleAlert, Eye, EyeOff, UserIcon } from "lucide-react";
 import Form from "next/form";
-import { useActionState, useState } from "react";
+import { use, useActionState, useState } from "react";
 import FormItem from "@/components/form/form-item";
 import React from "react";
 import { Motorista } from "@/lib/types/motorista";
 import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
 
-export default function EditarMotorista({
-  motorista,
-}: {
-  motorista: Motorista;
-}) {
+export default function EditarMotorista({ motorista }: { motorista: Motorista; }) {
 
   // Wrapper para passar o token na action
-  const atualizarComToken = async (prevState: unknown, formData: FormData) => {
-  
+  const atualizar = async (prevState: unknown, formData: FormData) => {
     return atualizarMotorista(formData);
   };
 
   const [state, atualizarMotoristaAction, pending] = useActionState(
-    atualizarComToken,
+    atualizar,
     null
   );
+  
   const [exibirSenha, setExibirSenha] = useState(false);
 
   return (
@@ -51,8 +47,8 @@ export default function EditarMotorista({
           </CardDescription>
         </CardHeader>
         <Form action={atualizarMotoristaAction}>
-          {/* Campo ID hidden - IMPORTANTE */}
-          <input type="hidden" name="id" value={motorista.id} />
+          {/* Campo hidden com o ID da vaga */}
+          <input type="hidden" name="id" value={motorista.usuario.id} />
 
           <CardContent className="p-4 md:p-6 lg:p-8">
             {/* Mensagem de erro ou sucesso */}

@@ -4,4 +4,5 @@ export type Gestor = {
   cpf: string;
   telefone: string;
   email: string;
+  senha: string;
 };
