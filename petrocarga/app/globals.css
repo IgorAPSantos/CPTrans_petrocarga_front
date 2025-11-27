@@ -3,6 +3,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
 @media (max-width: 640px) {
   .fc {
     font-size: 0.75rem; /* text-sm */
@@ -17,6 +18,10 @@
     font-size: 0.75rem !important;
   }
 }
+.fc-event.evento-click {
+  cursor: pointer;
+}
+
 
 .my-custom-geocoder {
   border-radius: 16px;

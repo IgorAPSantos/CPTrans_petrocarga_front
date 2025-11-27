@@ -25,8 +25,7 @@ export default function ReservaCard({
       className={cn(
         "flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full",
         reserva.status === "ATIVA" && "border-green-500",
-        reserva.status === "CANCELADA" && "border-red-500",
-        reserva.status === "FINALIZADA" && "border-gray-500"
+        reserva.status === "CONCLUIDA" && "border-gray-500"
       )}
     >
       {/* Conteúdo principal */}
@@ -42,8 +41,7 @@ export default function ReservaCard({
             className={cn(
               "hidden sm:inline-block px-2 py-0.5 rounded-full text-xs sm:text-sm font-semibold shadow-sm",
               reserva.status === "ATIVA" && "bg-green-100 text-green-800",
-              reserva.status === "CANCELADA" && "bg-red-100 text-red-800",
-              reserva.status === "FINALIZADA" && "bg-gray-100 text-gray-800"
+              reserva.status === "CONCLUIDA" && "bg-gray-100 text-gray-800"
             )}
           >
             {reserva.status}
@@ -76,8 +74,7 @@ export default function ReservaCard({
           className={cn(
             "sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center",
             reserva.status === "ATIVA" && "bg-green-100 text-green-800",
-            reserva.status === "CANCELADA" && "bg-red-100 text-red-800",
-            reserva.status === "FINALIZADA" && "bg-gray-100 text-gray-800"
+            reserva.status === "CONCLUIDA" && "bg-gray-100 text-gray-800"
           )}
         >
           {reserva.status}

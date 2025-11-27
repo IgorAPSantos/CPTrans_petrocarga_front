@@ -191,14 +191,15 @@ export const ReservaModal = ({
           )}
         </div>
         <div className="flex flex-row gap-2">
-          {modalState.type === "reserva" && (
-            <Button
-              variant="destructive"
-              onClick={() => checkoutForcado(modalState.data.reserva.id)}
-            >
-              Checkout Forçado
-            </Button>
-          )}
+          {modalState.type === "reserva" &&
+            modalState.data.reserva.status !== "CONCLUIDA" && (
+              <Button
+                variant="destructive"
+                onClick={() => checkoutForcado(modalState.data.reserva.id)}
+              >
+                Checkout Forçado
+              </Button>
+            )}
         </div>
       </DialogFooter>
     );

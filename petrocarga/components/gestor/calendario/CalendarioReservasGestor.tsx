@@ -39,7 +39,7 @@ type ModalState =
 
 /* -------------------- Componente -------------------- */
 export default function CalendarioReservasGestor() {
-  const { reservas } = useReservas();
+  const { reservas, finalizarReservaForcada } = useReservas();
   const [vagaCache, setVagaCache] = useState<Record<string, Vaga | null>>({});
   const [modalState, setModalState] = useState<ModalState>({
     type: null,
@@ -85,7 +85,7 @@ export default function CalendarioReservasGestor() {
     return Object.entries(reservasPorDia).map(([dateStr, logradouros]) => {
       const todasFinalizadas = Object.values(logradouros)
         .flat()
-        .every((r) => r.status === "FINALIZADA");
+        .every((r) => r.status === "CONCLUIDA");
       return {
         id: dateStr,
         title: "● Reservas",
@@ -93,6 +93,7 @@ export default function CalendarioReservasGestor() {
         allDay: true,
         color: todasFinalizadas ? "#ef4444" : "#22c55e",
         extendedProps: { logradouros },
+        classNames: ["evento-click"],
       };
     });
   }, [reservasPorDia]);
@@ -124,7 +125,11 @@ export default function CalendarioReservasGestor() {
     ).logradouros;
 
     const todosVagaIds = Array.from(
-      new Set(Object.values(logradouros).flat().map((r) => r.vagaId))
+      new Set(
+        Object.values(logradouros)
+          .flat()
+          .map((r) => r.vagaId)
+      )
     );
 
     await ensureVagasInCache(todosVagaIds);
@@ -146,14 +151,14 @@ export default function CalendarioReservasGestor() {
         close={closeModal}
         goBack={goBack}
         openVagasLogradouro={(l, r) => {
-          lastGroupRef.current = modalState; // <--- SALVA STEP ANTERIOR
+          lastGroupRef.current = modalState;
           setModalState({
             type: "vagasLogradouro",
             data: { logradouro: l, reservasDoLogradouro: r },
           });
         }}
         openVagaModal={async (vagaId, reservasDoLogradouro) => {
-          lastVagasLogradouroRef.current = modalState; // <--- SALVA STEP ANTERIOR
+          lastVagasLogradouroRef.current = modalState;
 
           await ensureVagasInCache([vagaId]);
 
@@ -167,7 +172,7 @@ export default function CalendarioReservasGestor() {
           });
         }}
         openReservaModal={async (reserva) => {
-          lastVagaRef.current = modalState; // <--- SALVA STEP ANTERIOR
+          lastVagaRef.current = modalState;
 
           if (!vagaCache[reserva.vagaId]) {
             const v = await getVagaById(reserva.vagaId);
@@ -179,8 +184,10 @@ export default function CalendarioReservasGestor() {
             data: { reserva, vagaInfo: vagaCache[reserva.vagaId] ?? null },
           });
         }}
-        checkoutForcado={(reservaId) => {
-          alert("Checkout forçado concluído para a reserva " + reservaId);
+        checkoutForcado={async (id) => {
+          await finalizarReservaForcada(id);
+          closeModal();
+          alert("Checkout-Forçado Concluído (alert versão temporária)")
         }}
       />
 
