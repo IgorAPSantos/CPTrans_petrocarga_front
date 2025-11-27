@@ -59,7 +59,7 @@ export async function reservarVagaAgente(formData: FormData) {
 // POST RESERVA CHECKOUT-FORÇADO
 // ----------------------
 
-export async function finalizarForçado(reservaID: string) {
+export async function finalizarForcado(reservaID: string) {
 
   const res = await serverApi(`/petrocarga/reservas/${reservaID}/finalizar-forcado`, {
     method: "POST",

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getReservas, finalizarForçado } from "@/lib/actions/reservaActions";
+import { getReservas, finalizarForcado } from "@/lib/actions/reservaActions";
 import { Reserva } from "@/lib/types/reserva";
 
 export function useReservas() {
@@ -26,7 +26,7 @@ export function useReservas() {
   async function finalizarReservaForcada(reservaID: string) {
     setActionLoading(true);
     try {
-      const result = await finalizarForçado(reservaID);
+      const result = await finalizarForcado(reservaID);
 
       setReservas(prev =>
         prev.map(r =>
