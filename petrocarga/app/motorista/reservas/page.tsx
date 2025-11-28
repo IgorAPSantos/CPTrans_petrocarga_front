@@ -8,12 +8,12 @@ import {
 } from "@/lib/actions/reservaActions";
 import { Loader2 } from "lucide-react";
 import ReservaCard from "@/components/reserva/minhasReservas/ReservaCard";
-import { Reserva } from "@/lib/types/reserva";
+import { ReservaGet } from "@/lib/types/reserva";
 import jsPDF from "jspdf";
 
 export default function MinhasReservas() {
   const { user } = useAuth();
-  const [reservas, setReservas] = useState<Reserva[]>([]);
+  const [reservas, setReservas] = useState<ReservaGet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +42,7 @@ export default function MinhasReservas() {
     fetchReservas();
   }, [user?.id]);
 
-  const handleGerarDocumento = async (reserva: Reserva) => {
+  const handleGerarDocumento = async (reserva: ReservaGet) => {
     try {
       const dados = await getDocumentoReserva(reserva.id);
 
@@ -92,13 +92,13 @@ export default function MinhasReservas() {
   }
 
   return (
-    <div className="p-4 flex flex-col items-center justify-center w-full min-h-screen bg-gray-50">
+    <div className="p-4 flex flex-col items-center w-full min-h-screen bg-gray-50">
       <h1 className="text-2xl font-bold mb-6 text-center">
         Bem-vindo às suas Reservas, {user?.nome || "motorista"}!
       </h1>
 
       {reservas.length === 0 ? (
-        <p className="text-gray-600 text-center">Nenhuma reserva encontrada.</p>
+        <p className="text-gray-500 text-center">Nenhuma reserva encontrada.</p>
       ) : (
         <div className="grid gap-4 w-full max-w-2xl">
           {reservas.map((reserva) => (

@@ -15,3 +15,20 @@ export type Reserva = {
   status: "ATIVA" | "CONCLUIDA";
   vaga: string; 
 };
+
+export type ReservaGet = {
+  id: string;
+  vagaId: string;
+  referenciaGeoInicio: string;
+  logradouro: string;
+  bairro: string;
+  referenciaGeoFim: string;
+  motoristaId: string;
+  veiculoId: string;
+  criadoPorId: string;
+  cidadeOrigem: string;
+  criadoEm: string;
+  inicio: string;
+  fim: string;
+  status: "ATIVA" | "CONCLUIDA";
+};
