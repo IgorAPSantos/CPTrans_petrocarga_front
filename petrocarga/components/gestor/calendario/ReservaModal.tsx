@@ -82,7 +82,7 @@ export const ReservaModal = ({
             <div className="space-y-2 max-h-[60vh] overflow-auto">
               {Array.from(
                 new Set(
-                  modalState.data.reservasDoLogradouro.map((r) => r.vagaId)
+                  modalState.data.reservasDoLogradouro.map((r) => r.vaga)
                 )
               ).map((vagaId) => (
                 <VagaItem
@@ -90,7 +90,7 @@ export const ReservaModal = ({
                   vagaId={vagaId}
                   vagasCache={vagaCache}
                   reservas={modalState.data.reservasDoLogradouro.filter(
-                    (r) => r.vagaId === vagaId
+                    (r) => r.vaga === vagaId
                   )}
                   onClick={() =>
                     openVagaModal(vagaId, modalState.data.reservasDoLogradouro)
@@ -141,9 +141,7 @@ export const ReservaModal = ({
             <div className="space-y-2 text-sm">
               <p>
                 <strong>Vaga:</strong>{" "}
-                {modalState.data.vagaInfo?.endereco?.logradouro ??
-                  modalState.data.vagaInfo?.referenciaEndereco ??
-                  modalState.data.reserva.vagaId}
+                {`${modalState.data.reserva.enderecoVaga.logradouro}`}
               </p>
               <p>
                 <strong>Área:</strong> {modalState.data.vagaInfo?.area ?? "—"}
@@ -160,11 +158,15 @@ export const ReservaModal = ({
                 <strong>Status:</strong> {modalState.data.reserva.status}
               </p>
               <p>
-                <strong>Bairro:</strong> {modalState.data.reserva.bairro}
+                <strong>Bairro:</strong> {modalState.data.reserva.enderecoVaga.bairro}
               </p>
               <p>
-                <strong>Cidade Origem:</strong>{" "}
-                {modalState.data.reserva.cidadeOrigem}
+                <strong>Placa:</strong>{" "}
+                {modalState.data.reserva.placaVeiculo}
+              </p>
+              <p>
+                <strong>Tamanho do Veiculo:</strong>{" "}
+                {`${modalState.data.reserva.tamanhoVeiculo}m`}
               </p>
             </div>
           </>

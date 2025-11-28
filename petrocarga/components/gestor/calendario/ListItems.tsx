@@ -86,7 +86,6 @@ export const VagaItem = ({
 
 export const ReservaItem = ({
   reserva,
-  veiculo,
   onClick,
 }: {
   reserva: Reserva;
@@ -109,7 +108,7 @@ export const ReservaItem = ({
           {formatTime(reserva.inicio)} — {formatTime(reserva.fim)}
         </div>
         <div className="text-sm text-muted-foreground">
-          {reserva.bairro} • {reserva.cidadeOrigem}
+          {reserva.enderecoVaga.bairro} • {reserva.placaVeiculo}
         </div>
       </div>
       <Button variant="ghost" onClick={onClick}>
