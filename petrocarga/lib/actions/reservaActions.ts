@@ -92,7 +92,7 @@ export async function getReservasPorUsuario(usuarioId: string) {
 // GET RESERVAS 
 // ----------------------
 export async function getReservas() {
-  const res = await serverApi(`/petrocarga/reservas`);
+  const res = await serverApi(`/petrocarga/reservas/all`);
 
   if (!res.ok) {
     throw new Error(await res.text());

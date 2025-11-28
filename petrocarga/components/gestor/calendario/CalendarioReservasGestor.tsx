@@ -75,8 +75,8 @@ export default function CalendarioReservasGestor() {
     reservas.forEach((r) => {
       const dateKey = toDateKey(r.inicio);
       if (!map[dateKey]) map[dateKey] = {};
-      if (!map[dateKey][r.logradouro]) map[dateKey][r.logradouro] = [];
-      map[dateKey][r.logradouro].push(r);
+      if (!map[dateKey][r.enderecoVaga.logradouro]) map[dateKey][r.enderecoVaga.logradouro] = [];
+      map[dateKey][r.enderecoVaga.logradouro].push(r);
     });
     return map;
   }, [reservas]);
@@ -128,7 +128,7 @@ export default function CalendarioReservasGestor() {
       new Set(
         Object.values(logradouros)
           .flat()
-          .map((r) => r.vagaId)
+          .map((r) => r.vaga)
       )
     );
 
@@ -167,21 +167,21 @@ export default function CalendarioReservasGestor() {
             data: {
               vagaId,
               vagaInfo: vagaCache[vagaId] ?? null,
-              reservas: reservasDoLogradouro.filter((r) => r.vagaId === vagaId),
+              reservas: reservasDoLogradouro.filter((r) => r.vaga === vagaId),
             },
           });
         }}
         openReservaModal={async (reserva) => {
           lastVagaRef.current = modalState;
 
-          if (!vagaCache[reserva.vagaId]) {
-            const v = await getVagaById(reserva.vagaId);
-            if (v) setVagaCache((prev) => ({ ...prev, [reserva.vagaId]: v }));
+          if (!vagaCache[reserva.vaga]) {
+            const v = await getVagaById(reserva.vaga);
+            if (v) setVagaCache((prev) => ({ ...prev, [reserva.vaga]: v }));
           }
 
           setModalState({
             type: "reserva",
-            data: { reserva, vagaInfo: vagaCache[reserva.vagaId] ?? null },
+            data: { reserva, vagaInfo: vagaCache[reserva.vaga] ?? null },
           });
         }}
         checkoutForcado={async (id) => {
