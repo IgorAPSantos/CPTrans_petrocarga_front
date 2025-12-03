@@ -123,3 +123,25 @@ export async function getMotoristaByUserId(userId: string) {
   const data = await res.json();
   return { error: false, motoristaId: data.id, motorista: data };
 }
+
+// ----------------------
+// GET MOTORISTAS
+// ----------------------
+export async function getMotoristas() {
+  const res = await serverApi(`/petrocarga/motoristas`); 
+  
+  if (!res.ok) {
+    let msg = "Erro ao buscar motoristas";
+    
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
+  }
+
+  const data = await res.json();
+  return { error: false, motoristas: data };
+}
+// ----------------------

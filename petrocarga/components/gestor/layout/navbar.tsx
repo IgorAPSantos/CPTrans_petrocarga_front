@@ -24,6 +24,7 @@ export function Navbar() {
     { href: "/gestor/guia", label: "Guia" },
     { href: "/gestor/reservas", label: "Reservas" },
     { href: "/gestor/disponibilidade-vagas", label: "Disponibilidade" },
+    { href: "/gestor/motoristas", label: "Motoristas" },
   ];
 
   // 🔥 Link extra somente se for ADMIN (só verifica após mounted)
