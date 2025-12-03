@@ -3,8 +3,7 @@
 import { deleteGestor } from "@/lib/actions/gestorActions";
 import { Gestor } from "@/lib/types/gestor";
 import { cn } from "@/lib/utils";
-import { IdCard, Mail, Phone, UserCircle } from "lucide-react";
-import Link from "next/link";
+import { Mail, Phone, UserCircle } from "lucide-react";
 import router from "next/router";
 import { useState } from "react";
 
