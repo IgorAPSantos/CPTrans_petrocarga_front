@@ -61,18 +61,17 @@ export async function deleteGestor(gestorId: string) {
 // ----------------------
 export async function atualizarGestor(formData: FormData) {
   const usuarioId = formData.get("id") as string;
-  const senha = formData.get("senha") as string;
 
   const payload = {
     nome: formData.get("nome") as string,
     cpf: formData.get("cpf") as string,
     telefone: formData.get("telefone") as string,
     email: formData.get("email") as string,
-    ...(senha ? { senha } : {}),
+    senha: formData.get("senha") as string,
   };
 
   const res = await serverApi(`/petrocarga/gestores/${usuarioId}`, {
-    method: "PUT",
+    method: "PATCH",
     body: JSON.stringify(payload),
   });
 
