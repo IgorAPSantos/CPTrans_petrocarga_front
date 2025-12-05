@@ -62,19 +62,18 @@ export async function deleteAgente(agenteId: string) {
 // ----------------------
 export async function atualizarAgente(formData: FormData) {
   const usuarioid = formData.get("id") as string;
-  const senha = formData.get("senha") as string;
-  
+
   const payload = {
     nome: formData.get("nome") as string,
     cpf: formData.get("cpf") as string,
     telefone: formData.get("telefone") as string,
     email: formData.get("email") as string,
     matricula: formData.get("matricula") as string,
-    ...(senha ? { senha } : {}),
+    senha: formData.get("senha") as string,
   };
 
   const res = await serverApi(`/petrocarga/agentes/${usuarioid}`, {
-    method: "PUT",
+    method: "PATCH",
     body: JSON.stringify(payload),
   });
 

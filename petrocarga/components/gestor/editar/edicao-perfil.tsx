@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { atualizarGestor } from "@/lib/actions/gestorActions";
 import { Gestor } from "@/lib/types/gestor";
-import { CheckCircle, CircleAlert, Eye, EyeOff, UserIcon } from "lucide-react";
+import { CheckCircle, CircleAlert, UserIcon } from "lucide-react";
 import Form from "next/form";
 import { useActionState, useState } from "react";
 
@@ -84,18 +84,6 @@ export default function EditarGestor({
               />
             </FormItem>
 
-            {/* Email */}
-            <FormItem name="Email" description="Digite o email do gestor.">
-              <Input
-                className="rounded-sm border-gray-400 text-sm md:text-base"
-                type="email"
-                id="email"
-                name="email"
-                defaultValue={gestor.email}
-                required
-              />
-            </FormItem>
-
             {/* CPF */}
             <FormItem
               name="CPF"
@@ -138,33 +126,6 @@ export default function EditarGestor({
                   );
                 }}
               />
-            </FormItem>
-
-            {/* Senha - OPCIONAL para edição */}
-            <FormItem
-              name="Nova Senha"
-              description="Deixe em branco para manter a senha atual"
-            >
-              <div className="relative">
-                <Input
-                  type={exibirSenha ? "text" : "password"}
-                  className="rounded-sm border-gray-400 text-sm md:text-base pr-10"
-                  id="senha"
-                  name="senha"
-                  defaultValue={gestor.senha}
-                />
-                <button
-                  type="button"
-                  onClick={() => setExibirSenha(!exibirSenha)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {exibirSenha ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
             </FormItem>
           </CardContent>
 

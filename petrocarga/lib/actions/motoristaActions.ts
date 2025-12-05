@@ -67,7 +67,6 @@ export async function deleteMotorista(motoristaId: string) {
 // ----------------------
 export async function atualizarMotorista(formData: FormData) {
   const id = formData.get("id") as string;
-  const senha = formData.get("senha") as string;
 
   const payload = {
     usuario: {
@@ -75,7 +74,7 @@ export async function atualizarMotorista(formData: FormData) {
       cpf: formData.get("cpf") as string,
       telefone: formData.get("telefone") as string,
       email: formData.get("email") as string,
-      ...(senha ? { senha } : {}),
+      senha: formData.get("senha") as string,
     },
     tipoCNH: (formData.get("tipoCNH") as string)?.toUpperCase(),
     numeroCNH: formData.get("numeroCNH") as string,
@@ -83,7 +82,7 @@ export async function atualizarMotorista(formData: FormData) {
   };
 
   const res = await serverApi(`/petrocarga/motoristas/${id}`, {
-    method: "PUT",
+    method: "PATCH",
     body: JSON.stringify(payload),
   });
 

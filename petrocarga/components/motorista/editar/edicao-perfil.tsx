@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { atualizarMotorista } from "@/lib/actions/motoristaActions";
-import { CheckCircle, CircleAlert, Eye, EyeOff, UserIcon } from "lucide-react";
+import { CheckCircle, CircleAlert, UserIcon } from "lucide-react";
 import Form from "next/form";
 import { use, useActionState, useState } from "react";
 import FormItem from "@/components/form/form-item";
@@ -184,50 +184,6 @@ export default function EditarMotorista({ motorista }: { motorista: Motorista; }
                 defaultValue={motorista.dataValidadeCNH}
                 required
               />
-            </FormItem>
-
-            <CardDescription className="text-base text-center mb-6 text-blue-800 font-bold">
-              Dados de Acesso
-            </CardDescription>
-
-            {/* Email */}
-            <FormItem name="Email" description="Digite seu email">
-              <Input
-                className="rounded-sm border-gray-400 text-sm md:text-base"
-                type="email"
-                id="email"
-                name="email"
-                placeholder="seu@email.com"
-                defaultValue={motorista.usuario.email}
-                required
-              />
-            </FormItem>
-
-            {/* Senha - OPCIONAL para edição */}
-            <FormItem
-              name="Nova Senha"
-              description="Deixe em branco para manter a senha atual"
-            >
-              <div className="relative">
-                <Input
-                  type={exibirSenha ? "text" : "password"}
-                  className="rounded-sm border-gray-400 text-sm md:text-base pr-10"
-                  id="senha"
-                  name="senha"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setExibirSenha(!exibirSenha)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  {exibirSenha ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
             </FormItem>
           </CardContent>
 
