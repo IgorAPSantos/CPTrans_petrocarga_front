@@ -1,11 +1,14 @@
+
+import DisponibilidadeCalendario from "@/components/gestor/disponibilidade/DisponibilidadeCalendario";
+
 export default function DisponibilidadeVagas() {
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4">
-          Gerenciamento de Disponibilidade de Vagas
-        </h1>
-      </div>
-    </div>
-  );
-}
+     <div className="flex flex-col items-center">
+       <h1 className="text-2xl font-bold p-4">Disponibilidade de Vagas</h1>
+ 
+       <div className="w-full max-w-5xl px-2 md:px-4">
+        <DisponibilidadeCalendario/>
+       </div>
+     </div>
+   );
+ }
