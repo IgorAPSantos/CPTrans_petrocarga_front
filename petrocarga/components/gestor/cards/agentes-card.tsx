@@ -62,13 +62,6 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
 
       {/* Botões */}
       <div className="flex sm:flex-col flex-row gap-2 sm:w-auto w-full sm:max-w-none">
-        <Link
-          href={`/gestor/agentes/${agente.usuario.id}`}
-          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition text-center w-full sm:w-auto"
-        >
-          Alterar
-        </Link>
-
         <button
           onClick={() => setModalAberto(true)}
           className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition w-full sm:w-auto"

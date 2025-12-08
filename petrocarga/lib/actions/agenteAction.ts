@@ -16,7 +16,7 @@ export async function addAgente(_: unknown, formData: FormData) {
     matricula: formData.get("matricula") as string,
   };
 
-  const res = await serverApi("/petrocarga/agentes", {
+  const res = await serverApi(`/petrocarga/agentes`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -61,18 +61,19 @@ export async function deleteAgente(agenteId: string) {
 // ATUALIZAR AGENTE
 // ----------------------
 export async function atualizarAgente(formData: FormData) {
-  const id = formData.get("id") as string;
-  
+  const usuarioid = formData.get("id") as string;
+
   const payload = {
     nome: formData.get("nome") as string,
     cpf: formData.get("cpf") as string,
     telefone: formData.get("telefone") as string,
     email: formData.get("email") as string,
     matricula: formData.get("matricula") as string,
+    senha: formData.get("senha") as string,
   };
 
-  const res = await serverApi(`/petrocarga/agentes/${id}`, {
-    method: "PUT",
+  const res = await serverApi(`/petrocarga/agentes/${usuarioid}`, {
+    method: "PATCH",
     body: JSON.stringify(payload),
   });
 
@@ -90,9 +91,8 @@ export async function atualizarAgente(formData: FormData) {
   revalidatePath("/gestor/agentes");
   revalidatePath("/agentes/perfil");
 
-  redirect("/agentes/perfil");
+  redirect("/agente/perfil");
 }
-
 // ----------------------
 // GET AGENTE BY USER ID
 // ----------------------

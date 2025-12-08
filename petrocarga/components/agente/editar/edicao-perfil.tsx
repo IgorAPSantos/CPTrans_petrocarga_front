@@ -16,16 +16,14 @@ export default function EditarAgente({
   agente: Agente;
 }) {
     // Wrapper para passar o token na action
-      const atualizarComToken = async (prevState: unknown, formData: FormData) => {
-      
-        return atualizarAgente(formData);
-      };
-    
-      const [state, atualizarAgenteAction, pending] = useActionState(
-        atualizarComToken,
-        null
-      );
-      const [exibirSenha, setExibirSenha] = useState(false);
+    const atualizar = async (prevState: unknown, formData: FormData) => {
+      return atualizarAgente(formData);
+    };
+        
+    const [state, atualizarAgenteAction, pending] = useActionState(
+      atualizar,
+      null
+    );
 
     return (
       <main className="container mx-auto px-4 py-4 md:py-8">
@@ -36,11 +34,11 @@ export default function EditarAgente({
             </div>
 
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              Editar Agente
+              Edição de Perfil
             </CardTitle>
 
             <CardDescription className="text-base">
-              Atualize os dados do agente conforme necessário.
+              Atualize os seus dados conforme necessário.
             </CardDescription>
           </CardHeader>
 
@@ -67,7 +65,7 @@ export default function EditarAgente({
               )}
 
               <CardDescription className="text-base text-center mb-6 text-blue-800 font-bold">
-                Dados do agente
+                Seus Dados
               </CardDescription>
 
               {/* Nome */}
@@ -81,19 +79,6 @@ export default function EditarAgente({
                   name="nome"
                   placeholder="Ex.: Eduardo Dantas"
                   defaultValue={agente.usuario.nome}
-                  required
-                />
-              </FormItem>
-
-              {/* Email */}
-              <FormItem name="Email" description="Digite o email do agente.">
-                <Input
-                  className="rounded-sm border-gray-400 text-sm md:text-base"
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="agente@email.com"
-                  defaultValue={agente.usuario.email}
                   required
                 />
               </FormItem>

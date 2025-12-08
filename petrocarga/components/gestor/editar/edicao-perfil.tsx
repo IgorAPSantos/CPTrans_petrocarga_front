@@ -16,15 +16,15 @@ export default function EditarGestor({
   gestor: Gestor;
 }) {
     // Wrapper para passar o token na action
-    const atualizarComToken = async (prevState: unknown, formData: FormData) => {
-    
+    const atualizar = async (prevState: unknown, formData: FormData) => {
       return atualizarGestor(formData);
     };
-  
+    
     const [state, atualizarGestorAction, pending] = useActionState(
-      atualizarComToken,
+      atualizar,
       null
     );
+
     const [exibirSenha, setExibirSenha] = useState(false);
   
   return (
@@ -36,15 +36,18 @@ export default function EditarGestor({
           </div>
 
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-            Cadastrar Gestor
+            Edição de Perfil
           </CardTitle>
 
           <CardDescription className="text-base">
-            Preencha os dados abaixo para adicionar um gestor ao sistema.
+            Preencha os dados abaixo para editar seu perfil.
           </CardDescription>
         </CardHeader>
 
         <Form action={atualizarGestorAction}>
+          {/* Campo hidden com o ID da vaga */}
+          <input type="hidden" name="id" value={gestor.id} />
+
           <CardContent className="p-4 md:p-6 lg:p-8">
             {(state?.error || state?.message) && (
               <div
@@ -64,7 +67,7 @@ export default function EditarGestor({
             )}
 
             <CardDescription className="text-base text-center mb-6 text-blue-800 font-bold">
-              Dados do Gestor
+              Seus Dados
             </CardDescription>
 
             {/* Nome */}
@@ -76,21 +79,7 @@ export default function EditarGestor({
                 className="rounded-sm border-gray-400 text-sm md:text-base"
                 id="nome"
                 name="nome"
-                placeholder="Ex.: Maria Souza"
                 defaultValue={gestor.nome}
-                required
-              />
-            </FormItem>
-
-            {/* Email */}
-            <FormItem name="Email" description="Digite o email do gestor.">
-              <Input
-                className="rounded-sm border-gray-400 text-sm md:text-base"
-                type="email"
-                id="email"
-                name="email"
-                placeholder="gestor@email.com"
-                defaultValue={gestor.email}
                 required
               />
             </FormItem>
@@ -104,7 +93,6 @@ export default function EditarGestor({
                 className="rounded-sm border-gray-400 text-sm md:text-base"
                 id="cpf"
                 name="cpf"
-                placeholder="00000000000"
                 defaultValue={gestor.cpf}
                 maxLength={11}
                 inputMode="numeric"
@@ -127,7 +115,6 @@ export default function EditarGestor({
                 className="rounded-sm border-gray-400 text-sm md:text-base"
                 id="telefone"
                 name="telefone"
-                placeholder="21999998888"
                 defaultValue={gestor.telefone}
                 maxLength={11}
                 inputMode="numeric"

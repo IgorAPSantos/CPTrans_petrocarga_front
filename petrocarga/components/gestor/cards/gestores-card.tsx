@@ -3,8 +3,7 @@
 import { deleteGestor } from "@/lib/actions/gestorActions";
 import { Gestor } from "@/lib/types/gestor";
 import { cn } from "@/lib/utils";
-import { IdCard, Mail, Phone, UserCircle } from "lucide-react";
-import Link from "next/link";
+import { Mail, Phone, UserCircle } from "lucide-react";
 import router from "next/router";
 import { useState } from "react";
 
@@ -57,12 +56,6 @@ export default function GestorCard({ gestor }: GestorCardProps) {
 
       {/* Botões */}
       <div className="flex sm:flex-col flex-row gap-2 sm:w-auto w-full sm:max-w-none">
-        <Link
-          href={`/gestor/${gestor.id}`}
-          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition text-center w-full sm:w-auto"
-        >
-          Alterar
-        </Link>
 
         <button
           onClick={() => setModalAberto(true)}

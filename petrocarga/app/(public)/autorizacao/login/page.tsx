@@ -137,12 +137,12 @@ export default function LoginPage() {
             </div>
 
             <div className="flex items-center justify-end">
-              <button
-                type="button"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
-              >
-                Esqueceu a senha?
-              </button>
+              <Link
+                href= "/autorizacao/verificacao"
+                className= 'text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors'
+              > 
+                Esqueceu sua senha? 
+              </Link>
             </div>
 
             <Button

@@ -21,7 +21,7 @@ export async function addMotorista(_: unknown, formData: FormData) {
     dataValidadeCNH: formData.get("dataValidadeCNH") as string,
   };
 
-  const res = await serverApi("/petrocarga/motoristas/cadastro", {
+  const res = await serverApi(`/petrocarga/motoristas/cadastro`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -67,7 +67,6 @@ export async function deleteMotorista(motoristaId: string) {
 // ----------------------
 export async function atualizarMotorista(formData: FormData) {
   const id = formData.get("id") as string;
-  const senha = formData.get("senha") as string;
 
   const payload = {
     usuario: {
@@ -75,7 +74,7 @@ export async function atualizarMotorista(formData: FormData) {
       cpf: formData.get("cpf") as string,
       telefone: formData.get("telefone") as string,
       email: formData.get("email") as string,
-      ...(senha ? { senha } : {}),
+      senha: formData.get("senha") as string,
     },
     tipoCNH: (formData.get("tipoCNH") as string)?.toUpperCase(),
     numeroCNH: formData.get("numeroCNH") as string,
@@ -83,7 +82,7 @@ export async function atualizarMotorista(formData: FormData) {
   };
 
   const res = await serverApi(`/petrocarga/motoristas/${id}`, {
-    method: "PUT",
+    method: "PATCH",
     body: JSON.stringify(payload),
   });
 
@@ -100,8 +99,7 @@ export async function atualizarMotorista(formData: FormData) {
 
   revalidatePath("/gestor/lista-motoristas");
   revalidatePath("/motoristas/perfil");
-
-  redirect("/motoristas/perfil");
+  redirect("/motorista/perfil");
 }
 
 // ----------------------
@@ -124,3 +122,25 @@ export async function getMotoristaByUserId(userId: string) {
   const data = await res.json();
   return { error: false, motoristaId: data.id, motorista: data };
 }
+
+// ----------------------
+// GET MOTORISTAS
+// ----------------------
+export async function getMotoristas() {
+  const res = await serverApi(`/petrocarga/motoristas`); 
+  
+  if (!res.ok) {
+    let msg = "Erro ao buscar motoristas";
+    
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
+  }
+
+  const data = await res.json();
+  return { error: false, motoristas: data };
+}
+// ----------------------
