@@ -12,7 +12,7 @@ export type Reserva = {
   fim: string;    
   tamanhoVeiculo: number;
   placaVeiculo: string;
-  status: "ATIVA" | "CONCLUIDA";
+  status: "ATIVA" | "CONCLUIDA" | "RESERVADA" | "REMOVIDA" | "CANCELADA";
   vaga: string; 
 };
 
@@ -30,5 +30,5 @@ export type ReservaGet = {
   criadoEm: string;
   inicio: string;
   fim: string;
-  status: "ATIVA" | "CONCLUIDA";
+  status: "ATIVA" | "CONCLUIDA" | "RESERVADA" | "REMOVIDA" | "CANCELADA";
 };

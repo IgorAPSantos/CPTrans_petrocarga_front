@@ -40,7 +40,7 @@ export default function LoginPage() {
           window.location.href = "/motorista/reservar-vaga";
           break;
         case "AGENTE":
-          window.location.href = "/agente";
+          window.location.href = "/agente/reserva-rapida";
           break;
         default:
           setError("Permissão desconhecida");

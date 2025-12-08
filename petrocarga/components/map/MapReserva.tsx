@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import mapboxgl from "mapbox-gl";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -19,33 +19,46 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   const { vagas, loading, error } = useVagas();
-  const { map, mapLoaded } = useMapbox({
+  const { map } = useMapbox({ 
     containerRef: mapContainer,
     enableSearch: true,
-    enableNavigation: false, // desativa os botões
+    enableNavigation: false,
     expandSearch: true,
     onSelectPlace: (place) => console.log(place),
   });
 
-  // Cria marcadores das vagas
-  useEffect(() => {
-    if (!map || !map.isStyleLoaded()) return;
+  const renderMarkers = useCallback(() => {
+    if (!map || !vagas || vagas.length === 0) return;
 
-    // Remove todos os marcadores antigos antes de criar novos
+    // 1. Remove todos os marcadores antigos
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current = [];
 
-    // Recria os marcadores (vagas atualizadas)
-    if (vagas && vagas.length > 0) {
-      addVagaMarkersReserva(map, vagas, markersRef, onClickVaga);
+    // 2. Adiciona os novos marcadores (vagas atualizadas)
+    addVagaMarkersReserva(map, vagas, markersRef, onClickVaga);
+    console.log(`Marcadores renderizados: ${vagas.length}`);
+  }, [map, vagas, onClickVaga]);
+
+
+  useEffect(() => {
+    if (!map) return;
+
+    if (map.isStyleLoaded()) {
+      renderMarkers();
+    } else {
+      map.on('load', renderMarkers);
     }
 
-    // Quando desmontar, remove os marcadores (não o mapa)
     return () => {
+      if (map && map.isStyleLoaded()) {
+         map.off('load', renderMarkers);
+      }
+      
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
     };
-  }, [map, mapLoaded, vagas, onClickVaga]);
+
+  }, [map, vagas, renderMarkers]); 
 
   return (
     <div className="w-full h-full rounded-lg overflow-visible relative">

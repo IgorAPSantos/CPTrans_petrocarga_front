@@ -22,6 +22,9 @@
   cursor: pointer;
 }
 
+.fc-event-time {
+  display: none;
+}
 
 .my-custom-geocoder {
   border-radius: 16px;
