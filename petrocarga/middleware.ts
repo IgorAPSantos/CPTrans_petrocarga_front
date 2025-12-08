@@ -21,6 +21,8 @@ const publicRoutes = [
   "/contato",
   "/autorizacao/login",
   "/autorizacao/cadastro",
+  "/autorizacao/verificacao",
+  '/autorizacao/nova-senha',
 ];
 
 function isPublicRoute(pathname: string) {
