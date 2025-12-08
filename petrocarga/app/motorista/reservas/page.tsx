@@ -74,6 +74,26 @@ export default function MinhasReservas() {
     }
   };
 
+const handleExcluirReserva = async (reservaId: string) => {
+  try {
+    const confirmar = confirm(
+      `Tem certeza que deseja excluir a reserva de ID ${reservaId}?`
+    );
+
+    if (!confirmar) return;
+
+    // Quando a rota DELETE existir, já estará funcional
+    // Por enquanto, isso vai apenas tentar e cair no alert de sucesso
+   // await deleteReserva(reserva.id);
+
+    alert("Reserva excluída (simulação). Quando o backend estiver pronto, isso será real.");
+  } catch (error) {
+    console.error(error);
+    alert("Erro ao excluir a reserva (backend ainda não implementado).");
+  }
+};
+
+
   if (loading) {
     return (
       <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
@@ -106,6 +126,7 @@ export default function MinhasReservas() {
               key={reserva.id}
               reserva={reserva}
               onGerarDocumento={handleGerarDocumento}
+              onExcluir={handleExcluirReserva}
             />
           ))}
         </div>
