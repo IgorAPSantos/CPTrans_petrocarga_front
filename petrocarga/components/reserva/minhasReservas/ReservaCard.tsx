@@ -19,7 +19,6 @@ export default function ReservaCard({
   onExcluir,
   onEditar,
 }: ReservaCardProps) {
-
   const [modalAberto, setModalAberto] = useState(false);
 
   const formatarData = (data: string) =>
@@ -40,8 +39,11 @@ export default function ReservaCard({
         "flex flex-col bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full",
         "sm:flex-row sm:justify-between",
         "max-sm:gap-3 max-sm:p-3",
-        reserva.status === "ATIVA" && "border-green-500",
-        reserva.status === "CONCLUIDA" && "border-red-500"
+        reserva.status === "ATIVA" && "border-green-900",
+        reserva.status === "CONCLUIDA" && "border-b-blue-300",
+        reserva.status === "RESERVADA" && "border-green-500",
+        reserva.status === "REMOVIDA" && "border-red-500",
+        reserva.status === "CANCELADA" && "border-b-blue-200"
       )}
     >
       {/* Conteúdo principal */}
@@ -56,8 +58,11 @@ export default function ReservaCard({
           <span
             className={cn(
               "hidden sm:inline-block px-2 py-0.5 rounded-full text-xs sm:text-sm font-semibold shadow-sm",
-              reserva.status === "ATIVA" && "bg-green-100 text-green-800",
-              reserva.status === "CONCLUIDA" && "bg-gray-100 text-red-800"
+              reserva.status === "ATIVA" && "bg-green-100 text-green-900",
+              reserva.status === "CONCLUIDA" && "bg-gray-100 border-b-blue-300",
+              reserva.status === "RESERVADA" && "bg-green-100 border-green-500",
+              reserva.status === "REMOVIDA" && "bg-gray-100 border-red-500",
+              reserva.status === "CANCELADA" && "bg-gray-100 border-b-blue-200"
             )}
           >
             {reserva.status}
@@ -89,7 +94,7 @@ export default function ReservaCard({
         <span
           className={cn(
             "sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center",
-            reserva.status === "ATIVA" && "bg-green-100 text-green-800",
+            reserva.status === "ATIVA" && "bg-green-100 text-green-900",
             reserva.status === "CONCLUIDA" && "bg-gray-100 text-red-800"
           )}
         >
@@ -110,7 +115,6 @@ export default function ReservaCard({
 
         {/* Botões Editar / Excluir */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-2 w-full sm:w-auto">
-
           {/* Excluir */}
           <button
             onClick={() => setModalAberto(true)}
@@ -151,7 +155,8 @@ export default function ReservaCard({
             </h3>
 
             <p className="text-gray-600 mb-6">
-              Tem certeza que deseja excluir esta Reserva? Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir esta Reserva? Esta ação não pode
+              ser desfeita.
             </p>
 
             <div className="flex justify-end gap-3">
