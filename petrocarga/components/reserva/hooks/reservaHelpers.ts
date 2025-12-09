@@ -26,12 +26,17 @@ export const formatDateTime = (day: Date, hour: string): string => {
 
 export const gerarHorariosOcupados = (reserva: Reserva): string[] => {
   const horariosOcupados: string[] = [];
-  
+
   const inicio = new Date(reserva.inicio);
   const fim = new Date(reserva.fim);
+
+  if (fim <= inicio) {
+    fim.setDate(fim.getDate() + 1);
+  }
+
   const current = new Date(inicio);
 
-  while (current <= fim) { 
+  while (current <= fim) {
     const h = padNumber(current.getHours());
     const m = current.getMinutes() >= 30 ? "30" : "00";
 
@@ -43,17 +48,21 @@ export const gerarHorariosOcupados = (reserva: Reserva): string[] => {
 };
 
 
+
 export const gerarHorariosDia = (operacao: OperacoesVaga): string[] => {
   const [hInicio, mInicio] = operacao.horaInicio.split(":").map(Number);
-  const [hFim, mFim] = operacao.horaFim.split(":").map(Number);
+  const [hFimRaw, mFim] = operacao.horaFim.split(":").map(Number);
+
+  // Trata horários que passam pela meia-noite
+  const hFim = hFimRaw < hInicio ? hFimRaw + 24 : hFimRaw;
 
   const times: string[] = [];
   let h = hInicio;
   let m = mInicio;
 
-  while (h < hFim || (h === hFim && m < mFim)) {
-    times.push(`${padNumber(h)}:${padNumber(m)}`);
-    
+  while (h < hFim || (h === hFim && m <= mFim)) {
+    times.push(`${padNumber(h % 24)}:${padNumber(m)}`);
+
     m += INTERVALO_MINUTOS;
     if (m >= 60) {
       h += 1;
@@ -63,6 +72,7 @@ export const gerarHorariosDia = (operacao: OperacoesVaga): string[] => {
 
   return times;
 };
+
 
 
 export const getOperacaoDia = (
