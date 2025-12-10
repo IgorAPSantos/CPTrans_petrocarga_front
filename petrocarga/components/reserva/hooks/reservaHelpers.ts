@@ -1,5 +1,6 @@
 import { DiaSemana, OperacoesVaga } from "@/lib/types/vaga";
 import { Reserva } from "@/lib/types/reserva";
+import { Vaga } from "@/lib/types/vaga";
 
 export const DIAS_SEMANA: DiaSemana[] = [
   "DOMINGO",
@@ -51,18 +52,15 @@ export const gerarHorariosOcupados = (reserva: Reserva): string[] => {
 
 export const gerarHorariosDia = (operacao: OperacoesVaga): string[] => {
   const [hInicio, mInicio] = operacao.horaInicio.split(":").map(Number);
-  const [hFimRaw, mFim] = operacao.horaFim.split(":").map(Number);
-
-  // Trata horários que passam pela meia-noite
-  const hFim = hFimRaw < hInicio ? hFimRaw + 24 : hFimRaw;
+  const [hFim, mFim] = operacao.horaFim.split(":").map(Number);
 
   const times: string[] = [];
   let h = hInicio;
   let m = mInicio;
 
   while (h < hFim || (h === hFim && m <= mFim)) {
-    times.push(`${padNumber(h % 24)}:${padNumber(m)}`);
-
+    times.push(`${padNumber(h)}:${padNumber(m)}`);
+    
     m += INTERVALO_MINUTOS;
     if (m >= 60) {
       h += 1;
@@ -113,4 +111,72 @@ export const filtrarHorariosDisponiveis = (
   horariosBloqueados: string[]
 ) => {
   return horariosDia.filter((h) => !horariosBloqueados.includes(h));
+};
+
+export const removerHorariosPassadosDeHoje = (
+  day: Date,
+  horarios: string[]
+): string[] => {
+  const agora = new Date();
+
+  // Se o dia NÃO é hoje, retorna todos os horários normalmente
+  const isHoje =
+    day.getDate() === agora.getDate() &&
+    day.getMonth() === agora.getMonth() &&
+    day.getFullYear() === agora.getFullYear();
+
+  if (!isHoje) return horarios;
+
+  const horaAtual = agora.getHours();
+  const minutoAtual = agora.getMinutes();
+
+  return horarios.filter((h) => {
+    const [hh, mm] = h.split(":").map(Number);
+
+    if (hh > horaAtual) return true;
+    if (hh === horaAtual && mm > minutoAtual) return true;
+
+    return false;
+  });
+};
+
+export const gerarHorariosOcupadosPorArea = (
+  reserva: Reserva,
+  area: Vaga["area"]
+): string[] => {
+
+  const limites: Record<string, number> = {
+    VERMELHA: 1,
+    AMARELA: 2,
+    AZUL: 4,
+    BRANCA: 6,
+  };
+
+  const limiteHoras = limites[area];
+
+  const horariosOcupados: string[] = [];
+
+  const inicio = new Date(reserva.inicio);
+  const fimOriginal = new Date(reserva.fim);
+
+  const fimLimitado = new Date(inicio);
+  fimLimitado.setHours(fimLimitado.getHours() + limiteHoras);
+
+  const fim = fimOriginal < fimLimitado ? fimOriginal : fimLimitado;
+
+  if (fim <= inicio) {
+    fim.setDate(fim.getDate() + 1);
+  }
+
+  const current = new Date(inicio);
+
+  while (current <= fim) {
+    const h = padNumber(current.getHours());
+    const m = current.getMinutes() >= 30 ? "30" : "00";
+
+    horariosOcupados.push(`${h}:${m}`);
+    current.setMinutes(current.getMinutes() + INTERVALO_MINUTOS);
+  }
+
+  return horariosOcupados;
 };

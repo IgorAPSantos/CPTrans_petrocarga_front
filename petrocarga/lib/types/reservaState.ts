@@ -4,7 +4,8 @@ export interface ReservaState {
   step: number;
   selectedDay?: Date;
   availableTimes: string[];
-  reservedTimes: string[];
+  reservedTimesStart: string[];
+  reservedTimesEnd: string[];
   startHour: string | null;
   endHour: string | null;
   origin: string;

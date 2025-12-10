@@ -4,9 +4,9 @@ interface StepIndicatorProps {
 
 const steps = [
   { number: 1, label: "Escolher dia" },
-  { number: 2, label: "Selecionar início" },
-  { number: 3, label: "Selecionar fim" },
-  { number: 4, label: "Informações" },
+  { number: 2, label: "Informações" },
+  { number: 3, label: "Selecionar início" },
+  { number: 4, label: "Selecionar fim" },
   { number: 5, label: "Confirmar reserva" },
 ];
 

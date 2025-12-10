@@ -28,7 +28,7 @@ export type Endereco = {
 // Tipo principal da vaga
 export type Vaga = {
   id: string;
-  area: string;
+  area: "VERMELHA" | "AMARELA" | "AZUL" | "BRANCA" | string;
   numeroEndereco: string;
   referenciaEndereco: string;
   tipoVaga: "PARALELA" | "PERPENDICULAR" | string;
