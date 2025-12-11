@@ -5,6 +5,7 @@ import { useAuth } from "@/components/hooks/useAuth";
 import {
   getReservasPorUsuario,
   getDocumentoReserva,
+  deleteReservaByID
 } from "@/lib/actions/reservaActions";
 import { Loader2 } from "lucide-react";
 import ReservaCard from "@/components/reserva/minhasReservas/ReservaCard";
@@ -17,28 +18,28 @@ export default function MinhasReservas() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchReservas = async () => {
     if (!user?.id) return;
 
-    const fetchReservas = async () => {
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const data = await getReservasPorUsuario(user.id);
-        if ("veiculos" in data) {
-          setReservas(data.reservas || []);
-        } else {
-          setReservas(data);
-        }
-      } catch (err) {
-        console.error("Erro ao carregar reservas:", err);
-        setError("Erro ao buscar suas reservas. Tente novamente mais tarde.");
-      } finally {
-        setLoading(false);
+    try {
+      const data = await getReservasPorUsuario(user.id);
+      if ("veiculos" in data) {
+        setReservas(data.reservas || []);
+      } else {
+        setReservas(data);
       }
-    };
+    } catch (err) {
+      console.error("Erro ao carregar reservas:", err);
+      setError("Erro ao buscar suas reservas. Tente novamente mais tarde.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchReservas();
   }, [user?.id]);
 
@@ -52,15 +53,9 @@ export default function MinhasReservas() {
       doc.text("Documento da Reserva", 20, 20);
 
       doc.setFontSize(12);
-
       doc.text(`ID: ${dados.id}`, 20, 40);
       doc.text(`Motorista: ${dados.motoristaNome}`, 20, 50);
-      doc.text(
-        `Veículo: ${dados.veiculoPlaca} - ${dados.veiculoModelo}`,
-        20,
-        60
-      );
-      //doc.text(`Entrada: ${dados.entradaCidade}`, 20, 70); // ALTERAÇÃO AQUI
+      doc.text(`Veículo: ${dados.veiculoPlaca} - ${dados.veiculoModelo}`, 20, 60);
       doc.text(`Local: ${dados.logradouro}, ${dados.bairro}`, 20, 70);
       doc.text(`Origem: ${dados.cidadeOrigem}`, 20, 80);
       doc.text(`Início: ${dados.inicio}`, 20, 90);
@@ -74,25 +69,15 @@ export default function MinhasReservas() {
     }
   };
 
-const handleExcluirReserva = async (reservaId: string) => {
-  try {
-    const confirmar = confirm(
-      `Tem certeza que deseja excluir a reserva de ID ${reservaId}?`
-    );
-
-    if (!confirmar) return;
-
-    // Quando a rota DELETE existir, já estará funcional
-    // Por enquanto, isso vai apenas tentar e cair no alert de sucesso
-   // await deleteReserva(reserva.id);
-
-    alert("Reserva excluída (simulação). Quando o backend estiver pronto, isso será real.");
-  } catch (error) {
-    console.error(error);
-    alert("Erro ao excluir a reserva (backend ainda não implementado).");
-  }
-};
-
+  const handleExcluirReserva = async (reservaId: string) => {
+    try {
+      const dados = await deleteReservaByID(reservaId, user!.id);
+      if (!dados) return;
+      await fetchReservas();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   if (loading) {
     return (

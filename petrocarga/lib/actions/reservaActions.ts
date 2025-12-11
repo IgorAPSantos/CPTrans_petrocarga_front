@@ -1,6 +1,7 @@
 "use server";
 
 import { serverApi } from "@/lib/serverApi";
+import { revalidatePath } from "next/cache";
 
 // ----------------------
 // POST RESERVA MOTORISTA
@@ -137,6 +138,22 @@ export async function getReservasAtivas(vagaId: string) {
   }
 
   return res.json();
+}
+
+export async function deleteReservaByID(reservaId: string, usuarioId: string) {
+  const res = await serverApi(`/petrocarga/reservas/${reservaId}/${usuarioId}`, {
+    method: "DELETE",
+    cache: "no-store"
+  });
+
+  if (!res.ok) {
+    console.error("Erro ao deletar Reserva:", await res.text());
+    return { error: true, message: "Erro ao deletar Reserva" };
+  }
+
+  revalidatePath("/motorista/reservas");
+
+  return { success: true }; 
 }
 
 // ----------------------
