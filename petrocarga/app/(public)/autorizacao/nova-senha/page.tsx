@@ -1,10 +1,41 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Mail, Lock, ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff, KeyRound, X } from 'lucide-react';
+import { Mail, Lock, ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { validarCodigoRecuperacao, redefinirSenhaComCodigo } from '@/lib/actions/recuperacaoAction';
 
 type StatusType = "success" | "error" | null;
+
+// Tipo para erros personalizados
+type AppError = {
+  message: string;
+  code?: string;
+};
+
+// Função auxiliar para extrair mensagem de erro de forma segura
+function extrairMensagemErro(erro: unknown): string {
+  if (erro instanceof Error) {
+    return erro.message;
+  }
+  
+  if (typeof erro === 'object' && erro !== null && 'message' in erro) {
+    const erroObj = erro as { message?: unknown };
+    if (typeof erroObj.message === 'string') {
+      return erroObj.message;
+    }
+  }
+  
+  if (typeof erro === 'string') {
+    return erro;
+  }
+  
+  return 'Ocorreu um erro inesperado. Tente novamente.';
+}
+
+// Função para criar erro personalizado
+function criarErro(mensagem: string, codigo?: string): AppError {
+  return { message: mensagem, code: codigo };
+}
 
 export default function ResetarSenhaComCodigo() {
   // Estados principais
@@ -70,18 +101,16 @@ export default function ResetarSenhaComCodigo() {
     setMensagem('');
 
     try {
-      // Chama a action para validar o código
       await validarCodigoRecuperacao(email, codigo);
       
-      // Código válido - abre modal para nova senha
       setCodigoValidado(true);
       setMostrarModalNovaSenha(true);
       setStatus('success');
       setMensagem('Código validado com sucesso!');
       
-    } catch (erro: any) {
+    } catch (erro: unknown) {
       setStatus('error');
-      setMensagem(erro.message || 'Código inválido ou expirado.');
+      setMensagem(extrairMensagemErro(erro));
     } finally {
       setEstaCarregando(false);
     }
@@ -101,16 +130,14 @@ export default function ResetarSenhaComCodigo() {
     setMensagem('');
 
     try {
-      // Chama a action para redefinir a senha
       await redefinirSenhaComCodigo(email, codigo, novaSenha);
       
-      // Senha alterada com sucesso
       setMostrarModalNovaSenha(false);
       setMostrarModalSucesso(true);
       
-    } catch (erro: any) {
+    } catch (erro: unknown) {
       setStatus('error');
-      setMensagem(erro.message || 'Erro ao redefinir senha.');
+      setMensagem(extrairMensagemErro(erro));
     } finally {
       setEstaCarregando(false);
     }
@@ -133,7 +160,7 @@ export default function ResetarSenhaComCodigo() {
     }
   };
 
-  // Função para cancelar e voltar (apenas no primeiro modal)
+  // Função para cancelar e voltar
   const cancelarRedefinicao = () => {
     setMostrarModalNovaSenha(false);
     setCodigoValidado(false);
@@ -141,205 +168,185 @@ export default function ResetarSenhaComCodigo() {
     setConfirmarSenha('');
   };
 
-  // Componentes auxiliares
-  const ModalNovaSenha = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full animate-fadeIn relative">
-        {/* Cabeçalho do modal com informação clara */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
-            <Lock className="w-8 h-8 text-indigo-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Redefinir Senha
-          </h2>
-          <p className="text-gray-600 text-sm">
-            Complete o processo redefinindo sua senha
-          </p>
-          <div className="mt-2 inline-flex items-center gap-2 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-            <CheckCircle2 className="w-3 h-3 text-green-500" />
-            <span>Código validado para: {email}</span>
-          </div>
-        </div>
-
-        {/* Mensagem de erro no modal */}
-        {status === 'error' && (
-          <div className="mb-4 p-4 rounded-lg flex items-start gap-3 bg-red-50 border border-red-200">
-            <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
-            <p className="text-sm text-red-800">{mensagem}</p>
-          </div>
-        )}
-
-        <div className="space-y-4">
-          {/* Campo Nova Senha */}
-          <div>
-            <label htmlFor="novaSenha" className="block text-sm font-medium text-gray-700 mb-2">
-              Nova Senha
-            </label>
-            <div className="relative">
-              <input
-                type={mostrarSenha ? 'text' : 'password'}
-                id="novaSenha"
-                value={novaSenha}
-                onChange={(e) => setNovaSenha(e.target.value)}
-                onKeyDown={aoPressionarTeclaModal}
-                placeholder="Digite sua nova senha"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition disabled:opacity-50"
-                disabled={estaCarregando}
-                autoFocus
-              />
-              <button
-                type="button"
-                onClick={() => setMostrarSenha(!mostrarSenha)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {mostrarSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-            <p className="mt-1 text-xs text-gray-500">
-              Mínimo 6 caracteres
-            </p>
-          </div>
-
-          {/* Campo Confirmar Senha */}
-          <div>
-            <label htmlFor="confirmarSenha" className="block text-sm font-medium text-gray-700 mb-2">
-              Confirmar Nova Senha
-            </label>
-            <div className="relative">
-              <input
-                type={mostrarConfirmarSenha ? 'text' : 'password'}
-                id="confirmarSenha"
-                value={confirmarSenha}
-                onChange={(e) => setConfirmarSenha(e.target.value)}
-                onKeyDown={aoPressionarTeclaModal}
-                placeholder="Digite a senha novamente"
-                className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition disabled:opacity-50"
-                disabled={estaCarregando}
-              />
-              <button
-                type="button"
-                onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {mostrarConfirmarSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
-            </div>
-          </div>
-
-          {/* Botões do modal */}
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={cancelarRedefinicao}
-              disabled={estaCarregando}
-              className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={redefinirSenha}
-              disabled={estaCarregando}
-              className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {estaCarregando ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Alterando senha...
-                </>
-              ) : (
-                'Confirmar Nova Senha'
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Indicador de progresso */}
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>Validação do código</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-              <span className="font-medium">Redefinir senha</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-              <span>Concluído</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const ModalSucesso = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full animate-fadeIn">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-            <CheckCircle2 className="w-8 h-8 text-green-600" />
-          </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-3">
-            Senha alterada com sucesso!
-          </h2>
-          <p className="text-gray-600 mb-6">
-            Sua senha foi redefinida com sucesso. Agora você pode fazer login com sua nova senha.
-          </p>
-          <button
-            onClick={irParaLogin}
-            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition"
-          >
-            Ir para o Login
-          </button>
-        </div>
-        
-        {/* Indicador de progresso completo */}
-        <div className="mt-6 pt-4 border-t border-gray-200">
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>Validação do código</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span>Redefinir senha</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="font-medium">Concluído</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const MensagemStatus = () => {
-    if (!status || mostrarModalNovaSenha || codigoValidado) return null;
-
-    const estilos = {
-      success: 'bg-green-50 border-green-200 text-green-800',
-      error: 'bg-red-50 border-red-200 text-red-800'
-    };
-
-    const Icone = status === 'success' ? CheckCircle2 : AlertCircle;
-
-    return (
-      <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 border ${estilos[status]}`}>
-        <Icone className="w-5 h-5 mt-0.5 flex-shrink-0" />
-        <p className="text-sm">{mensagem}</p>
-      </div>
-    );
-  };
-
   // Se algum modal estiver aberto, não renderiza o conteúdo principal
   if (mostrarModalNovaSenha || mostrarModalSucesso) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        {mostrarModalNovaSenha && <ModalNovaSenha />}
-        {mostrarModalSucesso && <ModalSucesso />}
+        {/* Modal Nova Senha - COM BLUR FORTE */}
+        {mostrarModalNovaSenha && (
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-lg flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full animate-fadeIn relative">
+              {/* Cabeçalho do modal */}
+              <div className="text-center mb-6">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 rounded-full mb-4">
+                  <Lock className="w-8 h-8 text-indigo-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                  Redefinir Senha
+                </h2>
+                <p className="text-gray-600 text-sm">
+                  Complete o processo redefinindo sua senha
+                </p>
+                <div className="mt-2 inline-flex items-center gap-2 text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                  <CheckCircle2 className="w-3 h-3 text-green-500" />
+                  <span>Código validado para: {email}</span>
+                </div>
+              </div>
+
+              {/* Mensagem de erro no modal */}
+              {status === 'error' && (
+                <div className="mb-4 p-4 rounded-lg flex items-start gap-3 bg-red-50 border border-red-200">
+                  <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-red-800">{mensagem}</p>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* Campo Nova Senha */}
+                <div>
+                  <label htmlFor="novaSenha" className="block text-sm font-medium text-gray-700 mb-2">
+                    Nova Senha
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={mostrarSenha ? 'text' : 'password'}
+                      id="novaSenha"
+                      value={novaSenha}
+                      onChange={(e) => setNovaSenha(e.target.value)}
+                      onKeyDown={aoPressionarTeclaModal}
+                      placeholder="Digite sua nova senha"
+                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition disabled:opacity-50"
+                      disabled={estaCarregando}
+                      autoFocus
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setMostrarSenha(!mostrarSenha)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {mostrarSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Mínimo 6 caracteres
+                  </p>
+                </div>
+
+                {/* Campo Confirmar Senha */}
+                <div>
+                  <label htmlFor="confirmarSenha" className="block text-sm font-medium text-gray-700 mb-2">
+                    Confirmar Nova Senha
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={mostrarConfirmarSenha ? 'text' : 'password'}
+                      id="confirmarSenha"
+                      value={confirmarSenha}
+                      onChange={(e) => setConfirmarSenha(e.target.value)}
+                      onKeyDown={aoPressionarTeclaModal}
+                      placeholder="Digite a senha novamente"
+                      className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition disabled:opacity-50"
+                      disabled={estaCarregando}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                    >
+                      {mostrarConfirmarSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Botões do modal */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    onClick={cancelarRedefinicao}
+                    disabled={estaCarregando}
+                    className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition disabled:opacity-50"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={redefinirSenha}
+                    disabled={estaCarregando}
+                    className="flex-1 bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {estaCarregando ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Alterando senha...
+                      </>
+                    ) : (
+                      'Confirmar Nova Senha'
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Indicador de progresso */}
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Validação do código</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                    <span className="font-medium">Redefinir senha</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                    <span>Concluído</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Sucesso - COM BLUR FORTE */}
+        {mostrarModalSucesso && (
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-lg flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full animate-fadeIn">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                  <CheckCircle2 className="w-8 h-8 text-green-600" />
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                  Senha alterada com sucesso!
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Sua senha foi redefinida com sucesso. Agora você pode fazer login com sua nova senha.
+                </p>
+                <button
+                  onClick={irParaLogin}
+                  className="w-full bg-indigo-600 text-white py-3 rounded-lg font-medium hover:bg-indigo-700 transition"
+                >
+                  Ir para o Login
+                </button>
+              </div>
+              
+              {/* Indicador de progresso completo */}
+              <div className="mt-6 pt-4 border-t border-gray-200">
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Validação do código</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Redefinir senha</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="font-medium">Concluído</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -362,7 +369,20 @@ export default function ResetarSenhaComCodigo() {
           </div>
 
           {/* Mensagem de Status */}
-          <MensagemStatus />
+          {status && !codigoValidado && (
+            <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 border ${
+              status === 'success' 
+                ? 'bg-green-50 border-green-200 text-green-800' 
+                : 'bg-red-50 border-red-200 text-red-800'
+            }`}>
+              {status === 'success' ? (
+                <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
+              ) : (
+                <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+              )}
+              <p className="text-sm">{mensagem}</p>
+            </div>
+          )}
 
           {/* Formulário de validação do código */}
           <div className="space-y-6">

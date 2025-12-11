@@ -1,11 +1,17 @@
 'use server';
 
-import { serverApi } from "@/lib/serverApi";
+import { serverApi } from '@/lib/serverApi';
 
-// 1. SOLICITAR RECUPERAÇÃO (envia email com código)
+// Função SUPER simples para extrair mensagem
+function extractMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'string') return error;
+  return 'Ocorreu um erro. Tente novamente.';
+}
+
+// 1. SOLICITAR RECUPERAÇÃO
 export async function solicitarRecuperacaoSenha(email: string): Promise<void> {
   try {
-    // Endpoint que envia email com código de recuperação
     const res = await serverApi('/petrocarga/auth/solicitar-recuperacao', {
       method: 'POST',
       body: JSON.stringify({ email })
@@ -14,24 +20,17 @@ export async function solicitarRecuperacaoSenha(email: string): Promise<void> {
     const data = await res.json();
 
     if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Falha ao enviar email com código de recuperação');
+      // Se o backend deu uma mensagem, usa ela. Senão, mensagem genérica.
+      throw new Error(data.message || 'Não foi possível enviar o código de recuperação');
     }
 
-  } catch (error: any) {
-    // Tratamento específico de erros
-    if (error.message.includes('network') || error.message.includes('fetch')) {
-      throw new Error('Erro de conexão. Verifique sua internet e tente novamente.');
-    }
-    
-    if (error.message.includes('Não encontrado') || error.message.includes('inexistente')) {
-      throw new Error('Email não encontrado. Verifique se digitou corretamente.');
-    }
-
-    throw new Error(error.message || 'Erro ao processar sua solicitação. Tente novamente.');
+  } catch (error: unknown) {
+    // Simplesmente passa a mensagem adiante
+    throw new Error(extractMessage(error));
   }
 }
 
-// 2. VALIDAR CÓDIGO DE RECUPERAÇÃO
+// 2. VALIDAR CÓDIGO
 export async function validarCodigoRecuperacao(
   email: string,
   codigo: string
@@ -48,25 +47,16 @@ export async function validarCodigoRecuperacao(
     const data = await res.json();
 
     if (!res.ok || !data.valido) {
-      const mensagemErro = data.message || 'Código inválido ou expirado.';
-      throw new Error(mensagemErro);
+      // Confia na mensagem do backend
+      throw new Error(data.message || 'Código inválido ou expirado');
     }
 
-    // Código válido - não precisa retornar nada
-  } catch (error: any) {
-    if (error.message.includes('expirado')) {
-      throw new Error('Código expirado. Solicite um novo código.');
-    }
-    
-    if (error.message.includes('inválido')) {
-      throw new Error('Código inválido. Verifique e tente novamente.');
-    }
-    
-    throw new Error(error.message || 'Erro ao validar código. Tente novamente.');
+  } catch (error: unknown) {
+    throw new Error(extractMessage(error));
   }
 }
 
-// 3. REDEFINIR SENHA COM CÓDIGO
+// 3. REDEFINIR SENHA
 export async function redefinirSenhaComCodigo(
   email: string,
   codigo: string,
@@ -85,19 +75,10 @@ export async function redefinirSenhaComCodigo(
     const data = await res.json();
 
     if (!res.ok || !data.success) {
-      throw new Error(data.message || 'Falha ao redefinir senha');
+      throw new Error(data.message || 'Não foi possível redefinir a senha');
     }
 
-    // Sucesso - não precisa retornar nada
-  } catch (error: any) {
-    if (error.message.includes('expirado')) {
-      throw new Error('Código expirado. Solicite um novo código de recuperação.');
-    }
-    
-    if (error.message.includes('inválido')) {
-      throw new Error('Código inválido. Verifique e tente novamente.');
-    }
-    
-    throw new Error(error.message || 'Erro ao redefinir senha. Tente novamente.');
+  } catch (error: unknown) {
+    throw new Error(extractMessage(error));
   }
 }
