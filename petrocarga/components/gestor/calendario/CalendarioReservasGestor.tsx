@@ -205,9 +205,9 @@ export default function CalendarioReservasGestor() {
         events={eventosCalendario}
         eventClick={handleGroupClick}
         headerToolbar={{
-          left: "prev,next today",
+          left: "prev next",
           center: "title",
-          right: "dayGridMonth",
+          right: "today",
         }}
         buttonText={{ today: "Hoje", month: "Mês" }}
       />

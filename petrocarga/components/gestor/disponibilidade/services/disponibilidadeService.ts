@@ -2,7 +2,7 @@
 import {
   getDisponibilidadeVagas,
   addDisponibilidadeVagas,
-  putDisponibilidadeVagas,
+  editarDisponibilidadeVagas,
   deleteDisponibilidadeVagas,
 } from "@/lib/actions/disponibilidadeVagasAction";
 
@@ -30,7 +30,7 @@ export async function postDisponibilidade(vagaIds: string[], inicio: string, fim
 // PUT — Editar disponibilidade 
 // -------------------------------------------------------
 export async function updateDisponibilidade(id: string, vagaId: string, inicio: string, fim: string) {
-  return await putDisponibilidadeVagas(id, vagaId, inicio, fim);
+  return await editarDisponibilidadeVagas(id, vagaId, inicio, fim);
 }
 
 

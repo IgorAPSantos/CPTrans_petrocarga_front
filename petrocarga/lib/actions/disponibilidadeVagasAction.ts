@@ -42,14 +42,18 @@ export async function getDisponibilidadeVagas(){
   return res.json();
 }
 
-export async function putDisponibilidadeVagas(id: string, vagaId: string, inicio: string, fim: string) {
+// ----------------------
+// PATCH DISPONIBILIDADE VAGAS
+// ----------------------
+
+export async function editarDisponibilidadeVagas(id: string, vagaId: string, inicio: string, fim: string) {
   const body = { vagaId, inicio, fim };
 
   console.log("Disponibilidade ID:", id);
   console.log("PUT body:", body);
 
   const res = await serverApi(`/petrocarga/disponibilidade-vagas/${id}`, {
-    method: "PUT",
+    method: "PATCH",
     body: JSON.stringify(body),
   });
 
