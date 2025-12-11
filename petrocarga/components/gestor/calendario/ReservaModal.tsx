@@ -81,9 +81,7 @@ export const ReservaModal = ({
             </DialogHeader>
             <div className="space-y-2 max-h-[60vh] overflow-auto">
               {Array.from(
-                new Set(
-                  modalState.data.reservasDoLogradouro.map((r) => r.vaga)
-                )
+                new Set(modalState.data.reservasDoLogradouro.map((r) => r.vaga))
               ).map((vagaId) => (
                 <VagaItem
                   key={vagaId}
@@ -158,11 +156,11 @@ export const ReservaModal = ({
                 <strong>Status:</strong> {modalState.data.reserva.status}
               </p>
               <p>
-                <strong>Bairro:</strong> {modalState.data.reserva.enderecoVaga.bairro}
+                <strong>Bairro:</strong>{" "}
+                {modalState.data.reserva.enderecoVaga.bairro}
               </p>
               <p>
-                <strong>Placa:</strong>{" "}
-                {modalState.data.reserva.placaVeiculo}
+                <strong>Placa:</strong> {modalState.data.reserva.placaVeiculo}
               </p>
               <p>
                 <strong>Tamanho do Veiculo:</strong>{" "}
@@ -194,7 +192,10 @@ export const ReservaModal = ({
         </div>
         <div className="flex flex-row gap-2">
           {modalState.type === "reserva" &&
-            modalState.data.reserva.status !== "CONCLUIDA" && (
+            modalState.data.reserva.status !== "CONCLUIDA" &&
+            modalState.data.reserva.status !== "RESERVADA" &&
+            modalState.data.reserva.status !== "REMOVIDA" &&
+            modalState.data.reserva.status !== "CANCELADA" && (
               <Button
                 variant="destructive"
                 onClick={() => checkoutForcado(modalState.data.reserva.id)}
