@@ -27,7 +27,6 @@ export default function ReservaCard({
       timeStyle: "short",
     });
 
-  // 🔥 Função chamada ao confirmar exclusão no modal
   const handleExcluir = () => {
     onExcluir?.(reserva.id);
     setModalAberto(false);
@@ -115,29 +114,33 @@ export default function ReservaCard({
 
         {/* Botões Editar / Excluir */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-2 w-full sm:w-auto">
-          {/* Excluir */}
-          <button
-            onClick={() => setModalAberto(true)}
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 text-red-600"
-            )}
-          >
-            <Trash2 className="w-4 h-4" />
-            Excluir
-          </button>
+          {reserva.status === "RESERVADA" && (
+            <>
+              {/* EXCLUIR */}
+              <button
+                onClick={() => setModalAberto(true)}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 text-red-600"
+                )}
+              >
+                <Trash2 className="w-4 h-4" />
+                Excluir
+              </button>
 
-          {/* Editar */}
-          <button
-            onClick={() => onEditar?.(reserva)}
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2"
-            )}
-          >
-            <Pencil className="w-4 h-4" />
-            Editar
-          </button>
+              {/* EDITAR */}
+              <button
+                onClick={() => onEditar?.(reserva)}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2"
+                )}
+              >
+                <Pencil className="w-4 h-4" />
+                Editar
+              </button>
+            </>
+          )}
         </div>
       </div>
 

@@ -5,10 +5,10 @@ import { useAuth } from "@/components/hooks/useAuth";
 import {
   getReservasPorUsuario,
   getDocumentoReserva,
-  deleteReservaByID
+  deleteReservaByID,
 } from "@/lib/actions/reservaActions";
 import { Loader2 } from "lucide-react";
-import ReservaCard from "@/components/reserva/minhasReservas/ReservaCard";
+import ReservaLista from "@/components/reserva/minhasReservas/ReservaLista";
 import { ReservaGet } from "@/lib/types/reserva";
 import jsPDF from "jspdf";
 
@@ -55,7 +55,11 @@ export default function MinhasReservas() {
       doc.setFontSize(12);
       doc.text(`ID: ${dados.id}`, 20, 40);
       doc.text(`Motorista: ${dados.motoristaNome}`, 20, 50);
-      doc.text(`Veículo: ${dados.veiculoPlaca} - ${dados.veiculoModelo}`, 20, 60);
+      doc.text(
+        `Veículo: ${dados.veiculoPlaca} - ${dados.veiculoModelo}`,
+        20,
+        60
+      );
       doc.text(`Local: ${dados.logradouro}, ${dados.bairro}`, 20, 70);
       doc.text(`Origem: ${dados.cidadeOrigem}`, 20, 80);
       doc.text(`Início: ${dados.inicio}`, 20, 90);
@@ -105,16 +109,11 @@ export default function MinhasReservas() {
       {reservas.length === 0 ? (
         <p className="text-gray-500 text-center">Nenhuma reserva encontrada.</p>
       ) : (
-        <div className="grid gap-4 w-full max-w-2xl">
-          {reservas.map((reserva) => (
-            <ReservaCard
-              key={reserva.id}
-              reserva={reserva}
-              onGerarDocumento={handleGerarDocumento}
-              onExcluir={handleExcluirReserva}
-            />
-          ))}
-        </div>
+        <ReservaLista
+          reservas={reservas}
+          onGerarDocumento={handleGerarDocumento}
+          onExcluir={handleExcluirReserva}
+        />
       )}
     </div>
   );
