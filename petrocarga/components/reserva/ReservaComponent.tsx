@@ -26,7 +26,8 @@ export default function ReservaComponent({
     selectedDay,
     setSelectedDay,
     availableTimes,
-    reservedTimes,
+    reservedTimesStart,
+    reservedTimesEnd,
     startHour,
     setStartHour,
     endHour,
@@ -55,6 +56,12 @@ export default function ReservaComponent({
     setSuccess(result);
     setStep(6); // step 6 = feedback visual
   };
+
+  const toMinutes = (h: string) => {
+  const [hh, mm] = h.split(":").map(Number);
+  return hh * 60 + mm;
+};
+
 
   return (
     <div className="p-4 sm:p-6 border rounded-xl shadow-lg max-w-2xl mx-auto bg-white min-h-[80vh] flex flex-col gap-4">
@@ -117,7 +124,7 @@ export default function ReservaComponent({
         {step === 3 && selectedDay && (
           <TimeSelection
             times={availableTimes}
-            reserved={reservedTimes}
+            reserved={reservedTimesStart}
             selected={startHour}
             onSelect={(t) => {
               setStartHour(t);
@@ -130,22 +137,20 @@ export default function ReservaComponent({
         )}
 
         {/* STEP 4 - Seleção do horário final */}
-        {step === 4 && startHour && (
-          <TimeSelection
-            times={availableTimes.filter(
-              (t) =>
-                availableTimes.indexOf(t) > availableTimes.indexOf(startHour)
-            )}
-            reserved={reservedTimes}
-            selected={endHour}
-            onSelect={(t) => {
-              setEndHour(t);
-              setStep(5);
-            }}
-            onBack={() => setStep(3)}
-            color="blue"
-          />
-        )}
+{step === 4 && startHour && (
+  <TimeSelection
+    times={availableTimes.filter((t) => toMinutes(t) > toMinutes(startHour))}
+    reserved={reservedTimesEnd} // aqui você só marca
+    selected={endHour}
+    onSelect={(t) => {
+      setEndHour(t);
+      setStep(5);
+    }}
+    onBack={() => setStep(3)}
+    color="blue"
+  />
+)}
+
 
         {/* STEP 5 - Confirmação */}
         {step === 5 && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useReserva } from "@/components/reserva/hooks/useReserva";
 import { Vaga } from "@/lib/types/vaga";
 import DaySelection from "@/components/reserva/DaySelection";
@@ -24,7 +24,8 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
     selectedDay,
     setSelectedDay,
     availableTimes,
-    reservedTimes,
+    reservedTimesStart,
+    reservedTimesEnd,
     startHour,
     setStartHour,
     endHour,
@@ -35,32 +36,25 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
 
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState<boolean | null>(null);
-  const [, setLoadingTimes] = useState(false);
 
   const onConfirm = async () => {
     const result = await handleConfirm();
     setSuccess(result);
-    setStep(6); // feedback
+    setStep(6);
   };
 
-  useEffect(() => {
-    if (step !== 3) return;
-    if (!selectedDay || !tipoVeiculoAgente) return;
-
-    const loadTimes = async () => {
-      setLoadingTimes(true);
-      await fetchHorariosDisponiveis(selectedDay, selectedVaga);
-      setLoadingTimes(false);
-    };
-
-    loadTimes();
-  },);
+  const toMinutes = (h: string) => {
+    const [hh, mm] = h.split(":").map(Number);
+    return hh * 60 + mm;
+  };
 
   return (
     <div className="p-4 sm:p-6 border rounded-xl shadow-lg max-w-2xl mx-auto bg-white min-h-[80vh] flex flex-col gap-4">
-      
       {onBack && step < 6 && (
-        <button onClick={onBack} className="px-3 py-2 w-fit bg-gray-200 rounded-lg text-sm sm:text-base">
+        <button
+          onClick={onBack}
+          className="px-3 py-2 w-fit bg-gray-200 rounded-lg text-sm sm:text-base hover:bg-gray-300 transition-colors"
+        >
           Voltar ao mapa
         </button>
       )}
@@ -75,13 +69,14 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
       <div className="flex-1 overflow-y-auto pb-4">
         {/* STEP 1 - Cadastro veículo */}
         {step === 1 && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5 p-2">
+            <h3 className="text-md font-semibold text-gray-700">1. Informações do Veículo</h3>
             <div>
               <p className="font-medium mb-1">Tipo de veículo</p>
               <select
                 value={tipoVeiculoAgente || ""}
                 onChange={(e) => setTipoVeiculoAgente(e.target.value as Veiculo["tipo"])}
-                className="w-full border rounded p-2"
+                className="w-full border rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               >
                 <option value="">Selecione...</option>
                 <option value="AUTOMOVEL">Automóvel</option>
@@ -96,14 +91,19 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
               <input
                 value={placaAgente}
                 onChange={(e) => setPlacaAgente(e.target.value.toUpperCase())}
-                className="w-full border rounded p-2"
+                className="w-full border rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                 placeholder="Digite a placa"
+                maxLength={7}
               />
             </div>
             <button
               onClick={() => setStep(2)}
-              disabled={!tipoVeiculoAgente || !placaAgente}
-              className="bg-blue-600 text-white py-2 rounded-lg mt-2"
+              disabled={!tipoVeiculoAgente || placaAgente.length < 7}
+              className={`py-3 rounded-lg mt-4 font-semibold transition-opacity ${
+                !tipoVeiculoAgente || placaAgente.length < 7
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+              }`}
             >
               Próximo
             </button>
@@ -112,50 +112,68 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
 
         {/* STEP 2 - Seleção do dia */}
         {step === 2 && (
-          <div>
+          <div className="p-2">
+            <h3 className="text-md font-semibold text-gray-700 mb-4">2. Selecione o Dia</h3>
             <DaySelection
               selected={selectedDay}
               onSelect={async (day) => {
                 setSelectedDay(day);
+                
+                // --- CORREÇÃO IMPORTANTE AQUI ---
+                // No ReservaComponent você passa o 'vehicleId'.
+                // Aqui, como é agente, passamos o 'tipoVeiculoAgente' como 3º argumento.
+                // Verifique se o seu hook 'fetchHorariosDisponiveis' aceita (string | null) nesse argumento.
+                await fetchHorariosDisponiveis(day, selectedVaga, tipoVeiculoAgente);
+                
                 setStep(3);
               }}
               availableDays={selectedVaga.operacoesVaga?.map((op) => op.diaSemanaAsEnum)}
             />
-            <button onClick={() => setStep(1)} className="mt-4 bg-gray-200 py-2 rounded-lg w-full">
+            <button
+              onClick={() => setStep(1)}
+              className="mt-6 bg-gray-200 py-3 rounded-lg w-full text-gray-700 hover:bg-gray-300 transition-colors"
+            >
               Voltar
             </button>
           </div>
         )}
 
-        {/* STEP 3 - Horário inicial */}
+        {/* STEP 3 - Seleção do horário inicial */}
         {step === 3 && selectedDay && (
-          <TimeSelection
-            times={availableTimes}
-            reserved={reservedTimes}
-            selected={startHour}
-            onSelect={(t) => {
-              setStartHour(t);
-              setEndHour(null);
-              setStep(4);
-            }}
-            onBack={() => setStep(2)}
-            color="blue"
-          />
+          <div className="p-2">
+            <h3 className="text-md font-semibold text-gray-700 mb-4">3. Horário Inicial</h3>
+            <TimeSelection
+              times={availableTimes}
+              reserved={reservedTimesStart}
+              selected={startHour}
+              onSelect={(t) => {
+                setStartHour(t);
+                setEndHour(null); // Reseta o fim ao mudar o início
+                setStep(4);
+              }}
+              onBack={() => setStep(2)}
+              color="blue"
+            />
+          </div>
         )}
 
-        {/* STEP 4 - Horário final */}
+        {/* STEP 4 - Seleção do horário final */}
         {step === 4 && startHour && (
-          <TimeSelection
-            times={availableTimes.filter((t) => availableTimes.indexOf(t) > availableTimes.indexOf(startHour))}
-            reserved={reservedTimes}
-            selected={endHour}
-            onSelect={(t) => {
-              setEndHour(t);
-              setStep(5);
-            }}
-            onBack={() => setStep(3)}
-            color="blue"
-          />
+          <div className="p-2">
+            <h3 className="text-md font-semibold text-gray-700 mb-4">4. Horário Final</h3>
+            <TimeSelection
+              // Filtra garantindo que só mostre horários POSTERIORES ao início
+              times={availableTimes.filter((t) => toMinutes(t) > toMinutes(startHour))}
+              reserved={reservedTimesEnd}
+              selected={endHour}
+              onSelect={(t) => {
+                setEndHour(t);
+                setStep(5);
+              }}
+              onBack={() => setStep(3)}
+              color="blue"
+            />
+          </div>
         )}
 
         {/* STEP 5 - Resumo e confirmação */}
@@ -164,38 +182,43 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
             day={selectedDay!}
             startHour={startHour!}
             endHour={endHour!}
-            origin="" 
+            origin="Agente Local"
             destination={`${selectedVaga.endereco.logradouro}, ${selectedVaga.endereco.bairro}`}
             vehicleName={`${tipoVeiculoAgente} - ${placaAgente}`}
             onConfirm={onConfirm}
-            onReset={onBack}
+            onReset={() => setStep(4)}
           />
         )}
 
         {/* STEP 6 - Feedback */}
-        {step === 6 && success === true && (
-          <div className="text-center p-6 bg-green-100 text-green-800 rounded-lg">
-            <p className="mb-4 font-semibold text-lg">Reserva confirmada ✅</p>
+        {step === 6 && success !== null && (
+          <div
+            className={`text-center p-6 rounded-xl ${
+              success
+                ? "bg-green-50 text-green-800 border border-green-300"
+                : "bg-red-50 text-red-800 border border-red-300"
+            }`}
+          >
+            <p className="mb-4 font-extrabold text-xl">
+              {success ? "Reserva confirmada ✅" : "Erro ao confirmar a reserva ❌"}
+            </p>
             <button
               onClick={() => setStep(1)}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg"
+              className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
             >
-              Nova reserva
+              Fazer Nova Reserva
             </button>
-          </div>
-        )}
-        {step === 6 && success === false && (
-          <div className="text-center p-6 bg-red-100 text-red-800 rounded-lg">
-            <p className="mb-4 font-semibold text-lg">Erro ao confirmar a reserva ❌</p>
-            <button
-              onClick={() => {
-                setStep(5);
-                setSuccess(null);
-              }}
-              className="px-6 py-2 bg-gray-300 rounded-lg"
-            >
-              Tentar novamente
-            </button>
+            {success === false && (
+              <button
+                onClick={() => {
+                  setStep(5);
+                  setSuccess(null);
+                }}
+                className="mt-4 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg w-full sm:w-auto"
+              >
+                Tentar novamente
+              </button>
+            )}
           </div>
         )}
       </div>

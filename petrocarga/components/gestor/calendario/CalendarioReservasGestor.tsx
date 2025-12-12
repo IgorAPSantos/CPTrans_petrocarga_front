@@ -75,7 +75,8 @@ export default function CalendarioReservasGestor() {
     reservas.forEach((r) => {
       const dateKey = toDateKey(r.inicio);
       if (!map[dateKey]) map[dateKey] = {};
-      if (!map[dateKey][r.enderecoVaga.logradouro]) map[dateKey][r.enderecoVaga.logradouro] = [];
+      if (!map[dateKey][r.enderecoVaga.logradouro])
+        map[dateKey][r.enderecoVaga.logradouro] = [];
       map[dateKey][r.enderecoVaga.logradouro].push(r);
     });
     return map;
@@ -85,7 +86,12 @@ export default function CalendarioReservasGestor() {
     return Object.entries(reservasPorDia).map(([dateStr, logradouros]) => {
       const todasFinalizadas = Object.values(logradouros)
         .flat()
-        .every((r) => r.status === "CONCLUIDA");
+        .every(
+          (reserva) =>
+            reserva.status === "CONCLUIDA" ||
+            reserva.status === "REMOVIDA" ||
+            reserva.status === "CANCELADA"
+        );
       return {
         id: dateStr,
         title: "● Reservas",
@@ -187,7 +193,7 @@ export default function CalendarioReservasGestor() {
         checkoutForcado={async (id) => {
           await finalizarReservaForcada(id);
           closeModal();
-          alert("Checkout-Forçado Concluído (alert versão temporária)")
+          alert("Checkout-Forçado Concluído (alert versão temporária)");
         }}
       />
 
@@ -199,9 +205,9 @@ export default function CalendarioReservasGestor() {
         events={eventosCalendario}
         eventClick={handleGroupClick}
         headerToolbar={{
-          left: "prev,next today",
+          left: "prev next",
           center: "title",
-          right: "dayGridMonth",
+          right: "today",
         }}
         buttonText={{ today: "Hoje", month: "Mês" }}
       />
