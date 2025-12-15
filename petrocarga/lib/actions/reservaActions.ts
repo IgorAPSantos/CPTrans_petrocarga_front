@@ -2,6 +2,7 @@
 
 import { serverApi } from "@/lib/serverApi";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/dist/server/api-utils";
 
 // ----------------------
 // POST RESERVA MOTORISTA
@@ -61,13 +62,15 @@ export async function reservarVagaAgente(formData: FormData) {
 // ----------------------
 
 export async function finalizarForcado(reservaID: string) {
-
-  const res = await serverApi(`/petrocarga/reservas/${reservaID}/finalizar-forcado`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const res = await serverApi(
+    `/petrocarga/reservas/${reservaID}/finalizar-forcado`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
     }
-  });
+  );
 
   if (!res.ok) {
     throw new Error(await res.text());
@@ -90,7 +93,7 @@ export async function getReservasPorUsuario(usuarioId: string) {
 }
 
 // ----------------------
-// GET RESERVAS 
+// GET RESERVAS
 // ----------------------
 export async function getReservas() {
   const res = await serverApi(`/petrocarga/reservas/all`);
@@ -108,16 +111,24 @@ export async function getReservas() {
 export async function getReservasBloqueios(
   vagaId: string,
   data: string,
-  tipoVeiculo: "AUTOMOVEL" | "VUC" | "CAMINHONETA" | "CAMINHAO_MEDIO" | "CAMINHAO_LONGO"
+  tipoVeiculo:
+    | "AUTOMOVEL"
+    | "VUC"
+    | "CAMINHONETA"
+    | "CAMINHAO_MEDIO"
+    | "CAMINHAO_LONGO"
 ) {
   const queryParams = new URLSearchParams({
     data,
     tipoVeiculo,
   }).toString();
 
-  const res = await serverApi(`/petrocarga/reservas/bloqueios/${vagaId}?${queryParams}`, {
-    method: "GET",
-  });
+  const res = await serverApi(
+    `/petrocarga/reservas/bloqueios/${vagaId}?${queryParams}`,
+    {
+      method: "GET",
+    }
+  );
 
   if (!res.ok) {
     throw new Error(await res.text());
@@ -125,7 +136,6 @@ export async function getReservasBloqueios(
 
   return res.json();
 }
-
 
 // ----------------------
 // GET RESERVAS ATIVAS
@@ -141,10 +151,13 @@ export async function getReservasAtivas(vagaId: string) {
 }
 
 export async function deleteReservaByID(reservaId: string, usuarioId: string) {
-  const res = await serverApi(`/petrocarga/reservas/${reservaId}/${usuarioId}`, {
-    method: "DELETE",
-    cache: "no-store"
-  });
+  const res = await serverApi(
+    `/petrocarga/reservas/${reservaId}/${usuarioId}`,
+    {
+      method: "DELETE",
+      cache: "no-store",
+    }
+  );
 
   if (!res.ok) {
     console.error("Erro ao deletar Reserva:", await res.text());
@@ -153,7 +166,7 @@ export async function deleteReservaByID(reservaId: string, usuarioId: string) {
 
   revalidatePath("/motorista/reservas");
 
-  return { success: true }; 
+  return { success: true };
 }
 
 // ----------------------
@@ -167,5 +180,42 @@ export async function getDocumentoReserva(reservaID: string) {
     throw new Error(await res.text());
   }
 
+  return res.json();
+}
+
+// ----------------------
+// PATCH RESERVA
+// ----------------------
+
+export async function atualizarReserva(
+  body: {
+    veiculoId: string;
+    cidadeOrigem: string;
+    inicio: string;
+    fim: string;
+    status: string;
+  },
+  reservaID: string,
+  usuarioId: string
+) {
+  console.log("📤 Enviando JSON para API Java:", body);
+
+  const res = await serverApi(
+    `/petrocarga/reservas/${reservaID}/${usuarioId}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("❌ Erro do Backend:", errorText);
+    throw new Error(errorText);
+  }
+  revalidatePath("/motorista/reservas");
   return res.json();
 }

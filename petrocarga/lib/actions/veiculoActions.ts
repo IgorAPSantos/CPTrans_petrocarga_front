@@ -163,9 +163,30 @@ export async function getVeiculosUsuario(
   };
 }
 
+export async function getVeiculo(veiculoId: string) {
+  const res = await serverApi(`/petrocarga/veiculos/${veiculoId}`);
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    return {
+      error: true,
+      message: errorData.message || "Erro ao buscar veículo",
+      veiculo: null as Veiculo | null,
+    };
+  }
+
+  const data: Veiculo = await res.json();
+
+  return {
+    error: false,
+    message: "Veículo carregado com sucesso",
+    veiculo: data,
+  };
+}
 
 interface GetVeiculosResult {
   error: boolean;
   message: string;
   veiculos: Veiculo[];
+  veiculo?: Veiculo;
 }

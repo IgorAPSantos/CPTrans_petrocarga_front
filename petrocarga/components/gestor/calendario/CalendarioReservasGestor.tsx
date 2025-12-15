@@ -134,7 +134,7 @@ export default function CalendarioReservasGestor() {
       new Set(
         Object.values(logradouros)
           .flat()
-          .map((r) => r.vaga)
+          .map((r) => r.vagaId)
       )
     );
 
@@ -173,21 +173,21 @@ export default function CalendarioReservasGestor() {
             data: {
               vagaId,
               vagaInfo: vagaCache[vagaId] ?? null,
-              reservas: reservasDoLogradouro.filter((r) => r.vaga === vagaId),
+              reservas: reservasDoLogradouro.filter((r) => r.vagaId === vagaId),
             },
           });
         }}
         openReservaModal={async (reserva) => {
           lastVagaRef.current = modalState;
 
-          if (!vagaCache[reserva.vaga]) {
-            const v = await getVagaById(reserva.vaga);
-            if (v) setVagaCache((prev) => ({ ...prev, [reserva.vaga]: v }));
+          if (!vagaCache[reserva.vagaId]) {
+            const v = await getVagaById(reserva.vagaId);
+            if (v) setVagaCache((prev) => ({ ...prev, [reserva.vagaId]: v }));
           }
 
           setModalState({
             type: "reserva",
-            data: { reserva, vagaInfo: vagaCache[reserva.vaga] ?? null },
+            data: { reserva, vagaInfo: vagaCache[reserva.vagaId] ?? null },
           });
         }}
         checkoutForcado={async (id) => {

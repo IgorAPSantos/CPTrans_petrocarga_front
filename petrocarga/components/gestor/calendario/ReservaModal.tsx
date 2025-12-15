@@ -73,31 +73,40 @@ export const ReservaModal = ({
             </div>
           </>
         );
-      case "vagasLogradouro":
+      case "vagasLogradouro": {
+        const reservasPorVaga = modalState.data.reservasDoLogradouro.reduce(
+          (acc, reserva) => {
+            const vagaId = reserva.vagaId;
+            if (!acc[vagaId]) acc[vagaId] = [];
+            acc[vagaId].push(reserva);
+            return acc;
+          },
+          {} as Record<string, Reserva[]>
+        );
+
         return (
           <>
             <DialogHeader>
               <DialogTitle>Vagas em {modalState.data.logradouro}</DialogTitle>
             </DialogHeader>
+
             <div className="space-y-2 max-h-[60vh] overflow-auto">
-              {Array.from(
-                new Set(modalState.data.reservasDoLogradouro.map((r) => r.vaga))
-              ).map((vagaId) => (
-                <VagaItem
-                  key={vagaId}
-                  vagaId={vagaId}
-                  vagasCache={vagaCache}
-                  reservas={modalState.data.reservasDoLogradouro.filter(
-                    (r) => r.vaga === vagaId
-                  )}
-                  onClick={() =>
-                    openVagaModal(vagaId, modalState.data.reservasDoLogradouro)
-                  }
-                />
-              ))}
+              {Object.entries(reservasPorVaga).map(
+                ([vagaId, reservasDaVaga]) => (
+                  <VagaItem
+                    key={vagaId}
+                    vagaId={vagaId}
+                    vagasCache={vagaCache}
+                    reservas={reservasDaVaga}
+                    onClick={() => openVagaModal(vagaId, reservasDaVaga)}
+                  />
+                )
+              )}
             </div>
           </>
         );
+      }
+
       case "vaga":
         return (
           <>
@@ -136,39 +145,72 @@ export const ReservaModal = ({
             <DialogHeader>
               <DialogTitle>Detalhes da Reserva</DialogTitle>
             </DialogHeader>
-            <div className="space-y-2 text-sm">
-              <p>
-                <strong>Vaga:</strong>{" "}
-                {`${modalState.data.reserva.enderecoVaga.logradouro}`}
-              </p>
-              <p>
-                <strong>Área:</strong> {modalState.data.vagaInfo?.area ?? "—"}
-              </p>
-              <p>
-                <strong>Início:</strong>{" "}
-                {new Date(modalState.data.reserva.inicio).toLocaleString()}
-              </p>
-              <p>
-                <strong>Fim:</strong>{" "}
-                {new Date(modalState.data.reserva.fim).toLocaleString()}
-              </p>
-              <p>
-                <strong>Status:</strong> {modalState.data.reserva.status}
-              </p>
-              <p>
-                <strong>Bairro:</strong>{" "}
-                {modalState.data.reserva.enderecoVaga.bairro}
-              </p>
-              <p>
-                <strong>Placa:</strong> {modalState.data.reserva.placaVeiculo}
-              </p>
-              <p>
-                <strong>Tamanho do Veiculo:</strong>{" "}
-                {`${modalState.data.reserva.tamanhoVeiculo}m`}
-              </p>
+
+            <div className="space-y-4 text-sm">
+              {/* Reserva */}
+              <div className="space-y-1">
+                <p className="font-semibold text-base">Reserva</p>
+                <p>
+                  <strong>Vaga:</strong>{" "}
+                  {modalState.data.reserva.enderecoVaga.logradouro}
+                </p>
+                <p>
+                  <strong>Bairro:</strong>{" "}
+                  {modalState.data.reserva.enderecoVaga.bairro}
+                </p>
+                <p>
+                  <strong>Área:</strong> {modalState.data.vagaInfo?.area ?? "—"}
+                </p>
+                <p>
+                  <strong>Início:</strong>{" "}
+                  {new Date(modalState.data.reserva.inicio).toLocaleString()}
+                </p>
+                <p>
+                  <strong>Fim:</strong>{" "}
+                  {new Date(modalState.data.reserva.fim).toLocaleString()}
+                </p>
+                <p>
+                  <strong>Status:</strong> {modalState.data.reserva.status}
+                </p>
+              </div>
+
+              <hr />
+
+              {/* Motorista */}
+              <div className="space-y-1">
+                <p className="font-semibold text-base">Motorista</p>
+                <p>
+                  <strong>Nome:</strong> {modalState.data.reserva.motoristaNome}
+                </p>
+                <p>
+                  <strong>CPF:</strong> {modalState.data.reserva.motoristaCpf}
+                </p>
+              </div>
+
+              <hr />
+
+              {/* Veículo */}
+              <div className="space-y-1">
+                <p className="font-semibold text-base">Veículo</p>
+                <p>
+                  <strong>Marca:</strong> {modalState.data.reserva.marcaVeiculo}
+                </p>
+                <p>
+                  <strong>Modelo:</strong>{" "}
+                  {modalState.data.reserva.modeloVeiculo}
+                </p>
+                <p>
+                  <strong>Placa:</strong> {modalState.data.reserva.placaVeiculo}
+                </p>
+                <p>
+                  <strong>Tamanho:</strong>{" "}
+                  {modalState.data.reserva.tamanhoVeiculo}m
+                </p>
+              </div>
             </div>
           </>
         );
+
       default:
         return null;
     }

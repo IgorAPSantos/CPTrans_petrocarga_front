@@ -23,33 +23,38 @@ export default function TimeSelection({
     color === "blue" ? "bg-blue-600 text-white" : "bg-green-600 text-white";
 
   return (
-    <div>
+    <div className="w-full">
       <p className="font-semibold mb-3">Escolha o horário:</p>
-      <div className="grid grid-cols-3 gap-3">
+
+      <div className="grid grid-cols-3 gap-3 w-full">
         {times.map((time) => {
           const disabled = reserved.includes(time);
           const isSelected = selected === time;
+
           return (
             <button
               key={time}
               disabled={disabled}
               onClick={() => onSelect(time)}
               className={`p-2 rounded border text-center transition
-                ${
-                  disabled
-                    ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                    : `cursor-pointer ${hoverClass}`
-                }
-                ${isSelected ? selectedClass : ""}`}
+              ${
+                disabled
+                  ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                  : `cursor-pointer ${hoverClass}`
+              }
+              ${isSelected ? selectedClass : ""}`}
             >
               {time}
             </button>
           );
         })}
       </div>
-      <button onClick={onBack} className="mt-4 px-3 py-1 bg-gray-200 rounded">
-        Voltar
-      </button>
+
+      {onBack && (
+        <button onClick={onBack} className="mt-4 px-3 py-1 bg-gray-200 rounded">
+          Voltar
+        </button>
+      )}
     </div>
   );
 }

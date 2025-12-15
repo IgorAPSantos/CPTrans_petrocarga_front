@@ -165,29 +165,27 @@ export function useReserva(selectedVaga: Vaga | null) {
   );
 
   // Quando selecionar horário inicial → recalcula bloqueios do horário final
- useEffect(() => {
-  if (!reservaState.startHour || !selectedVaga) return;
+  useEffect(() => {
+    if (!reservaState.startHour || !selectedVaga) return;
 
-  const bloqueados = calcularReservedTimesEnd(
-    reservaState.startHour,
-    selectedVaga
-  );
+    const bloqueados = calcularReservedTimesEnd(
+      reservaState.startHour,
+      selectedVaga
+    );
 
-  setReservaState((prev) => {
-    if (
-      JSON.stringify(prev.reservedTimesEnd) ===
-      JSON.stringify(bloqueados)
-    ) {
-      return prev; 
-    }
+    setReservaState((prev) => {
+      if (
+        JSON.stringify(prev.reservedTimesEnd) === JSON.stringify(bloqueados)
+      ) {
+        return prev;
+      }
 
-    return {
-      ...prev,
-      reservedTimesEnd: bloqueados,
-    };
-  });
-}, [reservaState.startHour, selectedVaga?.id]); 
-
+      return {
+        ...prev,
+        reservedTimesEnd: bloqueados,
+      };
+    });
+  }, [reservaState.startHour, selectedVaga?.id]);
 
   // ====================================================
   //  3) CARREGA MOTORISTA E VEÍCULOS
