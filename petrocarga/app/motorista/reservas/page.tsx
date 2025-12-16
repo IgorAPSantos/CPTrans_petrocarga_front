@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/components/hooks/useAuth";
 import {
   getReservasPorUsuario,
-  getDocumentoReserva,
   deleteReservaByID,
 } from "@/lib/actions/reservaActions";
 import { Loader2 } from "lucide-react";
@@ -22,18 +21,35 @@ export default function MinhasReservas() {
     if (!user?.id) return;
 
     setLoading(true);
-    setError(null);
+
+    // 1. Estratégia "Cache First" manual
+    const cachedData = localStorage.getItem(`reservas-${user.id}`);
+    if (cachedData) {
+      setReservas(JSON.parse(cachedData));
+    }
 
     try {
+      // 2. Tenta atualizar via Server Action
       const data = await getReservasPorUsuario(user.id);
+
+      let dadosFormatados;
       if ("veiculos" in data) {
-        setReservas(data.reservas || []);
+        dadosFormatados = data.reservas || [];
       } else {
-        setReservas(data);
+        dadosFormatados = data;
       }
+
+      setReservas(dadosFormatados);
+      // Salva a versão mais nova no cache
+      localStorage.setItem(
+        `reservas-${user.id}`,
+        JSON.stringify(dadosFormatados)
+      );
     } catch (err) {
-      console.error("Erro ao carregar reservas:", err);
-      setError("Erro ao buscar suas reservas. Tente novamente mais tarde.");
+      console.error("Erro ao atualizar dados:", err);
+      if (!cachedData) {
+        setError("Sem internet e sem dados salvos.");
+      }
     } finally {
       setLoading(false);
     }
@@ -41,35 +57,42 @@ export default function MinhasReservas() {
 
   useEffect(() => {
     fetchReservas();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
-  const handleGerarDocumento = async (reserva: ReservaGet) => {
+  const handleGerarDocumento = (reserva: ReservaGet) => {
     try {
-      const dados = await getDocumentoReserva(reserva.id);
-
       const doc = new jsPDF();
 
       doc.setFontSize(18);
       doc.text("Documento da Reserva", 20, 20);
 
       doc.setFontSize(12);
-      doc.text(`ID: ${dados.id}`, 20, 40);
-      doc.text(`Motorista: ${dados.motoristaNome}`, 20, 50);
+      doc.text(`ID: ${reserva.id}`, 20, 40);
+
+      const nomeMotorista = "Motorista";
+      doc.text(`Motorista: ${nomeMotorista}`, 20, 50);
+
+      const veiculoInfo = "Veículo não identificado";
+
+      doc.text(`Veículo: ${veiculoInfo}`, 20, 60);
+
       doc.text(
-        `Veículo: ${dados.veiculoPlaca} - ${dados.veiculoModelo}`,
+        `Local: ${reserva.logradouro || ""}, ${reserva.bairro || ""}`,
         20,
-        60
+        70
       );
-      doc.text(`Local: ${dados.logradouro}, ${dados.bairro}`, 20, 70);
-      doc.text(`Origem: ${dados.cidadeOrigem}`, 20, 80);
-      doc.text(`Início: ${dados.inicio}`, 20, 90);
-      doc.text(`Fim: ${dados.fim}`, 20, 100);
-      doc.text(`Status: ${dados.status}`, 20, 110);
+      doc.text(`Origem: ${reserva.cidadeOrigem || ""}`, 20, 80);
+
+      doc.text(`Início: ${new Date(reserva.inicio).toLocaleString()}`, 20, 90);
+      doc.text(`Fim: ${new Date(reserva.fim).toLocaleString()}`, 20, 100);
+
+      doc.text(`Status: ${reserva.status}`, 20, 110);
 
       doc.output("dataurlnewwindow");
     } catch (err) {
       console.error("Erro ao gerar documento:", err);
-      alert("Erro ao gerar documento.");
+      alert("Erro ao gerar o PDF. Verifique os dados.");
     }
   };
 
@@ -80,6 +103,7 @@ export default function MinhasReservas() {
       await fetchReservas();
     } catch (error) {
       console.error(error);
+      alert("Você precisa estar online para excluir uma reserva.");
     }
   };
 
