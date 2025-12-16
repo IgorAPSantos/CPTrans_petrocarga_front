@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { Vaga, OperacoesVaga } from "../types/vaga";
 import { serverApi } from "../serverApi";
 
-
 function buildVagaPayload(formData: FormData) {
   const diasSemanaRaw = formData.get("diaSemana") as string;
   const diasSemana: OperacoesVaga[] = diasSemanaRaw
@@ -55,9 +54,12 @@ export async function addVaga(formData: FormData) {
   }
 
   revalidatePath("/gestor/visualizar-vagas");
-  return { error: false, message: "Vaga cadastrada com sucesso!", valores: null };
+  return {
+    error: false,
+    message: "Vaga cadastrada com sucesso!",
+    valores: null,
+  };
   console.log("Vaga enviada:", Object.fromEntries(formData));
-
 }
 
 // ----------------------

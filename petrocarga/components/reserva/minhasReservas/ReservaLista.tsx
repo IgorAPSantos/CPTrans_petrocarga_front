@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ChevronDown, ChevronUp, Archive, CopyPlus  } from "lucide-react";
+import { ChevronDown, ChevronUp, Archive, CopyPlus } from "lucide-react";
 import Link from "next/link";
 import ReservaCard from "./ReservaCard";
 import { ReservaGet } from "@/lib/types/reserva";
@@ -16,10 +16,8 @@ const PRIORIDADE: Record<string, number> = {
   REMOVIDA: 5,
 };
 
-
-const VISIBLE_STATUSES = new Set(["ATIVA", "RESERVADA",]);
+const VISIBLE_STATUSES = new Set(["ATIVA", "RESERVADA"]);
 const HIDDEN_STATUSES = new Set(["CONCLUIDA", "CANCELADA", "REMOVIDA"]);
-
 
 // Função auxiliar de ordenação
 const sortReservas = (a: ReservaGet, b: ReservaGet) => {
@@ -66,7 +64,6 @@ export default function ReservaLista({
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col gap-6">
-      
       {/* --- SEÇÃO PRINCIPAL (Visíveis) --- */}
       <section className="flex flex-col gap-4 animate-in fade-in duration-500">
         {visiveis.length > 0 ? (
@@ -101,7 +98,7 @@ export default function ReservaLista({
                 {ocultas.length}
               </span>
             </div>
-            
+
             {mostrarOcultas ? (
               <ChevronUp className="w-4 h-4 text-gray-400" />
             ) : (
@@ -119,7 +116,10 @@ export default function ReservaLista({
             <div className="overflow-hidden min-h-0">
               <div className="flex flex-col gap-3 pb-2">
                 {ocultas.map((reserva) => (
-                  <div key={reserva.id} className="opacity-75 hover:opacity-100 transition-opacity">
+                  <div
+                    key={reserva.id}
+                    className="opacity-75 hover:opacity-100 transition-opacity"
+                  >
                     <ReservaCard
                       reserva={reserva}
                       onGerarDocumento={onGerarDocumento}
@@ -140,24 +140,26 @@ export default function ReservaLista({
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-      
       {/* Ícone de Destaque */}
       <div className="bg-white p-3 rounded-full shadow-sm mb-4">
         <CopyPlus className="w-8 h-8 text-gray-400" />
       </div>
-      
+
       {/* Título e Descrição */}
       <h3 className="text-gray-900 font-medium text-lg mb-2">
         Nenhuma Reserva Ativa
       </h3>
       {/* Botão Principal com Melhorias de UI/UX */}
-     <div className="flex flex-col sm:flex-row justify-center">
-            <Link href="/motorista/reservar-vaga">
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-sm md:text-base">
-                Fazer Reserva
-              </Button>
-            </Link>
-          </div>
+      <div className="flex flex-col sm:flex-row justify-center">
+        <Link href="/motorista/reservar-vaga">
+          <Button
+            size="lg"
+            className="bg-blue-600 hover:bg-blue-700 text-sm md:text-base"
+          >
+            Fazer Reserva
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }

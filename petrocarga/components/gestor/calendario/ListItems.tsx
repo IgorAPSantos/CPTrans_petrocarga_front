@@ -5,14 +5,13 @@ import { Vaga } from "@/lib/types/vaga";
 import { Veiculo } from "@/lib/types/veiculo";
 import { formatTime } from "./utils/utils";
 
-
 const STATUS_CONFIG = {
   ATIVA: {
     label: "Ativa",
     color: "text-green-700 bg-green-100",
     border: "border-green-500",
     dot: "bg-green-500",
-    isActive: true, 
+    isActive: true,
   },
   RESERVADA: {
     label: "Reservada",
@@ -114,21 +113,18 @@ export const VagaItem = ({
 }) => {
   const vagaInfo = vagasCache[vagaId] ?? null;
 
-
   const temAtividade = reservas.some((r) => {
     const s = r.status as StatusType;
     return STATUS_CONFIG[s]?.isActive;
   });
-
 
   const dotClass = temAtividade ? "bg-green-500" : "bg-red-500";
 
   return (
     <div className="flex items-center justify-between p-3 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors">
       <div className="flex items-center gap-3">
-
         <div className={`w-3 h-3 rounded-full shadow-sm ${dotClass}`} />
-        
+
         <div>
           <div className="font-medium text-sm text-gray-800">
             {vagaInfo?.endereco?.logradouro ?? vagaId}
@@ -166,15 +162,19 @@ export const ReservaItem = ({
           <span className="font-semibold text-gray-900 text-sm">
             {formatTime(reserva.inicio)} — {formatTime(reserva.fim)}
           </span>
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${config.color}`}>
+          <span
+            className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wide ${config.color}`}
+          >
             {config.label}
           </span>
         </div>
-        
+
         <div className="text-xs text-muted-foreground flex items-center gap-2">
-           <span>{reserva.enderecoVaga.bairro}</span>
-           <span className="w-1 h-1 bg-gray-300 rounded-full"/> 
-           <span className="font-medium text-gray-600">{reserva.placaVeiculo}</span>
+          <span>{reserva.enderecoVaga.bairro}</span>
+          <span className="w-1 h-1 bg-gray-300 rounded-full" />
+          <span className="font-medium text-gray-600">
+            {reserva.placaVeiculo}
+          </span>
         </div>
       </div>
 
