@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useAuth } from "@/components/hooks/useAuth";
-import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
-import { Loader2 } from "lucide-react";
-import { Veiculo } from "@/lib/types/veiculo";
-import VeiculoDetalhes from "@/components/motorista/cards/veiculo-card";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/components/hooks/useAuth';
+import { getVeiculosUsuario } from '@/lib/actions/veiculoActions';
+import { Loader2 } from 'lucide-react';
+import { Veiculo } from '@/lib/types/veiculo';
+import VeiculoDetalhes from '@/components/motorista/cards/veiculo-card';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 
 export default function EditarVeiculoPage() {
   const { user } = useAuth();
@@ -16,11 +16,11 @@ export default function EditarVeiculoPage() {
 
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string>("");
+  const [error, setError] = useState<string>('');
 
   useEffect(() => {
     if (!user?.id) {
-      setError("Usuário não autenticado.");
+      setError('Usuário não autenticado.');
       setLoading(false);
       return;
     }
@@ -30,7 +30,7 @@ export default function EditarVeiculoPage() {
 
     async function fetchVeiculo() {
       setLoading(true);
-      setError("");
+      setError('');
 
       try {
         const result = await getVeiculosUsuario(userId);
@@ -41,14 +41,14 @@ export default function EditarVeiculoPage() {
         } else {
           const v = result.veiculos.find((v) => v.id === params.id);
           if (!v) {
-            setError("Veículo não encontrado.");
+            setError('Veículo não encontrado.');
           } else {
             setVeiculo(v);
           }
         }
       } catch (err) {
-        console.error("Erro ao buscar veículo:", err);
-        setError("Erro ao buscar veículo.");
+        console.error('Erro ao buscar veículo:', err);
+        setError('Erro ao buscar veículo.');
       } finally {
         setLoading(false);
       }

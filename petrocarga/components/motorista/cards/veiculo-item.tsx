@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
-import { Truck } from "lucide-react";
-import { Veiculo } from "@/lib/types/veiculo";
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { Truck } from 'lucide-react';
+import { Veiculo } from '@/lib/types/veiculo';
 
 interface VeiculoCardProps {
   veiculo: Veiculo;
@@ -14,8 +14,8 @@ export default function VeiculoCard({ veiculo }: VeiculoCardProps) {
   return (
     <article
       className={cn(
-        "flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full",
-        "border-blue-500"
+        'flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full',
+        'border-blue-500',
       )}
     >
       {/* Conteúdo principal */}
@@ -52,8 +52,8 @@ export default function VeiculoCard({ veiculo }: VeiculoCardProps) {
         <Link
           href={`/motorista/veiculos/meus-veiculos/${veiculo.id}`}
           className={cn(
-            buttonVariants({ variant: "outline" }),
-            "text-sm sm:text-base w-full sm:w-auto text-center"
+            buttonVariants({ variant: 'outline' }),
+            'text-sm sm:text-base w-full sm:w-auto text-center',
           )}
         >
           Ver mais

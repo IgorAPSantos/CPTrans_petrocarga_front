@@ -1,53 +1,53 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Eye, EyeOff, Lock, Mail, AlertCircle } from "lucide-react";
-import Link from "next/link";
-import { useAuth } from "@/components/hooks/useAuth";
+} from '@/components/ui/card';
+import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+import { useAuth } from '@/components/hooks/useAuth';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
 
   async function handleLogin() {
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
       const decodedUser = await login({ email, senha });
 
       // Redirecionamento baseado na permissão
       switch (decodedUser.permissao) {
-        case "ADMIN":
-        case "GESTOR":
-          window.location.href = "/gestor/visualizar-vagas";
+        case 'ADMIN':
+        case 'GESTOR':
+          window.location.href = '/gestor/visualizar-vagas';
           break;
-        case "MOTORISTA":
-          window.location.href = "/motorista/reservar-vaga";
+        case 'MOTORISTA':
+          window.location.href = '/motorista/reservar-vaga';
           break;
-        case "AGENTE":
-          window.location.href = "/agente/reserva-rapida";
+        case 'AGENTE':
+          window.location.href = '/agente/reserva-rapida';
           break;
         default:
-          setError("Permissão desconhecida");
+          setError('Permissão desconhecida');
       }
     } catch (err: unknown) {
       console.error(err);
-      setError("Email ou senha incorretos");
+      setError('Email ou senha incorretos');
     } finally {
       setLoading(false);
     }
@@ -114,7 +114,7 @@ export default function LoginPage() {
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
                 <Input
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   placeholder="••••••••"
@@ -138,10 +138,10 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-end">
               <Link
-                href= "/autorizacao/verificacao"
-                className= 'text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors'
-              > 
-                Esqueceu sua senha? 
+                href="/autorizacao/verificacao"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+              >
+                Esqueceu sua senha?
               </Link>
             </div>
 
@@ -156,7 +156,7 @@ export default function LoginPage() {
                   <span>Entrando...</span>
                 </div>
               ) : (
-                "Entrar"
+                'Entrar'
               )}
             </Button>
           </form>

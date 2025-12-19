@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { onMessage } from "firebase/messaging";
-import toast from "react-hot-toast";
-import { getMessagingInstance } from "@/lib/firebase";
+import { useEffect } from 'react';
+import { onMessage } from 'firebase/messaging';
+import toast from 'react-hot-toast';
+import { getMessagingInstance } from '@/lib/firebase';
 
 export function useForegroundPush() {
   useEffect(() => {
@@ -17,11 +17,11 @@ export function useForegroundPush() {
         const title =
           payload.notification?.title ||
           payload.data?.title ||
-          "Nova notificação";
-        const body = payload.notification?.body || payload.data?.body || "";
+          'Nova notificação';
+        const body = payload.notification?.body || payload.data?.body || '';
 
-        toast(`${title}${body ? `: ${body}` : ""}`, {
-          icon: "🔔",
+        toast(`${title}${body ? `: ${body}` : ''}`, {
+          icon: '🔔',
           duration: 4000,
         });
       });

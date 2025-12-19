@@ -1,23 +1,43 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { Disponibilidade } from "@/lib/types/disponibilidadeVagas";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+import { Disponibilidade } from '@/lib/types/disponibilidadeVagas';
 
-// Definindo o estado interno do modal para controlar a navegação 
+// Definindo o estado interno do modal para controlar a navegação
 type ModalStep =
-  | { type: "GRUPO_LISTA"; data: Record<string, Disponibilidade[]> }
-  | { type: "VAGAS_LISTA"; data: { logradouro: string; vagas: Disponibilidade[] } }
-  | { type: "EDITAR_INDIVIDUAL"; data: { id: string; vagaId: string; inicio: string; fim: string } }
-  | { type: "EDITAR_GRUPO"; data: { logradouro: string; vagas: Disponibilidade[] } }
-  | { type: "INICIAL"; data: null }; // Estado inicial padrão
+  | { type: 'GRUPO_LISTA'; data: Record<string, Disponibilidade[]> }
+  | {
+      type: 'VAGAS_LISTA';
+      data: { logradouro: string; vagas: Disponibilidade[] };
+    }
+  | {
+      type: 'EDITAR_INDIVIDUAL';
+      data: { id: string; vagaId: string; inicio: string; fim: string };
+    }
+  | {
+      type: 'EDITAR_GRUPO';
+      data: { logradouro: string; vagas: Disponibilidade[] };
+    }
+  | { type: 'INICIAL'; data: null }; // Estado inicial padrão
 
 interface EditarModalProps {
   open: boolean;
   onClose: () => void;
-  gruposAgrupados: Record<string, Disponibilidade[]> | null; 
-  
+  gruposAgrupados: Record<string, Disponibilidade[]> | null;
+
   // Ações passadas do useDisponibilidadeActions
-  onEditarIntervalo: (id: string, vagaId: string, inicio: string, fim: string) => void;
+  onEditarIntervalo: (
+    id: string,
+    vagaId: string,
+    inicio: string,
+    fim: string,
+  ) => void;
   onRemoverVaga: (id: string) => void;
 }
 
@@ -28,24 +48,31 @@ export function EditarModal({
   onEditarIntervalo,
   onRemoverVaga,
 }: EditarModalProps) {
-
   // O estado interno controla qual tela estamos vendo dentro do modal
-  const [modalState, setModalState] = useState<ModalStep>({ type: "INICIAL", data: null });
+  const [modalState, setModalState] = useState<ModalStep>({
+    type: 'INICIAL',
+    data: null,
+  });
 
   // Estado para armazenar os valores de data sendo editados
-  const [editing, setEditing] = useState({ id: "", vagaId: "", inicio: "", fim: "" });
+  const [editing, setEditing] = useState({
+    id: '',
+    vagaId: '',
+    inicio: '',
+    fim: '',
+  });
 
-  const formatDateForInput = (iso: string) => iso.split("T")[0];
+  const formatDateForInput = (iso: string) => iso.split('T')[0];
 
-    /** ------------------------------------------------------------------
-       * FUNÇÃO DE CONDICIONAL DE NOME VAGA OU VAGAS 
-       * ------------------------------------------------------------------ */
-      const nomeVagaouVagas = (quantidade: number): string => {
-        if (quantidade > 1) {
-          return "VAGAS";
-        }
-        return "VAGA";
-      };
+  /** ------------------------------------------------------------------
+   * FUNÇÃO DE CONDICIONAL DE NOME VAGA OU VAGAS
+   * ------------------------------------------------------------------ */
+  const nomeVagaouVagas = (quantidade: number): string => {
+    if (quantidade > 1) {
+      return 'VAGAS';
+    }
+    return 'VAGA';
+  };
 
   /** ------------------------------------------------------------------
    * INICIALIZAÇÃO/RESET
@@ -54,56 +81,54 @@ export function EditarModal({
   useEffect(() => {
     if (open) {
       if (gruposAgrupados && Object.keys(gruposAgrupados).length > 0) {
-        setModalState({ type: "GRUPO_LISTA", data: gruposAgrupados });
+        setModalState({ type: 'GRUPO_LISTA', data: gruposAgrupados });
       } else {
-
-        setModalState({ type: "INICIAL", data: null });
-        
+        setModalState({ type: 'INICIAL', data: null });
       }
-      setEditing({ id: "", vagaId: "", inicio: "", fim: "" });
+      setEditing({ id: '', vagaId: '', inicio: '', fim: '' });
     }
   }, [open, gruposAgrupados]);
 
   /** Atualiza os inputs ao entrar no modo editar */
   useEffect(() => {
-    if (modalState.type === "EDITAR_INDIVIDUAL" && modalState.data) {
+    if (modalState.type === 'EDITAR_INDIVIDUAL' && modalState.data) {
       setEditing({
         id: modalState.data.id,
         vagaId: modalState.data.vagaId,
         inicio: formatDateForInput(modalState.data.inicio),
         fim: formatDateForInput(modalState.data.fim),
       });
-    } else if (modalState.type === "EDITAR_GRUPO" && modalState.data) {
-        const primeiraDisp = modalState.data.vagas[0];
-        setEditing({
-            id: "", 
-            vagaId: "",
-            inicio: formatDateForInput(primeiraDisp.inicio),
-            fim: formatDateForInput(primeiraDisp.fim),
-        });
+    } else if (modalState.type === 'EDITAR_GRUPO' && modalState.data) {
+      const primeiraDisp = modalState.data.vagas[0];
+      setEditing({
+        id: '',
+        vagaId: '',
+        inicio: formatDateForInput(primeiraDisp.inicio),
+        fim: formatDateForInput(primeiraDisp.fim),
+      });
     }
   }, [modalState]);
-
 
   /** ------------------------------------------------------------------
    * NAVEGAÇÃO INTERNA E AÇÃO DE VOLTAR
    * ------------------------------------------------------------------ */
   const goBack = () => {
-    if (modalState.type === "VAGAS_LISTA" || modalState.type === "EDITAR_GRUPO") {
-      setModalState({ type: "GRUPO_LISTA", data: gruposAgrupados! });
-    } 
-    else if (modalState.type === "EDITAR_INDIVIDUAL" && modalState.data) {
-      setModalState({ type: "GRUPO_LISTA", data: gruposAgrupados! });
+    if (
+      modalState.type === 'VAGAS_LISTA' ||
+      modalState.type === 'EDITAR_GRUPO'
+    ) {
+      setModalState({ type: 'GRUPO_LISTA', data: gruposAgrupados! });
+    } else if (modalState.type === 'EDITAR_INDIVIDUAL' && modalState.data) {
+      setModalState({ type: 'GRUPO_LISTA', data: gruposAgrupados! });
     }
   };
 
-  
   /** ------------------------------------------------------------------
-   * FUNÇÃO DE SALVAMENTO DE DATAS 
+   * FUNÇÃO DE SALVAMENTO DE DATAS
    * ------------------------------------------------------------------ */
   const salvarEdicaoIndividual = () => {
-    if (modalState.type !== "EDITAR_INDIVIDUAL") return;
-    
+    if (modalState.type !== 'EDITAR_INDIVIDUAL') return;
+
     const inicioISO = `${editing.inicio}T00:00:00-03:00`;
     const fimISO = `${editing.fim}T23:59:00-03:00`;
 
@@ -112,10 +137,10 @@ export function EditarModal({
   };
 
   const salvarEdicaoGrupo = () => {
-    if (modalState.type !== "EDITAR_GRUPO") return;
-    
+    if (modalState.type !== 'EDITAR_GRUPO') return;
+
     const inicioISO = `${editing.inicio}`;
-    const fimISO = `${editing.fim}`
+    const fimISO = `${editing.fim}`;
 
     // Chama a ação de edição para CADA disponibilidade do grupo
     modalState.data.vagas.forEach((v) => {
@@ -125,15 +150,13 @@ export function EditarModal({
     goBack();
   };
 
-
   /** ------------------------------------------------------------------
    * RENDERIZAÇÃO DINÂMICA
    * ------------------------------------------------------------------ */
   const renderContent = () => {
     switch (modalState.type) {
-
       /** GRUPO_LISTA: Lista os logradouros agrupados */
-      case "GRUPO_LISTA":
+      case 'GRUPO_LISTA':
         if (!modalState.data) return <p>Nenhum dado de grupo encontrado.</p>;
 
         return (
@@ -144,16 +167,26 @@ export function EditarModal({
 
             <div className="space-y-3 max-h-[60vh] overflow-auto">
               {Object.entries(modalState.data).map(([logradouro, vagas]) => (
-                <div key={logradouro} className="border p-3 flex flex-col sm:flex-row justify-between rounded items-start sm:items-center">
+                <div
+                  key={logradouro}
+                  className="border p-3 flex flex-col sm:flex-row justify-between rounded items-start sm:items-center"
+                >
                   <p className="font-medium mb-2 sm:mb-0">
-                    {logradouro} ({vagas.length} {nomeVagaouVagas(vagas.length)})
+                    {logradouro} ({vagas.length} {nomeVagaouVagas(vagas.length)}
+                    )
                   </p>
 
                   <div className="flex gap-2">
                     {/* Ver vagas individuais */}
-                    <Button 
-                        size="sm"
-                        onClick={() => setModalState({ type: "VAGAS_LISTA", data: { logradouro, vagas } })}>
+                    <Button
+                      size="sm"
+                      onClick={() =>
+                        setModalState({
+                          type: 'VAGAS_LISTA',
+                          data: { logradouro, vagas },
+                        })
+                      }
+                    >
                       Ver Vagas
                     </Button>
 
@@ -174,7 +207,6 @@ export function EditarModal({
                     
                     
                     */}
-                
                   </div>
                 </div>
               ))}
@@ -183,7 +215,7 @@ export function EditarModal({
         );
 
       /** VAGAS_LISTA: Lista as disponibilidades dentro de um logradouro */
-      case "VAGAS_LISTA":
+      case 'VAGAS_LISTA':
         return (
           <>
             <DialogHeader>
@@ -192,7 +224,10 @@ export function EditarModal({
 
             <div className="space-y-2 max-h-[60vh] overflow-auto">
               {modalState.data.vagas.map((v) => (
-                <div key={v.id} className="flex justify-between p-2 border rounded">
+                <div
+                  key={v.id}
+                  className="flex justify-between p-2 border rounded"
+                >
                   <p className="font-medium">
                     {v.endereco.logradouro}, {v.numeroEndereco}
                   </p>
@@ -203,8 +238,13 @@ export function EditarModal({
                       size="sm"
                       onClick={() =>
                         setModalState({
-                          type: "EDITAR_INDIVIDUAL",
-                          data: { id: v.id, vagaId: v.vagaId, inicio: v.inicio, fim: v.fim },
+                          type: 'EDITAR_INDIVIDUAL',
+                          data: {
+                            id: v.id,
+                            vagaId: v.vagaId,
+                            inicio: v.inicio,
+                            fim: v.fim,
+                          },
                         })
                       }
                     >
@@ -217,7 +257,7 @@ export function EditarModal({
                       variant="destructive"
                       onClick={() => {
                         onRemoverVaga(v.id);
-                        onClose(); 
+                        onClose();
                       }}
                     >
                       Remover
@@ -230,7 +270,7 @@ export function EditarModal({
         );
 
       /** EDITAR_INDIVIDUAL: Formulário para editar uma única vaga */
-      case "EDITAR_INDIVIDUAL":
+      case 'EDITAR_INDIVIDUAL':
         const disp = modalState.data;
         return (
           <>
@@ -246,7 +286,9 @@ export function EditarModal({
                 <input
                   type="date"
                   value={editing.inicio}
-                  onChange={(e) => setEditing((prev) => ({ ...prev, inicio: e.target.value }))}
+                  onChange={(e) =>
+                    setEditing((prev) => ({ ...prev, inicio: e.target.value }))
+                  }
                   className="w-full border p-2 rounded"
                 />
               </div>
@@ -255,30 +297,33 @@ export function EditarModal({
                 <input
                   type="date"
                   value={editing.fim}
-                  onChange={(e) => setEditing((prev) => ({ ...prev, fim: e.target.value }))}
+                  onChange={(e) =>
+                    setEditing((prev) => ({ ...prev, fim: e.target.value }))
+                  }
                   className="w-full border p-2 rounded"
                 />
               </div>
             </div>
 
             <div className="flex gap-2 p-2 justify-end">
-              <Button onClick={salvarEdicaoIndividual}>
-                Salvar
-              </Button>
+              <Button onClick={salvarEdicaoIndividual}>Salvar</Button>
             </div>
           </>
         );
 
       /** EDITAR_GRUPO: Formulário para editar todas as vagas de um logradouro */
-      case "EDITAR_GRUPO":
+      case 'EDITAR_GRUPO':
         return (
           <>
             <DialogHeader>
-              <DialogTitle>Editar Grupo — {modalState.data.logradouro}</DialogTitle>
+              <DialogTitle>
+                Editar Grupo — {modalState.data.logradouro}
+              </DialogTitle>
             </DialogHeader>
-            
+
             <p className="text-sm text-red-600 font-semibold mb-2">
-                Atenção: Isso irá aplicar as mesmas datas para as {modalState.data.vagas.length} vagas neste logradouro.
+              Atenção: Isso irá aplicar as mesmas datas para as{' '}
+              {modalState.data.vagas.length} vagas neste logradouro.
             </p>
 
             <div className="grid grid-cols-2 gap-4 p-2">
@@ -287,7 +332,9 @@ export function EditarModal({
                 <input
                   type="date"
                   value={editing.inicio}
-                  onChange={(e) => setEditing((prev) => ({ ...prev, inicio: e.target.value }))}
+                  onChange={(e) =>
+                    setEditing((prev) => ({ ...prev, inicio: e.target.value }))
+                  }
                   className="w-full border p-2 rounded"
                 />
               </div>
@@ -296,16 +343,16 @@ export function EditarModal({
                 <input
                   type="date"
                   value={editing.fim}
-                  onChange={(e) => setEditing((prev) => ({ ...prev, fim: e.target.value }))}
+                  onChange={(e) =>
+                    setEditing((prev) => ({ ...prev, fim: e.target.value }))
+                  }
                   className="w-full border p-2 rounded"
                 />
               </div>
             </div>
 
             <div className="flex gap-2 p-2 justify-end">
-              <Button onClick={salvarEdicaoGrupo}>
-                Salvar Grupo
-              </Button>
+              <Button onClick={salvarEdicaoGrupo}>Salvar Grupo</Button>
             </div>
           </>
         );
@@ -314,7 +361,7 @@ export function EditarModal({
         // Se o modal for aberto sem dados válidos, ele deve fechar ou mostrar um erro
         return (
           <div className="p-4 text-center">
-             <p className="text-lg font-medium text-gray-700">Carregando...</p>
+            <p className="text-lg font-medium text-gray-700">Carregando...</p>
           </div>
         );
     }
@@ -327,12 +374,13 @@ export function EditarModal({
 
         <DialogFooter className="flex justify-between items-center mt-4">
           {/* Botão Voltar: visível em todos os estados exceto o inicial (GRUPO_LISTA) */}
-          {modalState.type === "VAGAS_LISTA" || modalState.type.startsWith("EDITAR") ? (
+          {modalState.type === 'VAGAS_LISTA' ||
+          modalState.type.startsWith('EDITAR') ? (
             <Button variant="outline" onClick={goBack}>
               Voltar
             </Button>
           ) : (
-            <div /> 
+            <div />
           )}
 
           <Button variant="outline" onClick={onClose}>

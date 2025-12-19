@@ -1,13 +1,13 @@
-import Footer from "../../components/motorista/layout/footer";
-import { Navbar } from "../../components/motorista/layout/navbar";
-import { Metadata } from "next";
-import { PushProvider } from "@/context/PushProvider/PushProvider";
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
+import Footer from '../../components/motorista/layout/footer';
+import { Navbar } from '../../components/motorista/layout/navbar';
+import { Metadata } from 'next';
+import { PushProvider } from '@/context/PushProvider/PushProvider';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 export const metadata: Metadata = {
-  title: "PetroCarga",
+  title: 'PetroCarga',
   description:
-    "O Petrocarga trás aos motoristas uma plataforma eficiente para gerenciamento de cargas e rotas",
+    'O Petrocarga trás aos motoristas uma plataforma eficiente para gerenciamento de cargas e rotas',
 };
 
 export default function MotoristaLayout({

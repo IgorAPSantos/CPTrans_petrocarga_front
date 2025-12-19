@@ -1,4 +1,4 @@
-import { Veiculo } from "./veiculo";
+import { Veiculo } from './veiculo';
 
 export interface ReservaState {
   step: number;
@@ -14,6 +14,6 @@ export interface ReservaState {
   selectedVehicleId?: string;
 
   // agente
-  tipoVeiculoAgente?: Veiculo["tipo"];
+  tipoVeiculoAgente?: Veiculo['tipo'];
   placaAgente: string;
 }

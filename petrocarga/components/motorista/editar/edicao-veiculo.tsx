@@ -1,5 +1,5 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -7,19 +7,18 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { atualizarVeiculo } from "@/lib/actions/veiculoActions";
-import { CircleAlert, TruckIcon } from "lucide-react";
-import Form from "next/form";
-import { useActionState, useState } from "react";
-import FormItem from "@/components/form/form-item";
-import React from "react";
-import { Veiculo } from "@/lib/types/veiculo";
-import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { atualizarVeiculo } from '@/lib/actions/veiculoActions';
+import { CircleAlert, TruckIcon } from 'lucide-react';
+import Form from 'next/form';
+import { useActionState, useState } from 'react';
+import FormItem from '@/components/form/form-item';
+import React from 'react';
+import { Veiculo } from '@/lib/types/veiculo';
+import SelecaoCustomizada from '@/components/gestor/selecaoItem/selecao-customizada';
 
 export default function EditarVeiculo({ veiculo }: { veiculo: Veiculo }) {
-
   // Wrapper para passar o token na action
   const atualizarComToken = async (prevState: unknown, formData: FormData) => {
     return atualizarVeiculo(formData);
@@ -27,7 +26,7 @@ export default function EditarVeiculo({ veiculo }: { veiculo: Veiculo }) {
 
   const [state, atualizarVeiculoAction, pending] = useActionState(
     atualizarComToken,
-    null
+    null,
   );
   const [exibirSenha, setExibirSenha] = useState(false);
 
@@ -111,11 +110,17 @@ export default function EditarVeiculo({ veiculo }: { veiculo: Veiculo }) {
                 name="tipo"
                 placeholder="Selecione o tipo"
                 options={[
-                  { value: "AUTOMOVEL", label: "Carro - Até 5 metros" },
-                  { value: "VUC", label: "VUC - 6 a 7 metros" },
-                  { value: "CAMINHONETA", label: "Caminhoneta - Até 8 metros" },
-                  { value: "CAMINHAO_MEDIO", label: "Caminhão Médio - 9 a 12 metros" },
-                  { value: "CAMINHAO_LONGO", label: "Caminhão Longo - 13 a 19 metros" },
+                  { value: 'AUTOMOVEL', label: 'Carro - Até 5 metros' },
+                  { value: 'VUC', label: 'VUC - 6 a 7 metros' },
+                  { value: 'CAMINHONETA', label: 'Caminhoneta - Até 8 metros' },
+                  {
+                    value: 'CAMINHAO_MEDIO',
+                    label: 'Caminhão Médio - 9 a 12 metros',
+                  },
+                  {
+                    value: 'CAMINHAO_LONGO',
+                    label: 'Caminhão Longo - 13 a 19 metros',
+                  },
                 ]}
               />
             </FormItem>
@@ -140,7 +145,7 @@ export default function EditarVeiculo({ veiculo }: { veiculo: Veiculo }) {
                 inputMode="numeric"
                 onInput={(e) => {
                   const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/\D/g, ""); // Remove tudo que não é número
+                  target.value = target.value.replace(/\D/g, ''); // Remove tudo que não é número
                 }}
               />
             </FormItem>
@@ -160,7 +165,7 @@ export default function EditarVeiculo({ veiculo }: { veiculo: Veiculo }) {
                 inputMode="numeric"
                 onInput={(e) => {
                   const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/\D/g, ""); // Remove tudo que não é número
+                  target.value = target.value.replace(/\D/g, ''); // Remove tudo que não é número
                 }}
               />
             </FormItem>
@@ -173,7 +178,7 @@ export default function EditarVeiculo({ veiculo }: { veiculo: Veiculo }) {
               disabled={pending}
               className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium text-blue-800 bg-blue-200 hover:bg-blue-300 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {pending ? "Salvando..." : "Salvar"}
+              {pending ? 'Salvando...' : 'Salvar'}
             </Button>
           </CardFooter>
         </Form>

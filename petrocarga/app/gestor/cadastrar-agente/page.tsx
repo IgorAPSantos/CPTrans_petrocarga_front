@@ -1,5 +1,5 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -7,14 +7,21 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import Form from "next/form";
-import { useActionState, useState } from "react";
-import { CircleAlert, UserIcon, CheckCircle, EyeOff, Eye, ArrowLeft } from "lucide-react";
-import FormItem from "@/components/form/form-item";
-import { addAgente } from "@/lib/actions/agenteAction";
-import Link from "next/link";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import Form from 'next/form';
+import { useActionState, useState } from 'react';
+import {
+  CircleAlert,
+  UserIcon,
+  CheckCircle,
+  EyeOff,
+  Eye,
+  ArrowLeft,
+} from 'lucide-react';
+import FormItem from '@/components/form/form-item';
+import { addAgente } from '@/lib/actions/agenteAction';
+import Link from 'next/link';
 
 export default function CadastroAgentes() {
   const [state, action, pending] = useActionState(addAgente, null);
@@ -24,11 +31,11 @@ export default function CadastroAgentes() {
     <main className="container mx-auto px-4 py-4 md:py-8">
       <div className="mb-6">
         <Link
-        href="/gestor/agentes"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center"
+          href="/gestor/agentes"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center"
         >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para todos os agentes
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar para todos os agentes
         </Link>
       </div>
       <Card className="w-full max-w-4xl mx-auto">
@@ -52,8 +59,8 @@ export default function CadastroAgentes() {
               <div
                 className={`flex items-start gap-3 rounded-md border p-4 mb-6 ${
                   state.error
-                    ? "border-red-200 bg-red-50 text-red-900"
-                    : "border-green-200 bg-green-50 text-green-900"
+                    ? 'border-red-200 bg-red-50 text-red-900'
+                    : 'border-green-200 bg-green-50 text-green-900'
                 }`}
               >
                 {state.error ? (
@@ -111,7 +118,7 @@ export default function CadastroAgentes() {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    ""
+                    '',
                   );
                 }}
               />
@@ -133,7 +140,7 @@ export default function CadastroAgentes() {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    ""
+                    '',
                   );
                 }}
               />
@@ -160,7 +167,7 @@ export default function CadastroAgentes() {
               disabled={pending}
               className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium text-blue-800 bg-blue-200 hover:bg-blue-300 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {pending ? "Salvando..." : "Cadastrar"}
+              {pending ? 'Salvando...' : 'Cadastrar'}
             </Button>
           </CardFooter>
         </Form>

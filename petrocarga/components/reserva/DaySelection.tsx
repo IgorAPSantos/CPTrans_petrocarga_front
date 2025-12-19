@@ -1,5 +1,5 @@
-import { DayPicker } from "react-day-picker";
-import "react-day-picker/dist/style.css";
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/dist/style.css';
 
 interface DaySelectionProps {
   selected?: Date;
@@ -16,13 +16,13 @@ export default function DaySelection({
 
   // Mapear número do dia da semana (0=Domingo, 1=Segunda, ...) para string DiaSemana
   const diasSemanaMap = [
-    "DOMINGO",
-    "SEGUNDA",
-    "TERCA",
-    "QUARTA",
-    "QUINTA",
-    "SEXTA",
-    "SABADO",
+    'DOMINGO',
+    'SEGUNDA',
+    'TERCA',
+    'QUARTA',
+    'QUINTA',
+    'SEXTA',
+    'SABADO',
   ];
 
   const isBeforeDay = (date1: Date, date2: Date) => {
@@ -50,13 +50,13 @@ export default function DaySelection({
           disabled={isDisabled}
           modifiersClassNames={{
             selected:
-              "bg-blue-600 text-white w-12 h-12 flex items-center justify-center rounded-full",
-            disabled: "text-gray-400 opacity-50 cursor-not-allowed",
-            today: "bg-gray-100 font-semibold",
+              'bg-blue-600 text-white w-12 h-12 flex items-center justify-center rounded-full',
+            disabled: 'text-gray-400 opacity-50 cursor-not-allowed',
+            today: 'bg-gray-100 font-semibold',
           }}
           modifiersStyles={{
             disabled: {
-              backgroundColor: "#f9fafb",
+              backgroundColor: '#f9fafb',
             },
           }}
         />

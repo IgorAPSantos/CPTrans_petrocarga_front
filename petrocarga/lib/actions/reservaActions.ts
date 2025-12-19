@@ -1,7 +1,7 @@
-"use server";
+'use server';
 
-import { serverApi } from "@/lib/serverApi";
-import { revalidatePath } from "next/cache";
+import { serverApi } from '@/lib/serverApi';
+import { revalidatePath } from 'next/cache';
 
 // ----------------------
 // POST RESERVA MOTORISTA
@@ -9,17 +9,17 @@ import { revalidatePath } from "next/cache";
 
 export async function reservarVaga(formData: FormData) {
   const body = {
-    vagaId: formData.get("vagaId"),
-    motoristaId: formData.get("motoristaId"),
-    veiculoId: formData.get("veiculoId"),
-    cidadeOrigem: formData.get("cidadeOrigem"),
-    inicio: formData.get("inicio"),
-    fim: formData.get("fim"),
-    status: "ATIVA",
+    vagaId: formData.get('vagaId'),
+    motoristaId: formData.get('motoristaId'),
+    veiculoId: formData.get('veiculoId'),
+    cidadeOrigem: formData.get('cidadeOrigem'),
+    inicio: formData.get('inicio'),
+    fim: formData.get('fim'),
+    status: 'ATIVA',
   };
 
-  const res = await serverApi("/petrocarga/reservas", {
-    method: "POST",
+  const res = await serverApi('/petrocarga/reservas', {
+    method: 'POST',
     body: JSON.stringify(body),
   });
 
@@ -34,17 +34,17 @@ export async function reservarVaga(formData: FormData) {
 // ----------------------
 export async function reservarVagaAgente(formData: FormData) {
   const body = {
-    vagaId: formData.get("vagaId"),
-    tipoVeiculo: formData.get("tipoVeiculo"),
-    placa: formData.get("placa"),
-    inicio: formData.get("inicio"),
-    fim: formData.get("fim"),
+    vagaId: formData.get('vagaId'),
+    tipoVeiculo: formData.get('tipoVeiculo'),
+    placa: formData.get('placa'),
+    inicio: formData.get('inicio'),
+    fim: formData.get('fim'),
   };
 
-  const res = await serverApi("/petrocarga/reserva-rapida", {
-    method: "POST",
+  const res = await serverApi('/petrocarga/reserva-rapida', {
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify(body),
   });
@@ -64,11 +64,11 @@ export async function finalizarForcado(reservaID: string) {
   const res = await serverApi(
     `/petrocarga/reservas/${reservaID}/finalizar-forcado`,
     {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
-    }
+    },
   );
 
   if (!res.ok) {
@@ -111,11 +111,11 @@ export async function getReservasBloqueios(
   vagaId: string,
   data: string,
   tipoVeiculo:
-    | "AUTOMOVEL"
-    | "VUC"
-    | "CAMINHONETA"
-    | "CAMINHAO_MEDIO"
-    | "CAMINHAO_LONGO"
+    | 'AUTOMOVEL'
+    | 'VUC'
+    | 'CAMINHONETA'
+    | 'CAMINHAO_MEDIO'
+    | 'CAMINHAO_LONGO',
 ) {
   const queryParams = new URLSearchParams({
     data,
@@ -125,8 +125,8 @@ export async function getReservasBloqueios(
   const res = await serverApi(
     `/petrocarga/reservas/bloqueios/${vagaId}?${queryParams}`,
     {
-      method: "GET",
-    }
+      method: 'GET',
+    },
   );
 
   if (!res.ok) {
@@ -153,17 +153,17 @@ export async function deleteReservaByID(reservaId: string, usuarioId: string) {
   const res = await serverApi(
     `/petrocarga/reservas/${reservaId}/${usuarioId}`,
     {
-      method: "DELETE",
-      cache: "no-store",
-    }
+      method: 'DELETE',
+      cache: 'no-store',
+    },
   );
 
   if (!res.ok) {
-    console.error("Erro ao deletar Reserva:", await res.text());
-    return { error: true, message: "Erro ao deletar Reserva" };
+    console.error('Erro ao deletar Reserva:', await res.text());
+    return { error: true, message: 'Erro ao deletar Reserva' };
   }
 
-  revalidatePath("/motorista/reservas");
+  revalidatePath('/motorista/reservas');
 
   return { success: true };
 }
@@ -195,26 +195,26 @@ export async function atualizarReserva(
     status: string;
   },
   reservaID: string,
-  usuarioId: string
+  usuarioId: string,
 ) {
-  console.log("📤 Enviando JSON para API Java:", body);
+  console.log('📤 Enviando JSON para API Java:', body);
 
   const res = await serverApi(
     `/petrocarga/reservas/${reservaID}/${usuarioId}`,
     {
-      method: "PATCH",
+      method: 'PATCH',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-    }
+    },
   );
 
   if (!res.ok) {
     const errorText = await res.text();
-    console.error("❌ Erro do Backend:", errorText);
+    console.error('❌ Erro do Backend:', errorText);
     throw new Error(errorText);
   }
-  revalidatePath("/motorista/reservas");
+  revalidatePath('/motorista/reservas');
   return res.json();
 }

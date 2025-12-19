@@ -1,32 +1,35 @@
 'use client';
 
-import FormItem from "@/components/form/form-item";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { atualizarGestor } from "@/lib/actions/gestorActions";
-import { Gestor } from "@/lib/types/gestor";
-import { CheckCircle, CircleAlert, UserIcon } from "lucide-react";
-import Form from "next/form";
-import { useActionState, useState } from "react";
+import FormItem from '@/components/form/form-item';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { atualizarGestor } from '@/lib/actions/gestorActions';
+import { Gestor } from '@/lib/types/gestor';
+import { CheckCircle, CircleAlert, UserIcon } from 'lucide-react';
+import Form from 'next/form';
+import { useActionState, useState } from 'react';
 
-export default function EditarGestor({
-  gestor,
-}: {
-  gestor: Gestor;
-}) {
-    // Wrapper para passar o token na action
-    const atualizar = async (prevState: unknown, formData: FormData) => {
-      return atualizarGestor(formData);
-    };
-    
-    const [state, atualizarGestorAction, pending] = useActionState(
-      atualizar,
-      null
-    );
+export default function EditarGestor({ gestor }: { gestor: Gestor }) {
+  // Wrapper para passar o token na action
+  const atualizar = async (prevState: unknown, formData: FormData) => {
+    return atualizarGestor(formData);
+  };
 
-    const [exibirSenha, setExibirSenha] = useState(false);
-  
+  const [state, atualizarGestorAction, pending] = useActionState(
+    atualizar,
+    null,
+  );
+
+  const [exibirSenha, setExibirSenha] = useState(false);
+
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
       <Card className="w-full max-w-4xl mx-auto">
@@ -53,8 +56,8 @@ export default function EditarGestor({
               <div
                 className={`flex items-start gap-3 rounded-md border p-4 mb-6 ${
                   state.error
-                    ? "border-red-200 bg-red-50 text-red-900"
-                    : "border-green-200 bg-green-50 text-green-900"
+                    ? 'border-red-200 bg-red-50 text-red-900'
+                    : 'border-green-200 bg-green-50 text-green-900'
                 }`}
               >
                 {state.error ? (
@@ -100,7 +103,7 @@ export default function EditarGestor({
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    ""
+                    '',
                   );
                 }}
               />
@@ -122,7 +125,7 @@ export default function EditarGestor({
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    ""
+                    '',
                   );
                 }}
               />
@@ -135,7 +138,7 @@ export default function EditarGestor({
               disabled={pending}
               className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium text-blue-800 bg-blue-200 hover:bg-blue-300 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {pending ? "Salvando..." : "Atualizar"}
+              {pending ? 'Salvando...' : 'Atualizar'}
             </Button>
           </CardFooter>
         </Form>

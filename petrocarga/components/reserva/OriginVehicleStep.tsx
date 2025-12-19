@@ -1,8 +1,8 @@
-"use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { VeiculoAPI } from "@/lib/types/veiculo";
-import { useMapboxSuggestions } from "../map/hooks/useMapboxSuggestions";
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { VeiculoAPI } from '@/lib/types/veiculo';
+import { useMapboxSuggestions } from '../map/hooks/useMapboxSuggestions';
 
 interface OriginVehicleStepProps {
   vehicles: VeiculoAPI[];
@@ -10,7 +10,7 @@ interface OriginVehicleStepProps {
   selectedVehicleId?: string;
   onOriginChange: (value: string) => void;
   onVehicleChange: (id: string) => void;
-  onNext: (origin: string, vehicleId: string) => void
+  onNext: (origin: string, vehicleId: string) => void;
   onBack?: () => void;
 }
 
@@ -25,10 +25,10 @@ export default function OriginVehicleStep({
 }: OriginVehicleStepProps) {
   const router = useRouter();
   const [localOrigin, setLocalOrigin] = useState(origin);
-  const [localVehicleId, setLocalVehicleId] = useState(selectedVehicleId || "");
-  const [entradaId, setEntradaId] = useState(""); // NOVO estado para a entrada
+  const [localVehicleId, setLocalVehicleId] = useState(selectedVehicleId || '');
+  const [entradaId, setEntradaId] = useState(''); // NOVO estado para a entrada
   const [isFocused, setIsFocused] = useState(false);
-  const [origem, setOrigem] = useState("");
+  const [origem, setOrigem] = useState('');
 
   const suggestions = useMapboxSuggestions(localOrigin);
 
@@ -39,33 +39,34 @@ export default function OriginVehicleStep({
   };
 
   const handleVehicleChange = (value: string) => {
-    if (value === "add-new") {
-      router.push("/motorista/veiculos/cadastrar-veiculos");
+    if (value === 'add-new') {
+      router.push('/motorista/veiculos/cadastrar-veiculos');
       return;
     }
     setLocalVehicleId(value);
   };
 
   const handleNext = () => {
-  if (!localVehicleId) return;
+    if (!localVehicleId) return;
 
-  if (origem === "outro-municipio" && (!localOrigin || !entradaId)) return;
+    if (origem === 'outro-municipio' && (!localOrigin || !entradaId)) return;
 
-  const cidadeOrigemFinal =
-    origem === "proprio-municipio" ? "Petrópolis - RJ" : localOrigin;
+    const cidadeOrigemFinal =
+      origem === 'proprio-municipio' ? 'Petrópolis - RJ' : localOrigin;
 
-  onOriginChange(cidadeOrigemFinal);
-  onVehicleChange(localVehicleId);
-  onNext(cidadeOrigemFinal, localVehicleId);
-};
-
+    onOriginChange(cidadeOrigemFinal);
+    onVehicleChange(localVehicleId);
+    onNext(cidadeOrigemFinal, localVehicleId);
+  };
 
   return (
     <div className="flex flex-col gap-4">
       {/* Select de Origem */}
       <div>
-        <label className="block font-semibold mb-1">A carga vem de Petrópolis?</label>
-        <select 
+        <label className="block font-semibold mb-1">
+          A carga vem de Petrópolis?
+        </label>
+        <select
           value={origem}
           onChange={(e) => setOrigem(e.target.value)}
           className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -79,7 +80,7 @@ export default function OriginVehicleStep({
       </div>
 
       {/* Campo de origem com sugestões do Mapbox - só aparece se "Outro Município" */}
-      {origem === "outro-municipio" && (
+      {origem === 'outro-municipio' && (
         <>
           <div className="relative">
             <label className="block font-semibold mb-1">Local de origem:</label>
@@ -111,8 +112,10 @@ export default function OriginVehicleStep({
 
           {/* Select de Entrada */}
           <div>
-            <label className="block font-semibold mb-1">Qual entrada irá utilizar para chegar à Petrópolis?</label>
-            <select 
+            <label className="block font-semibold mb-1">
+              Qual entrada irá utilizar para chegar à Petrópolis?
+            </label>
+            <select
               value={entradaId}
               onChange={(e) => setEntradaId(e.target.value)}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -120,20 +123,34 @@ export default function OriginVehicleStep({
               <option value="" disabled>
                 Selecione a Entrada
               </option>
-              <option value="br040-quitandinha">BR-040 - Pórtico do Quitandinha</option>
+              <option value="br040-quitandinha">
+                BR-040 - Pórtico do Quitandinha
+              </option>
               <option value="br040-bingen">BR-040 - Pórtico do Bingen</option>
               <option value="br040-duarte">BR-040 - Duarte da Silveira</option>
               <option value="br040-mosela">BR-040 - Mosela</option>
-              <option value="br040-bonsucesso">BR-040 - Trevo de Bonsucesso</option>
-              <option value="br040-itaipava">BR-040 - Itaipava (Arranha-Céu)</option>
+              <option value="br040-bonsucesso">
+                BR-040 - Trevo de Bonsucesso
+              </option>
+              <option value="br040-itaipava">
+                BR-040 - Itaipava (Arranha-Céu)
+              </option>
               <option value="br040-pedro">BR-040 - Pedro do Rio</option>
               <option value="br040-barra">BR-040 - Barra Mansa</option>
-              <option value="br495-teresopolis">BR-495 - Est. Teresópolis</option>
-              <option value="rj107-serra">RJ-107 - Serra da Estrela (Serra Velha)</option>
+              <option value="br495-teresopolis">
+                BR-495 - Est. Teresópolis
+              </option>
+              <option value="rj107-serra">
+                RJ-107 - Serra da Estrela (Serra Velha)
+              </option>
               <option value="rj117-videiras">RJ-117 - Vale das Videiras</option>
               <option value="rj123-secretario">RJ-123 - Secretário</option>
-              <option value="rj134-silveira">RJ-134 - Silveira da Motta (Posse)</option>
-              <option value="est-uniao">Est. União e Indústria (Posse-Gaby)</option>
+              <option value="rj134-silveira">
+                RJ-134 - Silveira da Motta (Posse)
+              </option>
+              <option value="est-uniao">
+                Est. União e Indústria (Posse-Gaby)
+              </option>
             </select>
           </div>
         </>
@@ -175,8 +192,8 @@ export default function OriginVehicleStep({
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
           onClick={handleNext}
           disabled={
-            !localVehicleId || 
-            (origem === "outro-municipio" && (!localOrigin || !entradaId))
+            !localVehicleId ||
+            (origem === 'outro-municipio' && (!localOrigin || !entradaId))
           }
         >
           Próximo

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Veiculo } from "@/lib/types/veiculo";
-import { useRouter } from "next/navigation";
-import { deleteVeiculo, atualizarVeiculo } from "@/lib/actions/veiculoActions";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { useState } from 'react';
+import { Veiculo } from '@/lib/types/veiculo';
+import { useRouter } from 'next/navigation';
+import { deleteVeiculo, atualizarVeiculo } from '@/lib/actions/veiculoActions';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 type VeiculoDetalhesProps = {
   veiculo: Veiculo;
@@ -16,9 +16,9 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
   const [modalAberto, setModalAberto] = useState(false);
   const [editando, setEditando] = useState(false);
   const [mensagem, setMensagem] = useState<{
-    tipo: "sucesso" | "erro" | null;
+    tipo: 'sucesso' | 'erro' | null;
     texto: string;
-  }>({ tipo: null, texto: "" });
+  }>({ tipo: null, texto: '' });
 
   // Estados de edição
   const [formData, setFormData] = useState({
@@ -27,8 +27,8 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
     modelo: veiculo.modelo,
     placa: veiculo.placa,
     tipo: veiculo.tipo,
-    cpfProprietario: veiculo.cpfProprietario || "",
-    cnpjProprietario: veiculo.cnpjProprietario || "",
+    cpfProprietario: veiculo.cpfProprietario || '',
+    cnpjProprietario: veiculo.cnpjProprietario || '',
     usuarioId: veiculo.usuarioId,
   });
 
@@ -46,8 +46,8 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
       await atualizarVeiculo(fd);
 
       setMensagem({
-        tipo: "sucesso",
-        texto: "Veículo atualizado com sucesso!",
+        tipo: 'sucesso',
+        texto: 'Veículo atualizado com sucesso!',
       });
 
       setEditando(false);
@@ -55,8 +55,8 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
     } catch (err) {
       console.error(err);
       setMensagem({
-        tipo: "erro",
-        texto: "Erro ao atualizar veículo.",
+        tipo: 'erro',
+        texto: 'Erro ao atualizar veículo.',
       });
     }
   };
@@ -68,7 +68,7 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
       router.back();
     } catch (err) {
       console.error(err);
-      alert("Erro ao excluir veículo.");
+      alert('Erro ao excluir veículo.');
     }
   };
 
@@ -76,10 +76,10 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
     tipo,
     texto,
   }: {
-    tipo: "sucesso" | "erro";
+    tipo: 'sucesso' | 'erro';
     texto: string;
   }) => {
-    const isError = tipo === "erro";
+    const isError = tipo === 'erro';
 
     return (
       <div
@@ -87,8 +87,8 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
         p-3 rounded-lg flex items-start gap-2 border text-sm
         ${
           isError
-            ? "bg-red-50 border-red-200 text-red-700"
-            : "bg-green-50 border-green-200 text-green-700"
+            ? 'bg-red-50 border-red-200 text-red-700'
+            : 'bg-green-50 border-green-200 text-green-700'
         }
       `}
       >
@@ -172,7 +172,7 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
             <input
               className="w-full p-2 border rounded"
               value={formData.marca}
-              onChange={(e) => handleInput("marca", e.target.value)}
+              onChange={(e) => handleInput('marca', e.target.value)}
             />
           </div>
 
@@ -181,7 +181,7 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
             <input
               className="w-full p-2 border rounded"
               value={formData.modelo}
-              onChange={(e) => handleInput("modelo", e.target.value)}
+              onChange={(e) => handleInput('modelo', e.target.value)}
             />
           </div>
 
@@ -190,7 +190,7 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
             <input
               className="w-full p-2 border rounded"
               value={formData.placa}
-              onChange={(e) => handleInput("placa", e.target.value)}
+              onChange={(e) => handleInput('placa', e.target.value)}
             />
           </div>
 
@@ -199,7 +199,7 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
             <select
               className="w-full p-2 border rounded"
               value={formData.tipo}
-              onChange={(e) => handleInput("tipo", e.target.value)}
+              onChange={(e) => handleInput('tipo', e.target.value)}
             >
               <option value="AUTOMOVEL">Automóvel</option>
               <option value="VUC">Veículo Urbano de Carga</option>
@@ -215,7 +215,7 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
             <input
               className="w-full p-2 border rounded"
               value={formData.cpfProprietario}
-              onChange={(e) => handleInput("cpfProprietario", e.target.value)}
+              onChange={(e) => handleInput('cpfProprietario', e.target.value)}
             />
           </div>
 
@@ -224,7 +224,7 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
             <input
               className="w-full p-2 border rounded"
               value={formData.cnpjProprietario}
-              onChange={(e) => handleInput("cnpjProprietario", e.target.value)}
+              onChange={(e) => handleInput('cnpjProprietario', e.target.value)}
             />
           </div>
         </section>

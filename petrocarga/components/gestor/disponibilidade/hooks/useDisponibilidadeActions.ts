@@ -2,10 +2,10 @@ import {
   removeDisponibilidade,
   postDisponibilidade,
   updateDisponibilidade,
-} from "../services/disponibilidadeService";
+} from '../services/disponibilidadeService';
 
-import { Disponibilidade } from "@/lib/types/disponibilidadeVagas";
-import { Vaga } from "@/lib/types/vaga";
+import { Disponibilidade } from '@/lib/types/disponibilidadeVagas';
+import { Vaga } from '@/lib/types/vaga';
 
 interface UseDisponibilidadeActionsProps {
   vagasPorLogradouro: Record<string, Vaga[]>;
@@ -17,7 +17,7 @@ interface UseDisponibilidadeActionsProps {
 export interface SalvarDisponibilidadeData {
   inicio: string;
   fim: string;
-  modo: "logradouro" | "personalizado";
+  modo: 'logradouro' | 'personalizado';
   selecionados: string[];
 }
 
@@ -34,16 +34,16 @@ export function useDisponibilidadeActions({
     selecionados,
   }: SalvarDisponibilidadeData) {
     if (!inicio || !fim) {
-      alert("Preencha início e fim.");
+      alert('Preencha início e fim.');
       return;
     }
 
     try {
       let vagaIds: string[] = [];
 
-      if (modo === "logradouro") {
+      if (modo === 'logradouro') {
         vagaIds = selecionados.flatMap(
-          (log) => vagasPorLogradouro[log]?.map((v) => v.id) ?? []
+          (log) => vagasPorLogradouro[log]?.map((v) => v.id) ?? [],
         );
       } else {
         vagaIds = selecionados;
@@ -56,7 +56,7 @@ export function useDisponibilidadeActions({
         ...(Array.isArray(novas) ? novas : [novas]),
       ]);
     } catch (err) {
-      let mensagem = "Erro desconhecido";
+      let mensagem = 'Erro desconhecido';
 
       if (err instanceof Error) {
         try {
@@ -92,11 +92,10 @@ export function useDisponibilidadeActions({
     id: string,
     vagaId: string,
     inicio: string,
-    fim: string
+    fim: string,
   ) {
-
     setDisponibilidades((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, inicio, fim } : d))
+      prev.map((d) => (d.id === id ? { ...d, inicio, fim } : d)),
     );
 
     await updateDisponibilidade(id, vagaId, inicio, fim);

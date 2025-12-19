@@ -1,9 +1,9 @@
 'use client';
 
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "@/context/AuthContext";
-import { NotificationProvider } from "@/context/NotificationContext";
-import { ReactNode } from "react";
+import { useContext, useEffect, useState } from 'react';
+import { AuthContext } from '@/context/AuthContext';
+import { NotificationProvider } from '@/context/NotificationContext';
+import { ReactNode } from 'react';
 
 interface NotificationWrapperProps {
   children: ReactNode;

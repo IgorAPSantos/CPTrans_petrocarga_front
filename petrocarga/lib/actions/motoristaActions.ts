@@ -1,8 +1,8 @@
-"use server";
+'use server';
 
-import { serverApi } from "@/lib/serverApi";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { serverApi } from '@/lib/serverApi';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 // ----------------------
 // ADD MOTORISTA
@@ -10,24 +10,24 @@ import { redirect } from "next/navigation";
 export async function addMotorista(_: unknown, formData: FormData) {
   const payload = {
     usuario: {
-      nome: formData.get("nome") as string,
-      cpf: formData.get("cpf") as string,
-      telefone: formData.get("telefone") as string,
-      email: formData.get("email") as string,
-      senha: formData.get("senha") as string,
+      nome: formData.get('nome') as string,
+      cpf: formData.get('cpf') as string,
+      telefone: formData.get('telefone') as string,
+      email: formData.get('email') as string,
+      senha: formData.get('senha') as string,
     },
-    tipoCnh: (formData.get("tipoCNH") as string)?.toUpperCase(),
-    numeroCnh: formData.get("numeroCNH") as string,
-    dataValidadeCnh: formData.get("dataValidadeCNH") as string,
+    tipoCnh: (formData.get('tipoCNH') as string)?.toUpperCase(),
+    numeroCnh: formData.get('numeroCNH') as string,
+    dataValidadeCnh: formData.get('dataValidadeCNH') as string,
   };
 
   const res = await serverApi(`/petrocarga/motoristas/cadastro`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
-    let msg = "Erro ao cadastrar motorista";
+    let msg = 'Erro ao cadastrar motorista';
 
     try {
       const data = await res.json();
@@ -37,7 +37,7 @@ export async function addMotorista(_: unknown, formData: FormData) {
     return { error: true, message: msg, valores: payload };
   }
 
-  return { error: false, message: "Motorista cadastrado com sucesso!" };
+  return { error: false, message: 'Motorista cadastrado com sucesso!' };
 }
 
 // ----------------------
@@ -45,11 +45,11 @@ export async function addMotorista(_: unknown, formData: FormData) {
 // ----------------------
 export async function deleteMotorista(motoristaId: string) {
   const res = await serverApi(`/petrocarga/motoristas/${motoristaId}`, {
-    method: "DELETE",
+    method: 'DELETE',
   });
 
   if (!res.ok) {
-    let msg = "Erro ao deletar motorista";
+    let msg = 'Erro ao deletar motorista';
     try {
       const err = await res.json();
       msg = err.message ?? msg;
@@ -58,36 +58,36 @@ export async function deleteMotorista(motoristaId: string) {
     return { error: true, message: msg };
   }
 
-  revalidatePath("/motoristas/veiculos&reservas");
-  return { error: false, message: "Motorista deletado com sucesso!" };
+  revalidatePath('/motoristas/veiculos&reservas');
+  return { error: false, message: 'Motorista deletado com sucesso!' };
 }
 
 // ----------------------
 // ATUALIZAR MOTORISTA
 // ----------------------
 export async function atualizarMotorista(formData: FormData) {
-  const id = formData.get("id") as string;
+  const id = formData.get('id') as string;
 
   const payload = {
     usuario: {
-      nome: formData.get("nome") as string,
-      cpf: formData.get("cpf") as string,
-      telefone: formData.get("telefone") as string,
-      email: formData.get("email") as string,
-      senha: formData.get("senha") as string,
+      nome: formData.get('nome') as string,
+      cpf: formData.get('cpf') as string,
+      telefone: formData.get('telefone') as string,
+      email: formData.get('email') as string,
+      senha: formData.get('senha') as string,
     },
-    tipoCNH: (formData.get("tipoCNH") as string)?.toUpperCase(),
-    numeroCNH: formData.get("numeroCNH") as string,
-    dataValidadeCNH: formData.get("dataValidadeCNH") as string,
+    tipoCNH: (formData.get('tipoCNH') as string)?.toUpperCase(),
+    numeroCNH: formData.get('numeroCNH') as string,
+    dataValidadeCNH: formData.get('dataValidadeCNH') as string,
   };
 
   const res = await serverApi(`/petrocarga/motoristas/${id}`, {
-    method: "PATCH",
+    method: 'PATCH',
     body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
-    let msg = "Erro ao atualizar motorista";
+    let msg = 'Erro ao atualizar motorista';
 
     try {
       const err = await res.json();
@@ -97,9 +97,9 @@ export async function atualizarMotorista(formData: FormData) {
     return { error: true, message: msg };
   }
 
-  revalidatePath("/gestor/lista-motoristas");
-  revalidatePath("/motoristas/perfil");
-  redirect("/motorista/perfil");
+  revalidatePath('/gestor/lista-motoristas');
+  revalidatePath('/motoristas/perfil');
+  redirect('/motorista/perfil');
 }
 
 // ----------------------
@@ -109,7 +109,7 @@ export async function getMotoristaByUserId(userId: string) {
   const res = await serverApi(`/petrocarga/motoristas/${userId}`);
 
   if (!res.ok) {
-    let msg = "Erro ao buscar motorista";
+    let msg = 'Erro ao buscar motorista';
 
     try {
       const err = await res.json();
@@ -127,11 +127,11 @@ export async function getMotoristaByUserId(userId: string) {
 // GET MOTORISTAS
 // ----------------------
 export async function getMotoristas() {
-  const res = await serverApi(`/petrocarga/motoristas`); 
-  
+  const res = await serverApi(`/petrocarga/motoristas`);
+
   if (!res.ok) {
-    let msg = "Erro ao buscar motoristas";
-    
+    let msg = 'Erro ao buscar motoristas';
+
     try {
       const err = await res.json();
       msg = err.message ?? msg;

@@ -3,11 +3,11 @@ interface StepIndicatorProps {
 }
 
 const steps = [
-  { number: 1, label: "Escolher dia" },
-  { number: 2, label: "Informações" },
-  { number: 3, label: "Selecionar início" },
-  { number: 4, label: "Selecionar fim" },
-  { number: 5, label: "Confirmar reserva" },
+  { number: 1, label: 'Escolher dia' },
+  { number: 2, label: 'Informações' },
+  { number: 3, label: 'Selecionar início' },
+  { number: 4, label: 'Selecionar fim' },
+  { number: 5, label: 'Confirmar reserva' },
 ];
 
 export default function StepIndicator({ step }: StepIndicatorProps) {
@@ -47,10 +47,10 @@ export default function StepIndicator({ step }: StepIndicatorProps) {
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold border-4 relative z-20
                 ${
                   isCurrent
-                    ? "bg-blue-600 border-blue-600 text-white"
+                    ? 'bg-blue-600 border-blue-600 text-white'
                     : isCompleted
-                    ? "bg-green-600 border-green-600 text-white"
-                    : "bg-white border-gray-300 text-gray-600"
+                      ? 'bg-green-600 border-green-600 text-white'
+                      : 'bg-white border-gray-300 text-gray-600'
                 }`}
               >
                 {s.number}

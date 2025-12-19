@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useAuth } from "@/components/hooks/useAuth";
-import { getAgentes } from "@/lib/actions/agenteAction";
-import { Loader2 } from "lucide-react";
-import { Agente } from "@/lib/types/agente";
-import AgenteCard from "@/components/gestor/cards/agentes-card";
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/components/hooks/useAuth';
+import { getAgentes } from '@/lib/actions/agenteAction';
+import { Loader2 } from 'lucide-react';
+import { Agente } from '@/lib/types/agente';
+import AgenteCard from '@/components/gestor/cards/agentes-card';
 
 export default function AgentesPage() {
   const { user } = useAuth();
@@ -24,8 +24,10 @@ export default function AgentesPage() {
         const result = await getAgentes();
         setAgentes(result.agentes);
       } catch (err) {
-        console.error("Erro ao carregar os agentes:", err);
-        setError("Erro ao buscar os agentes cadastrados. Tente novamente mais tarde.");
+        console.error('Erro ao carregar os agentes:', err);
+        setError(
+          'Erro ao buscar os agentes cadastrados. Tente novamente mais tarde.',
+        );
       } finally {
         setLoading(false);
       }
@@ -38,7 +40,9 @@ export default function AgentesPage() {
     return (
       <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
         <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
-        <span className="text-gray-600">Carregando informação dos agentes...</span>
+        <span className="text-gray-600">
+          Carregando informação dos agentes...
+        </span>
       </div>
     );
   }

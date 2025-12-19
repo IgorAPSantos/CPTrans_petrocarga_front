@@ -1,12 +1,12 @@
 // Tipos de dias da semana
 export type DiaSemana =
-  | "DOMINGO"
-  | "SEGUNDA"
-  | "TERCA"
-  | "QUARTA"
-  | "QUINTA"
-  | "SEXTA"
-  | "SABADO";
+  | 'DOMINGO'
+  | 'SEGUNDA'
+  | 'TERCA'
+  | 'QUARTA'
+  | 'QUINTA'
+  | 'SEXTA'
+  | 'SABADO';
 
 // Tipo para operações da vaga (horários por dia)
 export type OperacoesVaga = {
@@ -28,14 +28,14 @@ export type Endereco = {
 // Tipo principal da vaga
 export type Vaga = {
   id: string;
-  area: "VERMELHA" | "AMARELA" | "AZUL" | "BRANCA" | string;
+  area: 'VERMELHA' | 'AMARELA' | 'AZUL' | 'BRANCA' | string;
   numeroEndereco: string;
   referenciaEndereco: string;
-  tipoVaga: "PARALELA" | "PERPENDICULAR" | string;
+  tipoVaga: 'PARALELA' | 'PERPENDICULAR' | string;
   referenciaGeoInicio: string;
   referenciaGeoFim: string;
   comprimento: number;
-  status: "DISPONIVEL" | "OCUPADO" | "MANUTENCAO" | "INDISPONIVEL" | string;
+  status: 'DISPONIVEL' | 'OCUPADO' | 'MANUTENCAO' | 'INDISPONIVEL' | string;
   operacoesVaga: OperacoesVaga[];
   endereco: Endereco;
 };

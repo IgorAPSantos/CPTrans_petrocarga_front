@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { getVeiculo } from "@/lib/actions/veiculoActions";
-import { getVagaById } from "@/lib/actions/vagaActions";
-import { Veiculo } from "@/lib/types/veiculo";
-import { Vaga } from "@/lib/types/vaga";
+import { useState, useEffect } from 'react';
+import { getVeiculo } from '@/lib/actions/veiculoActions';
+import { getVagaById } from '@/lib/actions/vagaActions';
+import { Veiculo } from '@/lib/types/veiculo';
+import { Vaga } from '@/lib/types/vaga';
 
 export function useReservaData(veiculoId: string, vagaId: string) {
   const [veiculo, setVeiculo] = useState<Veiculo | null>(null);
@@ -27,7 +27,7 @@ export function useReservaData(veiculoId: string, vagaId: string) {
         }
       } catch (err) {
         console.error(err);
-        if (mounted) setError("Falha ao carregar detalhes da reserva.");
+        if (mounted) setError('Falha ao carregar detalhes da reserva.');
       } finally {
         if (mounted) setLoading(false);
       }

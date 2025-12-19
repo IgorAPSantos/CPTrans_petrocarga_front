@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, CheckCircle } from "lucide-react";
-import Link from "next/link";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Calendar, CheckCircle } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   return (
@@ -39,19 +39,19 @@ export default function Home() {
             {[
               {
                 icon: Calendar,
-                title: "Agendamento Online",
+                title: 'Agendamento Online',
                 description:
-                  "Reserve seu horário de forma rápida e descomplicada",
+                  'Reserve seu horário de forma rápida e descomplicada',
               },
               {
                 icon: CheckCircle,
-                title: "Reserva Garantida",
-                description: "Sua vaga reservada com confirmação imediata",
+                title: 'Reserva Garantida',
+                description: 'Sua vaga reservada com confirmação imediata',
               },
               {
-                icon: "📱",
-                title: "Acompanhamento",
-                description: "Acompanhe sua reserva em tempo real",
+                icon: '📱',
+                title: 'Acompanhamento',
+                description: 'Acompanhe sua reserva em tempo real',
               },
             ].map((item, index) => (
               <Card
@@ -60,7 +60,7 @@ export default function Home() {
               >
                 <CardHeader className="p-4 md:p-6">
                   <CardTitle className="flex justify-center">
-                    {typeof item.icon === "string" ? (
+                    {typeof item.icon === 'string' ? (
                       <span className="text-3xl md:text-4xl">{item.icon}</span>
                     ) : (
                       <item.icon className="h-8 w-8 md:h-12 md:w-12 text-blue-600" />
@@ -91,26 +91,26 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {[
                 {
-                  step: "1",
-                  title: "Escolha seu veículo",
-                  description: "Selecione o seu veículo cadastrado no sistema",
+                  step: '1',
+                  title: 'Escolha seu veículo',
+                  description: 'Selecione o seu veículo cadastrado no sistema',
                 },
                 {
-                  step: "2",
-                  title: "Selecione o Horário",
+                  step: '2',
+                  title: 'Selecione o Horário',
                   description:
-                    "Escolha data e horário disponíveis para sua operação",
+                    'Escolha data e horário disponíveis para sua operação',
                 },
                 {
-                  step: "3",
-                  title: "Escolha a Área",
+                  step: '3',
+                  title: 'Escolha a Área',
                   description:
-                    "Selecione a zona de carga e descarga mais conveniente",
+                    'Selecione a zona de carga e descarga mais conveniente',
                 },
                 {
-                  step: "4",
-                  title: "Confirme a Reserva",
-                  description: "Receba a confirmação",
+                  step: '4',
+                  title: 'Confirme a Reserva',
+                  description: 'Receba a confirmação',
                 },
               ].map((item, index) => (
                 <div key={index} className="text-center p-3 md:p-4">

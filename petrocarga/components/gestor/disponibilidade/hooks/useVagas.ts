@@ -1,8 +1,6 @@
-
-import { useEffect, useState, useMemo } from "react";
-import { getVagas } from "@/lib/actions/vagaActions"; 
-import { Vaga } from "@/lib/types/vaga";
-
+import { useEffect, useState, useMemo } from 'react';
+import { getVagas } from '@/lib/actions/vagaActions';
+import { Vaga } from '@/lib/types/vaga';
 
 export function useVagas() {
   const [vagas, setVagas] = useState<Vaga[]>([]);
@@ -17,8 +15,10 @@ export function useVagas() {
       const data = await getVagas();
       setVagas(data ?? []);
     } catch (error) {
-      console.error("Erro ao carregar vagas:", error);
-      setErrorVagas(error instanceof Error ? error : new Error("Erro ao carregar vagas."));
+      console.error('Erro ao carregar vagas:', error);
+      setErrorVagas(
+        error instanceof Error ? error : new Error('Erro ao carregar vagas.'),
+      );
     } finally {
       setLoadingVagas(false);
     }
@@ -30,18 +30,21 @@ export function useVagas() {
 
   /** Agrupar vagas por logradouro para uso no modal de criação (salvar) */
   const vagasPorLogradouro = useMemo(() => {
-    return vagas.reduce((acc, vaga) => {
-      const log = vaga?.endereco?.logradouro ?? "Sem Logradouro";
-      (acc[log] ??= []).push(vaga);
-      return acc;
-    }, {} as Record<string, Vaga[]>);
+    return vagas.reduce(
+      (acc, vaga) => {
+        const log = vaga?.endereco?.logradouro ?? 'Sem Logradouro';
+        (acc[log] ??= []).push(vaga);
+        return acc;
+      },
+      {} as Record<string, Vaga[]>,
+    );
   }, [vagas]);
 
-  return { 
-    vagas, 
-    vagasPorLogradouro, 
-    loadingVagas, 
-    errorVagas, 
-    refetchVagas: loadVagas 
+  return {
+    vagas,
+    vagasPorLogradouro,
+    loadingVagas,
+    errorVagas,
+    refetchVagas: loadVagas,
   };
 }

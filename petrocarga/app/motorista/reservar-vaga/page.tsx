@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { MapReserva } from "@/components/map/MapReserva";
-import ReservaComponent from "@/components/reserva/ReservaComponent";
-import { Vaga } from "@/lib/types/vaga";
+import { useState } from 'react';
+import { MapReserva } from '@/components/map/MapReserva';
+import ReservaComponent from '@/components/reserva/ReservaComponent';
+import { Vaga } from '@/lib/types/vaga';
 
 export default function ReservaPage() {
   const [step, setStep] = useState(1); // Step 1 = mapa, Step 2 = reserva

@@ -1,7 +1,3 @@
 export default function Relatorio() {
-  return (
-    <h1>
-      Relatorios
-    </h1>
-  )
+  return <h1>Relatorios</h1>;
 }

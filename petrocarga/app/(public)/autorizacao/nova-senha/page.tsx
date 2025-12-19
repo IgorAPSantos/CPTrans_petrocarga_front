@@ -1,10 +1,22 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import { Mail, Lock, ArrowLeft, CheckCircle2, AlertCircle, Eye, EyeOff, KeyRound } from 'lucide-react';
-import { validarCodigoRecuperacao, redefinirSenhaComCodigo } from '@/lib/actions/recuperacaoAction';
+import {
+  Mail,
+  Lock,
+  ArrowLeft,
+  CheckCircle2,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  KeyRound,
+} from 'lucide-react';
+import {
+  validarCodigoRecuperacao,
+  redefinirSenhaComCodigo,
+} from '@/lib/actions/recuperacaoAction';
 
-type StatusType = "success" | "error" | null;
+type StatusType = 'success' | 'error' | null;
 
 // Tipo para erros personalizados
 type AppError = {
@@ -17,18 +29,18 @@ function extrairMensagemErro(erro: unknown): string {
   if (erro instanceof Error) {
     return erro.message;
   }
-  
+
   if (typeof erro === 'object' && erro !== null && 'message' in erro) {
     const erroObj = erro as { message?: unknown };
     if (typeof erroObj.message === 'string') {
       return erroObj.message;
     }
   }
-  
+
   if (typeof erro === 'string') {
     return erro;
   }
-  
+
   return 'Ocorreu um erro inesperado. Tente novamente.';
 }
 
@@ -43,7 +55,7 @@ export default function ResetarSenhaComCodigo() {
   const [codigo, setCodigo] = useState('');
   const [novaSenha, setNovaSenha] = useState('');
   const [confirmarSenha, setConfirmarSenha] = useState('');
-  
+
   // Estados de controle
   const [estaCarregando, setEstaCarregando] = useState(false);
   const [status, setStatus] = useState<StatusType>(null);
@@ -102,12 +114,11 @@ export default function ResetarSenhaComCodigo() {
 
     try {
       await validarCodigoRecuperacao(email, codigo);
-      
+
       setCodigoValidado(true);
       setMostrarModalNovaSenha(true);
       setStatus('success');
       setMensagem('Código validado com sucesso!');
-      
     } catch (erro: unknown) {
       setStatus('error');
       setMensagem(extrairMensagemErro(erro));
@@ -131,10 +142,9 @@ export default function ResetarSenhaComCodigo() {
 
     try {
       await redefinirSenhaComCodigo(email, codigo, novaSenha);
-      
+
       setMostrarModalNovaSenha(false);
       setMostrarModalSucesso(true);
-      
     } catch (erro: unknown) {
       setStatus('error');
       setMensagem(extrairMensagemErro(erro));
@@ -204,7 +214,10 @@ export default function ResetarSenhaComCodigo() {
               <div className="space-y-4">
                 {/* Campo Nova Senha */}
                 <div>
-                  <label htmlFor="novaSenha" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="novaSenha"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Nova Senha
                   </label>
                   <div className="relative">
@@ -224,7 +237,11 @@ export default function ResetarSenhaComCodigo() {
                       onClick={() => setMostrarSenha(!mostrarSenha)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     >
-                      {mostrarSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {mostrarSenha ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                   <p className="mt-1 text-xs text-gray-500">
@@ -234,7 +251,10 @@ export default function ResetarSenhaComCodigo() {
 
                 {/* Campo Confirmar Senha */}
                 <div>
-                  <label htmlFor="confirmarSenha" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="confirmarSenha"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Confirmar Nova Senha
                   </label>
                   <div className="relative">
@@ -250,10 +270,16 @@ export default function ResetarSenhaComCodigo() {
                     />
                     <button
                       type="button"
-                      onClick={() => setMostrarConfirmarSenha(!mostrarConfirmarSenha)}
+                      onClick={() =>
+                        setMostrarConfirmarSenha(!mostrarConfirmarSenha)
+                      }
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                     >
-                      {mostrarConfirmarSenha ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                      {mostrarConfirmarSenha ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
                     </button>
                   </div>
                 </div>
@@ -317,7 +343,8 @@ export default function ResetarSenhaComCodigo() {
                   Senha alterada com sucesso!
                 </h2>
                 <p className="text-gray-600 mb-6">
-                  Sua senha foi redefinida com sucesso. Agora você pode fazer login com sua nova senha.
+                  Sua senha foi redefinida com sucesso. Agora você pode fazer
+                  login com sua nova senha.
                 </p>
                 <button
                   onClick={irParaLogin}
@@ -326,7 +353,7 @@ export default function ResetarSenhaComCodigo() {
                   Ir para o Login
                 </button>
               </div>
-              
+
               {/* Indicador de progresso completo */}
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <div className="flex items-center justify-between text-xs text-gray-500">
@@ -370,11 +397,13 @@ export default function ResetarSenhaComCodigo() {
 
           {/* Mensagem de Status */}
           {status && !codigoValidado && (
-            <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 border ${
-              status === 'success' 
-                ? 'bg-green-50 border-green-200 text-green-800' 
-                : 'bg-red-50 border-red-200 text-red-800'
-            }`}>
+            <div
+              className={`mb-6 p-4 rounded-lg flex items-start gap-3 border ${
+                status === 'success'
+                  ? 'bg-green-50 border-green-200 text-green-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
               {status === 'success' ? (
                 <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
               ) : (
@@ -388,7 +417,10 @@ export default function ResetarSenhaComCodigo() {
           <div className="space-y-6">
             {/* Campo Email */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Email
               </label>
               <input
@@ -405,7 +437,10 @@ export default function ResetarSenhaComCodigo() {
 
             {/* Campo Código */}
             <div>
-              <label htmlFor="codigo" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="codigo"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Código de Verificação
               </label>
               <input
@@ -465,7 +500,8 @@ export default function ResetarSenhaComCodigo() {
             Não recebeu o código? Verifique sua caixa de spam.
           </p>
           <p className="text-center text-xs text-gray-500">
-            O código é válido por 30 minutos. Após este período, solicite um novo código.
+            O código é válido por 30 minutos. Após este período, solicite um
+            novo código.
           </p>
         </div>
       </div>

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import VagaItem from "@/components/gestor/cards/vagas-item";
-import { Vaga } from "@/lib/types/vaga";
-import { ChevronUp, ChevronDown } from "lucide-react";
-import * as vagaActions from "@/lib/actions/vagaActions";
+import { useEffect, useState } from 'react';
+import VagaItem from '@/components/gestor/cards/vagas-item';
+import { Vaga } from '@/lib/types/vaga';
+import { ChevronUp, ChevronDown } from 'lucide-react';
+import * as vagaActions from '@/lib/actions/vagaActions';
 
 // Hook simples de debounce
 function useDebounce(value: string, delay = 300) {
@@ -21,7 +21,7 @@ function useDebounce(value: string, delay = 300) {
 export function ListaVagas() {
   const [vagas, setVagas] = useState<Vaga[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filtro, setFiltro] = useState("");
+  const [filtro, setFiltro] = useState('');
   const [disponiveisPrimeiro, setDisponiveisPrimeiro] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,8 +35,8 @@ export function ListaVagas() {
         const data: Vaga[] = await vagaActions.getVagas();
         setVagas(data);
       } catch (err) {
-        console.error("Erro ao carregar vagas:", err);
-        setError(err instanceof Error ? err.message : "Erro desconhecido");
+        console.error('Erro ao carregar vagas:', err);
+        setError(err instanceof Error ? err.message : 'Erro desconhecido');
         setVagas([]);
       } finally {
         setLoading(false);
@@ -60,17 +60,17 @@ export function ListaVagas() {
   // Ordena baseado na disponibilidade
   const vagasOrdenadas = [...vagasFiltradas].sort((a, b) => {
     if (disponiveisPrimeiro) {
-      return a.status === "DISPONIVEL" && b.status !== "DISPONIVEL"
+      return a.status === 'DISPONIVEL' && b.status !== 'DISPONIVEL'
         ? -1
-        : b.status === "DISPONIVEL" && a.status !== "DISPONIVEL"
-        ? 1
-        : 0;
+        : b.status === 'DISPONIVEL' && a.status !== 'DISPONIVEL'
+          ? 1
+          : 0;
     } else {
-      return a.status !== "DISPONIVEL" && b.status === "DISPONIVEL"
+      return a.status !== 'DISPONIVEL' && b.status === 'DISPONIVEL'
         ? -1
-        : b.status !== "DISPONIVEL" && a.status === "DISPONIVEL"
-        ? 1
-        : 0;
+        : b.status !== 'DISPONIVEL' && a.status === 'DISPONIVEL'
+          ? 1
+          : 0;
     }
   });
 
@@ -90,8 +90,8 @@ export function ListaVagas() {
           className="p-2 rounded border border-gray-300 shadow-sm hover:bg-gray-100"
           title={
             disponiveisPrimeiro
-              ? "Disponíveis por último"
-              : "Disponíveis primeiro"
+              ? 'Disponíveis por último'
+              : 'Disponíveis primeiro'
           }
         >
           {disponiveisPrimeiro ? (

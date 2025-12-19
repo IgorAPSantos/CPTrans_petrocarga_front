@@ -1,17 +1,17 @@
 // components/gestor/modals/NotificacaoModal.tsx
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Bell, X, Send } from "lucide-react";
-import { Notificacao } from "@/lib/actions/notificacaoAction";
-import { useAuth } from "@/components/hooks/useAuth";
+import { useState } from 'react';
+import { Bell, X, Send } from 'lucide-react';
+import { Notificacao } from '@/lib/actions/notificacaoAction';
+import { useAuth } from '@/components/hooks/useAuth';
 
 interface NotificacaoModalProps {
   isOpen: boolean;
   onClose: () => void;
   usuarioId: string;
   usuarioNome: string;
-  tipoUsuario: "MOTORISTA" | "AGENTE" | "GESTOR";
+  tipoUsuario: 'MOTORISTA' | 'AGENTE' | 'GESTOR';
 }
 
 export function NotificacaoModal({
@@ -19,12 +19,14 @@ export function NotificacaoModal({
   onClose,
   usuarioId,
   usuarioNome,
-  tipoUsuario
+  tipoUsuario,
 }: NotificacaoModalProps) {
   const { user } = useAuth();
-  const [titulo, setTitulo] = useState("");
-  const [mensagem, setMensagem] = useState("");
-  const [tipo, setTipo] = useState<"RESERVA" | "VAGA" | "VEICULO" | "MOTORISTA" | "SISTEMA">("SISTEMA");
+  const [titulo, setTitulo] = useState('');
+  const [mensagem, setMensagem] = useState('');
+  const [tipo, setTipo] = useState<
+    'RESERVA' | 'VAGA' | 'VEICULO' | 'MOTORISTA' | 'SISTEMA'
+  >('SISTEMA');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,39 +39,42 @@ export function NotificacaoModal({
 
     try {
       const formData = new FormData();
-      formData.append("usuarioId", usuarioId);
-      formData.append("titulo", titulo);
-      formData.append("mensagem", mensagem);
-      formData.append("tipo", tipo);
-      formData.append("metada", JSON.stringify({
-        remetente: {
-          id: user?.id,
-          nome: user?.nome,
-          permissao: user?.permissao
-        },
-        destinatario: {
-          id: usuarioId,
-          nome: usuarioNome,
-          tipo: tipoUsuario
-        },
-        enviadoEm: new Date().toISOString()
-      }));
+      formData.append('usuarioId', usuarioId);
+      formData.append('titulo', titulo);
+      formData.append('mensagem', mensagem);
+      formData.append('tipo', tipo);
+      formData.append(
+        'metada',
+        JSON.stringify({
+          remetente: {
+            id: user?.id,
+            nome: user?.nome,
+            permissao: user?.permissao,
+          },
+          destinatario: {
+            id: usuarioId,
+            nome: usuarioNome,
+            tipo: tipoUsuario,
+          },
+          enviadoEm: new Date().toISOString(),
+        }),
+      );
 
       const result = await Notificacao(formData);
 
       if (result.error) {
         setError(result.message);
       } else {
-        setSuccess("Notificação enviada com sucesso!");
-        setTitulo("");
-        setMensagem("");
+        setSuccess('Notificação enviada com sucesso!');
+        setTitulo('');
+        setMensagem('');
         setTimeout(() => {
           onClose();
           setSuccess(null);
         }, 2000);
       }
     } catch (err) {
-      setError("Erro ao enviar notificação. Tente novamente.");
+      setError('Erro ao enviar notificação. Tente novamente.');
       console.error(err);
     } finally {
       setLoading(false);

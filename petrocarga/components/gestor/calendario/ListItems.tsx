@@ -1,44 +1,44 @@
-import { useMemo } from "react";
-import { Button } from "@/components/ui/button";
-import { Reserva } from "@/lib/types/reserva";
-import { Vaga } from "@/lib/types/vaga";
-import { Veiculo } from "@/lib/types/veiculo";
-import { formatTime } from "./utils/utils";
+import { useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Reserva } from '@/lib/types/reserva';
+import { Vaga } from '@/lib/types/vaga';
+import { Veiculo } from '@/lib/types/veiculo';
+import { formatTime } from './utils/utils';
 
 const STATUS_CONFIG = {
   ATIVA: {
-    label: "Ativa",
-    color: "text-green-700 bg-green-100",
-    border: "border-green-500",
-    dot: "bg-green-500",
+    label: 'Ativa',
+    color: 'text-green-700 bg-green-100',
+    border: 'border-green-500',
+    dot: 'bg-green-500',
     isActive: true,
   },
   RESERVADA: {
-    label: "Reservada",
-    color: "text-amber-700 bg-amber-100",
-    border: "border-amber-500",
-    dot: "bg-amber-500",
+    label: 'Reservada',
+    color: 'text-amber-700 bg-amber-100',
+    border: 'border-amber-500',
+    dot: 'bg-amber-500',
     isActive: true,
   },
   CONCLUIDA: {
-    label: "Concluída",
-    color: "text-slate-600 bg-slate-100",
-    border: "border-slate-400",
-    dot: "bg-slate-400",
+    label: 'Concluída',
+    color: 'text-slate-600 bg-slate-100',
+    border: 'border-slate-400',
+    dot: 'bg-slate-400',
     isActive: false,
   },
   CANCELADA: {
-    label: "Cancelada",
-    color: "text-red-700 bg-red-100",
-    border: "border-red-400",
-    dot: "bg-red-400",
+    label: 'Cancelada',
+    color: 'text-red-700 bg-red-100',
+    border: 'border-red-400',
+    dot: 'bg-red-400',
     isActive: false,
   },
   REMOVIDA: {
-    label: "Removida",
-    color: "text-gray-500 bg-gray-100 decoration-line-through",
-    border: "border-gray-300",
-    dot: "bg-gray-300",
+    label: 'Removida',
+    color: 'text-gray-500 bg-gray-100 decoration-line-through',
+    border: 'border-gray-300',
+    dot: 'bg-gray-300',
     isActive: false,
   },
 } as const;
@@ -59,7 +59,7 @@ export const LogradouroItem = ({
   const counts = useMemo(() => {
     return reservas.reduce(
       (acc, r) => {
-        const status = (r.status as StatusType) || "CONCLUIDA";
+        const status = (r.status as StatusType) || 'CONCLUIDA';
         if (STATUS_CONFIG[status]?.isActive) {
           acc.emAndamento++;
         } else {
@@ -67,7 +67,7 @@ export const LogradouroItem = ({
         }
         return acc;
       },
-      { emAndamento: 0, finalizadas: 0 }
+      { emAndamento: 0, finalizadas: 0 },
     );
   }, [reservas]);
 
@@ -118,7 +118,7 @@ export const VagaItem = ({
     return STATUS_CONFIG[s]?.isActive;
   });
 
-  const dotClass = temAtividade ? "bg-green-500" : "bg-red-500";
+  const dotClass = temAtividade ? 'bg-green-500' : 'bg-red-500';
 
   return (
     <div className="flex items-center justify-between p-3 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors">
@@ -128,7 +128,7 @@ export const VagaItem = ({
         <div>
           <div className="font-medium text-sm text-gray-800">
             {vagaInfo?.endereco?.logradouro ?? vagaId}
-            {vagaInfo?.numeroEndereco ? `, ${vagaInfo.numeroEndereco}` : ""}
+            {vagaInfo?.numeroEndereco ? `, ${vagaInfo.numeroEndereco}` : ''}
           </div>
           <div className="text-xs text-muted-foreground mt-0.5">
             {reservas.length} registro(s) no histórico
@@ -150,7 +150,7 @@ export const ReservaItem = ({
   veiculo?: Veiculo;
   onClick: () => void;
 }) => {
-  const status = (reserva.status as StatusType) || "CONCLUIDA";
+  const status = (reserva.status as StatusType) || 'CONCLUIDA';
   const config = STATUS_CONFIG[status] || STATUS_CONFIG.CONCLUIDA;
 
   return (

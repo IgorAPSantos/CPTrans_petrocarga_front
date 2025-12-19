@@ -1,16 +1,19 @@
 // app/gestor/enviar-notificacoes/page.tsx
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useAuth } from "@/components/hooks/useAuth";
-import { getMotoristas } from "@/lib/actions/motoristaActions";
-import { getAgentes } from "@/lib/actions/agenteAction";
-import { getGestores } from "@/lib/actions/gestorActions"; 
-import { Notificacao, NotificacaoPorPermissao } from "@/lib/actions/notificacaoAction";
-import { Motorista } from "@/lib/types/motorista";
-import { Agente } from "@/lib/types/agente";
-import { Gestor } from "@/lib/types/gestor";
-import { Loader2, Send, Users, Bell, Filter, Check, X } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { useAuth } from '@/components/hooks/useAuth';
+import { getMotoristas } from '@/lib/actions/motoristaActions';
+import { getAgentes } from '@/lib/actions/agenteAction';
+import { getGestores } from '@/lib/actions/gestorActions';
+import {
+  Notificacao,
+  NotificacaoPorPermissao,
+} from '@/lib/actions/notificacaoAction';
+import { Motorista } from '@/lib/types/motorista';
+import { Agente } from '@/lib/types/agente';
+import { Gestor } from '@/lib/types/gestor';
+import { Loader2, Send, Users, Bell, Filter, Check, X } from 'lucide-react';
 
 export default function EnviarNotificacoesPage() {
   const { user } = useAuth();
@@ -18,118 +21,128 @@ export default function EnviarNotificacoesPage() {
   const [agentes, setAgentes] = useState<Agente[]>([]);
   const [gestores, setGestores] = useState<Gestor[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Filtros simplificados
-  const [filtroTipo, setFiltroTipo] = useState<"TODOS" | "MOTORISTAS" | "AGENTES" | "GESTORES" | "GRUPO">("TODOS");
-  const [grupoSelecionado, setGrupoSelecionado] = useState<"MOTORISTA" | "AGENTE" | "GESTOR">("MOTORISTA");
-  
+  const [filtroTipo, setFiltroTipo] = useState<
+    'TODOS' | 'MOTORISTAS' | 'AGENTES' | 'GESTORES' | 'GRUPO'
+  >('TODOS');
+  const [grupoSelecionado, setGrupoSelecionado] = useState<
+    'MOTORISTA' | 'AGENTE' | 'GESTOR'
+  >('MOTORISTA');
+
   // Formulário
-  const [titulo, setTitulo] = useState("");
-  const [mensagem, setMensagem] = useState("");
-  const [tipo, setTipo] = useState<"RESERVA" | "VAGA" | "VEICULO" | "MOTORISTA" | "SISTEMA">("SISTEMA");
-  
+  const [titulo, setTitulo] = useState('');
+  const [mensagem, setMensagem] = useState('');
+  const [tipo, setTipo] = useState<
+    'RESERVA' | 'VAGA' | 'VEICULO' | 'MOTORISTA' | 'SISTEMA'
+  >('SISTEMA');
+
   // Seleção de usuários
-  const [usuariosSelecionados, setUsuariosSelecionados] = useState<string[]>([]);
+  const [usuariosSelecionados, setUsuariosSelecionados] = useState<string[]>(
+    [],
+  );
   const [enviando, setEnviando] = useState(false);
-  const [resultado, setResultado] = useState<{ enviadas: number; erros: number } | null>(null);
+  const [resultado, setResultado] = useState<{
+    enviadas: number;
+    erros: number;
+  } | null>(null);
 
   useEffect(() => {
-  if (!user?.id) return;
+    if (!user?.id) return;
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      // Busca motoristas e agentes sempre
-      const [motoristasRes, agentesRes] = await Promise.all([
-        getMotoristas(),
-        getAgentes()
-      ]);
-      
-      // Inicializa gestores como vazio
-      let gestoresArray: Gestor[] = [];
-      
-      // Somente admin pode buscar gestores
-      if (user.permissao === "ADMIN") {
-        const gestoresRes = await getGestores();
-        if (!gestoresRes.error && gestoresRes.gestores) {
-          gestoresArray = gestoresRes.gestores;
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Busca motoristas e agentes sempre
+        const [motoristasRes, agentesRes] = await Promise.all([
+          getMotoristas(),
+          getAgentes(),
+        ]);
+
+        // Inicializa gestores como vazio
+        let gestoresArray: Gestor[] = [];
+
+        // Somente admin pode buscar gestores
+        if (user.permissao === 'ADMIN') {
+          const gestoresRes = await getGestores();
+          if (!gestoresRes.error && gestoresRes.gestores) {
+            gestoresArray = gestoresRes.gestores;
+          }
         }
-      }
-      
-      if (!motoristasRes.error) setMotoristas(motoristasRes.motoristas || []);
-      if (!agentesRes.error) setAgentes(agentesRes.agentes || []);
-      setGestores(gestoresArray);
-      
-    } catch (err) {
-      console.error("Erro ao carregar dados:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  fetchData();
-}, [user]);
+        if (!motoristasRes.error) setMotoristas(motoristasRes.motoristas || []);
+        if (!agentesRes.error) setAgentes(agentesRes.agentes || []);
+        setGestores(gestoresArray);
+      } catch (err) {
+        console.error('Erro ao carregar dados:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
 
   // Verifica se usuário é admin (pode enviar para gestores)
-  const isAdmin = user?.permissao === "ADMIN";
+  const isAdmin = user?.permissao === 'ADMIN';
 
   const usuariosFiltrados = () => {
     switch (filtroTipo) {
-      case "MOTORISTAS":
-        return motoristas.map(m => ({
+      case 'MOTORISTAS':
+        return motoristas.map((m) => ({
           id: m.usuario.id,
           nome: m.usuario.nome,
           email: m.usuario.email,
-          tipo: "MOTORISTA" as const
+          tipo: 'MOTORISTA' as const,
         }));
-      case "AGENTES":
-        return agentes.map(a => ({
+      case 'AGENTES':
+        return agentes.map((a) => ({
           id: a.usuario.id,
           nome: a.usuario.nome,
           email: a.usuario.email,
-          tipo: "AGENTE" as const
+          tipo: 'AGENTE' as const,
         }));
-      case "GESTORES":
-        return gestores.map(g => ({
+      case 'GESTORES':
+        return gestores.map((g) => ({
           id: g.id,
           nome: g.nome,
           email: g.email,
-          tipo: "GESTOR" as const
+          tipo: 'GESTOR' as const,
         }));
       default:
         return [
-          ...motoristas.map(m => ({
+          ...motoristas.map((m) => ({
             id: m.usuario.id,
             nome: m.usuario.nome,
             email: m.usuario.email,
-            tipo: "MOTORISTA" as const
+            tipo: 'MOTORISTA' as const,
           })),
-          ...agentes.map(a => ({
+          ...agentes.map((a) => ({
             id: a.usuario.id,
             nome: a.usuario.nome,
             email: a.usuario.email,
-            tipo: "AGENTE" as const
+            tipo: 'AGENTE' as const,
           })),
-          ...gestores.map(g => ({
+          ...gestores.map((g) => ({
             id: g.id,
             nome: g.nome,
             email: g.email,
-            tipo: "GESTOR" as const
-          }))
+            tipo: 'GESTOR' as const,
+          })),
         ];
     }
   };
 
   const toggleUsuario = (id: string) => {
-    setUsuariosSelecionados(prev =>
+    setUsuariosSelecionados((prev) =>
       prev.includes(id)
-        ? prev.filter(userId => userId !== id)
-        : [...prev, id]
+        ? prev.filter((userId) => userId !== id)
+        : [...prev, id],
     );
   };
 
   const selecionarTodos = () => {
-    const ids = usuariosFiltrados().map(u => u.id);
+    const ids = usuariosFiltrados().map((u) => u.id);
     setUsuariosSelecionados(ids);
   };
 
@@ -138,14 +151,18 @@ export default function EnviarNotificacoesPage() {
   };
 
   const handleEnvioIndividual = async () => {
-    if (!titulo.trim() || !mensagem.trim() || usuariosSelecionados.length === 0) {
-      alert("Preencha título, mensagem e selecione pelo menos um destinatário");
+    if (
+      !titulo.trim() ||
+      !mensagem.trim() ||
+      usuariosSelecionados.length === 0
+    ) {
+      alert('Preencha título, mensagem e selecione pelo menos um destinatário');
       return;
     }
 
     setEnviando(true);
     setResultado(null);
-    
+
     let enviadas = 0;
     let erros = 0;
 
@@ -153,19 +170,22 @@ export default function EnviarNotificacoesPage() {
       // Envia notificação para cada usuário selecionado
       for (const usuarioId of usuariosSelecionados) {
         const formData = new FormData();
-        formData.append("usuarioId", usuarioId);
-        formData.append("titulo", titulo);
-        formData.append("mensagem", mensagem);
-        formData.append("tipo", tipo);
-        formData.append("metada", JSON.stringify({
-          remetente: {
-            id: user?.id,
-            nome: user?.nome,
-            permissao: user?.permissao
-          },
-          enviadoEm: new Date().toISOString(),
-          tipoEnvio: "INDIVIDUAL"
-        }));
+        formData.append('usuarioId', usuarioId);
+        formData.append('titulo', titulo);
+        formData.append('mensagem', mensagem);
+        formData.append('tipo', tipo);
+        formData.append(
+          'metada',
+          JSON.stringify({
+            remetente: {
+              id: user?.id,
+              nome: user?.nome,
+              permissao: user?.permissao,
+            },
+            enviadoEm: new Date().toISOString(),
+            tipoEnvio: 'INDIVIDUAL',
+          }),
+        );
 
         const result = await Notificacao(formData);
 
@@ -178,16 +198,16 @@ export default function EnviarNotificacoesPage() {
       }
 
       setResultado({ enviadas, erros });
-      
+
       // Limpa o formulário se tudo foi enviado com sucesso
       if (erros === 0) {
-        setTitulo("");
-        setMensagem("");
+        setTitulo('');
+        setMensagem('');
         setUsuariosSelecionados([]);
       }
     } catch (err) {
       console.error(err);
-      alert("Erro ao enviar notificações");
+      alert('Erro ao enviar notificações');
     } finally {
       setEnviando(false);
     }
@@ -195,7 +215,7 @@ export default function EnviarNotificacoesPage() {
 
   const handleEnvioGrupo = async () => {
     if (!titulo.trim() || !mensagem.trim()) {
-      alert("Preencha título e mensagem");
+      alert('Preencha título e mensagem');
       return;
     }
 
@@ -204,19 +224,22 @@ export default function EnviarNotificacoesPage() {
 
     try {
       const formData = new FormData();
-      formData.append("permissao", grupoSelecionado);
-      formData.append("titulo", titulo);
-      formData.append("mensagem", mensagem);
-      formData.append("tipo", tipo);
-      formData.append("metada", JSON.stringify({
-        remetente: {
-          id: user?.id,
-          nome: user?.nome,
-          permissao: user?.permissao
-        },
-        enviadoEm: new Date().toISOString(),
-        tipoEnvio: "GRUPO"
-      }));
+      formData.append('permissao', grupoSelecionado);
+      formData.append('titulo', titulo);
+      formData.append('mensagem', mensagem);
+      formData.append('tipo', tipo);
+      formData.append(
+        'metada',
+        JSON.stringify({
+          remetente: {
+            id: user?.id,
+            nome: user?.nome,
+            permissao: user?.permissao,
+          },
+          enviadoEm: new Date().toISOString(),
+          tipoEnvio: 'GRUPO',
+        }),
+      );
 
       const result = await NotificacaoPorPermissao(formData);
 
@@ -225,13 +248,13 @@ export default function EnviarNotificacoesPage() {
         alert(`Erro: ${result.message}`);
       } else {
         setResultado({ enviadas: 1, erros: 0 }); // 1 grupo enviado
-        setTitulo("");
-        setMensagem("");
+        setTitulo('');
+        setMensagem('');
       }
     } catch (err) {
       console.error(err);
       setResultado({ enviadas: 0, erros: 1 });
-      alert("Erro ao enviar notificação para o grupo");
+      alert('Erro ao enviar notificação para o grupo');
     } finally {
       setEnviando(false);
     }
@@ -261,8 +284,10 @@ export default function EnviarNotificacoesPage() {
         {/* Formulário */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Conteúdo da Notificação</h2>
-            
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              Conteúdo da Notificação
+            </h2>
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -324,30 +349,34 @@ export default function EnviarNotificacoesPage() {
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => setFiltroTipo("GRUPO")}
+                    onClick={() => setFiltroTipo('GRUPO')}
                     className={`p-3 border rounded-lg transition-colors flex flex-col items-center justify-center gap-2 ${
-                      filtroTipo === "GRUPO"
-                        ? "bg-blue-50 border-blue-300 text-blue-700"
-                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                      filtroTipo === 'GRUPO'
+                        ? 'bg-blue-50 border-blue-300 text-blue-700'
+                        : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     <Users className="h-5 w-5" />
-                    <span className="text-sm font-medium">Enviar para Grupo</span>
+                    <span className="text-sm font-medium">
+                      Enviar para Grupo
+                    </span>
                     <span className="text-xs text-gray-500 text-center">
                       Todos os usuários de um tipo
                     </span>
                   </button>
-                  
+
                   <button
-                    onClick={() => setFiltroTipo("TODOS")}
+                    onClick={() => setFiltroTipo('TODOS')}
                     className={`p-3 border rounded-lg transition-colors flex flex-col items-center justify-center gap-2 ${
-                      filtroTipo !== "GRUPO"
-                        ? "bg-blue-50 border-blue-300 text-blue-700"
-                        : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100"
+                      filtroTipo !== 'GRUPO'
+                        ? 'bg-blue-50 border-blue-300 text-blue-700'
+                        : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
                     }`}
                   >
                     <Users className="h-5 w-5" />
-                    <span className="text-sm font-medium">Selecionar Individualmente</span>
+                    <span className="text-sm font-medium">
+                      Selecionar Individualmente
+                    </span>
                     <span className="text-xs text-gray-500 text-center">
                       Escolha usuários específicos
                     </span>
@@ -356,18 +385,18 @@ export default function EnviarNotificacoesPage() {
               </div>
 
               {/* Se for modo GRUPO */}
-              {filtroTipo === "GRUPO" && (
+              {filtroTipo === 'GRUPO' && (
                 <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Selecione o grupo:
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <button
-                      onClick={() => setGrupoSelecionado("MOTORISTA")}
+                      onClick={() => setGrupoSelecionado('MOTORISTA')}
                       className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${
-                        grupoSelecionado === "MOTORISTA"
-                          ? "bg-blue-100 border-blue-300 text-blue-700"
-                          : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        grupoSelecionado === 'MOTORISTA'
+                          ? 'bg-blue-100 border-blue-300 text-blue-700'
+                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       <span className="font-medium">Motoristas</span>
@@ -375,13 +404,13 @@ export default function EnviarNotificacoesPage() {
                         {motoristas.length} usuários
                       </span>
                     </button>
-                    
+
                     <button
-                      onClick={() => setGrupoSelecionado("AGENTE")}
+                      onClick={() => setGrupoSelecionado('AGENTE')}
                       className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${
-                        grupoSelecionado === "AGENTE"
-                          ? "bg-blue-100 border-blue-300 text-blue-700"
-                          : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        grupoSelecionado === 'AGENTE'
+                          ? 'bg-blue-100 border-blue-300 text-blue-700'
+                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       <span className="font-medium">Agentes</span>
@@ -389,14 +418,14 @@ export default function EnviarNotificacoesPage() {
                         {agentes.length} usuários
                       </span>
                     </button>
-                    
+
                     {isAdmin && (
                       <button
-                        onClick={() => setGrupoSelecionado("GESTOR")}
+                        onClick={() => setGrupoSelecionado('GESTOR')}
                         className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${
-                          grupoSelecionado === "GESTOR"
-                            ? "bg-blue-100 border-blue-300 text-blue-700"
-                            : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                          grupoSelecionado === 'GESTOR'
+                            ? 'bg-blue-100 border-blue-300 text-blue-700'
+                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
                         }`}
                       >
                         <span className="font-medium">Gestores</span>
@@ -413,7 +442,7 @@ export default function EnviarNotificacoesPage() {
               )}
 
               {/* Se for modo INDIVIDUAL */}
-              {filtroTipo !== "GRUPO" && (
+              {filtroTipo !== 'GRUPO' && (
                 <>
                   {/* Filtro de tipo de usuário */}
                   <div>
@@ -459,34 +488,42 @@ export default function EnviarNotificacoesPage() {
 
                   {/* Lista de usuários */}
                   <div className="border border-gray-200 rounded-lg overflow-hidden max-h-60 overflow-y-auto">
-                    {usuariosFiltrados().map(usuario => (
+                    {usuariosFiltrados().map((usuario) => (
                       <div
                         key={usuario.id}
                         className={`px-4 py-3 border-b border-gray-100 flex items-center gap-3 hover:bg-gray-50 cursor-pointer ${
-                          usuariosSelecionados.includes(usuario.id) ? 'bg-blue-50' : ''
+                          usuariosSelecionados.includes(usuario.id)
+                            ? 'bg-blue-50'
+                            : ''
                         }`}
                         onClick={() => toggleUsuario(usuario.id)}
                       >
-                        <div className={`w-5 h-5 rounded border flex items-center justify-center ${
-                          usuariosSelecionados.includes(usuario.id)
-                            ? 'bg-blue-500 border-blue-500'
-                            : 'border-gray-300'
-                        }`}>
+                        <div
+                          className={`w-5 h-5 rounded border flex items-center justify-center ${
+                            usuariosSelecionados.includes(usuario.id)
+                              ? 'bg-blue-500 border-blue-500'
+                              : 'border-gray-300'
+                          }`}
+                        >
                           {usuariosSelecionados.includes(usuario.id) && (
                             <Check className="w-3 h-3 text-white" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-medium text-gray-900 truncate">{usuario.nome}</div>
+                          <div className="font-medium text-gray-900 truncate">
+                            {usuario.nome}
+                          </div>
                           <div className="text-sm text-gray-500 flex items-center gap-2">
                             <span className="truncate">{usuario.email}</span>
-                            <span className={`px-2 py-0.5 text-xs rounded-full ${
-                              usuario.tipo === 'MOTORISTA'
-                                ? 'bg-blue-100 text-blue-800'
-                                : usuario.tipo === 'AGENTE'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-purple-100 text-purple-800'
-                            }`}>
+                            <span
+                              className={`px-2 py-0.5 text-xs rounded-full ${
+                                usuario.tipo === 'MOTORISTA'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : usuario.tipo === 'AGENTE'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-purple-100 text-purple-800'
+                              }`}
+                            >
                               {usuario.tipo}
                             </span>
                           </div>
@@ -504,7 +541,7 @@ export default function EnviarNotificacoesPage() {
             </div>
 
             {/* Botão de envio (depende do modo) */}
-            {filtroTipo === "GRUPO" ? (
+            {filtroTipo === 'GRUPO' ? (
               <button
                 onClick={handleEnvioGrupo}
                 disabled={enviando || !titulo.trim() || !mensagem.trim()}
@@ -518,10 +555,13 @@ export default function EnviarNotificacoesPage() {
                 ) : (
                   <>
                     <Send className="h-4 w-4" />
-                    Enviar para todos os {grupoSelecionado.toLowerCase()}s
-                    ({grupoSelecionado === "MOTORISTA" ? motoristas.length :
-                      grupoSelecionado === "AGENTE" ? agentes.length :
-                      gestores.length} usuários)
+                    Enviar para todos os {grupoSelecionado.toLowerCase()}s (
+                    {grupoSelecionado === 'MOTORISTA'
+                      ? motoristas.length
+                      : grupoSelecionado === 'AGENTE'
+                        ? agentes.length
+                        : gestores.length}{' '}
+                    usuários)
                   </>
                 )}
               </button>
@@ -556,34 +596,46 @@ export default function EnviarNotificacoesPage() {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumo</h3>
-            
+
             <div className="space-y-4">
               {/* Estatísticas */}
               <div className="space-y-3">
                 <div className="p-3 bg-blue-50 rounded-lg">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Motoristas</span>
-                    <span className="font-bold text-blue-700">{motoristas.length}</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      Motoristas
+                    </span>
+                    <span className="font-bold text-blue-700">
+                      {motoristas.length}
+                    </span>
                   </div>
                 </div>
-                
+
                 <div className="p-3 bg-green-50 rounded-lg">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">Agentes</span>
-                    <span className="font-bold text-green-700">{agentes.length}</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      Agentes
+                    </span>
+                    <span className="font-bold text-green-700">
+                      {agentes.length}
+                    </span>
                   </div>
                 </div>
-                
+
                 {isAdmin && (
                   <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-700">Gestores</span>
+                        <span className="text-sm font-medium text-gray-700">
+                          Gestores
+                        </span>
                         <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
                           Admin
                         </span>
                       </div>
-                      <span className="font-bold text-purple-700">{gestores.length}</span>
+                      <span className="font-bold text-purple-700">
+                        {gestores.length}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -591,11 +643,13 @@ export default function EnviarNotificacoesPage() {
 
               {/* Resultado do envio */}
               {resultado && (
-                <div className={`p-4 rounded-lg border ${
-                  resultado.erros > 0
-                    ? 'bg-red-50 border-red-200 text-red-800'
-                    : 'bg-green-50 border-green-200 text-green-800'
-                }`}>
+                <div
+                  className={`p-4 rounded-lg border ${
+                    resultado.erros > 0
+                      ? 'bg-red-50 border-red-200 text-red-800'
+                      : 'bg-green-50 border-green-200 text-green-800'
+                  }`}
+                >
                   <div className="flex items-center gap-2 font-medium mb-1">
                     {resultado.erros > 0 ? (
                       <>
@@ -610,13 +664,18 @@ export default function EnviarNotificacoesPage() {
                     )}
                   </div>
                   <div className="text-sm">
-                    {filtroTipo === "GRUPO" ? (
+                    {filtroTipo === 'GRUPO' ? (
                       <p>Notificação enviada para o grupo</p>
                     ) : (
                       <>
-                        <p><strong>{resultado.enviadas}</strong> notificação(ões) enviada(s)</p>
+                        <p>
+                          <strong>{resultado.enviadas}</strong> notificação(ões)
+                          enviada(s)
+                        </p>
                         {resultado.erros > 0 && (
-                          <p className="mt-1"><strong>{resultado.erros}</strong> erro(s)</p>
+                          <p className="mt-1">
+                            <strong>{resultado.erros}</strong> erro(s)
+                          </p>
                         )}
                       </>
                     )}
@@ -630,16 +689,24 @@ export default function EnviarNotificacoesPage() {
                 <ul className="text-sm text-gray-600 space-y-1.5">
                   <li className="flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
-                    <span>Use <strong>Enviar para Grupo</strong> para comunicados gerais</span>
+                    <span>
+                      Use <strong>Enviar para Grupo</strong> para comunicados
+                      gerais
+                    </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
-                    <span>Use <strong>Selecionar Individualmente</strong> para mensagens específicas</span>
+                    <span>
+                      Use <strong>Selecionar Individualmente</strong> para
+                      mensagens específicas
+                    </span>
                   </li>
                   {isAdmin && (
                     <li className="flex items-start gap-2">
                       <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1.5 flex-shrink-0" />
-                      <span><strong>Apenas admin</strong> pode enviar para gestores</span>
+                      <span>
+                        <strong>Apenas admin</strong> pode enviar para gestores
+                      </span>
                     </li>
                   )}
                 </ul>

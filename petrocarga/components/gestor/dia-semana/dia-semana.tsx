@@ -1,8 +1,8 @@
-import React, { useState, useMemo } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { OperacoesVaga } from "@/lib/types/vaga";
+import React, { useState, useMemo } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { OperacoesVaga } from '@/lib/types/vaga';
 
 interface DiaSemanaProps {
   name?: string;
@@ -10,47 +10,47 @@ interface DiaSemanaProps {
 }
 
 export default function DiaSemana({
-  name = "diaSemana",
+  name = 'diaSemana',
   operacoesVaga = [],
 }: DiaSemanaProps) {
   const diasDaSemana = [
-    { id: "dom", label: "Domingo", value: "1", abrev: "Dom", enum: "DOMINGO" },
+    { id: 'dom', label: 'Domingo', value: '1', abrev: 'Dom', enum: 'DOMINGO' },
     {
-      id: "seg",
-      label: "Segunda-feira",
-      value: "2",
-      abrev: "Seg",
-      enum: "SEGUNDA",
+      id: 'seg',
+      label: 'Segunda-feira',
+      value: '2',
+      abrev: 'Seg',
+      enum: 'SEGUNDA',
     },
     {
-      id: "ter",
-      label: "Terça-feira",
-      value: "3",
-      abrev: "Ter",
-      enum: "TERCA",
+      id: 'ter',
+      label: 'Terça-feira',
+      value: '3',
+      abrev: 'Ter',
+      enum: 'TERCA',
     },
     {
-      id: "qua",
-      label: "Quarta-feira",
-      value: "4",
-      abrev: "Qua",
-      enum: "QUARTA",
+      id: 'qua',
+      label: 'Quarta-feira',
+      value: '4',
+      abrev: 'Qua',
+      enum: 'QUARTA',
     },
     {
-      id: "qui",
-      label: "Quinta-feira",
-      value: "5",
-      abrev: "Qui",
-      enum: "QUINTA",
+      id: 'qui',
+      label: 'Quinta-feira',
+      value: '5',
+      abrev: 'Qui',
+      enum: 'QUINTA',
     },
     {
-      id: "sex",
-      label: "Sexta-feira",
-      value: "6",
-      abrev: "Sex",
-      enum: "SEXTA",
+      id: 'sex',
+      label: 'Sexta-feira',
+      value: '6',
+      abrev: 'Sex',
+      enum: 'SEXTA',
     },
-    { id: "sab", label: "Sábado", value: "7", abrev: "Sáb", enum: "SABADO" },
+    { id: 'sab', label: 'Sábado', value: '7', abrev: 'Sáb', enum: 'SABADO' },
   ];
 
   type DiaConfig = {
@@ -68,7 +68,7 @@ export default function DiaSemana({
 
     diasDaSemana.forEach((dia) => {
       const operacao = operacoesVaga.find(
-        (op) => op.diaSemanaAsEnum === dia.enum
+        (op) => op.diaSemanaAsEnum === dia.enum,
       );
 
       if (operacao) {
@@ -80,8 +80,8 @@ export default function DiaSemana({
       } else {
         config[dia.value] = {
           ativo: false,
-          horaInicio: "00:00",
-          horaFim: "13:00",
+          horaInicio: '00:00',
+          horaFim: '13:00',
         };
       }
     });
@@ -90,7 +90,7 @@ export default function DiaSemana({
   };
 
   const [diasConfig, setDiasConfig] = useState<DiasConfig>(() =>
-    getInitialConfig()
+    getInitialConfig(),
   );
 
   const handleDayToggle = (dayValue: string) => {
@@ -105,8 +105,8 @@ export default function DiaSemana({
 
   const handleHorarioChange = (
     dayValue: string,
-    tipo: "horaInicio" | "horaFim",
-    valor: string
+    tipo: 'horaInicio' | 'horaFim',
+    valor: string,
   ) => {
     setDiasConfig((prev) => ({
       ...prev,
@@ -126,7 +126,7 @@ export default function DiaSemana({
           codigoDiaSemana: Number(dia),
           horaInicio: config.horaInicio,
           horaFim: config.horaFim,
-        }))
+        })),
     );
   }, [diasConfig]);
 
@@ -171,8 +171,8 @@ export default function DiaSemana({
                     onChange={(e) =>
                       handleHorarioChange(
                         dia.value,
-                        "horaInicio",
-                        e.target.value
+                        'horaInicio',
+                        e.target.value,
                       )
                     }
                   />
@@ -191,7 +191,7 @@ export default function DiaSemana({
                     id={`${dia.id}-fim`}
                     value={diasConfig[dia.value].horaFim}
                     onChange={(e) =>
-                      handleHorarioChange(dia.value, "horaFim", e.target.value)
+                      handleHorarioChange(dia.value, 'horaFim', e.target.value)
                     }
                   />
                 </div>

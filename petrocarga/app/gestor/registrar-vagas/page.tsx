@@ -1,5 +1,5 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -7,42 +7,40 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { addVaga } from "@/lib/actions/vagaActions";
-import { ArrowLeft, CircleAlert, ParkingSquare } from "lucide-react";
-import Form from "next/form";
-import { useActionState } from "react";
-import FormItem from "../../../components/form/form-item";
-import React from "react";
-import DiaSemana from "../../../components/gestor/dia-semana/dia-semana";
-import SelecaoCustomizada from "../../../components/gestor/selecaoItem/selecao-customizada";
-import Link from "next/link";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { addVaga } from '@/lib/actions/vagaActions';
+import { ArrowLeft, CircleAlert, ParkingSquare } from 'lucide-react';
+import Form from 'next/form';
+import { useActionState } from 'react';
+import FormItem from '../../../components/form/form-item';
+import React from 'react';
+import DiaSemana from '../../../components/gestor/dia-semana/dia-semana';
+import SelecaoCustomizada from '../../../components/gestor/selecaoItem/selecao-customizada';
+import Link from 'next/link';
 
 export default function Cadastro() {
-
   const [state, addVagaAction, pending] = useActionState(
     async (prevState: unknown, formData: FormData) => {
-
       return await addVaga(formData);
     },
-    null
+    null,
   );
 
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
       <div className="mx-auto max-w-5xl p-6">
-                <div className="mb-6">
-                    <Link
-                    href="/gestor/visualizar-vagas"
-                    className="text-muted-foreground hover:text-foreground inline-flex items-center"
-                    >
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Voltar para visualizar vagas
-                    </Link>
-                </div>
+        <div className="mb-6">
+          <Link
+            href="/gestor/visualizar-vagas"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para visualizar vagas
+          </Link>
         </div>
+      </div>
       <Card className="w-full max-w-5xl mx-auto">
         <CardHeader className="space-y-3 text-center pb-6">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -112,10 +110,10 @@ export default function Cadastro() {
                 name="area"
                 placeholder="Selecione a área"
                 options={[
-                  { value: "vermelha", label: "Vermelha" },
-                  { value: "amarela", label: "Amarela" },
-                  { value: "azul", label: "Azul" },
-                  { value: "branca", label: "Branca" },
+                  { value: 'vermelha', label: 'Vermelha' },
+                  { value: 'amarela', label: 'Amarela' },
+                  { value: 'azul', label: 'Azul' },
+                  { value: 'branca', label: 'Branca' },
                 ]}
               />
             </FormItem>
@@ -127,8 +125,8 @@ export default function Cadastro() {
                 name="tipo"
                 placeholder="Selecione o tipo"
                 options={[
-                  { value: "paralela", label: "Paralela" },
-                  { value: "perpendicular", label: "Perpendicular" },
+                  { value: 'paralela', label: 'Paralela' },
+                  { value: 'perpendicular', label: 'Perpendicular' },
                 ]}
               />
             </FormItem>
@@ -213,7 +211,7 @@ export default function Cadastro() {
               disabled={pending}
               className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium"
             >
-              {pending ? "Salvando..." : "Salvar"}
+              {pending ? 'Salvando...' : 'Salvar'}
             </Button>
           </CardFooter>
         </Form>

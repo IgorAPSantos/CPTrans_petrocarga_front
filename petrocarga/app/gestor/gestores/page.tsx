@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useAuth } from "@/components/hooks/useAuth";
-import { getGestores } from "@/lib/actions/gestorActions";
-import { Loader2 } from "lucide-react";
-import GestorCard from "@/components/gestor/cards/gestores-card";
-import { Gestor } from "@/lib/types/gestor";
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/components/hooks/useAuth';
+import { getGestores } from '@/lib/actions/gestorActions';
+import { Loader2 } from 'lucide-react';
+import GestorCard from '@/components/gestor/cards/gestores-card';
+import { Gestor } from '@/lib/types/gestor';
 
 export default function GestoresPage() {
   const { user } = useAuth();
@@ -24,8 +24,10 @@ export default function GestoresPage() {
         const result = await getGestores();
         setGestores(result.gestores);
       } catch (err) {
-        console.error("Erro ao carregar os gestores:", err);
-        setError("Erro ao buscar os gestores cadastrados. Tente novamente mais tarde.");
+        console.error('Erro ao carregar os gestores:', err);
+        setError(
+          'Erro ao buscar os gestores cadastrados. Tente novamente mais tarde.',
+        );
       } finally {
         setLoading(false);
       }
@@ -38,7 +40,9 @@ export default function GestoresPage() {
     return (
       <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
         <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
-        <span className="text-gray-600">Carregando informação dos gestores...</span>
+        <span className="text-gray-600">
+          Carregando informação dos gestores...
+        </span>
       </div>
     );
   }

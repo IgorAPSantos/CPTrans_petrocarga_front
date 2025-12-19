@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 
 // Tipos que representam a resposta da API do Mapbox
 interface MapboxContext {
@@ -31,11 +31,11 @@ export function useMapboxSuggestions(query: string) {
       try {
         const response = await fetch(
           `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
-            query
-          )}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&country=BR&types=address,place&limit=5`
+            query,
+          )}.json?access_token=${MAPBOX_TOKEN}&autocomplete=true&country=BR&types=address,place&limit=5`,
         );
 
-        if (!response.ok) throw new Error("Erro na requisição ao Mapbox");
+        if (!response.ok) throw new Error('Erro na requisição ao Mapbox');
 
         const data: MapboxResponse = await response.json();
 
@@ -43,8 +43,8 @@ export function useMapboxSuggestions(query: string) {
           data.features?.map((f) => {
             const context = f.context ?? [];
 
-            const city = context.find((c) => c.id.includes("place"))?.text;
-            const state = context.find((c) => c.id.includes("region"))?.text;
+            const city = context.find((c) => c.id.includes('place'))?.text;
+            const state = context.find((c) => c.id.includes('region'))?.text;
             const street = f.text;
 
             if (street && city && state) return `${street}, ${city} - ${state}`;
@@ -54,7 +54,7 @@ export function useMapboxSuggestions(query: string) {
 
         setSuggestions(places);
       } catch (err) {
-        console.error("Erro ao buscar sugestões do Mapbox:", err);
+        console.error('Erro ao buscar sugestões do Mapbox:', err);
       }
     };
 

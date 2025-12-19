@@ -26,10 +26,10 @@ declare const firebase: FirebaseNamespace;
 declare const self: ServiceWorkerGlobalScope;
 
 importScripts(
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js',
 );
 importScripts(
-  "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"
+  'https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js',
 );
 
 // 3. Inicialização
@@ -44,12 +44,12 @@ const messaging = firebase.messaging();
 
 // 4. Handler com tipo MessagePayload definido acima
 messaging.onBackgroundMessage((payload: MessagePayload) => {
-  console.log("[SW] Mensagem recebida:", payload);
+  console.log('[SW] Mensagem recebida:', payload);
 
-  const title = payload.notification?.title || "Nova atualização PetroCarga";
+  const title = payload.notification?.title || 'Nova atualização PetroCarga';
   const options: NotificationOptions = {
     body: payload.notification?.body,
-    icon: "/icons/icon-192x192.png",
+    icon: '/icons/icon-192x192.png',
     data: payload.data, // Payload.data agora é Record<string, string>
   };
 

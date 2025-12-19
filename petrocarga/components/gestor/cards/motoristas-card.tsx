@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { buttonVariants } from "@/components/ui/button";
-import { Motorista } from "@/lib/types/motorista";
-import { cn } from "@/lib/utils";
-import { Mail, Phone, UserCircle, Bell, Car, Truck } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import { NotificacaoModal } from "@/components/gestor/modals/notificacaoModal";
+import { buttonVariants } from '@/components/ui/button';
+import { Motorista } from '@/lib/types/motorista';
+import { cn } from '@/lib/utils';
+import { Mail, Phone, UserCircle, Bell, Car, Truck } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
+import { NotificacaoModal } from '@/components/gestor/modals/notificacaoModal';
 
 interface MotoristaCardProps {
   motorista: Motorista;
@@ -19,8 +19,8 @@ export default function MotoristaCard({ motorista }: MotoristaCardProps) {
     <>
       <article
         className={cn(
-          "flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full",
-          "border-blue-500"
+          'flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full',
+          'border-blue-500',
         )}
       >
         {/* Informações */}
@@ -47,7 +47,7 @@ export default function MotoristaCard({ motorista }: MotoristaCardProps) {
               <Phone className="w-4 h-4 text-gray-400" />
               {motorista.usuario.telefone}
             </span>
-            
+
             <span className="text-sm text-gray-600 flex items-center gap-1">
               <Car className="w-4 h-4 text-gray-400" />
               CNH: {motorista.tipoCnh}
@@ -61,25 +61,25 @@ export default function MotoristaCard({ motorista }: MotoristaCardProps) {
           <button
             onClick={() => setIsNotificacaoModalOpen(true)}
             className={cn(
-              "flex items-center justify-center gap-1.5",
-              "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200",
-              "rounded-lg transition-colors text-sm font-medium",
-              "h-9 w-full sm:w-28" // Altura fixa e largura fixa em desktop
+              'flex items-center justify-center gap-1.5',
+              'bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200',
+              'rounded-lg transition-colors text-sm font-medium',
+              'h-9 w-full sm:w-28', // Altura fixa e largura fixa em desktop
             )}
             title="Enviar notificação"
           >
             <Bell className="w-4 h-4" />
             <span className="hidden sm:inline">Notificar</span>
           </button>
-          
+
           {/* Botão Veículos */}
           <Link
             href={`/gestor/motoristas/veiculos/${motorista.usuario.id}`}
             className={cn(
-              "flex items-center justify-center gap-1.5",
-              "bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200",
-              "rounded-lg transition-colors text-sm font-medium",
-              "h-9 w-full sm:w-28" // Mesma altura e largura
+              'flex items-center justify-center gap-1.5',
+              'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200',
+              'rounded-lg transition-colors text-sm font-medium',
+              'h-9 w-full sm:w-28', // Mesma altura e largura
             )}
             title="Ver veículos"
           >

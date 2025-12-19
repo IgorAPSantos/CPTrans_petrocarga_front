@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { use, useEffect, useState } from "react";
-import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { Veiculo } from "@/lib/types/veiculo";
-import VeiculoCard from "@/components/gestor/cards/veiculo-item";
-import Link from "next/link";
+import { use, useEffect, useState } from 'react';
+import { getVeiculosUsuario } from '@/lib/actions/veiculoActions';
+import { ArrowLeft, Loader2 } from 'lucide-react';
+import { Veiculo } from '@/lib/types/veiculo';
+import VeiculoCard from '@/components/gestor/cards/veiculo-item';
+import Link from 'next/link';
 interface PageProps {
   params: Promise<{ motoristaId: string }>;
 }
@@ -25,15 +25,15 @@ export default function GestorVeiculosPage({ params }: PageProps) {
 
       try {
         const result = await getVeiculosUsuario(motoristaId);
-        
+
         if (result.error) {
           setError(result.message);
         } else {
           setVeiculos(result.veiculos);
         }
       } catch (err) {
-        console.error("Erro ao carregar veículos:", err);
-        setError("Erro ao buscar os veículos. Tente novamente mais tarde.");
+        console.error('Erro ao carregar veículos:', err);
+        setError('Erro ao buscar os veículos. Tente novamente mais tarde.');
       } finally {
         setLoading(false);
       }
@@ -66,11 +66,11 @@ export default function GestorVeiculosPage({ params }: PageProps) {
       </h1>
       <div className="mb-6">
         <Link
-        href="/gestor/motoristas"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center"
+          href="/gestor/motoristas"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center"
         >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Voltar para todos os motoristas
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Voltar para todos os motoristas
         </Link>
       </div>
 

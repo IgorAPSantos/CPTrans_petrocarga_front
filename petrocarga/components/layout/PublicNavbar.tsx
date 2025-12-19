@@ -1,17 +1,17 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState } from "react";
-import Logo from "@/public/Logo.png";
-import Image from "next/image";
+import Link from 'next/link';
+import { useState } from 'react';
+import Logo from '@/public/Logo.png';
+import Image from 'next/image';
 
 export function PublicNavbar() {
   const [menuAberto, setMenuAberto] = useState(false);
 
   const links = [
-    { href: "/", label: "Introdução" },
-    { href: "/autorizacao/login", label: "Acessar Conta" },
-    { href: "/quemsomos", label: "Quem Somos" },
+    { href: '/', label: 'Introdução' },
+    { href: '/autorizacao/login', label: 'Acessar Conta' },
+    { href: '/quemsomos', label: 'Quem Somos' },
   ];
 
   return (
@@ -42,7 +42,7 @@ export function PublicNavbar() {
 
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ${
-          menuAberto ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+          menuAberto ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <ul className="flex flex-col gap-4 bg-blue-500 p-4 shadow-md">

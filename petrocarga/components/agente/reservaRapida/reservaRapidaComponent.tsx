@@ -1,20 +1,23 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useReserva } from "@/components/reserva/hooks/useReserva";
-import { Vaga } from "@/lib/types/vaga";
-import DaySelection from "@/components/reserva/DaySelection";
-import TimeSelection from "@/components/reserva/TimeSelection";
-import StepIndicator from "@/components/reserva/StepIndicator";
-import Confirmation from "@/components/reserva/Confirmation";
-import { Veiculo } from "@/lib/types/veiculo";
+import { useState } from 'react';
+import { useReserva } from '@/components/reserva/hooks/useReserva';
+import { Vaga } from '@/lib/types/vaga';
+import DaySelection from '@/components/reserva/DaySelection';
+import TimeSelection from '@/components/reserva/TimeSelection';
+import StepIndicator from '@/components/reserva/StepIndicator';
+import Confirmation from '@/components/reserva/Confirmation';
+import { Veiculo } from '@/lib/types/veiculo';
 
 interface ReservaAgenteProps {
   selectedVaga: Vaga;
   onBack?: () => void;
 }
 
-export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgenteProps) {
+export default function ReservaAgente({
+  selectedVaga,
+  onBack,
+}: ReservaAgenteProps) {
   const reserva = useReserva(selectedVaga);
   const {
     tipoVeiculoAgente,
@@ -44,7 +47,7 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
   };
 
   const toMinutes = (h: string) => {
-    const [hh, mm] = h.split(":").map(Number);
+    const [hh, mm] = h.split(':').map(Number);
     return hh * 60 + mm;
   };
 
@@ -70,12 +73,16 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
         {/* STEP 1 - Cadastro veículo */}
         {step === 1 && (
           <div className="flex flex-col gap-5 p-2">
-            <h3 className="text-md font-semibold text-gray-700">1. Informações do Veículo</h3>
+            <h3 className="text-md font-semibold text-gray-700">
+              1. Informações do Veículo
+            </h3>
             <div>
               <p className="font-medium mb-1">Tipo de veículo</p>
               <select
-                value={tipoVeiculoAgente || ""}
-                onChange={(e) => setTipoVeiculoAgente(e.target.value as Veiculo["tipo"])}
+                value={tipoVeiculoAgente || ''}
+                onChange={(e) =>
+                  setTipoVeiculoAgente(e.target.value as Veiculo['tipo'])
+                }
                 className="w-full border rounded-lg p-3 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               >
                 <option value="">Selecione...</option>
@@ -101,8 +108,8 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
               disabled={!tipoVeiculoAgente || placaAgente.length < 7}
               className={`py-3 rounded-lg mt-4 font-semibold transition-opacity ${
                 !tipoVeiculoAgente || placaAgente.length < 7
-                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
               }`}
             >
               Próximo
@@ -113,21 +120,29 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
         {/* STEP 2 - Seleção do dia */}
         {step === 2 && (
           <div className="p-2">
-            <h3 className="text-md font-semibold text-gray-700 mb-4">2. Selecione o Dia</h3>
+            <h3 className="text-md font-semibold text-gray-700 mb-4">
+              2. Selecione o Dia
+            </h3>
             <DaySelection
               selected={selectedDay}
               onSelect={async (day) => {
                 setSelectedDay(day);
-                
+
                 // --- CORREÇÃO IMPORTANTE AQUI ---
                 // No ReservaComponent você passa o 'vehicleId'.
                 // Aqui, como é agente, passamos o 'tipoVeiculoAgente' como 3º argumento.
                 // Verifique se o seu hook 'fetchHorariosDisponiveis' aceita (string | null) nesse argumento.
-                await fetchHorariosDisponiveis(day, selectedVaga, tipoVeiculoAgente);
-                
+                await fetchHorariosDisponiveis(
+                  day,
+                  selectedVaga,
+                  tipoVeiculoAgente,
+                );
+
                 setStep(3);
               }}
-              availableDays={selectedVaga.operacoesVaga?.map((op) => op.diaSemanaAsEnum)}
+              availableDays={selectedVaga.operacoesVaga?.map(
+                (op) => op.diaSemanaAsEnum,
+              )}
             />
             <button
               onClick={() => setStep(1)}
@@ -141,7 +156,9 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
         {/* STEP 3 - Seleção do horário inicial */}
         {step === 3 && selectedDay && (
           <div className="p-2">
-            <h3 className="text-md font-semibold text-gray-700 mb-4">3. Horário Inicial</h3>
+            <h3 className="text-md font-semibold text-gray-700 mb-4">
+              3. Horário Inicial
+            </h3>
             <TimeSelection
               times={availableTimes}
               reserved={reservedTimesStart}
@@ -160,10 +177,14 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
         {/* STEP 4 - Seleção do horário final */}
         {step === 4 && startHour && (
           <div className="p-2">
-            <h3 className="text-md font-semibold text-gray-700 mb-4">4. Horário Final</h3>
+            <h3 className="text-md font-semibold text-gray-700 mb-4">
+              4. Horário Final
+            </h3>
             <TimeSelection
               // Filtra garantindo que só mostre horários POSTERIORES ao início
-              times={availableTimes.filter((t) => toMinutes(t) > toMinutes(startHour))}
+              times={availableTimes.filter(
+                (t) => toMinutes(t) > toMinutes(startHour),
+              )}
               reserved={reservedTimesEnd}
               selected={endHour}
               onSelect={(t) => {
@@ -195,12 +216,14 @@ export default function ReservaAgente({ selectedVaga, onBack }: ReservaAgentePro
           <div
             className={`text-center p-6 rounded-xl ${
               success
-                ? "bg-green-50 text-green-800 border border-green-300"
-                : "bg-red-50 text-red-800 border border-red-300"
+                ? 'bg-green-50 text-green-800 border border-green-300'
+                : 'bg-red-50 text-red-800 border border-red-300'
             }`}
           >
             <p className="mb-4 font-extrabold text-xl">
-              {success ? "Reserva confirmada ✅" : "Erro ao confirmar a reserva ❌"}
+              {success
+                ? 'Reserva confirmada ✅'
+                : 'Erro ao confirmar a reserva ❌'}
             </p>
             <button
               onClick={() => setStep(1)}

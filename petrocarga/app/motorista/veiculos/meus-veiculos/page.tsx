@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useAuth } from "@/components/hooks/useAuth";
-import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
-import { Loader2 } from "lucide-react";
-import { Veiculo } from "@/lib/types/veiculo";
-import VeiculoCard from "@/components/motorista/cards/veiculo-item"; // 🔹 futuro componente de card
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/components/hooks/useAuth';
+import { getVeiculosUsuario } from '@/lib/actions/veiculoActions';
+import { Loader2 } from 'lucide-react';
+import { Veiculo } from '@/lib/types/veiculo';
+import VeiculoCard from '@/components/motorista/cards/veiculo-item'; // 🔹 futuro componente de card
 
 export default function VeiculosPage() {
   const { user } = useAuth();
@@ -24,8 +24,8 @@ export default function VeiculosPage() {
         const result = await getVeiculosUsuario(user.id);
         setVeiculos(result.veiculos);
       } catch (err) {
-        console.error("Erro ao carregar veículos:", err);
-        setError("Erro ao buscar seus veículos. Tente novamente mais tarde.");
+        console.error('Erro ao carregar veículos:', err);
+        setError('Erro ao buscar seus veículos. Tente novamente mais tarde.');
       } finally {
         setLoading(false);
       }
@@ -54,7 +54,7 @@ export default function VeiculosPage() {
   return (
     <div className="p-4 flex flex-col items-center w-full min-h-screen bg-gray-50">
       <h1 className="text-2xl font-bold mb-2 text-center">
-        Olá, {user?.nome || "Motorista"}!
+        Olá, {user?.nome || 'Motorista'}!
       </h1>
       <p className="text-gray-600 mb-6 text-center">
         Aqui estão seus veículos cadastrados.

@@ -1,5 +1,5 @@
-import { initializeApp, getApps } from "firebase/app";
-import { getMessaging, isSupported } from "firebase/messaging";
+import { initializeApp, getApps } from 'firebase/app';
+import { getMessaging, isSupported } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
@@ -12,7 +12,7 @@ export const firebaseApp =
   getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
 export async function getMessagingInstance() {
-  if (typeof window === "undefined") return null;
+  if (typeof window === 'undefined') return null;
 
   const supported = await isSupported();
   if (!supported) return null;

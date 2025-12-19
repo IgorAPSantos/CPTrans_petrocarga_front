@@ -1,12 +1,23 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback, useRef, ReactNode, useMemo } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  ReactNode,
+  useMemo,
+} from 'react';
 import { parseCookies } from 'nookies';
 import { getNotificacoesUsuario } from '@/lib/actions/notificacaoAction';
 import { Notification, NotificationContextData } from '@/lib/types/notificacao';
 
 // Contexto
-const NotificationContext = createContext<NotificationContextData | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextData | undefined>(
+  undefined,
+);
 
 // Provider Props
 interface NotificationProviderProps {
@@ -16,17 +27,17 @@ interface NotificationProviderProps {
   enableSSE?: boolean;
 }
 
-export function NotificationProvider({ 
+export function NotificationProvider({
   children,
   usuarioId,
   maxNotifications = 50,
-  enableSSE = true
+  enableSSE = true,
 }: NotificationProviderProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isConnected, setIsConnected] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const eventSourceRef = useRef<EventSource | null>(null);
   const hasLoadedInitialRef = useRef(false);
   const apiUrlRef = useRef(process.env.NEXT_PUBLIC_API_URL || '');
@@ -34,17 +45,21 @@ export function NotificationProvider({
   // 🔴 CARREGAR HISTÓRICO
   const loadHistorico = useCallback(async () => {
     if (!usuarioId) return;
-    
+
     console.log('Carregando histórico para usuário:', usuarioId);
     setIsLoading(true);
     try {
       const result = await getNotificacoesUsuario(usuarioId);
-      
+
       if (result.error) {
         console.error('Erro ao carregar histórico:', result.message);
         setError(result.message || 'Erro ao carregar notificações');
       } else {
-        console.log('Histórico carregado:', result.notificacoes?.length || 0, 'notificações');
+        console.log(
+          'Histórico carregado:',
+          result.notificacoes?.length || 0,
+          'notificações',
+        );
         setNotifications(result.notificacoes || []);
         setError(null);
       }
@@ -57,15 +72,18 @@ export function NotificationProvider({
   }, [usuarioId]);
 
   // 🔴 ADICIONAR NOTIFICAÇÃO
-  const addNotification = useCallback((notification: Notification) => {
-    setNotifications(prev => {
-      const exists = prev.some(n => n.id === notification.id);
-      if (exists) return prev;
-      
-      const newNotifications = [notification, ...prev];
-      return newNotifications.slice(0, maxNotifications);
-    });
-  }, [maxNotifications]);
+  const addNotification = useCallback(
+    (notification: Notification) => {
+      setNotifications((prev) => {
+        const exists = prev.some((n) => n.id === notification.id);
+        if (exists) return prev;
+
+        const newNotifications = [notification, ...prev];
+        return newNotifications.slice(0, maxNotifications);
+      });
+    },
+    [maxNotifications],
+  );
 
   // 🔴 CONECTAR SSE - SEM RECONEXÃO
   const connect = useCallback(() => {
@@ -80,7 +98,7 @@ export function NotificationProvider({
       eventSourceRef.current = null;
     }
 
-    const { "auth-token": token } = parseCookies();
+    const { 'auth-token': token } = parseCookies();
     if (!token) {
       console.error('SSE: Token JWT não encontrado nos cookies');
       setError('Usuário não autenticado. Faça login novamente.');
@@ -89,11 +107,11 @@ export function NotificationProvider({
 
     try {
       const url = `${apiUrlRef.current}/petrocarga/notificacoes/stream`;
-      
+
       console.log('SSE: Conectando...', url);
-      
+
       const eventSource = new EventSource(url, {
-        withCredentials: true
+        withCredentials: true,
       });
 
       eventSourceRef.current = eventSource;
@@ -106,7 +124,10 @@ export function NotificationProvider({
 
       eventSource.onmessage = (event) => {
         try {
-          if (event.data.trim().startsWith('{') || event.data.trim().startsWith('[')) {
+          if (
+            event.data.trim().startsWith('{') ||
+            event.data.trim().startsWith('[')
+          ) {
             const notification: Notification = JSON.parse(event.data);
             console.log('SSE: Nova notificação:', notification.titulo);
             addNotification(notification);
@@ -120,14 +141,13 @@ export function NotificationProvider({
         console.error('SSE: Erro na conexão', err);
         setIsConnected(false);
         setError('Conexão com servidor de notificações perdida');
-        
+
         // 🔴 APENAS FECHA A CONEXÃO, SEM TENTAR RECONECTAR
         if (eventSourceRef.current) {
           eventSourceRef.current.close();
           eventSourceRef.current = null;
         }
       };
-
     } catch (err) {
       console.error('SSE: Erro ao criar EventSource:', err);
       setError('Erro ao iniciar conexão em tempo real');
@@ -155,17 +175,17 @@ export function NotificationProvider({
 
   // 🔴 EFEITO: Gerenciar conexão SSE
   useEffect(() => {
-    if (!usuarioId || usuarioId.trim() === "" || !enableSSE) {
+    if (!usuarioId || usuarioId.trim() === '' || !enableSSE) {
       return;
     }
 
-    const { "auth-token": token } = parseCookies();
+    const { 'auth-token': token } = parseCookies();
     if (!token) {
       return;
     }
 
     console.log('NotificationProvider: Iniciando SSE para usuário', usuarioId);
-    
+
     // Pequeno delay para garantir que o histórico foi carregado
     const timer = setTimeout(() => {
       connect();
@@ -190,7 +210,7 @@ export function NotificationProvider({
 
   // 🔴 OUTRAS FUNÇÕES
   const removeNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   }, []);
 
   const clearNotifications = useCallback(() => {
@@ -198,15 +218,13 @@ export function NotificationProvider({
   }, []);
 
   const markAsRead = useCallback((id: string) => {
-    setNotifications(prev => 
-      prev.map(n => n.id === id ? { ...n, lida: true } : n)
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, lida: true } : n)),
     );
   }, []);
 
   const markAllAsRead = useCallback(() => {
-    setNotifications(prev => 
-      prev.map(n => ({ ...n, lida: true }))
-    );
+    setNotifications((prev) => prev.map((n) => ({ ...n, lida: true })));
   }, []);
 
   const refreshNotifications = useCallback(async () => {
@@ -214,33 +232,36 @@ export function NotificationProvider({
   }, [loadHistorico]);
 
   // 🔴 VALOR DO CONTEXTO
-  const contextValue = useMemo(() => ({
-    notifications,
-    isConnected,
-    isLoading,
-    error,
-    addNotification,
-    removeNotification,
-    clearNotifications,
-    markAsRead,
-    markAllAsRead,
-    loadHistorico,
-    refreshNotifications,
-    reconnect, // 🔴 ADICIONADO PARA RECONEXÃO MANUAL
-  }), [
-    notifications,
-    isConnected,
-    isLoading,
-    error,
-    addNotification,
-    removeNotification,
-    clearNotifications,
-    markAsRead,
-    markAllAsRead,
-    loadHistorico,
-    refreshNotifications,
-    reconnect,
-  ]);
+  const contextValue = useMemo(
+    () => ({
+      notifications,
+      isConnected,
+      isLoading,
+      error,
+      addNotification,
+      removeNotification,
+      clearNotifications,
+      markAsRead,
+      markAllAsRead,
+      loadHistorico,
+      refreshNotifications,
+      reconnect, // 🔴 ADICIONADO PARA RECONEXÃO MANUAL
+    }),
+    [
+      notifications,
+      isConnected,
+      isLoading,
+      error,
+      addNotification,
+      removeNotification,
+      clearNotifications,
+      markAsRead,
+      markAllAsRead,
+      loadHistorico,
+      refreshNotifications,
+      reconnect,
+    ],
+  );
 
   return (
     <NotificationContext.Provider value={contextValue}>
@@ -252,7 +273,7 @@ export function NotificationProvider({
 // Hook para usar o contexto
 export function useNotifications() {
   const context = useContext(NotificationContext);
-  
+
   if (context === undefined) {
     return {
       notifications: [],
@@ -269,6 +290,6 @@ export function useNotifications() {
       reconnect: () => {}, // 🔴 ADICIONADO
     };
   }
-  
+
   return context;
 }
