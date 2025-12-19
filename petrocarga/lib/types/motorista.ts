@@ -8,9 +8,9 @@ export type Usuario = {
 
 export type Motorista = {
   id: string;
-  numeroCNH: string;
-  tipoCNH: string;
-  dataValidadeCNH: string;
+  numeroCnh: string;
+  tipoCnh: string;
+  dataValidadeCnh: string;
   empresaId?: string | null;
   usuario: Usuario;
 };

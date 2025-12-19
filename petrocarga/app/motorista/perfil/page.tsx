@@ -152,7 +152,7 @@ export default function PerfilMotorista() {
                             <IdCardIcon className="w-5 h-5 text-blue-600" />
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Número da CNH</p>
-                                <p className="text-lg font-semibold text-gray-900">{motorista.numeroCNH}</p>
+                                <p className="text-lg font-semibold text-gray-900">{motorista.numeroCnh}</p>
                             </div>
                         </div>
 
@@ -161,7 +161,7 @@ export default function PerfilMotorista() {
                             <FileText className="w-5 h-5 text-blue-600" />
                             <div>
                                 <p className="text-sm font-medium text-gray-500">Tipo da CNH</p>
-                                <p className="text-lg font-semibold text-gray-900">{motorista.tipoCNH}</p>
+                                <p className="text-lg font-semibold text-gray-900">{motorista.tipoCnh}</p>
                             </div>
                         </div>
 

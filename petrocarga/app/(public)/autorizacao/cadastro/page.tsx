@@ -127,8 +127,8 @@ export default function CadastroUsuario() {
                 >
                 <Input
                     className="rounded-sm border-gray-400 text-sm md:text-base"
-                    id="numeroCNH"
-                    name="numeroCNH"
+                    id="numeroCnh"
+                    name="numeroCnh"
                     placeholder="123456789-0"
                     required
                 />
@@ -140,8 +140,8 @@ export default function CadastroUsuario() {
                 description="Selecione a categoria da sua CNH"
                 >
                   <SelecaoCustomizada
-                      id="tipoCNH"
-                      name="tipoCNH"
+                      id="tipoCnh"
+                      name="tipoCnh"
                       placeholder="Selecione a categoria"
                       options={[
                       { value: "B", label: "Categoria B" },
@@ -164,8 +164,8 @@ export default function CadastroUsuario() {
                 <Input
                     className="rounded-sm border-gray-400 text-sm md:text-base"
                     type="date"
-                    id="dataValidadeCNH"
-                    name="dataValidadeCNH"
+                    id="dataValidadeCnh"
+                    name="dataValidadeCnh"
                     required
                 />
                 </FormItem>

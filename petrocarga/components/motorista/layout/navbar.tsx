@@ -10,13 +10,18 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { CarIcon, ChevronDown, User } from "lucide-react";
+import { CarIcon, ChevronDown, User, Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { LogoutButton } from "@/components/logoutButton/logoutButton";
+import { useNotifications } from "@/context/NotificationContext";
 
 export function Navbar() {
     const [menuAberto, setMenuAberto] = useState(false);
     const router = useRouter();
+    const { notifications, isConnected } = useNotifications();
+
+    // Conta notificações não lidas (você pode adicionar uma propriedade 'read' no tipo Notification)
+    const unreadCount = notifications.length;
 
     const links = [
         { href: "/motorista/reservar-vaga", label: "Reservar Vaga" },
@@ -72,7 +77,7 @@ export function Navbar() {
                 </DropdownMenu>
             </li>
 
-            {/* Dropdown Meu Perfil */}
+                        {/* Dropdown Meu Perfil */}
             <li>
                 <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
@@ -90,11 +95,34 @@ export function Navbar() {
                     </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem className="p-0 m-0 focus:bg-gray-100">
-                    {/* Redirect após logout */}
                     <LogoutButton />
                     </DropdownMenuItem>
                 </DropdownMenuContent>
                 </DropdownMenu>
+            </li>
+
+            {/* BOTÃO DE NOTIFICAÇÕES - DESKTOP */}
+            <li>
+                <Link
+                href="/motorista/notificacoes"
+                className="relative flex items-center gap-1 hover:text-gray-300 p-2 rounded-lg hover:bg-blue-700 transition-colors"
+                aria-label={`Notificações${unreadCount > 0 ? `, ${unreadCount} não lidas` : ''}`}
+                >
+                <Bell className="h-5 w-5" />
+                
+                {/* Badge de contador */}
+                {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                )}
+
+                {/* Indicador de conexão (opcional) */}
+                {!isConnected && (
+                    <span className="absolute -bottom-1 -right-1 bg-yellow-500 rounded-full h-2 w-2" 
+                          title="Reconectando..."/>
+                )}
+                </Link>
             </li>
             </ul>
 
@@ -128,6 +156,25 @@ export function Navbar() {
                 </li>
             ))}
 
+            {/* NOTIFICAÇÕES - MOBILE */}
+            <li className="hover:bg-blue-700 rounded">
+                <Link
+                href="/motorista/notificacoes"
+                onClick={() => setMenuAberto(false)}
+                className="flex items-center justify-between px-2 py-1 w-full"
+                >
+                <span className="flex items-center gap-2">
+                    <Bell className="h-4 w-4" />
+                    Notificações
+                </span>
+                {unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                )}
+                </Link>
+            </li>
+
             {/* Meus Veículos no Mobile */}
             <li className="hover:bg-blue-700 rounded">
                 <Link
@@ -139,7 +186,7 @@ export function Navbar() {
                 </Link>
             </li>
 
-            {/* Meus Veículos no Mobile */}
+            {/* Adicionar Veículo no Mobile */}
             <li className="hover:bg-blue-700 rounded">
                 <Link
                 href="/motorista/veiculos/cadastrar-veiculos"
@@ -161,7 +208,7 @@ export function Navbar() {
                 </Link>
             </li>
 
-            {/* Logout no Mobile - SEM ÍCONE */}
+            {/* Logout no Mobile */}
             <li className="hover:bg-blue-700 rounded">
                 <div className="px-2 py-1 w-full">
                 <LogoutButton mobile={true} />

@@ -7,7 +7,7 @@ import Image from "next/image";
 import { LogoutButton } from "@/components/logoutButton/logoutButton";
 import { useAuth } from "@/components/hooks/useAuth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronDown, ParkingSquare, User } from "lucide-react";
+import { ChevronDown, ParkingSquare, User, Bell, FileText, Calendar, Car, Users, UserCircle, BookOpen } from "lucide-react";
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -18,14 +18,6 @@ export function Navbar() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const links = [
-    { href: "/gestor/relatorio", label: "Relatório" },
-    { href: "/gestor/guia", label: "Guia" },
-    { href: "/gestor/reservas", label: "Reservas" },
-    { href: "/gestor/disponibilidade-vagas", label: "Disponibilidade" },
-    { href: "/gestor/motoristas", label: "Motoristas" },
-  ];
 
   // 🔥 Link extra somente se for ADMIN (só verifica após mounted)
   const adminLink =
@@ -45,130 +37,163 @@ export function Navbar() {
         </Link>
 
         {/* MENU DESKTOP */}
-        <ul className="hidden md:flex gap-6 text-lg items-center">
-          {links.map(({ href, label }) => (
-            <li key={href} className="hover:text-gray-300">
-              <Link href={href}>{label}</Link>
-            </li>
-          ))}
+        <ul className="hidden md:flex gap-5 text-lg items-center">
+          {/* Relatório */}
+          <li className="hover:text-gray-300">
+            <Link href="/gestor/relatorio" className="flex items-center gap-1">
+              Relatório
+            </Link>
+          </li>
 
-          {/* Dropdown Vagas */}
-            <li>
-                <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
-                    Vaga
-                    <ChevronDown className="h-4 w-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
-                    <DropdownMenuItem asChild>
-                    <Link
-                        href="/gestor/visualizar-vagas"
-                        className="flex items-center gap-2 cursor-pointer w-full"
-                    >
-                        <ParkingSquare className="h-4 w-4" />
-                        Vagas
-                    </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                    <Link
-                        href="/gestor/registrar-vagas"
-                        className="flex items-center gap-2 cursor-pointer w-full"
-                    >
-                        <ParkingSquare className="h-4 w-4" />
-                        Adicionar Vaga
-                    </Link>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-                </DropdownMenu>
-            </li>
+          {/* Vagas Dropdown */}
+          <li>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                Vagas
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/gestor/visualizar-vagas"
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
+                    Vagas
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/gestor/registrar-vagas"
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
+                    Adicionar Vaga
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
 
-            {/* Dropdown Agente */}
-            <li>
-                <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
-                    Agente
-                    <ChevronDown className="h-4 w-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
-                    <DropdownMenuItem asChild>
-                    <Link
-                        href="/gestor/agentes"
-                        className="flex items-center gap-2 cursor-pointer w-full"
-                    >
-                        <User className="h-4 w-4" />
-                        Agentes
-                    </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                    <Link
-                        href="/gestor/cadastrar-agente"
-                        className="flex items-center gap-2 cursor-pointer w-full"
-                    >
-                        <User className="h-4 w-4" />
-                        Adicionar Agente
-                    </Link>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-                </DropdownMenu>
-            </li>
+          {/* Disponibilidade */}
+          <li className="hover:text-gray-300">
+            <Link href="/gestor/disponibilidade-vagas" className="flex items-center gap-1">
+              Disponibilidade
+            </Link>
+          </li>
 
-          {/* 🔥 Link ADMIN no desktop */}
+          {/* Reservas */}
+          <li className="hover:text-gray-300">
+            <Link href="/gestor/reservas" className="flex items-center gap-1">
+              Reservas
+            </Link>
+          </li>
+
+          {/* Notificações */}
+          <li className="hover:text-gray-300">
+            <Link href="/gestor/enviar-notificacoes" className="flex items-center gap-1">
+              Notificações
+            </Link>
+          </li>
+
+          {/* Motoristas Dropdown */}
+          <li className="hover:text-gray-300">
+            <Link href="/gestor/motoristas" className="flex items-center gap-1">
+              Motoristas
+            </Link>
+          </li>
+
+          {/* Agentes Dropdown */}
+          <li>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                Agentes
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/gestor/agentes"
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
+                    <Users className="h-4 w-4" />
+                    Agentes
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/gestor/cadastrar-agente"
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
+                    <Users className="h-4 w-4" />
+                    Adicionar Agente
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
+
+          {/* 🔥 Link ADMIN no desktop (se aplicável) */}
           {adminLink && (
-            //Dropdown Gestores
             <li>
-                <DropdownMenu>
+              <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
-                    Gestor
-                    <ChevronDown className="h-4 w-4" />
+                  Gestores
+                  <ChevronDown className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
-                    <DropdownMenuItem asChild>
+                  <DropdownMenuItem asChild>
                     <Link
-                        href="/gestor/gestores"
-                        className="flex items-center gap-2 cursor-pointer w-full"
+                      href="/gestor/gestores"
+                      className="flex items-center gap-2 cursor-pointer w-full"
                     >
-                        <User className="h-4 w-4" />
-                        Gestores
+                      <User className="h-4 w-4" />
+                      Gestores
                     </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
                     <Link
-                        href="/gestor/adicionar-gestores"
-                        className="flex items-center gap-2 cursor-pointer w-full"
+                      href="/gestor/adicionar-gestores"
+                      className="flex items-center gap-2 cursor-pointer w-full"
                     >
-                        <User className="h-4 w-4" />
-                        Adicionar Gestor
+                      <User className="h-4 w-4" />
+                      Adicionar Gestor
                     </Link>
-                    </DropdownMenuItem>
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
-                </DropdownMenu>
+              </DropdownMenu>
             </li>
           )}
 
-          {/* Dropdown Meu Perfil */}
-            <li>
-                <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
-                    Perfil
-                    <ChevronDown className="h-4 w-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
-                    <DropdownMenuItem asChild>
-                    <Link
-                        href="/gestor/perfil"
-                        className="flex items-center gap-2 cursor-pointer w-full"
-                    >
-                        <User className="h-4 w-4" />
-                        Meu Perfil
-                    </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="p-0 m-0 focus:bg-gray-100">
-                    {/* Redirect após logout */}
-                    <LogoutButton />
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-                </DropdownMenu>
-            </li>
+          {/* Perfil Dropdown */}
+          <li>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                Perfil
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/gestor/perfil"
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
+                    <UserCircle className="h-4 w-4" />
+                    Meu Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="p-0 m-0 focus:bg-gray-100">
+                  {/* Redirect após logout */}
+                  <LogoutButton />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
+
+          {/* Guia */}
+          <li className="hover:text-gray-300">
+            <Link href="/gestor/guia" className="flex items-center gap-1">
+              Guia
+            </Link>
+          </li>
         </ul>
 
         {/* BOTÃO HAMBURGUER (mobile) */}
@@ -189,30 +214,165 @@ export function Navbar() {
         }`}
       >
         <ul className="flex flex-col gap-4 bg-blue-500 p-4 shadow-md">
-          {links.map(({ href, label }) => (
-            <li key={href} className="hover:bg-blue-700 rounded">
+          {/* Relatório */}
+          <li className="hover:bg-blue-700 rounded">
+            <Link
+              href="/gestor/relatorio"
+              onClick={() => setMenuAberto(false)}
+              className="block px-2 py-1 w-full flex items-center gap-2"
+            >
+              <FileText className="h-4 w-4" />
+              Relatório
+            </Link>
+          </li>
+
+          {/* Vagas Submenu */}
+          <li>
+            <div className="text-white font-medium px-2 py-1">Vagas</div>
+            <div className="pl-4 space-y-2">
               <Link
-                href={href}
+                href="/gestor/visualizar-vagas"
                 onClick={() => setMenuAberto(false)}
-                className="block px-2 py-1 w-full"
+                className="block text-gray-200 hover:text-white"
               >
-                {label}
+                Visualizar Vagas
               </Link>
-            </li>
-          ))}
+              <Link
+                href="/gestor/registrar-vagas"
+                onClick={() => setMenuAberto(false)}
+                className="block text-gray-200 hover:text-white"
+              >
+                Adicionar Vaga
+              </Link>
+            </div>
+          </li>
+
+          {/* Disponibilidade */}
+          <li className="hover:bg-blue-700 rounded">
+            <Link
+              href="/gestor/disponibilidade-vagas"
+              onClick={() => setMenuAberto(false)}
+              className="block px-2 py-1 w-full flex items-center gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              Disponibilidade
+            </Link>
+          </li>
+
+          {/* Reservas */}
+          <li className="hover:bg-blue-700 rounded">
+            <Link
+              href="/gestor/reservas"
+              onClick={() => setMenuAberto(false)}
+              className="block px-2 py-1 w-full flex items-center gap-2"
+            >
+              <Calendar className="h-4 w-4" />
+              Reservas
+            </Link>
+          </li>
+
+          {/* Notificações */}
+          <li className="hover:bg-blue-700 rounded">
+            <Link
+              href="/gestor/enviar-notificacoes"
+              onClick={() => setMenuAberto(false)}
+              className="block px-2 py-1 w-full flex items-center gap-2"
+            >
+              <Bell className="h-4 w-4" />
+              Notificações
+            </Link>
+          </li>
+
+          {/* Motoristas Submenu */}
+          <li>
+            <div className="text-white font-medium px-2 py-1">Motoristas</div>
+            <div className="pl-4 space-y-2">
+              <Link
+                href="/gestor/motoristas"
+                onClick={() => setMenuAberto(false)}
+                className="block text-gray-200 hover:text-white"
+              >
+                Ver Motoristas
+              </Link>
+              <Link
+                href="/gestor/adicionar-motorista"
+                onClick={() => setMenuAberto(false)}
+                className="block text-gray-200 hover:text-white"
+              >
+                Adicionar Motorista
+              </Link>
+            </div>
+          </li>
+
+          {/* Agentes Submenu */}
+          <li>
+            <div className="text-white font-medium px-2 py-1">Agentes</div>
+            <div className="pl-4 space-y-2">
+              <Link
+                href="/gestor/agentes"
+                onClick={() => setMenuAberto(false)}
+                className="block text-gray-200 hover:text-white"
+              >
+                Ver Agentes
+              </Link>
+              <Link
+                href="/gestor/cadastrar-agente"
+                onClick={() => setMenuAberto(false)}
+                className="block text-gray-200 hover:text-white"
+              >
+                Adicionar Agente
+              </Link>
+            </div>
+          </li>
 
           {/* 🔥 Link ADMIN no mobile */}
           {adminLink && (
-            <li className="hover:bg-blue-700 rounded font-semibold text-yellow-300">
-              <Link
-                href={adminLink.href}
-                onClick={() => setMenuAberto(false)}
-                className="block px-2 py-1 w-full"
-              >
-                {adminLink.label}
-              </Link>
-            </li>
+            <>
+              <div className="border-t border-blue-400 my-2 pt-2">
+                <div className="text-yellow-300 font-medium px-2 py-1">Admin</div>
+                <div className="pl-4 space-y-2">
+                  <Link
+                    href="/gestor/gestores"
+                    onClick={() => setMenuAberto(false)}
+                    className="block text-yellow-200 hover:text-yellow-100"
+                  >
+                    Gestores
+                  </Link>
+                  <Link
+                    href="/gestor/adicionar-gestores"
+                    onClick={() => setMenuAberto(false)}
+                    className="block text-yellow-200 hover:text-yellow-100"
+                  >
+                    Adicionar Gestor
+                  </Link>
+                </div>
+              </div>
+            </>
           )}
+
+          {/* Perfil */}
+          <li className="hover:bg-blue-700 rounded">
+            <Link
+              href="/gestor/perfil"
+              onClick={() => setMenuAberto(false)}
+              className="block px-2 py-1 w-full flex items-center gap-2"
+            >
+              <UserCircle className="h-4 w-4" />
+              Meu Perfil
+            </Link>
+          </li>
+
+          {/* Guia */}
+          <li className="hover:bg-blue-700 rounded">
+            <Link
+              href="/gestor/guia"
+              onClick={() => setMenuAberto(false)}
+              className="block px-2 py-1 w-full flex items-center gap-2"
+            >
+              <BookOpen className="h-4 w-4" />
+              Guia
+            </Link>
+          </li>
 
           {/* Logout mobile */}
           <li className="hover:bg-blue-700 rounded">
