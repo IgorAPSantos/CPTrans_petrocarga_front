@@ -58,13 +58,14 @@ function PutVeiculoPayload(
 // ----------------------
 export async function addVeiculo(formData: FormData) {
   const doc = getCpfCnpj(formData);
+  const usuarioId = formData.get("usuarioId") as string;
   if ("error" in doc) {
     return { error: true, message: doc.error, valores: null };
   }
 
   const payload = buildVeiculoPayload(formData, doc.cpf, doc.cnpj);
 
-  const res = await serverApi("/petrocarga/veiculos", {
+  const res = await serverApi(`/petrocarga/veiculos/${usuarioId}`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -78,7 +79,7 @@ export async function addVeiculo(formData: FormData) {
     };
   }
 
-  revalidatePath("/motoristas/veiculos&reservas");
+  revalidatePath("/motoristas/meus-veiculos");
 
   return {
     error: false,
@@ -103,14 +104,15 @@ export async function deleteVeiculo(veiculoId: string) {
     };
   }
 
-  revalidatePath("/motoristas/veiculos&reservas");
+  revalidatePath("/motoristas/meus-veiculos");
   return { error: false, message: "Veículo deletado com sucesso!" };
 }
 
 // ----------------------
-// PUT VEICULO
+// PATCH VEICULO
 // ----------------------
 export async function atualizarVeiculo(formData: FormData) {
+  const usuarioId = formData.get("usuarioId") as string;
   const id = formData.get("id") as string;
 
   const doc = getCpfCnpj(formData);
@@ -120,7 +122,7 @@ export async function atualizarVeiculo(formData: FormData) {
 
   const payload = PutVeiculoPayload(formData, doc.cpf, doc.cnpj);
 
-  const res = await serverApi(`/petrocarga/veiculos/${id}`, {
+  const res = await serverApi(`/petrocarga/veiculos/${id}/${usuarioId}`, {
     method: "PUT",
     body: JSON.stringify(payload),
   });

@@ -15,7 +15,7 @@ export async function addGestor(_: unknown, formData: FormData) {
     email: formData.get("email") as string,
   };
 
-  const res = await serverApi(`/petrocarga/gestor`, {
+  const res = await serverApi(`/petrocarga/gestores`, {
     method: "POST",
     body: JSON.stringify(payload),
   });
@@ -38,7 +38,7 @@ export async function addGestor(_: unknown, formData: FormData) {
 // DELETE GESTOR
 // ----------------------
 export async function deleteGestor(gestorId: string) {
-  const res = await serverApi(`/petrocarga/gestor/${gestorId}`, {
+  const res = await serverApi(`/petrocarga/gestores/${gestorId}`, {
     method: "DELETE",
   });
 
@@ -97,12 +97,12 @@ export async function atualizarGestor(formData: FormData) {
 // ----------------------
 // GET GESTOR
 // ----------------------
-export async function getGestor() {
+export async function getGestores() {
   const res = await serverApi(`/petrocarga/gestores`, {
     method: "GET",
   });
   if (!res.ok) {
-    let msg = "Erro ao buscar gestor";
+    let msg = "Erro ao buscar gestores";
 
     try {
       const err = await res.json();
@@ -112,8 +112,8 @@ export async function getGestor() {
     return { error: true, message: msg };
   }
 
-  const gestor = await res.json();
-  return { error: false, gestor };
+  const gestores = await res.json();
+  return { error: false, gestores };
 }
 
 // ----------------------

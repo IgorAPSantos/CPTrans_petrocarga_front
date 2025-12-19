@@ -11,6 +11,7 @@ import type { EventClickArg, EventInput } from "@fullcalendar/core";
 import { getVagaById } from "@/lib/actions/vagaActions";
 import type { Reserva } from "@/lib/types/reserva";
 import type { Vaga } from "@/lib/types/vaga";
+import { Toaster } from "sonner";
 
 /* -------------------- Tipos -------------------- */
 interface ReservasPorLogradouro {
@@ -39,7 +40,8 @@ type ModalState =
 
 /* -------------------- Componente -------------------- */
 export default function CalendarioReservasGestor() {
-  const { reservas, finalizarReservaForcada } = useReservas();
+  // ✅ Corrigido: Pegando todas as funções necessárias do hook
+  const { reservas, actionLoading, finalizarReservaForcada } = useReservas();
   const [vagaCache, setVagaCache] = useState<Record<string, Vaga | null>>({});
   const [modalState, setModalState] = useState<ModalState>({
     type: null,
@@ -148,9 +150,41 @@ export default function CalendarioReservasGestor() {
 
   const closeModal = () => setModalState({ type: null, data: null });
 
+  /* -------------------- Checkout forçado (SIMPLIFICADO) -------------------- */
+  const handleCheckoutForcado = async (reservaId: string, reservaData: Reserva) => {
+    if (actionLoading) return;
+    
+    try {
+      // ✅ Chama a função do hook que já gerencia tudo:
+      // - Confirmação
+      // - Checkout no backend
+      // - Notificação ao motorista
+      // - Feedback com toast
+      // - Atualização do estado
+      await finalizarReservaForcada(reservaId, reservaData);
+      
+      // Fecha o modal após sucesso (o feedback já foi mostrado pelo hook)
+      closeModal();
+      
+    } catch (error) {
+      console.error("Erro no checkout forçado:", error);
+    }
+  };
+
   /* -------------------- Render -------------------- */
   return (
     <div className="p-2 md:p-4">
+      {/* ✅ Componente Toaster para mostrar as notificações */}
+      <Toaster 
+        position="top-right"
+        richColors
+        closeButton
+        duration={4000}
+        toastOptions={{
+          className: "text-sm font-medium",
+        }}
+      />
+      
       <ReservaModal
         modalState={modalState}
         vagaCache={vagaCache}
@@ -190,10 +224,11 @@ export default function CalendarioReservasGestor() {
             data: { reserva, vagaInfo: vagaCache[reserva.vagaId] ?? null },
           });
         }}
-        checkoutForcado={async (id) => {
-          await finalizarReservaForcada(id);
-          closeModal();
-          alert("Checkout-Forçado Concluído (alert versão temporária)");
+        // ✅ Passa a função handleCheckoutForcado que chama o hook
+        checkoutForcado={(reservaId) => {
+          if (modalState.type === "reserva") {
+            handleCheckoutForcado(reservaId, modalState.data.reserva);
+          }
         }}
       />
 
