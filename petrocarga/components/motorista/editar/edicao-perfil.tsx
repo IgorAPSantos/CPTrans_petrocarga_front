@@ -140,10 +140,10 @@ export default function EditarMotorista({ motorista }: { motorista: Motorista; }
             >
               <Input
                 className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="numeroCNH"
-                name="numeroCNH"
+                id="numeroCnh"
+                name="numeroCnh"
                 placeholder="123456789-0"
-                defaultValue={motorista.numeroCNH}
+                defaultValue={motorista.numeroCnh}
                 required
               />
             </FormItem>
@@ -154,10 +154,10 @@ export default function EditarMotorista({ motorista }: { motorista: Motorista; }
               description="Selecione a categoria da sua CNH"
             >
               <SelecaoCustomizada
-                id="tipoCNH"
-                name="tipoCNH"
+                id="tipoCnh"
+                name="tipoCnh"
                 placeholder="Selecione a categoria"
-                defaultValue={motorista.tipoCNH}
+                defaultValue={motorista.tipoCnh}
                 options={[
                   { value: "B", label: "Categoria B" },
                   { value: "AB", label: "Categoria AB" },
@@ -179,9 +179,9 @@ export default function EditarMotorista({ motorista }: { motorista: Motorista; }
               <Input
                 className="rounded-sm border-gray-400 text-sm md:text-base"
                 type="date"
-                id="dataValidadeCNH"
-                name="dataValidadeCNH"
-                defaultValue={motorista.dataValidadeCNH}
+                id="dataValidadeCnh"
+                name="dataValidadeCnh"
+                defaultValue={motorista.dataValidadeCnh}
                 required
               />
             </FormItem>

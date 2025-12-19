@@ -16,9 +16,9 @@ export async function addMotorista(_: unknown, formData: FormData) {
       email: formData.get("email") as string,
       senha: formData.get("senha") as string,
     },
-    tipoCNH: (formData.get("tipoCNH") as string)?.toUpperCase(),
-    numeroCNH: formData.get("numeroCNH") as string,
-    dataValidadeCNH: formData.get("dataValidadeCNH") as string,
+    tipoCnh: (formData.get("tipoCNH") as string)?.toUpperCase(),
+    numeroCnh: formData.get("numeroCNH") as string,
+    dataValidadeCnh: formData.get("dataValidadeCNH") as string,
   };
 
   const res = await serverApi(`/petrocarga/motoristas/cadastro`, {
