@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useAuth } from "@/components/hooks/useAuth";
-import { deleteReservaByID } from "@/lib/actions/reservaActions"; // Server Action (precisa de internet)
-import { clientApi } from "@/lib/clientApi";
-import { Loader2, WifiOff } from "lucide-react"; // Ícone para estado offline
-import ReservaLista from "@/components/reserva/minhasReservas/ReservaLista";
-import { ReservaGet } from "@/lib/types/reserva";
-import jsPDF from "jspdf";
+import { useEffect, useState } from 'react';
+import { useAuth } from '@/components/hooks/useAuth';
+import { deleteReservaByID } from '@/lib/actions/reservaActions'; // Server Action (precisa de internet)
+import { clientApi } from '@/lib/clientApi';
+import { Loader2, WifiOff } from 'lucide-react'; // Ícone para estado offline
+import ReservaLista from '@/components/reserva/minhasReservas/ReservaLista';
+import { ReservaGet } from '@/lib/types/reserva';
+import jsPDF from 'jspdf';
 
 export default function MinhasReservas() {
   const { user } = useAuth();
@@ -22,7 +22,7 @@ export default function MinhasReservas() {
     const response = await clientApi(`/petrocarga/reservas/usuario/${userId}`);
 
     if (!response.ok) {
-      throw new Error("Erro ao buscar dados do servidor.");
+      throw new Error('Erro ao buscar dados do servidor.');
     }
 
     return response.json();
@@ -39,7 +39,7 @@ export default function MinhasReservas() {
 
       let dadosFormatados;
       // Mantive sua lógica de formatação original
-      if (data && typeof data === "object" && "veiculos" in data) {
+      if (data && typeof data === 'object' && 'veiculos' in data) {
         dadosFormatados = data.reservas || [];
       } else {
         dadosFormatados = data || [];
@@ -48,10 +48,10 @@ export default function MinhasReservas() {
       setReservas(dadosFormatados);
       setIsOffline(false);
     } catch (err) {
-      console.error("Erro ao buscar reservas:", err);
+      console.error('Erro ao buscar reservas:', err);
 
       // No PWA, se cair aqui, geralmente é falha crítica ou falta de cache
-      setError("Não foi possível carregar suas reservas atuais.");
+      setError('Não foi possível carregar suas reservas atuais.');
 
       // Verifica se o navegador está offline para avisar o usuário
       if (!navigator.onLine) {
@@ -67,12 +67,12 @@ export default function MinhasReservas() {
 
     // Listener para avisar se a internet cair/voltar enquanto ele está na página
     const updateOnlineStatus = () => setIsOffline(!navigator.onLine);
-    window.addEventListener("online", fetchReservas); // Tenta atualizar quando a net volta
-    window.addEventListener("offline", updateOnlineStatus);
+    window.addEventListener('online', fetchReservas); // Tenta atualizar quando a net volta
+    window.addEventListener('offline', updateOnlineStatus);
 
     return () => {
-      window.removeEventListener("online", fetchReservas);
-      window.removeEventListener("offline", updateOnlineStatus);
+      window.removeEventListener('online', fetchReservas);
+      window.removeEventListener('offline', updateOnlineStatus);
     };
   }, [user?.id]);
 
@@ -81,19 +81,19 @@ export default function MinhasReservas() {
     try {
       const doc = new jsPDF();
       doc.setFontSize(18);
-      doc.text("Documento da Reserva", 20, 20);
+      doc.text('Documento da Reserva', 20, 20);
       doc.setFontSize(12);
       doc.text(`ID: ${reserva.id}`, 20, 40);
       doc.text(
-        `Local: ${reserva.logradouro || ""}, ${reserva.bairro || ""}`,
+        `Local: ${reserva.logradouro || ''}, ${reserva.bairro || ''}`,
         20,
-        70
+        70,
       );
       doc.text(`Status: ${reserva.status}`, 20, 110);
-      doc.output("dataurlnewwindow");
+      doc.output('dataurlnewwindow');
     } catch (err) {
-      console.error("Erro ao gerar PDF:", err);
-      alert("Erro ao gerar o PDF.");
+      console.error('Erro ao gerar PDF:', err);
+      alert('Erro ao gerar o PDF.');
     }
   };
 
@@ -101,7 +101,7 @@ export default function MinhasReservas() {
   const handleExcluirReserva = async (reservaId: string) => {
     if (!navigator.onLine) {
       alert(
-        "Você está offline. A exclusão de reservas só é permitida com conexão à internet."
+        'Você está offline. A exclusão de reservas só é permitida com conexão à internet.',
       );
       return;
     }
@@ -114,7 +114,7 @@ export default function MinhasReservas() {
       await fetchReservas();
     } catch (error) {
       console.error(error);
-      alert("Erro ao excluir. Verifique sua conexão.");
+      alert('Erro ao excluir. Verifique sua conexão.');
     }
   };
 
@@ -143,7 +143,7 @@ export default function MinhasReservas() {
       )}
 
       <h1 className="text-2xl font-bold mb-6 text-center">
-        Suas Reservas, {user?.nome || "motorista"}!
+        Suas Reservas, {user?.nome || 'motorista'}!
       </h1>
 
       {reservas.length === 0 ? (

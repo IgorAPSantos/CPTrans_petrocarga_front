@@ -1,9 +1,9 @@
 export type ReservaStatus =
-  | "ATIVA"
-  | "CONCLUIDA"
-  | "RESERVADA"
-  | "REMOVIDA"
-  | "CANCELADA";
+  | 'ATIVA'
+  | 'CONCLUIDA'
+  | 'RESERVADA'
+  | 'REMOVIDA'
+  | 'CANCELADA';
 
 export type UsuarioCriadoPor = {
   id: string;
@@ -11,7 +11,7 @@ export type UsuarioCriadoPor = {
   cpf: string;
   telefone: string;
   email: string;
-  permissao: "MOTORISTA" | "GESTOR" | "ADMIN";
+  permissao: 'MOTORISTA' | 'GESTOR' | 'ADMIN';
   criadoEm: string;
   ativo: boolean;
   desativadoEm: string | null;
@@ -74,5 +74,5 @@ export type ReservaGet = {
   referenciaGeoInicio: string;
   referenciaGeoFim: string;
   cidadeOrigem: string;
-  status: "ATIVA" | "CONCLUIDA" | "RESERVADA" | "REMOVIDA" | "CANCELADA";
+  status: 'ATIVA' | 'CONCLUIDA' | 'RESERVADA' | 'REMOVIDA' | 'CANCELADA';
 };

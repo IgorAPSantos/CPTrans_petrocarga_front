@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useMemo } from "react";
-import { ChevronDown, ChevronUp, Archive, CopyPlus } from "lucide-react";
-import Link from "next/link";
-import ReservaCard from "./ReservaCard";
-import { ReservaGet } from "@/lib/types/reserva";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo } from 'react';
+import { ChevronDown, ChevronUp, Archive, CopyPlus } from 'lucide-react';
+import Link from 'next/link';
+import ReservaCard from './ReservaCard';
+import { ReservaGet } from '@/lib/types/reserva';
+import { Button } from '@/components/ui/button';
 
 // CONSTANTES (Fora do componente para não recriar na renderização)
 const PRIORIDADE: Record<string, number> = {
@@ -16,13 +16,13 @@ const PRIORIDADE: Record<string, number> = {
   REMOVIDA: 5,
 };
 
-const VISIBLE_STATUSES = new Set(["ATIVA", "RESERVADA"]);
-const HIDDEN_STATUSES = new Set(["CONCLUIDA", "CANCELADA", "REMOVIDA"]);
+const VISIBLE_STATUSES = new Set(['ATIVA', 'RESERVADA']);
+const HIDDEN_STATUSES = new Set(['CONCLUIDA', 'CANCELADA', 'REMOVIDA']);
 
 // Função auxiliar de ordenação
 const sortReservas = (a: ReservaGet, b: ReservaGet) => {
-  const statusA = (a.status || "").toUpperCase();
-  const statusB = (b.status || "").toUpperCase();
+  const statusA = (a.status || '').toUpperCase();
+  const statusB = (b.status || '').toUpperCase();
   const pa = PRIORIDADE[statusA] ?? 999;
   const pb = PRIORIDADE[statusB] ?? 999;
   return pa - pb;
@@ -45,7 +45,7 @@ export default function ReservaLista({
   const { visiveis, ocultas } = useMemo(() => {
     const buckets = reservas.reduce(
       (acc, r) => {
-        const status = (r.status || "").toUpperCase();
+        const status = (r.status || '').toUpperCase();
         if (VISIBLE_STATUSES.has(status)) {
           acc.visiveis.push(r);
         } else if (HIDDEN_STATUSES.has(status)) {
@@ -53,7 +53,7 @@ export default function ReservaLista({
         }
         return acc;
       },
-      { visiveis: [] as ReservaGet[], ocultas: [] as ReservaGet[] }
+      { visiveis: [] as ReservaGet[], ocultas: [] as ReservaGet[] },
     );
 
     return {
@@ -92,7 +92,7 @@ export default function ReservaLista({
             <div className="flex items-center gap-3 text-gray-600">
               <Archive className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
               <span className="text-sm font-medium">
-                {mostrarOcultas ? "Ocultar histórico" : "Ver histórico"}
+                {mostrarOcultas ? 'Ocultar histórico' : 'Ver histórico'}
               </span>
               <span className="bg-gray-200 text-gray-600 text-xs py-0.5 px-2 rounded-full">
                 {ocultas.length}
@@ -110,7 +110,7 @@ export default function ReservaLista({
           <div
             id="lista-ocultas"
             className={`grid transition-[grid-template-rows] duration-300 ease-out ${
-              mostrarOcultas ? "grid-rows-[1fr] mt-4" : "grid-rows-[0fr]"
+              mostrarOcultas ? 'grid-rows-[1fr] mt-4' : 'grid-rows-[0fr]'
             }`}
           >
             <div className="overflow-hidden min-h-0">

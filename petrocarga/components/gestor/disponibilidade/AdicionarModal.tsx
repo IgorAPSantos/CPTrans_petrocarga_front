@@ -4,21 +4,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Vaga } from "@/lib/types/vaga";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { useState, useEffect } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Vaga } from '@/lib/types/vaga';
 
 interface AdicionarModalProps {
   open: boolean;
   onClose: () => void;
   vagasPorLogradouro: Record<string, Vaga[]>;
-  dataInicialPredefinida?: string | null;   
+  dataInicialPredefinida?: string | null;
   onSalvar: (data: {
     inicio: string;
     fim: string;
-    modo: "logradouro" | "personalizado";
+    modo: 'logradouro' | 'personalizado';
     selecionados: string[];
   }) => void;
 }
@@ -30,47 +30,48 @@ export function AdicionarModal({
   dataInicialPredefinida,
   onSalvar,
 }: AdicionarModalProps) {
-  const [modo, setModo] = useState<"logradouro" | "personalizado">("logradouro");
+  const [modo, setModo] = useState<'logradouro' | 'personalizado'>(
+    'logradouro',
+  );
   const [selecionados, setSelecionados] = useState<string[]>([]);
-  const [inicio, setInicio] = useState("");
-  const [fim, setFim] = useState("");
+  const [inicio, setInicio] = useState('');
+  const [fim, setFim] = useState('');
 
   /* ------------------------------------------------------------------ */
   /*      QUANDO O MODAL ABRIR: SE TIVER dataInicialPredefinida → SETA  */
   /* ------------------------------------------------------------------ */
- useEffect(() => {
-  if (open && dataInicialPredefinida) {
+  useEffect(() => {
+    if (open && dataInicialPredefinida) {
+      const data =
+        dataInicialPredefinida.split('T')[0] ?? dataInicialPredefinida;
 
-    const data = dataInicialPredefinida.split("T")[0] ?? dataInicialPredefinida;
+      setInicio(data);
 
-    setInicio(data);
+      const dt = new Date(data);
+      dt.setDate(dt.getDate() + 4);
 
-    const dt = new Date(data);
-    dt.setDate(dt.getDate() + 4); 
-
-    const fimSugerido = dt.toISOString().split("T")[0];
-    setFim(fimSugerido);
-  }
-}, [open, dataInicialPredefinida]);
-
+      const fimSugerido = dt.toISOString().split('T')[0];
+      setFim(fimSugerido);
+    }
+  }, [open, dataInicialPredefinida]);
 
   const toggle = (item: string) =>
     setSelecionados((prev) =>
-      prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item]
+      prev.includes(item) ? prev.filter((x) => x !== item) : [...prev, item],
     );
 
   function salvar() {
     onSalvar({
-  inicio: `${inicio}T00:00`,
-  fim: `${fim}T23:59`,
-  modo,
-  selecionados,
-});
+      inicio: `${inicio}T00:00`,
+      fim: `${fim}T23:59`,
+      modo,
+      selecionados,
+    });
 
     // limpar estado após salvar
     setSelecionados([]);
-    setInicio("");
-    setFim("");
+    setInicio('');
+    setFim('');
 
     onClose();
   }
@@ -85,18 +86,18 @@ export function AdicionarModal({
         {/* Modo LOGRADOURO | PERSONALIZADO */}
         <div className="flex gap-2 mb-4">
           <button
-            onClick={() => setModo("logradouro")}
+            onClick={() => setModo('logradouro')}
             className={`px-3 py-1 rounded ${
-              modo === "logradouro" ? "bg-primary text-white" : "bg-gray-100"
+              modo === 'logradouro' ? 'bg-primary text-white' : 'bg-gray-100'
             }`}
           >
             Por Logradouro
           </button>
 
           <button
-            onClick={() => setModo("personalizado")}
+            onClick={() => setModo('personalizado')}
             className={`px-3 py-1 rounded ${
-              modo === "personalizado" ? "bg-primary text-white" : "bg-gray-100"
+              modo === 'personalizado' ? 'bg-primary text-white' : 'bg-gray-100'
             }`}
           >
             Personalizado
@@ -104,7 +105,7 @@ export function AdicionarModal({
         </div>
 
         {/* Escolha por logradouro ------------------------------------------------ */}
-        {modo === "logradouro" ? (
+        {modo === 'logradouro' ? (
           <div className="grid grid-cols-2 gap-3 max-h-[40vh] overflow-auto mb-4">
             {Object.keys(vagasPorLogradouro).map((log) => (
               <label

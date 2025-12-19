@@ -1,13 +1,29 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import Logo from "@/public/Logo.png";
-import Image from "next/image";
-import { LogoutButton } from "@/components/logoutButton/logoutButton";
-import { useAuth } from "@/components/hooks/useAuth";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronDown, ParkingSquare, User, Bell, FileText, Calendar, Car, Users, UserCircle, BookOpen } from "lucide-react";
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import Logo from '@/public/Logo.png';
+import Image from 'next/image';
+import { LogoutButton } from '@/components/logoutButton/logoutButton';
+import { useAuth } from '@/components/hooks/useAuth';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  ChevronDown,
+  ParkingSquare,
+  User,
+  Bell,
+  FileText,
+  Calendar,
+  Car,
+  Users,
+  UserCircle,
+  BookOpen,
+} from 'lucide-react';
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -21,8 +37,8 @@ export function Navbar() {
 
   // 🔥 Link extra somente se for ADMIN (só verifica após mounted)
   const adminLink =
-    mounted && user?.permissao === "ADMIN"
-      ? { href: "/gestor/adicionar-gestores", label: "Adicionar Gestores" }
+    mounted && user?.permissao === 'ADMIN'
+      ? { href: '/gestor/adicionar-gestores', label: 'Adicionar Gestores' }
       : null;
 
   return (
@@ -75,7 +91,10 @@ export function Navbar() {
 
           {/* Disponibilidade */}
           <li className="hover:text-gray-300">
-            <Link href="/gestor/disponibilidade-vagas" className="flex items-center gap-1">
+            <Link
+              href="/gestor/disponibilidade-vagas"
+              className="flex items-center gap-1"
+            >
               Disponibilidade
             </Link>
           </li>
@@ -89,7 +108,10 @@ export function Navbar() {
 
           {/* Notificações */}
           <li className="hover:text-gray-300">
-            <Link href="/gestor/enviar-notificacoes" className="flex items-center gap-1">
+            <Link
+              href="/gestor/enviar-notificacoes"
+              className="flex items-center gap-1"
+            >
               Notificações
             </Link>
           </li>
@@ -201,7 +223,7 @@ export function Navbar() {
           className="md:hidden text-2xl hover:text-gray-300"
           onClick={() => setMenuAberto(!menuAberto)}
           aria-expanded={menuAberto}
-          aria-label={menuAberto ? "Fechar menu" : "Abrir menu"}
+          aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
         >
           ☰
         </button>
@@ -210,7 +232,7 @@ export function Navbar() {
       {/* MENU MOBILE COM ANIMAÇÃO */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          menuAberto ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+          menuAberto ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <ul className="flex flex-col gap-4 bg-blue-500 p-4 shadow-md">
@@ -329,7 +351,9 @@ export function Navbar() {
           {adminLink && (
             <>
               <div className="border-t border-blue-400 my-2 pt-2">
-                <div className="text-yellow-300 font-medium px-2 py-1">Admin</div>
+                <div className="text-yellow-300 font-medium px-2 py-1">
+                  Admin
+                </div>
                 <div className="pl-4 space-y-2">
                   <Link
                     href="/gestor/gestores"

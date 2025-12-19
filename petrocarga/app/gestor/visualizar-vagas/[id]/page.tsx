@@ -1,37 +1,36 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import VagaDetalhes from "@/components/gestor/cards/vaga-card";
-import * as vagaActions from "@/lib/actions/vagaActions";
-import { Vaga } from "@/lib/types/vaga";
-import { useParams } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import VagaDetalhes from '@/components/gestor/cards/vaga-card';
+import * as vagaActions from '@/lib/actions/vagaActions';
+import { Vaga } from '@/lib/types/vaga';
+import { useParams } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function VagaPosting() {
   const params = useParams() as { id: string };
 
   const [vaga, setVaga] = useState<Vaga | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   useEffect(() => {
-
     async function fetchVaga() {
       setLoading(true);
-      setError("");
+      setError('');
 
       try {
         const vagaData = await vagaActions.getVagaById(params.id);
 
         if (!vagaData) {
-          setError("Vaga não encontrada.");
+          setError('Vaga não encontrada.');
         } else {
           setVaga(vagaData);
         }
       } catch (err) {
-        console.error("Erro ao buscar vaga:", err);
-        setError("Erro ao buscar vaga.");
+        console.error('Erro ao buscar vaga:', err);
+        setError('Erro ao buscar vaga.');
       } finally {
         setLoading(false);
       }

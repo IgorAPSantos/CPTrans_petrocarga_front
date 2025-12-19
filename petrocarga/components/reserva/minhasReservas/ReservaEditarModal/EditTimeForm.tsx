@@ -1,4 +1,4 @@
-import TimeSelection from "../../TimeSelection";
+import TimeSelection from '../../TimeSelection';
 
 interface EditTimeFormProps {
   step: number;
@@ -28,7 +28,7 @@ export function EditTimeForm({
   onBack,
 }: EditTimeFormProps) {
   const toMinutes = (h: string) => {
-    const [hh, mm] = h.split(":").map(Number);
+    const [hh, mm] = h.split(':').map(Number);
     return hh * 60 + mm;
   };
 
@@ -51,7 +51,7 @@ export function EditTimeForm({
         <div className="w-full">
           <TimeSelection
             times={availableTimes.filter(
-              (t) => toMinutes(t) > toMinutes(startHour)
+              (t) => toMinutes(t) > toMinutes(startHour),
             )}
             reserved={reservedTimesEnd}
             selected={endHour}

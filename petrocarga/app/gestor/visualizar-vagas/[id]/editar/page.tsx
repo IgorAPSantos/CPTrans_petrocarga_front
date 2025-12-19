@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import EditarVaga from "@/components/gestor/editar/edicao-vaga";
-import { Vaga } from "@/lib/types/vaga";
-import { useAuth } from "@/components/hooks/useAuth";
-import { getVagaById } from "@/lib/actions/vagaActions";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import EditarVaga from '@/components/gestor/editar/edicao-vaga';
+import { Vaga } from '@/lib/types/vaga';
+import { useAuth } from '@/components/hooks/useAuth';
+import { getVagaById } from '@/lib/actions/vagaActions';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function EditarVagaPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  const {loading: authLoading } = useAuth();
+  const { loading: authLoading } = useAuth();
 
   const [vaga, setVaga] = useState<Vaga | null>(null);
   const [loading, setLoading] = useState(true);
@@ -27,13 +27,13 @@ export default function EditarVagaPage() {
       try {
         const vagaData = await getVagaById(id);
         if (!vagaData) {
-          router.replace("/gestor/visualizar-vagas");
+          router.replace('/gestor/visualizar-vagas');
         } else {
           setVaga(vagaData);
         }
       } catch (err) {
-        console.error("Erro ao buscar vaga:", err);
-        router.replace("/gestor/visualizar-vagas");
+        console.error('Erro ao buscar vaga:', err);
+        router.replace('/gestor/visualizar-vagas');
       } finally {
         setLoading(false);
       }

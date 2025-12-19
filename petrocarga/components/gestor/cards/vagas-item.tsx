@@ -1,8 +1,8 @@
-import { Vaga } from "@/lib/types/vaga";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
-import { MapPin, Ruler, ScanBarcodeIcon } from "lucide-react";
+import { Vaga } from '@/lib/types/vaga';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { buttonVariants } from '@/components/ui/button';
+import { MapPin, Ruler, ScanBarcodeIcon } from 'lucide-react';
 
 type VagaItemProp = {
   vaga: Vaga;
@@ -14,11 +14,11 @@ export default function VagaItem({ vaga }: VagaItemProp) {
   return (
     <article
       className={cn(
-        "flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full",
-        vaga.area === "AMARELA" && "border-yellow-500",
-        vaga.area === "AZUL" && "border-blue-500",
-        vaga.area === "VERMELHA" && "border-red-500",
-        vaga.area === "BRANCA" && "border-gray-500"
+        'flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full',
+        vaga.area === 'AMARELA' && 'border-yellow-500',
+        vaga.area === 'AZUL' && 'border-blue-500',
+        vaga.area === 'VERMELHA' && 'border-red-500',
+        vaga.area === 'BRANCA' && 'border-gray-500',
       )}
     >
       {/* Conteúdo principal */}
@@ -30,10 +30,10 @@ export default function VagaItem({ vaga }: VagaItemProp) {
           {/* Status para desktop */}
           <span
             className={cn(
-              "hidden sm:inline-block px-2 py-0.5 rounded-full text-xs sm:text-sm font-semibold shadow-sm",
-              vaga.status === "DISPONIVEL" && "bg-green-100 text-green-800",
-              vaga.status === "INDISPONIVEL" && "bg-red-100 text-red-800",
-              vaga.status === "MANUTENCAO" && "bg-yellow-100 text-yellow-800"
+              'hidden sm:inline-block px-2 py-0.5 rounded-full text-xs sm:text-sm font-semibold shadow-sm',
+              vaga.status === 'DISPONIVEL' && 'bg-green-100 text-green-800',
+              vaga.status === 'INDISPONIVEL' && 'bg-red-100 text-red-800',
+              vaga.status === 'MANUTENCAO' && 'bg-yellow-100 text-yellow-800',
             )}
           >
             {vaga.status}
@@ -66,10 +66,10 @@ export default function VagaItem({ vaga }: VagaItemProp) {
         {/* Status para mobile */}
         <span
           className={cn(
-            "sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center",
-            vaga.status === "DISPONIVEL" && "bg-green-100 text-green-800",
-            vaga.status === "INDISPONIVEL" && "bg-red-100 text-red-800",
-            vaga.status === "MANUTENCAO" && "bg-yellow-100 text-yellow-800"
+            'sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center',
+            vaga.status === 'DISPONIVEL' && 'bg-green-100 text-green-800',
+            vaga.status === 'INDISPONIVEL' && 'bg-red-100 text-red-800',
+            vaga.status === 'MANUTENCAO' && 'bg-yellow-100 text-yellow-800',
           )}
         >
           {vaga.status}
@@ -79,8 +79,8 @@ export default function VagaItem({ vaga }: VagaItemProp) {
         <Link
           href={`/gestor/visualizar-vagas/${vaga.id}`}
           className={cn(
-            buttonVariants({ variant: "outline" }),
-            "text-sm sm:text-base w-full sm:w-auto text-center"
+            buttonVariants({ variant: 'outline' }),
+            'text-sm sm:text-base w-full sm:w-auto text-center',
           )}
         >
           Ver mais

@@ -6,9 +6,9 @@ import {
   Pencil,
   Save,
   Loader2,
-} from "lucide-react";
-import { Veiculo } from "@/lib/types/veiculo";
-import { Vaga } from "@/lib/types/vaga";
+} from 'lucide-react';
+import { Veiculo } from '@/lib/types/veiculo';
+import { Vaga } from '@/lib/types/vaga';
 
 interface ReservaSummaryProps {
   form: {
@@ -44,16 +44,16 @@ export function ReservaSummary({
   hasUser,
 }: ReservaSummaryProps) {
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", {
-      weekday: "short",
-      day: "2-digit",
-      month: "long",
+    new Date(d).toLocaleDateString('pt-BR', {
+      weekday: 'short',
+      day: '2-digit',
+      month: 'long',
     });
 
   const formatTime = (d: string) =>
-    new Date(d).toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
+    new Date(d).toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
     });
 
   /* =====================
@@ -81,7 +81,7 @@ export function ReservaSummary({
               <p className="text-gray-800 font-medium">
                 {veiculo
                   ? `${veiculo.modelo} • ${veiculo.placa}`
-                  : "Carregando…"}
+                  : 'Carregando…'}
               </p>
             </div>
 
@@ -126,8 +126,8 @@ export function ReservaSummary({
           onClick={onEditTime}
           className={`shrink-0 h-9 w-9 flex items-center justify-center rounded-full transition ${
             !vaga
-              ? "text-gray-300 cursor-not-allowed"
-              : "text-gray-400 hover:text-indigo-600 hover:bg-gray-100"
+              ? 'text-gray-300 cursor-not-allowed'
+              : 'text-gray-400 hover:text-indigo-600 hover:bg-gray-100'
           }`}
         >
           <Pencil size={16} />
@@ -146,8 +146,8 @@ export function ReservaSummary({
               transition active:scale-[0.98]
               ${
                 isSaving || !hasUser
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  ? 'bg-gray-300 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700'
               }
             `}
           >

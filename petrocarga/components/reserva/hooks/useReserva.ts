@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@/components/hooks/useAuth";
-import { Veiculo } from "@/lib/types/veiculo";
-import { Reserva } from "@/lib/types/reserva";
-import { Vaga } from "@/lib/types/vaga";
-import { ReservaState } from "@/lib/types/reservaState";
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '@/components/hooks/useAuth';
+import { Veiculo } from '@/lib/types/veiculo';
+import { Reserva } from '@/lib/types/reserva';
+import { Vaga } from '@/lib/types/vaga';
+import { ReservaState } from '@/lib/types/reservaState';
 
-import { getMotoristaByUserId } from "@/lib/actions/motoristaActions";
-import { getVeiculosUsuario } from "@/lib/actions/veiculoActions";
+import { getMotoristaByUserId } from '@/lib/actions/motoristaActions';
+import { getVeiculosUsuario } from '@/lib/actions/veiculoActions';
 
 import {
   gerarHorariosDia,
@@ -14,19 +14,19 @@ import {
   getOperacaoDia,
   formatDateTime,
   removerHorariosPassadosDeHoje,
-} from "./reservaHelpers";
+} from './reservaHelpers';
 
 import {
   fetchReservasBloqueios,
   confirmarReserva,
   confirmarReservaAgente,
-} from "./reservaService";
+} from './reservaService';
 
 // ================= HOOK PRINCIPAL =================
 
 export function useReserva(selectedVaga: Vaga | null) {
   const { user } = useAuth();
-  const isAgente = user?.permissao === "AGENTE";
+  const isAgente = user?.permissao === 'AGENTE';
 
   const [reservaState, setReservaState] = useState<ReservaState>({
     step: 1,
@@ -36,10 +36,10 @@ export function useReserva(selectedVaga: Vaga | null) {
     reservedTimesEnd: [],
     startHour: null,
     endHour: null,
-    origin: "",
+    origin: '',
     selectedVehicleId: undefined,
     tipoVeiculoAgente: undefined,
-    placaAgente: "",
+    placaAgente: '',
   });
 
   const [motoristaId, setMotoristaId] = useState<string | null>(null);
@@ -56,10 +56,10 @@ export function useReserva(selectedVaga: Vaga | null) {
       reservedTimesEnd: [],
       startHour: null,
       endHour: null,
-      origin: "",
+      origin: '',
       selectedVehicleId: undefined,
       tipoVeiculoAgente: undefined,
-      placaAgente: "",
+      placaAgente: '',
     });
   }, []);
 
@@ -72,7 +72,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       const operacao = getOperacaoDia(day, vaga);
       if (!operacao) return [];
 
-      let tipoVeiculo: Veiculo["tipo"] | undefined;
+      let tipoVeiculo: Veiculo['tipo'] | undefined;
 
       if (!isAgente) {
         const v = vehicles.find((x) => x.id === vehicleId);
@@ -84,23 +84,23 @@ export function useReserva(selectedVaga: Vaga | null) {
 
       if (!tipoVeiculo) return [];
 
-      const dataFormatada = day.toISOString().split("T")[0];
+      const dataFormatada = day.toISOString().split('T')[0];
 
       const bloqueios = await fetchReservasBloqueios(
         vaga.id,
         dataFormatada,
-        tipoVeiculo
+        tipoVeiculo,
       );
 
       const horariosOcupadosReais = bloqueios.flatMap((reserva: Reserva) =>
-        gerarHorariosOcupados(reserva)
+        gerarHorariosOcupados(reserva),
       );
 
       const todosHorarios = gerarHorariosDia(operacao);
 
       const horariosFiltradosHoje = removerHorariosPassadosDeHoje(
         day,
-        todosHorarios
+        todosHorarios,
       );
 
       setReservaState((prev) => ({
@@ -112,7 +112,7 @@ export function useReserva(selectedVaga: Vaga | null) {
 
       return horariosFiltradosHoje;
     },
-    [vehicles, reservaState.tipoVeiculoAgente, isAgente]
+    [vehicles, reservaState.tipoVeiculoAgente, isAgente],
   );
 
   // ====================================================
@@ -133,7 +133,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       const limiteHoras = limites[vaga.area] ?? 1;
 
       const inicio = new Date(
-        `${reservaState.selectedDay.toISOString().split("T")[0]}T${start}:00`
+        `${reservaState.selectedDay.toISOString().split('T')[0]}T${start}:00`,
       );
 
       const fimMax = new Date(inicio);
@@ -142,14 +142,14 @@ export function useReserva(selectedVaga: Vaga | null) {
       const horariosPossiveis = reservaState.availableTimes.filter(
         (t) =>
           reservaState.availableTimes.indexOf(t) >
-          reservaState.availableTimes.indexOf(start)
+          reservaState.availableTimes.indexOf(start),
       );
 
       const ocupados = [...reservaState.reservedTimesStart];
 
       const horariosBloqueados = horariosPossiveis.filter((h) => {
         const d = new Date(
-          `${reservaState.selectedDay!.toISOString().split("T")[0]}T${h}:00`
+          `${reservaState.selectedDay!.toISOString().split('T')[0]}T${h}:00`,
         );
 
         if (d > fimMax) return true;
@@ -161,7 +161,7 @@ export function useReserva(selectedVaga: Vaga | null) {
 
       return horariosBloqueados;
     },
-    [reservaState]
+    [reservaState],
   );
 
   // Quando selecionar horário inicial → recalcula bloqueios do horário final
@@ -170,7 +170,7 @@ export function useReserva(selectedVaga: Vaga | null) {
 
     const bloqueados = calcularReservedTimesEnd(
       reservaState.startHour,
-      selectedVaga
+      selectedVaga,
     );
 
     setReservaState((prev) => {
@@ -236,7 +236,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       fetchHorariosDisponiveis(
         reservaState.selectedDay,
         selectedVaga,
-        reservaState.selectedVehicleId
+        reservaState.selectedVehicleId,
       );
     }
   }, [
@@ -270,7 +270,7 @@ export function useReserva(selectedVaga: Vaga | null) {
   const setSelectedVehicleId = (selectedVehicleId?: string) =>
     setReservaState((prev) => ({ ...prev, selectedVehicleId }));
 
-  const setTipoVeiculoAgente = (tipo: Veiculo["tipo"]) =>
+  const setTipoVeiculoAgente = (tipo: Veiculo['tipo']) =>
     setReservaState((prev) => ({ ...prev, tipoVeiculoAgente: tipo }));
 
   const setPlacaAgente = (placa: string) =>
@@ -296,21 +296,21 @@ export function useReserva(selectedVaga: Vaga | null) {
     if (!selectedDay || !startHour || !endHour) return false;
 
     const formData = new FormData();
-    formData.append("vagaId", selectedVaga.id);
+    formData.append('vagaId', selectedVaga.id);
 
     if (isAgente) {
       if (!tipoVeiculoAgente || !placaAgente) return false;
-      formData.append("tipoVeiculo", tipoVeiculoAgente);
-      formData.append("placa", placaAgente);
+      formData.append('tipoVeiculo', tipoVeiculoAgente);
+      formData.append('placa', placaAgente);
     } else {
       if (!motoristaId || !selectedVehicleId || !origin) return false;
-      formData.append("motoristaId", motoristaId);
-      formData.append("veiculoId", selectedVehicleId);
-      formData.append("cidadeOrigem", origin);
+      formData.append('motoristaId', motoristaId);
+      formData.append('veiculoId', selectedVehicleId);
+      formData.append('cidadeOrigem', origin);
     }
 
-    formData.append("inicio", formatDateTime(selectedDay, startHour));
-    formData.append("fim", formatDateTime(selectedDay, endHour));
+    formData.append('inicio', formatDateTime(selectedDay, startHour));
+    formData.append('fim', formatDateTime(selectedDay, endHour));
 
     const success = isAgente
       ? await confirmarReservaAgente(formData)

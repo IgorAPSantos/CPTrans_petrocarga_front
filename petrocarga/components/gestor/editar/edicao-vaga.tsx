@@ -1,30 +1,24 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { atualizarVaga } from "@/lib/actions/vagaActions";
-import { CircleAlert } from "lucide-react";
-import Form from "next/form";
-import { useActionState } from "react";
-import FormItem from "@/components/form/form-item";
-import React from "react";
-import DiaSemana from "@/components/gestor/dia-semana/dia-semana";
-import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
-import { Vaga } from "@/lib/types/vaga";
+'use client';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { atualizarVaga } from '@/lib/actions/vagaActions';
+import { CircleAlert } from 'lucide-react';
+import Form from 'next/form';
+import { useActionState } from 'react';
+import FormItem from '@/components/form/form-item';
+import React from 'react';
+import DiaSemana from '@/components/gestor/dia-semana/dia-semana';
+import SelecaoCustomizada from '@/components/gestor/selecaoItem/selecao-customizada';
+import { Vaga } from '@/lib/types/vaga';
 
 export default function EditarVaga({ vaga }: { vaga: Vaga }) {
-  const atualizar = async (
-    prevState: unknown,
-    formData: FormData
-  ) => {
+  const atualizar = async (prevState: unknown, formData: FormData) => {
     return atualizarVaga(formData);
   };
 
-  const [state, atualizarVagaAction, pending] = useActionState(
-    atualizar,
-    null
-  );
+  const [state, atualizarVagaAction, pending] = useActionState(atualizar, null);
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
       <Card className="w-full max-w-5xl mx-auto">
@@ -95,8 +89,8 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                 placeholder="Selecione o status"
                 defaultValue={vaga.status.toLowerCase()}
                 options={[
-                  { value: "disponivel", label: "Disponivel" },
-                  { value: "indisponivel", label: "Indisponível" },
+                  { value: 'disponivel', label: 'Disponivel' },
+                  { value: 'indisponivel', label: 'Indisponível' },
                 ]}
               />
             </FormItem>
@@ -109,10 +103,10 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                 placeholder="Selecione a área"
                 defaultValue={vaga.area.toLowerCase()} // ← Adicione .toLowerCase() //
                 options={[
-                  { value: "vermelha", label: "Vermelha" },
-                  { value: "amarela", label: "Amarela" },
-                  { value: "azul", label: "Azul" },
-                  { value: "branca", label: "Branca" },
+                  { value: 'vermelha', label: 'Vermelha' },
+                  { value: 'amarela', label: 'Amarela' },
+                  { value: 'azul', label: 'Azul' },
+                  { value: 'branca', label: 'Branca' },
                 ]}
               />
             </FormItem>
@@ -125,8 +119,8 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
                 placeholder="Selecione o tipo"
                 defaultValue={vaga.tipoVaga.toLowerCase()} // ← Adicione .toLowerCase() //
                 options={[
-                  { value: "paralela", label: "Paralela" },
-                  { value: "perpendicular", label: "Perpendicular" },
+                  { value: 'paralela', label: 'Paralela' },
+                  { value: 'perpendicular', label: 'Perpendicular' },
                 ]}
               />
             </FormItem>
@@ -217,7 +211,7 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
               disabled={pending}
               className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium"
             >
-              {pending ? "Atualizando..." : "Atualizar"}
+              {pending ? 'Atualizando...' : 'Atualizar'}
             </Button>
           </CardFooter>
         </Form>

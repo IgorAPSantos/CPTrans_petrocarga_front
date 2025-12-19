@@ -1,7 +1,7 @@
 // useVagas.ts
-import { useEffect, useState } from "react";
-import { Vaga } from "@/lib/types/vaga";
-import * as vagaActions from "@/lib/actions/vagaActions";
+import { useEffect, useState } from 'react';
+import { Vaga } from '@/lib/types/vaga';
+import * as vagaActions from '@/lib/actions/vagaActions';
 
 export function useVagas() {
   const [vagas, setVagas] = useState<Vaga[]>([]);
@@ -15,8 +15,8 @@ export function useVagas() {
         const data: Vaga[] = await vagaActions.getVagas();
         setVagas(data);
       } catch (err) {
-        console.error("Erro ao carregar vagas:", err);
-        setError(err instanceof Error ? err.message : "Erro desconhecido");
+        console.error('Erro ao carregar vagas:', err);
+        setError(err instanceof Error ? err.message : 'Erro desconhecido');
         setVagas([]); // garante array vazio
       } finally {
         setLoading(false);
@@ -24,7 +24,7 @@ export function useVagas() {
     };
 
     fetchVagas();
-  },[]);
+  }, []);
 
   return { vagas, loading, error };
 }

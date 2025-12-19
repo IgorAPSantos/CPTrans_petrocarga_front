@@ -1,29 +1,27 @@
-import { DiaSemana, OperacoesVaga } from "@/lib/types/vaga";
-import { Reserva } from "@/lib/types/reserva";
-import { Vaga } from "@/lib/types/vaga";
+import { DiaSemana, OperacoesVaga } from '@/lib/types/vaga';
+import { Reserva } from '@/lib/types/reserva';
+import { Vaga } from '@/lib/types/vaga';
 
 export const DIAS_SEMANA: DiaSemana[] = [
-  "DOMINGO",
-  "SEGUNDA",
-  "TERCA",
-  "QUARTA",
-  "QUINTA",
-  "SEXTA",
-  "SABADO",
+  'DOMINGO',
+  'SEGUNDA',
+  'TERCA',
+  'QUARTA',
+  'QUINTA',
+  'SEXTA',
+  'SABADO',
 ];
 
 export const INTERVALO_MINUTOS = 30;
 
-export const padNumber = (n: number): string => n.toString().padStart(2, "0");
-
+export const padNumber = (n: number): string => n.toString().padStart(2, '0');
 
 export const formatDateTime = (day: Date, hour: string): string => {
-  const [h, m] = hour.split(":").map(Number);
+  const [h, m] = hour.split(':').map(Number);
   const date = new Date(day);
   date.setHours(h, m, 0, 0);
   return date.toISOString();
 };
-
 
 export const gerarHorariosOcupados = (reserva: Reserva): string[] => {
   const horariosOcupados: string[] = [];
@@ -39,7 +37,7 @@ export const gerarHorariosOcupados = (reserva: Reserva): string[] => {
 
   while (current <= fim) {
     const h = padNumber(current.getHours());
-    const m = current.getMinutes() >= 30 ? "30" : "00";
+    const m = current.getMinutes() >= 30 ? '30' : '00';
 
     horariosOcupados.push(`${h}:${m}`);
     current.setMinutes(current.getMinutes() + INTERVALO_MINUTOS);
@@ -48,11 +46,9 @@ export const gerarHorariosOcupados = (reserva: Reserva): string[] => {
   return horariosOcupados;
 };
 
-
-
 export const gerarHorariosDia = (operacao: OperacoesVaga): string[] => {
-  const [hInicio, mInicio] = operacao.horaInicio.split(":").map(Number);
-  const [hFim, mFim] = operacao.horaFim.split(":").map(Number);
+  const [hInicio, mInicio] = operacao.horaInicio.split(':').map(Number);
+  const [hFim, mFim] = operacao.horaFim.split(':').map(Number);
 
   const times: string[] = [];
   let h = hInicio;
@@ -60,7 +56,7 @@ export const gerarHorariosDia = (operacao: OperacoesVaga): string[] => {
 
   while (h < hFim || (h === hFim && m <= mFim)) {
     times.push(`${padNumber(h)}:${padNumber(m)}`);
-    
+
     m += INTERVALO_MINUTOS;
     if (m >= 60) {
       h += 1;
@@ -71,19 +67,16 @@ export const gerarHorariosDia = (operacao: OperacoesVaga): string[] => {
   return times;
 };
 
-
-
 export const getOperacaoDia = (
   day: Date,
-  vaga: { operacoesVaga?: OperacoesVaga[] }
+  vaga: { operacoesVaga?: OperacoesVaga[] },
 ) => {
   const diaSemana = DIAS_SEMANA[day.getDay()];
   return vaga.operacoesVaga?.find((op) => op.diaSemanaAsEnum === diaSemana);
 };
 
-
 export const gerarHorariosBloqueados = (
-  bloqueios: { inicio: string; fim: string }[]
+  bloqueios: { inicio: string; fim: string }[],
 ): string[] => {
   const horarios: string[] = [];
 
@@ -92,9 +85,9 @@ export const gerarHorariosBloqueados = (
     const fim = new Date(b.fim);
     const current = new Date(inicio);
 
-    while (current < fim) { 
+    while (current < fim) {
       const h = padNumber(current.getHours());
-      const m = current.getMinutes() >= 30 ? "30" : "00";
+      const m = current.getMinutes() >= 30 ? '30' : '00';
 
       horarios.push(`${h}:${m}`);
 
@@ -105,17 +98,16 @@ export const gerarHorariosBloqueados = (
   return horarios;
 };
 
-
 export const filtrarHorariosDisponiveis = (
   horariosDia: string[],
-  horariosBloqueados: string[]
+  horariosBloqueados: string[],
 ) => {
   return horariosDia.filter((h) => !horariosBloqueados.includes(h));
 };
 
 export const removerHorariosPassadosDeHoje = (
   day: Date,
-  horarios: string[]
+  horarios: string[],
 ): string[] => {
   const agora = new Date();
 
@@ -131,7 +123,7 @@ export const removerHorariosPassadosDeHoje = (
   const minutoAtual = agora.getMinutes();
 
   return horarios.filter((h) => {
-    const [hh, mm] = h.split(":").map(Number);
+    const [hh, mm] = h.split(':').map(Number);
 
     if (hh > horaAtual) return true;
     if (hh === horaAtual && mm > minutoAtual) return true;
@@ -142,9 +134,8 @@ export const removerHorariosPassadosDeHoje = (
 
 export const gerarHorariosOcupadosPorArea = (
   reserva: Reserva,
-  area: Vaga["area"]
+  area: Vaga['area'],
 ): string[] => {
-
   const limites: Record<string, number> = {
     VERMELHA: 1,
     AMARELA: 2,
@@ -172,7 +163,7 @@ export const gerarHorariosOcupadosPorArea = (
 
   while (current <= fim) {
     const h = padNumber(current.getHours());
-    const m = current.getMinutes() >= 30 ? "30" : "00";
+    const m = current.getMinutes() >= 30 ? '30' : '00';
 
     horariosOcupados.push(`${h}:${m}`);
     current.setMinutes(current.getMinutes() + INTERVALO_MINUTOS);

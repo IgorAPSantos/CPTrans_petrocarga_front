@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { ViewMap } from "@/components/map/viewMap";
-import { useState } from "react";
-import { ListaVagas } from "@/components/lista/listaVagas";
+import { ViewMap } from '@/components/map/viewMap';
+import { useState } from 'react';
+import { ListaVagas } from '@/components/lista/listaVagas';
 
 export default function Page() {
   const [selectedPlace, setSelectedPlace] = useState(null);

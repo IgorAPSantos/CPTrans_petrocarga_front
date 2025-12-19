@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { deleteGestor } from "@/lib/actions/gestorActions";
-import { Gestor } from "@/lib/types/gestor";
-import { cn } from "@/lib/utils";
-import { Mail, Phone, UserCircle } from "lucide-react";
-import router from "next/router";
-import { useState } from "react";
+import { deleteGestor } from '@/lib/actions/gestorActions';
+import { Gestor } from '@/lib/types/gestor';
+import { cn } from '@/lib/utils';
+import { Mail, Phone, UserCircle } from 'lucide-react';
+import router from 'next/router';
+import { useState } from 'react';
 
 interface GestorCardProps {
   gestor: Gestor;
@@ -21,15 +21,15 @@ export default function GestorCard({ gestor }: GestorCardProps) {
       router.back();
     } catch (err) {
       console.error(err);
-      alert("Erro ao excluir vaga.");
+      alert('Erro ao excluir vaga.');
     }
   };
 
   return (
     <article
       className={cn(
-        "flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full",
-        "border-blue-500"
+        'flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full',
+        'border-blue-500',
       )}
     >
       {/* Informações */}
@@ -56,7 +56,6 @@ export default function GestorCard({ gestor }: GestorCardProps) {
 
       {/* Botões */}
       <div className="flex sm:flex-col flex-row gap-2 sm:w-auto w-full sm:max-w-none">
-
         <button
           onClick={() => setModalAberto(true)}
           className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-md transition w-full sm:w-auto"

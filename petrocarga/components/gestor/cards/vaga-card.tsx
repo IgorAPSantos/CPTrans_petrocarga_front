@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Vaga, DiaSemana } from "@/lib/types/vaga";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import CardMap from "@/components/map/cardMap";
-import { deleteVaga } from "@/lib/actions/vagaActions";
+import { useState } from 'react';
+import { Vaga, DiaSemana } from '@/lib/types/vaga';
+import { cn } from '@/lib/utils';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import CardMap from '@/components/map/cardMap';
+import { deleteVaga } from '@/lib/actions/vagaActions';
 
 type VagaDetalhesProps = {
   vaga: Vaga;
 };
 
 const diasSemana: DiaSemana[] = [
-  "DOMINGO",
-  "SEGUNDA",
-  "TERCA",
-  "QUARTA",
-  "QUINTA",
-  "SEXTA",
-  "SABADO",
+  'DOMINGO',
+  'SEGUNDA',
+  'TERCA',
+  'QUARTA',
+  'QUINTA',
+  'SEXTA',
+  'SABADO',
 ];
 
 export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
@@ -31,19 +31,18 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   vaga.operacoesVaga.forEach((op) => {
     horariosPorDia.set(
       op.diaSemanaAsEnum,
-      `${op.horaInicio.slice(0, 5)} - ${op.horaFim.slice(0, 5)}`
+      `${op.horaInicio.slice(0, 5)} - ${op.horaFim.slice(0, 5)}`,
     );
   });
 
   const handleExcluir = async () => {
-
     try {
-      await deleteVaga(vaga.id,);
+      await deleteVaga(vaga.id);
       setModalAberto(false);
       router.back();
     } catch (err) {
       console.error(err);
-      alert("Erro ao excluir vaga.");
+      alert('Erro ao excluir vaga.');
     }
   };
 
@@ -52,10 +51,10 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
       <header className="mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
         <div
           className={cn(
-            "absolute top-4 right-4 w-4 h-4 rounded-full shadow-md",
-            vaga.status === "DISPONIVEL" && "bg-green-500",
-            vaga.status === "INDISPONIVEL" && "bg-red-500",
-            vaga.status === "MANUTENCAO" && "bg-yellow-400"
+            'absolute top-4 right-4 w-4 h-4 rounded-full shadow-md',
+            vaga.status === 'DISPONIVEL' && 'bg-green-500',
+            vaga.status === 'INDISPONIVEL' && 'bg-red-500',
+            vaga.status === 'MANUTENCAO' && 'bg-yellow-400',
           )}
           title={vaga.status}
         />
@@ -94,12 +93,12 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
             <button
               key={dia}
               className={cn(
-                "px-3 py-1 rounded-full text-sm font-medium transition",
+                'px-3 py-1 rounded-full text-sm font-medium transition',
                 ativo
                   ? selecionado
-                    ? "bg-green-500 text-white"
-                    : "bg-green-100 text-green-800 hover:bg-green-200"
-                  : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    ? 'bg-green-500 text-white'
+                    : 'bg-green-100 text-green-800 hover:bg-green-200'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed',
               )}
               disabled={!ativo}
               onClick={() => setDiaSelecionado(ativo ? dia : null)}
@@ -112,7 +111,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
 
       {diaSelecionado && horariosPorDia.has(diaSelecionado) && (
         <p className="mb-6 text-gray-700 text-sm">
-          <strong>Horário de {diaSelecionado}:</strong>{" "}
+          <strong>Horário de {diaSelecionado}:</strong>{' '}
           {horariosPorDia.get(diaSelecionado)}
         </p>
       )}

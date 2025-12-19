@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { AlertCircle, CheckCircle2, X, Loader2 } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { AlertCircle, CheckCircle2, X, Loader2 } from 'lucide-react';
 
-import { ReservaGet } from "@/lib/types/reserva";
-import { atualizarReserva } from "@/lib/actions/reservaActions";
-import { useAuth } from "@/components/hooks/useAuth";
-import { useReserva } from "../../hooks/useReserva";
-import OriginVehicleStep from "../../OriginVehicleStep";
+import { ReservaGet } from '@/lib/types/reserva';
+import { atualizarReserva } from '@/lib/actions/reservaActions';
+import { useAuth } from '@/components/hooks/useAuth';
+import { useReserva } from '../../hooks/useReserva';
+import OriginVehicleStep from '../../OriginVehicleStep';
 
-import { useReservaData } from "./useReservaData";
-import { ReservaSummary } from "./ReservaSummary";
-import { EditTimeForm } from "./EditTimeForm";
+import { useReservaData } from './useReservaData';
+import { ReservaSummary } from './ReservaSummary';
+import { EditTimeForm } from './EditTimeForm';
 
 interface ReservaEditarProps {
   reserva: ReservaGet;
@@ -20,7 +20,7 @@ interface ReservaEditarProps {
   onSuccess?: (reservaAtualizada: ReservaGet) => void;
 }
 
-type EditField = null | "horario" | "veiculo-origem";
+type EditField = null | 'horario' | 'veiculo-origem';
 
 export default function ReservaEditarModal({
   reserva,
@@ -104,7 +104,7 @@ export default function ReservaEditarModal({
   ====================== */
   const handleSave = async () => {
     try {
-      if (!user?.id) throw new Error("Sessão expirada");
+      if (!user?.id) throw new Error('Sessão expirada');
 
       setIsSaving(true);
       setError(null);
@@ -115,19 +115,19 @@ export default function ReservaEditarModal({
           cidadeOrigem: form.cidadeOrigem,
           inicio: form.inicio,
           fim: form.fim,
-          status: "RESERVADA",
+          status: 'RESERVADA',
         },
         reserva.id,
-        user.id
+        user.id,
       );
 
       const updatedReserva: ReservaGet = {
         ...reserva,
         ...form,
-        status: "RESERVADA",
+        status: 'RESERVADA',
       };
 
-      setSuccessMsg("Reserva atualizada com sucesso!");
+      setSuccessMsg('Reserva atualizada com sucesso!');
       router.refresh();
 
       setTimeout(() => {
@@ -135,7 +135,7 @@ export default function ReservaEditarModal({
         onClose?.();
       }, 800);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Erro desconhecido");
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setIsSaving(false);
     }
@@ -146,8 +146,8 @@ export default function ReservaEditarModal({
 
     const base = new Date(form.inicio);
 
-    const [sh, sm] = startHour.split(":").map(Number);
-    const [eh, em] = t.split(":").map(Number);
+    const [sh, sm] = startHour.split(':').map(Number);
+    const [eh, em] = t.split(':').map(Number);
 
     const inicio = new Date(base);
     inicio.setHours(sh, sm, 0, 0);
@@ -182,11 +182,11 @@ export default function ReservaEditarModal({
       {/* Header */}
       <header className="flex items-center justify-between border-b">
         <h1 className="font-semibold text-gray-900">
-          {editField === "horario"
-            ? "Selecionar horário"
-            : editField === "veiculo-origem"
-            ? "Editar veículo"
-            : "Gerenciar reserva"}
+          {editField === 'horario'
+            ? 'Selecionar horário'
+            : editField === 'veiculo-origem'
+              ? 'Editar veículo'
+              : 'Gerenciar reserva'}
         </h1>
 
         <button
@@ -230,11 +230,11 @@ export default function ReservaEditarModal({
               isSaving={isSaving}
               hasUser={!!user}
               onSave={handleSave}
-              onEditVehicle={() => setEditField("veiculo-origem")}
+              onEditVehicle={() => setEditField('veiculo-origem')}
               onEditTime={async () => {
                 const dia = new Date(form.inicio);
                 setSelectedDay(dia);
-                setEditField("horario");
+                setEditField('horario');
 
                 if (vaga) {
                   await fetchHorariosDisponiveis(dia, vaga, form.veiculoId);
@@ -244,7 +244,7 @@ export default function ReservaEditarModal({
             />
           )}
 
-          {editField === "veiculo-origem" && (
+          {editField === 'veiculo-origem' && (
             <OriginVehicleStep
               vehicles={vehiclesForStep}
               origin={origin}
@@ -263,7 +263,7 @@ export default function ReservaEditarModal({
             />
           )}
 
-          {editField === "horario" && (
+          {editField === 'horario' && (
             <EditTimeForm
               step={step}
               availableTimes={availableTimes}

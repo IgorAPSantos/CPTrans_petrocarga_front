@@ -1,13 +1,13 @@
-import Footer from "@/components/gestor/layout/footer";
-import { Metadata } from "next";
-import { MapProvider } from "@/context/MapContext";
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-import { Navbar } from "@/components/gestor/layout/navbar";
+import Footer from '@/components/gestor/layout/footer';
+import { Metadata } from 'next';
+import { MapProvider } from '@/context/MapContext';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import { Navbar } from '@/components/gestor/layout/navbar';
 
 export const metadata: Metadata = {
-  title: "PetroCarga",
+  title: 'PetroCarga',
   description:
-    "O Petrocarga trás aos motoristas uma plataforma eficiente para gerenciamento de cargas e rotas.",
+    'O Petrocarga trás aos motoristas uma plataforma eficiente para gerenciamento de cargas e rotas.',
 };
 
 export default function GestorLayout({

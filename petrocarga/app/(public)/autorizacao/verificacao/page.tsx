@@ -5,7 +5,7 @@ import { Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { solicitarRecuperacaoSenha } from '@/lib/actions/recuperacaoAction';
 import { validateEmail } from '@/lib/utils';
 
-type StatusType = "success" | "error" | null;
+type StatusType = 'success' | 'error' | null;
 
 export default function RecuperacaoSenha() {
   // Estados
@@ -42,7 +42,7 @@ export default function RecuperacaoSenha() {
 
     try {
       await solicitarRecuperacaoSenha(email);
-      
+
       // Se chegou aqui, é sucesso
       setStatus('success');
       setMensagem('Email enviado com sucesso!');
@@ -95,7 +95,8 @@ export default function RecuperacaoSenha() {
                 Verifique seu email
               </h2>
               <p className="text-gray-600 mb-6">
-                Um email foi enviado para o seu endereço de email para redefinir sua senha.
+                Um email foi enviado para o seu endereço de email para redefinir
+                sua senha.
               </p>
               <button
                 onClick={fecharModal}
@@ -125,11 +126,13 @@ export default function RecuperacaoSenha() {
 
           {/* Mensagem de Status */}
           {status && !mostrarModal && (
-            <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 border ${
-              status === 'success' 
-                ? 'bg-green-50 border-green-200 text-green-800' 
-                : 'bg-red-50 border-red-200 text-red-800'
-            }`}>
+            <div
+              className={`mb-6 p-4 rounded-lg flex items-start gap-3 border ${
+                status === 'success'
+                  ? 'bg-green-50 border-green-200 text-green-800'
+                  : 'bg-red-50 border-red-200 text-red-800'
+              }`}
+            >
               {status === 'success' ? (
                 <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
               ) : (
@@ -144,7 +147,10 @@ export default function RecuperacaoSenha() {
             <div className="space-y-6">
               {/* Input Email */}
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Email cadastrado
                 </label>
                 <input
@@ -159,7 +165,8 @@ export default function RecuperacaoSenha() {
                   autoComplete="email"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Digite o email cadastrado na sua conta para receber o link de recuperação.
+                  Digite o email cadastrado na sua conta para receber o link de
+                  recuperação.
                 </p>
               </div>
 
@@ -202,7 +209,8 @@ export default function RecuperacaoSenha() {
                   Email enviado com sucesso!
                 </h3>
                 <p className="text-gray-600">
-                  Enviamos as instruções para recuperação de senha para:<br />
+                  Enviamos as instruções para recuperação de senha para:
+                  <br />
                   <span className="font-medium text-indigo-600">{email}</span>
                 </p>
               </div>

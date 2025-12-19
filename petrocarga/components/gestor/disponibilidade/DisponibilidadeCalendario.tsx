@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import ptBr from "@fullcalendar/core/locales/pt-br";
-import { useState } from "react";
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import ptBr from '@fullcalendar/core/locales/pt-br';
+import { useState } from 'react';
 
-import type { EventClickArg } from "@fullcalendar/core";
-import type { DateClickArg } from "@fullcalendar/interaction";
+import type { EventClickArg } from '@fullcalendar/core';
+import type { DateClickArg } from '@fullcalendar/interaction';
 
-import { AdicionarModal } from "./AdicionarModal";
-import { EditarModal } from "./EditarModal";
+import { AdicionarModal } from './AdicionarModal';
+import { EditarModal } from './EditarModal';
 
-import { useDisponibilidadesData } from "./hooks/useDisponibilidadesData";
-import { useDisponibilidadeActions } from "./hooks/useDisponibilidadeActions";
-import { useVagas } from "./hooks/useVagas";
-import { useCalendarEvents } from "./hooks/useCalendarEvents";
+import { useDisponibilidadesData } from './hooks/useDisponibilidadesData';
+import { useDisponibilidadeActions } from './hooks/useDisponibilidadeActions';
+import { useVagas } from './hooks/useVagas';
+import { useCalendarEvents } from './hooks/useCalendarEvents';
 
-import type { Disponibilidade } from "@/lib/types/disponibilidadeVagas";
+import type { Disponibilidade } from '@/lib/types/disponibilidadeVagas';
 
 /* --------------------------------------------------------------------- */
 /* ----------------------- TIPOS (Manutenção) -------------------------- */
@@ -36,28 +36,22 @@ interface ExtendedPropsDisponibilidade {
 /* --------------------------------------------------------------------- */
 
 export default function DisponibilidadeCalendario() {
-  
   const { disponibilidadesAgrupadas, setDisponibilidades } =
     useDisponibilidadesData();
 
-  
   const { vagas, vagasPorLogradouro } = useVagas();
 
-  
   const { eventos } = useCalendarEvents({
     disponibilidadesAgrupadas,
     vagas,
   });
 
- 
   const actions = useDisponibilidadeActions({
-    
     vagasPorLogradouro,
     disponibilidadesAgrupadas,
     setDisponibilidades,
   });
 
-  
   const [modalAddOpen, setModalAddOpen] = useState(false);
   const [modalEditOpen, setModalEditOpen] = useState(false);
 
@@ -91,7 +85,6 @@ export default function DisponibilidadeCalendario() {
     const props = info.event.extendedProps as ExtendedPropsDisponibilidade;
 
     if (props.isGrouped) {
-     
       setModalState({
         dataSelecionada: null,
         logradouroSelecionado: null,
@@ -99,25 +92,23 @@ export default function DisponibilidadeCalendario() {
         gruposAgrupados: props.grupos ?? null,
       });
     } else {
-      
       const disposDoUnicoLogradouro = props.disps || [];
 
       if (props.logradouro && disposDoUnicoLogradouro.length > 0) {
         const gruposParaModal: Record<string, Disponibilidade[]> = {
-          [props.logradouro]: disposDoUnicoLogradouro, 
+          [props.logradouro]: disposDoUnicoLogradouro,
         };
 
         setModalState({
           dataSelecionada: null,
           logradouroSelecionado: props.logradouro,
           intervaloSelecionado: props.intervalo,
-          gruposAgrupados: gruposParaModal, 
+          gruposAgrupados: gruposParaModal,
         });
       } else {
-        
-        console.error("Erro: Evento individual sem dados de disponibilidade.");
+        console.error('Erro: Evento individual sem dados de disponibilidade.');
         setModalState((prev) => ({ ...prev, gruposAgrupados: null }));
-        setModalEditOpen(false); 
+        setModalEditOpen(false);
         return;
       }
     }
@@ -141,9 +132,9 @@ export default function DisponibilidadeCalendario() {
         dateClick={handleDateClick}
         eventClick={handleEventClick}
         headerToolbar={{
-          left: "prev next",
-          center: "title",
-          right: "today",
+          left: 'prev next',
+          center: 'title',
+          right: 'today',
         }}
       />
 
@@ -158,7 +149,7 @@ export default function DisponibilidadeCalendario() {
         open={modalEditOpen}
         onClose={() => {
           setModalEditOpen(false);
-          
+
           setModalState((prev) => ({ ...prev, gruposAgrupados: null }));
         }}
         gruposAgrupados={modalState.gruposAgrupados}

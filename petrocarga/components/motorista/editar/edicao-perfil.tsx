@@ -1,5 +1,5 @@
-"use client";
-import { Button } from "@/components/ui/button";
+'use client';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
@@ -7,19 +7,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { atualizarMotorista } from "@/lib/actions/motoristaActions";
-import { CheckCircle, CircleAlert, UserIcon } from "lucide-react";
-import Form from "next/form";
-import { use, useActionState, useState } from "react";
-import FormItem from "@/components/form/form-item";
-import React from "react";
-import { Motorista } from "@/lib/types/motorista";
-import SelecaoCustomizada from "@/components/gestor/selecaoItem/selecao-customizada";
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { atualizarMotorista } from '@/lib/actions/motoristaActions';
+import { CheckCircle, CircleAlert, UserIcon } from 'lucide-react';
+import Form from 'next/form';
+import { use, useActionState, useState } from 'react';
+import FormItem from '@/components/form/form-item';
+import React from 'react';
+import { Motorista } from '@/lib/types/motorista';
+import SelecaoCustomizada from '@/components/gestor/selecaoItem/selecao-customizada';
 
-export default function EditarMotorista({ motorista }: { motorista: Motorista; }) {
-
+export default function EditarMotorista({
+  motorista,
+}: {
+  motorista: Motorista;
+}) {
   // Wrapper para passar o token na action
   const atualizar = async (prevState: unknown, formData: FormData) => {
     return atualizarMotorista(formData);
@@ -27,9 +30,9 @@ export default function EditarMotorista({ motorista }: { motorista: Motorista; }
 
   const [state, atualizarMotoristaAction, pending] = useActionState(
     atualizar,
-    null
+    null,
   );
-  
+
   const [exibirSenha, setExibirSenha] = useState(false);
 
   return (
@@ -56,8 +59,8 @@ export default function EditarMotorista({ motorista }: { motorista: Motorista; }
               <div
                 className={`flex items-start gap-3 rounded-md border p-4 mb-6 ${
                   state.error
-                    ? "border-red-200 bg-red-50 text-red-900"
-                    : "border-green-200 bg-green-50 text-green-900"
+                    ? 'border-red-200 bg-red-50 text-red-900'
+                    : 'border-green-200 bg-green-50 text-green-900'
                 }`}
               >
                 {state.error ? (
@@ -102,7 +105,7 @@ export default function EditarMotorista({ motorista }: { motorista: Motorista; }
                 required
                 onInput={(e) => {
                   const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/\D/g, "");
+                  target.value = target.value.replace(/\D/g, '');
                 }}
               />
             </FormItem>
@@ -124,7 +127,7 @@ export default function EditarMotorista({ motorista }: { motorista: Motorista; }
                 required
                 onInput={(e) => {
                   const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/\D/g, "");
+                  target.value = target.value.replace(/\D/g, '');
                 }}
               />
             </FormItem>
@@ -159,14 +162,14 @@ export default function EditarMotorista({ motorista }: { motorista: Motorista; }
                 placeholder="Selecione a categoria"
                 defaultValue={motorista.tipoCnh}
                 options={[
-                  { value: "B", label: "Categoria B" },
-                  { value: "AB", label: "Categoria AB" },
-                  { value: "C", label: "Categoria C" },
-                  { value: "AC", label: "Categoria AC" },
-                  { value: "D", label: "Categoria D" },
-                  { value: "AD", label: "Categoria AD" },
-                  { value: "E", label: "Categoria E" },
-                  { value: "AE", label: "Categoria AE" },
+                  { value: 'B', label: 'Categoria B' },
+                  { value: 'AB', label: 'Categoria AB' },
+                  { value: 'C', label: 'Categoria C' },
+                  { value: 'AC', label: 'Categoria AC' },
+                  { value: 'D', label: 'Categoria D' },
+                  { value: 'AD', label: 'Categoria AD' },
+                  { value: 'E', label: 'Categoria E' },
+                  { value: 'AE', label: 'Categoria AE' },
                 ]}
               />
             </FormItem>
@@ -194,7 +197,7 @@ export default function EditarMotorista({ motorista }: { motorista: Motorista; }
               disabled={pending}
               className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium text-blue-800 bg-blue-200 hover:bg-blue-300 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
-              {pending ? "Salvando..." : "Salvar Alterações"}
+              {pending ? 'Salvando...' : 'Salvar Alterações'}
             </Button>
           </CardFooter>
         </Form>

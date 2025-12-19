@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { cn } from "@/lib/utils";
-import { Award, Truck } from "lucide-react";
-import { Veiculo } from "@/lib/types/veiculo";
+import { cn } from '@/lib/utils';
+import { Award, Truck } from 'lucide-react';
+import { Veiculo } from '@/lib/types/veiculo';
 
 interface VeiculoCardProps {
   veiculo: Veiculo;
@@ -12,8 +12,8 @@ export default function VeiculoCard({ veiculo }: VeiculoCardProps) {
   return (
     <article
       className={cn(
-        "flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full",
-        "border-blue-500"
+        'flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full',
+        'border-blue-500',
       )}
     >
       {/* Conteúdo principal */}

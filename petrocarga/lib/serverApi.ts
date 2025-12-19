@@ -1,22 +1,21 @@
-import { cookies } from "next/headers";
+import { cookies } from 'next/headers';
 
 export async function serverApi(path: string, options: RequestInit = {}) {
   const cookieStore = await cookies();
-  const token = cookieStore.get("auth-token")?.value;
+  const token = cookieStore.get('auth-token')?.value;
 
-  const isJson =
-    options.body && typeof options.body === "string";
+  const isJson = options.body && typeof options.body === 'string';
 
   const headers = {
     ...(options.headers || {}),
-    Authorization: token ? `Bearer ${token}` : "",
-    ...(isJson ? { "Content-Type": "application/json" } : {}),
+    Authorization: token ? `Bearer ${token}` : '',
+    ...(isJson ? { 'Content-Type': 'application/json' } : {}),
   };
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${path}`, {
     ...options,
     headers,
-    cache: "no-store",
+    cache: 'no-store',
   });
 
   if (!res.ok) {

@@ -1,19 +1,24 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { useState } from "react";
-import Logo from "@/public/Logo.png";
-import Image from "next/image";
-import { LogoutButton } from "@/components/logoutButton/logoutButton";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronDown, User } from "lucide-react";
+import Link from 'next/link';
+import { useState } from 'react';
+import Logo from '@/public/Logo.png';
+import Image from 'next/image';
+import { LogoutButton } from '@/components/logoutButton/logoutButton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { ChevronDown, User } from 'lucide-react';
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
 
   const links = [
-    { href: "/agente/reserva-rapida", label: "Reserva Rapida" },
-    { href: "/agente/guia", label: "Guia" },
+    { href: '/agente/reserva-rapida', label: 'Reserva Rapida' },
+    { href: '/agente/guia', label: 'Guia' },
   ];
 
   return (
@@ -36,29 +41,29 @@ export function Navbar() {
           ))}
 
           {/* Dropdown Meu Perfil */}
-            <li>
-                <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
-                    Perfil
-                    <ChevronDown className="h-4 w-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
-                    <DropdownMenuItem asChild>
-                    <Link
-                        href="/agente/perfil"
-                        className="flex items-center gap-2 cursor-pointer w-full"
-                    >
-                        <User className="h-4 w-4" />
-                        Meu Perfil
-                    </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="p-0 m-0 focus:bg-gray-100">
-                    {/* Redirect após logout */}
-                    <LogoutButton />
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-                </DropdownMenu>
-            </li>
+          <li>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                Perfil
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/agente/perfil"
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
+                    <User className="h-4 w-4" />
+                    Meu Perfil
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="p-0 m-0 focus:bg-gray-100">
+                  {/* Redirect após logout */}
+                  <LogoutButton />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
         </ul>
 
         {/* BOTÃO HAMBURGUER (mobile) */}
@@ -66,7 +71,7 @@ export function Navbar() {
           className="md:hidden text-2xl hover:text-gray-300"
           onClick={() => setMenuAberto(!menuAberto)}
           aria-expanded={menuAberto}
-          aria-label={menuAberto ? "Fechar menu" : "Abrir menu"}
+          aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
         >
           ☰
         </button>
@@ -75,7 +80,7 @@ export function Navbar() {
       {/* MENU MOBILE COM ANIMAÇÃO */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          menuAberto ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+          menuAberto ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <ul className="flex flex-col gap-4 bg-blue-500 p-4 shadow-md">

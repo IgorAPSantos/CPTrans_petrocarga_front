@@ -1,11 +1,19 @@
 'use client';
 
-import { useNotifications } from "@/context/NotificationContext";
-import { Notification } from "@/lib/types/notificacao";
-import { Bell, BellOff, CheckCheck, X, Wifi, WifiOff, RefreshCw } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { useCallback } from "react";
+import { useNotifications } from '@/context/NotificationContext';
+import { Notification } from '@/lib/types/notificacao';
+import {
+  Bell,
+  BellOff,
+  CheckCheck,
+  X,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+} from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { useCallback } from 'react';
 
 export default function NotificacoesPage() {
   const {
@@ -25,41 +33,41 @@ export default function NotificacoesPage() {
         locale: ptBR,
       });
     } catch {
-      return "Agora";
+      return 'Agora';
     }
   }, []);
 
   const getIconeNotificacao = useCallback((tipo: Notification['tipo']) => {
     switch (tipo) {
-      case "RESERVA":
-        return "🚗";
-      case "VAGA":
-        return "🅿️";
-      case "VEICULO":
-        return "🔧";
-      case "MOTORISTA":
-        return "👤";
-      case "SISTEMA":
-        return "📢";
+      case 'RESERVA':
+        return '🚗';
+      case 'VAGA':
+        return '🅿️';
+      case 'VEICULO':
+        return '🔧';
+      case 'MOTORISTA':
+        return '👤';
+      case 'SISTEMA':
+        return '📢';
       default:
-        return "📢";
+        return '📢';
     }
   }, []);
 
   const getCorNotificacao = useCallback((tipo: Notification['tipo']) => {
     switch (tipo) {
-      case "RESERVA":
-        return "border-l-blue-500 bg-blue-50";
-      case "VAGA":
-        return "border-l-green-500 bg-green-50";
-      case "VEICULO":
-        return "border-l-purple-500 bg-purple-50";
-      case "MOTORISTA":
-        return "border-l-yellow-500 bg-yellow-50";
-      case "SISTEMA":
-        return "border-l-gray-500 bg-gray-50";
+      case 'RESERVA':
+        return 'border-l-blue-500 bg-blue-50';
+      case 'VAGA':
+        return 'border-l-green-500 bg-green-50';
+      case 'VEICULO':
+        return 'border-l-purple-500 bg-purple-50';
+      case 'MOTORISTA':
+        return 'border-l-yellow-500 bg-yellow-50';
+      case 'SISTEMA':
+        return 'border-l-gray-500 bg-gray-50';
       default:
-        return "border-l-gray-500 bg-gray-50";
+        return 'border-l-gray-500 bg-gray-50';
     }
   }, []);
 
@@ -76,10 +84,8 @@ export default function NotificacoesPage() {
                   Notificações
                 </h1>
                 <p className="text-sm text-gray-600">
-                  {notifications.length}{" "}
-                  {notifications.length === 1
-                    ? "notificação"
-                    : "notificações"}
+                  {notifications.length}{' '}
+                  {notifications.length === 1 ? 'notificação' : 'notificações'}
                 </p>
               </div>
             </div>
@@ -89,8 +95,8 @@ export default function NotificacoesPage() {
               <div
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
                   isConnected
-                    ? "bg-green-100 text-green-700"
-                    : "bg-yellow-100 text-yellow-700"
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-yellow-100 text-yellow-700'
                 }`}
               >
                 {isConnected ? (
@@ -137,7 +143,8 @@ export default function NotificacoesPage() {
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
               ⚠️ {error}
               <div className="mt-1 text-xs text-red-600">
-                As notificações em tempo real estão temporariamente indisponíveis.
+                As notificações em tempo real estão temporariamente
+                indisponíveis.
               </div>
             </div>
           )}
@@ -146,7 +153,8 @@ export default function NotificacoesPage() {
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-yellow-700 text-sm">
               ⚡ Conectando ao servidor de notificações...
               <div className="mt-1 text-xs text-yellow-600">
-                As notificações serão recebidas em tempo real quando a conexão for estabelecida.
+                As notificações serão recebidas em tempo real quando a conexão
+                for estabelecida.
               </div>
             </div>
           )}
@@ -176,7 +184,7 @@ export default function NotificacoesPage() {
               <div
                 key={notif.id}
                 className={`bg-white rounded-lg shadow-md p-4 border-l-4 ${getCorNotificacao(
-                  notif.tipo
+                  notif.tipo,
                 )} hover:shadow-lg transition-shadow ${notif.lida ? 'opacity-80' : ''}`}
               >
                 <div className="flex items-start justify-between gap-4">
@@ -199,7 +207,7 @@ export default function NotificacoesPage() {
                           <span className="inline-block h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-2"></span>
                         )}
                       </div>
-                      
+
                       <div className="flex items-center gap-4 mt-2">
                         <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
                           {notif.tipo}

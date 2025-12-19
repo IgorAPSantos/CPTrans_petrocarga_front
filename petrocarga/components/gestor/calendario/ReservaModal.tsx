@@ -4,26 +4,26 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { LogradouroItem, VagaItem, ReservaItem } from "./ListItems";
-import { Reserva } from "@/lib/types/reserva";
-import { Vaga } from "@/lib/types/vaga";
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { LogradouroItem, VagaItem, ReservaItem } from './ListItems';
+import { Reserva } from '@/lib/types/reserva';
+import { Vaga } from '@/lib/types/vaga';
 
 export type ModalState =
   | {
-      type: "group";
+      type: 'group';
       data: { dateStr: string; logradouros: Record<string, Reserva[]> };
     }
   | {
-      type: "vagasLogradouro";
+      type: 'vagasLogradouro';
       data: { logradouro: string; reservasDoLogradouro: Reserva[] };
     }
   | {
-      type: "vaga";
+      type: 'vaga';
       data: { vagaId: string; vagaInfo: Vaga | null; reservas: Reserva[] };
     }
-  | { type: "reserva"; data: { reserva: Reserva; vagaInfo: Vaga | null } }
+  | { type: 'reserva'; data: { reserva: Reserva; vagaInfo: Vaga | null } }
   | { type: null; data: null };
 
 interface ModalProps {
@@ -49,7 +49,7 @@ export const ReservaModal = ({
 }: ModalProps) => {
   const renderContent = () => {
     switch (modalState.type) {
-      case "group":
+      case 'group':
         return (
           <>
             <DialogHeader>
@@ -68,12 +68,12 @@ export const ReservaModal = ({
                       openVagasLogradouro(logradouro, reservasDoLogradouro)
                     }
                   />
-                )
+                ),
               )}
             </div>
           </>
         );
-      case "vagasLogradouro": {
+      case 'vagasLogradouro': {
         const reservasPorVaga = modalState.data.reservasDoLogradouro.reduce(
           (acc, reserva) => {
             const vagaId = reserva.vagaId;
@@ -81,7 +81,7 @@ export const ReservaModal = ({
             acc[vagaId].push(reserva);
             return acc;
           },
-          {} as Record<string, Reserva[]>
+          {} as Record<string, Reserva[]>,
         );
 
         return (
@@ -100,19 +100,19 @@ export const ReservaModal = ({
                     reservas={reservasDaVaga}
                     onClick={() => openVagaModal(vagaId, reservasDaVaga)}
                   />
-                )
+                ),
               )}
             </div>
           </>
         );
       }
 
-      case "vaga":
+      case 'vaga':
         return (
           <>
             <DialogHeader>
               <DialogTitle>
-                Horários -{" "}
+                Horários -{' '}
                 {modalState.data.vagaInfo?.endereco?.logradouro ??
                   modalState.data.vagaId}
               </DialogTitle>
@@ -127,7 +127,7 @@ export const ReservaModal = ({
                 .slice()
                 .sort(
                   (a, b) =>
-                    new Date(a.inicio).getTime() - new Date(b.inicio).getTime()
+                    new Date(a.inicio).getTime() - new Date(b.inicio).getTime(),
                 )
                 .map((r) => (
                   <ReservaItem
@@ -139,7 +139,7 @@ export const ReservaModal = ({
             </div>
           </>
         );
-      case "reserva":
+      case 'reserva':
         return (
           <>
             <DialogHeader>
@@ -151,22 +151,22 @@ export const ReservaModal = ({
               <div className="space-y-1">
                 <p className="font-semibold text-base">Reserva</p>
                 <p>
-                  <strong>Vaga:</strong>{" "}
+                  <strong>Vaga:</strong>{' '}
                   {modalState.data.reserva.enderecoVaga.logradouro}
                 </p>
                 <p>
-                  <strong>Bairro:</strong>{" "}
+                  <strong>Bairro:</strong>{' '}
                   {modalState.data.reserva.enderecoVaga.bairro}
                 </p>
                 <p>
-                  <strong>Área:</strong> {modalState.data.vagaInfo?.area ?? "—"}
+                  <strong>Área:</strong> {modalState.data.vagaInfo?.area ?? '—'}
                 </p>
                 <p>
-                  <strong>Início:</strong>{" "}
+                  <strong>Início:</strong>{' '}
                   {new Date(modalState.data.reserva.inicio).toLocaleString()}
                 </p>
                 <p>
-                  <strong>Fim:</strong>{" "}
+                  <strong>Fim:</strong>{' '}
                   {new Date(modalState.data.reserva.fim).toLocaleString()}
                 </p>
                 <p>
@@ -196,14 +196,14 @@ export const ReservaModal = ({
                   <strong>Marca:</strong> {modalState.data.reserva.marcaVeiculo}
                 </p>
                 <p>
-                  <strong>Modelo:</strong>{" "}
+                  <strong>Modelo:</strong>{' '}
                   {modalState.data.reserva.modeloVeiculo}
                 </p>
                 <p>
                   <strong>Placa:</strong> {modalState.data.reserva.placaVeiculo}
                 </p>
                 <p>
-                  <strong>Tamanho:</strong>{" "}
+                  <strong>Tamanho:</strong>{' '}
                   {modalState.data.reserva.tamanhoVeiculo}m
                 </p>
               </div>
@@ -222,7 +222,7 @@ export const ReservaModal = ({
     return (
       <DialogFooter className="flex flex-row items-center justify-between gap-2">
         <div className="flex flex-row gap-2">
-          {modalState.type !== "group" && (
+          {modalState.type !== 'group' && (
             <Button
               variant="outline"
               onClick={goBack}
@@ -233,11 +233,11 @@ export const ReservaModal = ({
           )}
         </div>
         <div className="flex flex-row gap-2">
-          {modalState.type === "reserva" &&
-            modalState.data.reserva.status !== "CONCLUIDA" &&
-            modalState.data.reserva.status !== "RESERVADA" &&
-            modalState.data.reserva.status !== "REMOVIDA" &&
-            modalState.data.reserva.status !== "CANCELADA" && (
+          {modalState.type === 'reserva' &&
+            modalState.data.reserva.status !== 'CONCLUIDA' &&
+            modalState.data.reserva.status !== 'RESERVADA' &&
+            modalState.data.reserva.status !== 'REMOVIDA' &&
+            modalState.data.reserva.status !== 'CANCELADA' && (
               <Button
                 variant="destructive"
                 onClick={() => checkoutForcado(modalState.data.reserva.id)}

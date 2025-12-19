@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
-import { FileText, MapPin, Clock, Trash2, Pencil } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
-import { ReservaGet } from "@/lib/types/reserva";
-import ReservaEditarModal from "./ReservaEditarModal/ReservaEditarModal";
+import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
+import { FileText, MapPin, Clock, Trash2, Pencil } from 'lucide-react';
+import { buttonVariants } from '@/components/ui/button';
+import { ReservaGet } from '@/lib/types/reserva';
+import ReservaEditarModal from './ReservaEditarModal/ReservaEditarModal';
 
 interface ReservaCardProps {
   reserva: ReservaGet;
@@ -31,9 +31,9 @@ export default function ReservaCard({
   }, [reservaInicial]);
 
   const formatarData = (data: string) =>
-    new Date(data).toLocaleString("pt-BR", {
-      dateStyle: "short",
-      timeStyle: "short",
+    new Date(data).toLocaleString('pt-BR', {
+      dateStyle: 'short',
+      timeStyle: 'short',
     });
 
   const handleExcluir = () => {
@@ -50,15 +50,15 @@ export default function ReservaCard({
   return (
     <article
       className={cn(
-        "flex flex-col bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full",
-        "sm:flex-row sm:justify-between",
-        "max-sm:gap-3 max-sm:p-3",
+        'flex flex-col bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full',
+        'sm:flex-row sm:justify-between',
+        'max-sm:gap-3 max-sm:p-3',
         // Usa currentReserva para refletir a cor nova se mudar status
-        currentReserva.status === "ATIVA" && "border-green-900",
-        currentReserva.status === "CONCLUIDA" && "border-b-blue-300",
-        currentReserva.status === "RESERVADA" && "border-green-500",
-        currentReserva.status === "REMOVIDA" && "border-red-500",
-        currentReserva.status === "CANCELADA" && "border-b-blue-200"
+        currentReserva.status === 'ATIVA' && 'border-green-900',
+        currentReserva.status === 'CONCLUIDA' && 'border-b-blue-300',
+        currentReserva.status === 'RESERVADA' && 'border-green-500',
+        currentReserva.status === 'REMOVIDA' && 'border-red-500',
+        currentReserva.status === 'CANCELADA' && 'border-b-blue-200',
       )}
     >
       {/* Conteúdo principal */}
@@ -66,23 +66,23 @@ export default function ReservaCard({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h3 className="text-base sm:text-lg font-semibold text-gray-800 truncate leading-tight">
             {`${currentReserva.logradouro} - ${currentReserva.bairro}` ||
-              "Local não informado"}
+              'Local não informado'}
           </h3>
 
           {/* Status (desktop) */}
           <span
             className={cn(
-              "hidden sm:inline-block px-2 py-0.5 rounded-full text-xs sm:text-sm font-semibold shadow-sm",
-              currentReserva.status === "ATIVA" &&
-                "bg-green-100 text-green-900",
-              currentReserva.status === "CONCLUIDA" &&
-                "bg-gray-100 border-b-blue-300",
-              currentReserva.status === "RESERVADA" &&
-                "bg-green-100 border-green-500",
-              currentReserva.status === "REMOVIDA" &&
-                "bg-gray-100 border-red-500",
-              currentReserva.status === "CANCELADA" &&
-                "bg-gray-100 border-b-blue-200"
+              'hidden sm:inline-block px-2 py-0.5 rounded-full text-xs sm:text-sm font-semibold shadow-sm',
+              currentReserva.status === 'ATIVA' &&
+                'bg-green-100 text-green-900',
+              currentReserva.status === 'CONCLUIDA' &&
+                'bg-gray-100 border-b-blue-300',
+              currentReserva.status === 'RESERVADA' &&
+                'bg-green-100 border-green-500',
+              currentReserva.status === 'REMOVIDA' &&
+                'bg-gray-100 border-red-500',
+              currentReserva.status === 'CANCELADA' &&
+                'bg-gray-100 border-b-blue-200',
             )}
           >
             {currentReserva.status}
@@ -113,9 +113,9 @@ export default function ReservaCard({
         {/* Status (mobile) */}
         <span
           className={cn(
-            "sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center",
-            currentReserva.status === "ATIVA" && "bg-green-100 text-green-900",
-            currentReserva.status === "CONCLUIDA" && "bg-gray-100 text-red-800"
+            'sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center',
+            currentReserva.status === 'ATIVA' && 'bg-green-100 text-green-900',
+            currentReserva.status === 'CONCLUIDA' && 'bg-gray-100 text-red-800',
           )}
         >
           {currentReserva.status}
@@ -125,8 +125,8 @@ export default function ReservaCard({
         <button
           onClick={() => onGerarDocumento?.(currentReserva)}
           className={cn(
-            buttonVariants({ variant: "outline" }),
-            "text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2"
+            buttonVariants({ variant: 'outline' }),
+            'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2',
           )}
         >
           <FileText className="w-4 h-4" />
@@ -135,14 +135,14 @@ export default function ReservaCard({
 
         {/* Botões Editar / Excluir */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-2 w-full sm:w-auto">
-          {currentReserva.status === "RESERVADA" && (
+          {currentReserva.status === 'RESERVADA' && (
             <>
               {/* EXCLUIR */}
               <button
                 onClick={() => setModalAberto(true)}
                 className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 text-red-600"
+                  buttonVariants({ variant: 'outline' }),
+                  'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 text-red-600',
                 )}
               >
                 <Trash2 className="w-4 h-4" />
@@ -153,8 +153,8 @@ export default function ReservaCard({
               <button
                 onClick={() => setModalEditarAberto(true)}
                 className={cn(
-                  buttonVariants({ variant: "outline" }),
-                  "text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2"
+                  buttonVariants({ variant: 'outline' }),
+                  'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2',
                 )}
               >
                 <Pencil className="w-4 h-4" />

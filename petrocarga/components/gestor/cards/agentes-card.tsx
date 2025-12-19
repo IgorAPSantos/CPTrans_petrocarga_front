@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { deleteAgente } from "@/lib/actions/agenteAction";
-import { Agente } from "@/lib/types/agente";
-import { cn } from "@/lib/utils";
-import { IdCard, Mail, Phone, UserCircle, Bell, Trash2 } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import { NotificacaoModal } from "@/components/gestor/modals/notificacaoModal";
+import { deleteAgente } from '@/lib/actions/agenteAction';
+import { Agente } from '@/lib/types/agente';
+import { cn } from '@/lib/utils';
+import { IdCard, Mail, Phone, UserCircle, Bell, Trash2 } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
+import { NotificacaoModal } from '@/components/gestor/modals/notificacaoModal';
 
 interface AgenteCardProps {
   agente: Agente;
@@ -24,7 +24,7 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
       window.location.reload();
     } catch (err) {
       console.error(err);
-      alert("Erro ao excluir agente.");
+      alert('Erro ao excluir agente.');
     }
   };
 
@@ -32,8 +32,8 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
     <>
       <article
         className={cn(
-          "flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full",
-          "border-green-500"
+          'flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full',
+          'border-green-500',
         )}
       >
         {/* Informações */}
@@ -73,23 +73,23 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
           <button
             onClick={() => setIsNotificacaoModalOpen(true)}
             className={cn(
-              "flex items-center justify-center gap-1.5",
-              "bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200",
-              "rounded-lg transition-colors text-sm font-medium",
-              "h-9 w-full sm:w-28"
+              'flex items-center justify-center gap-1.5',
+              'bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200',
+              'rounded-lg transition-colors text-sm font-medium',
+              'h-9 w-full sm:w-28',
             )}
           >
             <Bell className="w-4 h-4" />
             Notificar
           </button>
-          
+
           <button
             onClick={() => setModalExcluirAberto(true)}
             className={cn(
-              "flex items-center justify-center gap-1.5",
-              "bg-red-50 hover:bg-red-100 text-red-700 border border-red-200",
-              "rounded-lg transition-colors text-sm font-medium",
-              "h-9 w-full sm:w-28"
+              'flex items-center justify-center gap-1.5',
+              'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200',
+              'rounded-lg transition-colors text-sm font-medium',
+              'h-9 w-full sm:w-28',
             )}
           >
             <Trash2 className="w-4 h-4" />
@@ -119,7 +119,9 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
               Confirmar exclusão
             </h3>
             <p className="text-gray-600 mb-6">
-              Tem certeza que deseja excluir o agente <strong>{agente.usuario.nome}</strong>? Esta ação não pode ser desfeita.
+              Tem certeza que deseja excluir o agente{' '}
+              <strong>{agente.usuario.nome}</strong>? Esta ação não pode ser
+              desfeita.
             </p>
             <div className="flex justify-end gap-3">
               <button

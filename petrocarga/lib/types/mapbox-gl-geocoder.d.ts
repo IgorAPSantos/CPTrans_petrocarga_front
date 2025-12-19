@@ -1,5 +1,5 @@
-declare module "@mapbox/mapbox-gl-geocoder" {
-  import mapboxgl from "mapbox-gl";
+declare module '@mapbox/mapbox-gl-geocoder' {
+  import mapboxgl from 'mapbox-gl';
 
   interface MapboxGeocoderOptions {
     accessToken: string;
@@ -26,7 +26,10 @@ declare module "@mapbox/mapbox-gl-geocoder" {
     constructor(options: MapboxGeocoderOptions);
     onAdd(map: mapboxgl.Map): HTMLElement;
     onRemove(): void;
-    on(event: "result" | "clear", callback: (event: GeocoderResultEvent) => void): void;
+    on(
+      event: 'result' | 'clear',
+      callback: (event: GeocoderResultEvent) => void,
+    ): void;
   }
 
   export default MapboxGeocoder;

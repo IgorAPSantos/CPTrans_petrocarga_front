@@ -1,13 +1,13 @@
-"use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import StepIndicator from "@/components/reserva/StepIndicator";
-import DaySelection from "@/components/reserva/DaySelection";
-import TimeSelection from "@/components/reserva/TimeSelection";
-import OriginVehicleStep from "@/components/reserva/OriginVehicleStep";
-import Confirmation from "@/components/reserva/Confirmation";
-import { useReserva } from "./hooks/useReserva";
-import { Vaga } from "@/lib/types/vaga";
+'use client';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import StepIndicator from '@/components/reserva/StepIndicator';
+import DaySelection from '@/components/reserva/DaySelection';
+import TimeSelection from '@/components/reserva/TimeSelection';
+import OriginVehicleStep from '@/components/reserva/OriginVehicleStep';
+import Confirmation from '@/components/reserva/Confirmation';
+import { useReserva } from './hooks/useReserva';
+import { Vaga } from '@/lib/types/vaga';
 
 interface ReservaComponentProps {
   selectedVaga: Vaga;
@@ -58,10 +58,9 @@ export default function ReservaComponent({
   };
 
   const toMinutes = (h: string) => {
-  const [hh, mm] = h.split(":").map(Number);
-  return hh * 60 + mm;
-};
-
+    const [hh, mm] = h.split(':').map(Number);
+    return hh * 60 + mm;
+  };
 
   return (
     <div className="p-4 sm:p-6 border rounded-xl shadow-lg max-w-2xl mx-auto bg-white min-h-[80vh] flex flex-col gap-4">
@@ -91,7 +90,7 @@ export default function ReservaComponent({
               setStep(2);
             }}
             availableDays={selectedVaga.operacoesVaga?.map(
-              (op) => op.diaSemanaAsEnum
+              (op) => op.diaSemanaAsEnum,
             )}
           />
         )}
@@ -111,7 +110,7 @@ export default function ReservaComponent({
               await fetchHorariosDisponiveis(
                 selectedDay,
                 selectedVaga,
-                vehicleId
+                vehicleId,
               );
 
               setStep(3);
@@ -137,20 +136,21 @@ export default function ReservaComponent({
         )}
 
         {/* STEP 4 - Seleção do horário final */}
-{step === 4 && startHour && (
-  <TimeSelection
-    times={availableTimes.filter((t) => toMinutes(t) > toMinutes(startHour))}
-    reserved={reservedTimesEnd} // aqui você só marca
-    selected={endHour}
-    onSelect={(t) => {
-      setEndHour(t);
-      setStep(5);
-    }}
-    onBack={() => setStep(3)}
-    color="blue"
-  />
-)}
-
+        {step === 4 && startHour && (
+          <TimeSelection
+            times={availableTimes.filter(
+              (t) => toMinutes(t) > toMinutes(startHour),
+            )}
+            reserved={reservedTimesEnd} // aqui você só marca
+            selected={endHour}
+            onSelect={(t) => {
+              setEndHour(t);
+              setStep(5);
+            }}
+            onBack={() => setStep(3)}
+            color="blue"
+          />
+        )}
 
         {/* STEP 5 - Confirmação */}
         {step === 5 && (
@@ -175,7 +175,7 @@ export default function ReservaComponent({
           <div className="text-center p-6 bg-green-100 text-green-800 rounded-lg">
             <p className="mb-4 font-semibold text-lg">Reserva confirmada ✅</p>
             <button
-              onClick={() => router.push("/motorista/reservas")}
+              onClick={() => router.push('/motorista/reservas')}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg"
             >
               Ir para minhas reservas

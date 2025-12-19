@@ -4,7 +4,7 @@ interface TimeSelectionProps {
   selected: string | null;
   onSelect: (time: string) => void;
   onBack?: () => void;
-  color?: "blue" | "green";
+  color?: 'blue' | 'green';
 }
 
 export default function TimeSelection({
@@ -13,14 +13,14 @@ export default function TimeSelection({
   selected,
   onSelect,
   onBack,
-  color = "blue",
+  color = 'blue',
 }: TimeSelectionProps) {
   const hoverClass =
-    color === "blue"
-      ? "hover:bg-blue-500 hover:text-white"
-      : "hover:bg-green-500 hover:text-white";
+    color === 'blue'
+      ? 'hover:bg-blue-500 hover:text-white'
+      : 'hover:bg-green-500 hover:text-white';
   const selectedClass =
-    color === "blue" ? "bg-blue-600 text-white" : "bg-green-600 text-white";
+    color === 'blue' ? 'bg-blue-600 text-white' : 'bg-green-600 text-white';
 
   return (
     <div className="w-full">
@@ -39,10 +39,10 @@ export default function TimeSelection({
               className={`p-2 rounded border text-center transition
               ${
                 disabled
-                  ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                  ? 'bg-gray-300 cursor-not-allowed text-gray-500'
                   : `cursor-pointer ${hoverClass}`
               }
-              ${isSelected ? selectedClass : ""}`}
+              ${isSelected ? selectedClass : ''}`}
             >
               {time}
             </button>

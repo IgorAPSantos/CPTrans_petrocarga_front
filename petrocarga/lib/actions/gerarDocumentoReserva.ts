@@ -1,5 +1,5 @@
-import { jsPDF } from "jspdf";
-import { getDocumentoReserva } from "./reservaActions";
+import { jsPDF } from 'jspdf';
+import { getDocumentoReserva } from './reservaActions';
 
 export async function gerarDocumentoReserva(reservaId: string) {
   const dados = await getDocumentoReserva(reservaId);
@@ -7,7 +7,7 @@ export async function gerarDocumentoReserva(reservaId: string) {
   const doc = new jsPDF();
 
   doc.setFontSize(16);
-  doc.text("Documento da Reserva", 20, 20);
+  doc.text('Documento da Reserva', 20, 20);
 
   doc.setFontSize(12);
   doc.text(`ID da Reserva: ${dados.id}`, 20, 40);
@@ -18,11 +18,11 @@ export async function gerarDocumentoReserva(reservaId: string) {
   doc.text(`Veículo: ${dados.veiculoModelo} - ${dados.veiculoPlaca}`, 20, 90);
 
   doc.text(
-    `Período: ${new Date(dados.inicio).toLocaleString("pt-BR")} até ${new Date(
-      dados.fim
-    ).toLocaleString("pt-BR")}`,
+    `Período: ${new Date(dados.inicio).toLocaleString('pt-BR')} até ${new Date(
+      dados.fim,
+    ).toLocaleString('pt-BR')}`,
     20,
-    100
+    100,
   );
 
   doc.text(`Status: ${dados.status}`, 20, 110);

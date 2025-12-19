@@ -1,27 +1,27 @@
-"use server";
+'use server';
 
-import { serverApi } from "@/lib/serverApi";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
+import { serverApi } from '@/lib/serverApi';
+import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 // ----------------------
 // ADD GESTOR
 // ----------------------
 export async function addGestor(_: unknown, formData: FormData) {
   const payload = {
-    nome: formData.get("nome") as string,
-    cpf: formData.get("cpf") as string,
-    telefone: formData.get("telefone") as string,
-    email: formData.get("email") as string,
+    nome: formData.get('nome') as string,
+    cpf: formData.get('cpf') as string,
+    telefone: formData.get('telefone') as string,
+    email: formData.get('email') as string,
   };
 
   const res = await serverApi(`/petrocarga/gestores`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
-    let msg = "Erro ao cadastrar gestor";
+    let msg = 'Erro ao cadastrar gestor';
 
     try {
       const data = await res.json();
@@ -31,7 +31,7 @@ export async function addGestor(_: unknown, formData: FormData) {
     return { error: true, message: msg, valores: payload };
   }
 
-  return { error: false, message: "Gestor cadastrado com sucesso!" };
+  return { error: false, message: 'Gestor cadastrado com sucesso!' };
 }
 
 // ----------------------
@@ -39,11 +39,11 @@ export async function addGestor(_: unknown, formData: FormData) {
 // ----------------------
 export async function deleteGestor(gestorId: string) {
   const res = await serverApi(`/petrocarga/gestores/${gestorId}`, {
-    method: "DELETE",
+    method: 'DELETE',
   });
 
   if (!res.ok) {
-    let msg = "Erro ao deletar gestor";
+    let msg = 'Erro ao deletar gestor';
 
     try {
       const err = await res.json();
@@ -53,30 +53,30 @@ export async function deleteGestor(gestorId: string) {
     return { error: true, message: msg };
   }
 
-  return { error: false, message: "Gestor deletado com sucesso!" };
+  return { error: false, message: 'Gestor deletado com sucesso!' };
 }
 
 // ----------------------
 // ATUALIZAR GESTOR
 // ----------------------
 export async function atualizarGestor(formData: FormData) {
-  const usuarioId = formData.get("id") as string;
+  const usuarioId = formData.get('id') as string;
 
   const payload = {
-    nome: formData.get("nome") as string,
-    cpf: formData.get("cpf") as string,
-    telefone: formData.get("telefone") as string,
-    email: formData.get("email") as string,
-    senha: formData.get("senha") as string,
+    nome: formData.get('nome') as string,
+    cpf: formData.get('cpf') as string,
+    telefone: formData.get('telefone') as string,
+    email: formData.get('email') as string,
+    senha: formData.get('senha') as string,
   };
 
   const res = await serverApi(`/petrocarga/gestores/${usuarioId}`, {
-    method: "PATCH",
+    method: 'PATCH',
     body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
-    let msg = "Erro ao atualizar gestor"; 
+    let msg = 'Erro ao atualizar gestor';
     try {
       const err = await res.json();
       msg = err.message ?? msg;
@@ -84,25 +84,24 @@ export async function atualizarGestor(formData: FormData) {
 
     return { error: true, message: msg, valores: payload };
   }
-  
-  return { error: false, message: "Gestor atualizado com sucesso!" };
 
-  revalidatePath("/gestor/perfil");
-  revalidatePath("/gestor/gestores");
-  
-  redirect("/gestor/perfil");
+  return { error: false, message: 'Gestor atualizado com sucesso!' };
+
+  revalidatePath('/gestor/perfil');
+  revalidatePath('/gestor/gestores');
+
+  redirect('/gestor/perfil');
 }
-
 
 // ----------------------
 // GET GESTOR
 // ----------------------
 export async function getGestores() {
   const res = await serverApi(`/petrocarga/gestores`, {
-    method: "GET",
+    method: 'GET',
   });
   if (!res.ok) {
-    let msg = "Erro ao buscar gestores";
+    let msg = 'Erro ao buscar gestores';
 
     try {
       const err = await res.json();
@@ -123,8 +122,8 @@ export async function getGestorByUserId(userId: string) {
   const res = await serverApi(`/petrocarga/gestores/${userId}`);
 
   if (!res.ok) {
-    let msg = "Erro ao buscar gestor";
-    
+    let msg = 'Erro ao buscar gestor';
+
     try {
       const err = await res.json();
       msg = err.message ?? msg;

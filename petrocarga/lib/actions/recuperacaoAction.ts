@@ -14,16 +14,17 @@ export async function solicitarRecuperacaoSenha(email: string): Promise<void> {
   try {
     const res = await serverApi('/petrocarga/auth/solicitar-recuperacao', {
       method: 'POST',
-      body: JSON.stringify({ email })
+      body: JSON.stringify({ email }),
     });
 
     const data = await res.json();
 
     if (!res.ok || !data.success) {
       // Se o backend deu uma mensagem, usa ela. Senão, mensagem genérica.
-      throw new Error(data.message || 'Não foi possível enviar o código de recuperação');
+      throw new Error(
+        data.message || 'Não foi possível enviar o código de recuperação',
+      );
     }
-
   } catch (error: unknown) {
     // Simplesmente passa a mensagem adiante
     throw new Error(extractMessage(error));
@@ -33,15 +34,15 @@ export async function solicitarRecuperacaoSenha(email: string): Promise<void> {
 // 2. VALIDAR CÓDIGO
 export async function validarCodigoRecuperacao(
   email: string,
-  codigo: string
+  codigo: string,
 ): Promise<void> {
   try {
     const res = await serverApi('/petrocarga/auth/validar-codigo', {
       method: 'POST',
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         email: email.trim(),
-        codigo: codigo.trim().toUpperCase()
-      })
+        codigo: codigo.trim().toUpperCase(),
+      }),
     });
 
     const data = await res.json();
@@ -50,7 +51,6 @@ export async function validarCodigoRecuperacao(
       // Confia na mensagem do backend
       throw new Error(data.message || 'Código inválido ou expirado');
     }
-
   } catch (error: unknown) {
     throw new Error(extractMessage(error));
   }
@@ -60,16 +60,16 @@ export async function validarCodigoRecuperacao(
 export async function redefinirSenhaComCodigo(
   email: string,
   codigo: string,
-  novaSenha: string
+  novaSenha: string,
 ): Promise<void> {
   try {
     const res = await serverApi('/petrocarga/auth/redefinir-senha-com-codigo', {
       method: 'POST',
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         email: email.trim(),
         codigo: codigo.trim().toUpperCase(),
-        novaSenha
-      })
+        novaSenha,
+      }),
     });
 
     const data = await res.json();
@@ -77,7 +77,6 @@ export async function redefinirSenhaComCodigo(
     if (!res.ok || !data.success) {
       throw new Error(data.message || 'Não foi possível redefinir a senha');
     }
-
   } catch (error: unknown) {
     throw new Error(extractMessage(error));
   }

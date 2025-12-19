@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import { useRef, useEffect, useCallback } from "react";
-import mapboxgl from "mapbox-gl";
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { useRef, useEffect, useCallback } from 'react';
+import mapboxgl from 'mapbox-gl';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
-import { useVagas } from "./hooks/useVagas";
-import { useMapbox } from "./hooks/useMapbox";
-import { addVagaMarkersReserva } from "./utils/markerUtilsReserva";
-import { Vaga } from "@/lib/types/vaga";
+import { useVagas } from './hooks/useVagas';
+import { useMapbox } from './hooks/useMapbox';
+import { addVagaMarkersReserva } from './utils/markerUtilsReserva';
+import { Vaga } from '@/lib/types/vaga';
 
 interface MapReservaProps {
   onClickVaga?: (vaga: Vaga) => void;
@@ -19,7 +19,7 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
   const { vagas, loading, error } = useVagas();
-  const { map } = useMapbox({ 
+  const { map } = useMapbox({
     containerRef: mapContainer,
     enableSearch: true,
     enableNavigation: false,
@@ -39,7 +39,6 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
     console.log(`Marcadores renderizados: ${vagas.length}`);
   }, [map, vagas, onClickVaga]);
 
-
   useEffect(() => {
     if (!map) return;
 
@@ -51,21 +50,20 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
 
     return () => {
       if (map && map.isStyleLoaded()) {
-         map.off('load', renderMarkers);
+        map.off('load', renderMarkers);
       }
-      
+
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
     };
-
-  }, [map, vagas, renderMarkers]); 
+  }, [map, vagas, renderMarkers]);
 
   return (
     <div className="w-full h-full rounded-lg overflow-visible relative">
       <div
         ref={mapContainer}
         className="w-full h-full rounded-lg shadow-md overflow-visible"
-        style={{ minHeight: "300px" }}
+        style={{ minHeight: '300px' }}
       />
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-10">

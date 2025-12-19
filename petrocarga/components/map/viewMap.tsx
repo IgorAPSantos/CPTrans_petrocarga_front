@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useRef, useEffect } from "react";
-import mapboxgl from "mapbox-gl";
-import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css";
-import "mapbox-gl/dist/mapbox-gl.css";
+import { useRef, useEffect } from 'react';
+import mapboxgl from 'mapbox-gl';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
-import { useVagas } from "./hooks/useVagas";
-import { useMapbox } from "./hooks/useMapbox";
-import { addVagaMarkers } from "./utils/markerUtils";
-import { Vaga } from "@/lib/types/vaga";
+import { useVagas } from './hooks/useVagas';
+import { useMapbox } from './hooks/useMapbox';
+import { addVagaMarkers } from './utils/markerUtils';
+import { Vaga } from '@/lib/types/vaga';
 
 interface MapboxFeature {
   id: string;
   place_name: string;
-  geometry: { type: "Point"; coordinates: [number, number] };
+  geometry: { type: 'Point'; coordinates: [number, number] };
 }
 
 interface MapProps {
@@ -54,7 +54,7 @@ export function ViewMap({ selectedPlace, onSelectPlace }: MapProps) {
       <div
         ref={mapContainer}
         className="w-full h-full rounded-lg shadow-md overflow-visible"
-        style={{ minHeight: "300px" }}
+        style={{ minHeight: '300px' }}
       />
       {loading && (
         <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-50 z-10">
