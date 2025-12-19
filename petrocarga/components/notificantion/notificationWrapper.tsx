@@ -17,26 +17,18 @@ export function NotificationWrapper({ children }: NotificationWrapperProps) {
     setMounted(true);
   }, []);
 
-  // Aguarda o mount completo
   if (!mounted || loading) {
-    console.log('NotificationWrapper: Aguardando mount/loading...');
     return <>{children}</>;
   }
 
-  // Se não está logado, não envolve com provider
   if (!isAuthenticated || !user?.id) {
-    console.log('NotificationWrapper: Usuário não autenticado, pulando provider');
     return <>{children}</>;
   }
 
-  // Usuário autenticado - envolve com provider
-  console.log('NotificationWrapper: Envolvendo com provider para usuário:', user.id);
-  
   return (
     <NotificationProvider
       usuarioId={user.id}
       maxNotifications={50}
-      reconnectInterval={10000} // 10 segundos para reconexão
       enableSSE={true}
     >
       {children}

@@ -1,4 +1,4 @@
-interface Notification {
+export interface Notification {
   id: string;
   titulo: string;
   mensagem: string;
@@ -8,7 +8,7 @@ interface Notification {
   metada: JSON;
 }
 
-interface NotificationContextData {
+export interface NotificationContextData {
   notifications: Notification[];
   isConnected: boolean;
   isLoading: boolean;
@@ -20,4 +20,5 @@ interface NotificationContextData {
   markAllAsRead: () => void;
   loadHistorico: () => Promise<void>;
   refreshNotifications: () => Promise<void>;
+  reconnect: () => void;
 }

@@ -1,9 +1,11 @@
 'use client';
 
 import { useNotifications } from "@/context/NotificationContext";
-import { Bell, BellOff, CheckCheck, X, Wifi, WifiOff } from "lucide-react";
+import { Notification } from "@/lib/types/notificacao";
+import { Bell, BellOff, CheckCheck, X, Wifi, WifiOff, RefreshCw } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useCallback } from "react";
 
 export default function NotificacoesPage() {
   const {
@@ -13,9 +15,10 @@ export default function NotificacoesPage() {
     error,
     removeNotification,
     clearNotifications,
+    reconnect,
   } = useNotifications();
 
-  const formatarTempo = (timestamp: string) => {
+  const formatarTempo = useCallback((timestamp: string) => {
     try {
       return formatDistanceToNow(new Date(timestamp), {
         addSuffix: true,
@@ -24,9 +27,9 @@ export default function NotificacoesPage() {
     } catch {
       return "Agora";
     }
-  };
+  }, []);
 
-  const getIconeNotificacao = (tipo: string) => {
+  const getIconeNotificacao = useCallback((tipo: Notification['tipo']) => {
     switch (tipo) {
       case "RESERVA":
         return "🚗";
@@ -41,9 +44,9 @@ export default function NotificacoesPage() {
       default:
         return "📢";
     }
-  };
+  }, []);
 
-  const getCorNotificacao = (tipo: string) => {
+  const getCorNotificacao = useCallback((tipo: Notification['tipo']) => {
     switch (tipo) {
       case "RESERVA":
         return "border-l-blue-500 bg-blue-50";
@@ -58,7 +61,7 @@ export default function NotificacoesPage() {
       default:
         return "border-l-gray-500 bg-gray-50";
     }
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
@@ -102,6 +105,18 @@ export default function NotificacoesPage() {
                   </>
                 )}
               </div>
+
+              {/* Botão de Reconexão Manual (apenas se estiver offline) */}
+              {!isConnected && (
+                <button
+                  onClick={reconnect}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  title="Tentar reconectar"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  Reconectar
+                </button>
+              )}
 
               {/* Botão Limpar Tudo */}
               {notifications.length > 0 && (
@@ -157,7 +172,7 @@ export default function NotificacoesPage() {
               </p>
             </div>
           ) : (
-            notifications.map((notif) => (
+            notifications.map((notif: Notification) => (
               <div
                 key={notif.id}
                 className={`bg-white rounded-lg shadow-md p-4 border-l-4 ${getCorNotificacao(
