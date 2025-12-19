@@ -16,9 +16,9 @@ export async function addMotorista(_: unknown, formData: FormData) {
       email: formData.get('email') as string,
       senha: formData.get('senha') as string,
     },
-    tipoCnh: (formData.get('tipoCNH') as string)?.toUpperCase(),
-    numeroCnh: formData.get('numeroCNH') as string,
-    dataValidadeCnh: formData.get('dataValidadeCNH') as string,
+    tipoCnh: (formData.get('tipoCnh') as string)?.toUpperCase(),
+    numeroCnh: formData.get('numeroCnh') as string,
+    dataValidadeCnh: formData.get('dataValidadeCnh') as string,
   };
 
   const res = await serverApi(`/petrocarga/motoristas/cadastro`, {
@@ -32,7 +32,7 @@ export async function addMotorista(_: unknown, formData: FormData) {
     try {
       const data = await res.json();
       msg = data.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg, valores: payload };
   }
@@ -53,7 +53,7 @@ export async function deleteMotorista(motoristaId: string) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
@@ -76,9 +76,9 @@ export async function atualizarMotorista(formData: FormData) {
       email: formData.get('email') as string,
       senha: formData.get('senha') as string,
     },
-    tipoCNH: (formData.get('tipoCNH') as string)?.toUpperCase(),
-    numeroCNH: formData.get('numeroCNH') as string,
-    dataValidadeCNH: formData.get('dataValidadeCNH') as string,
+    tipoCnh: (formData.get('tipoCnh') as string)?.toUpperCase(),
+    numeroCnh: formData.get('numeroCnh') as string,
+    dataValidadeCnh: formData.get('dataValidadeCnh') as string,
   };
 
   const res = await serverApi(`/petrocarga/motoristas/${id}`, {
@@ -92,7 +92,7 @@ export async function atualizarMotorista(formData: FormData) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
@@ -114,7 +114,7 @@ export async function getMotoristaByUserId(userId: string) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
@@ -135,7 +135,7 @@ export async function getMotoristas() {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
