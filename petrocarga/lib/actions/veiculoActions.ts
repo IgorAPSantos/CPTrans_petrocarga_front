@@ -38,7 +38,7 @@ function buildVeiculoPayload(
   };
 }
 
-function PutVeiculoPayload(
+function PatchVeiculoPayload(
   formData: FormData,
   cpf: string | null,
   cnpj: string | null,
@@ -120,10 +120,10 @@ export async function atualizarVeiculo(formData: FormData) {
     return { error: true, message: doc.error, valores: null };
   }
 
-  const payload = PutVeiculoPayload(formData, doc.cpf, doc.cnpj);
+  const payload = PatchVeiculoPayload(formData, doc.cpf, doc.cnpj);
 
   const res = await serverApi(`/petrocarga/veiculos/${id}/${usuarioId}`, {
-    method: 'PUT',
+    method: 'PATCH',
     body: JSON.stringify(payload),
   });
 
