@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/hooks/useAuth";
-import { getGestor } from "@/lib/actions/gestorActions";
+import { getGestores } from "@/lib/actions/gestorActions";
 import { Loader2 } from "lucide-react";
 import GestorCard from "@/components/gestor/cards/gestores-card";
 import { Gestor } from "@/lib/types/gestor";
@@ -21,8 +21,8 @@ export default function GestoresPage() {
       setError(null);
 
       try {
-        const result = await getGestor();
-        setGestores(result.gestor);
+        const result = await getGestores();
+        setGestores(result.gestores);
       } catch (err) {
         console.error("Erro ao carregar os gestores:", err);
         setError("Erro ao buscar os gestores cadastrados. Tente novamente mais tarde.");
