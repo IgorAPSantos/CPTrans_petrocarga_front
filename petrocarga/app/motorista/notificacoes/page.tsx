@@ -184,8 +184,10 @@ export default function NotificacoesPage() {
               <div
                 key={notif.id}
                 className={`bg-white rounded-lg shadow-md p-4 border-l-4 ${getCorNotificacao(
-                  notif.tipo,
-                )} hover:shadow-lg transition-shadow ${notif.lida ? 'opacity-80' : ''}`}
+                  notif.tipo
+                )} hover:shadow-lg transition-shadow ${
+                  notif.lida ? 'opacity-80' : ''
+                }`}
               >
                 <div className="flex items-start justify-between gap-4">
                   {/* Conteúdo */}
@@ -213,20 +215,23 @@ export default function NotificacoesPage() {
                           {notif.tipo}
                         </span>
                         <span className="text-xs text-gray-500">
-                          {formatarTempo(notif.timestamp)}
+                          {formatarTempo(notif.criada_em)}
                         </span>
                       </div>
 
                       {/* Dados adicionais */}
-                      {notif.metada && Object.keys(notif.metada).length > 0 && (
-                        <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
-                          {Object.entries(notif.metada).map(([key, value]) => (
-                            <div key={key} className="truncate">
-                              <strong>{key}:</strong> {String(value)}
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                      {notif.metadata &&
+                        Object.keys(notif.metadata).length > 0 && (
+                          <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                            {Object.entries(notif.metadata).map(
+                              ([key, value]) => (
+                                <div key={key} className="truncate">
+                                  <strong>{key}:</strong> {String(value)}
+                                </div>
+                              )
+                            )}
+                          </div>
+                        )}
                     </div>
                   </div>
 

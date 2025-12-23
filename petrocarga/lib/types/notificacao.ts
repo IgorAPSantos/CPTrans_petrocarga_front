@@ -4,8 +4,8 @@ export interface Notification {
   mensagem: string;
   tipo: 'RESERVA' | 'VAGA' | 'VEICULO' | 'MOTORISTA' | 'SISTEMA';
   lida: boolean;
-  timestamp: string;
-  metada: JSON;
+  criada_em: string;
+  metadata: Record<string, unknown>;
 }
 
 export interface NotificationContextData {

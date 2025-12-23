@@ -1,7 +1,6 @@
 'use client';
 
-import { useContext, useEffect, useState } from 'react';
-import { AuthContext } from '@/context/AuthContext';
+import { useAuth } from '@/context/AuthContext'; // Use o hook correto
 import { NotificationProvider } from '@/context/NotificationContext';
 import { ReactNode } from 'react';
 
@@ -10,14 +9,9 @@ interface NotificationWrapperProps {
 }
 
 export function NotificationWrapper({ children }: NotificationWrapperProps) {
-  const { isAuthenticated, user, loading } = useContext(AuthContext);
-  const [mounted, setMounted] = useState(false);
+  const { isAuthenticated, user, loading } = useAuth(); // Use o hook
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted || loading) {
+  if (loading) {
     return <>{children}</>;
   }
 

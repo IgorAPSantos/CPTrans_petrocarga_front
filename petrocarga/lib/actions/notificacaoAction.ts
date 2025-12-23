@@ -22,7 +22,7 @@ export async function Notificacao(formData: FormData) {
     {
       method: 'POST',
       body: JSON.stringify(payload),
-    },
+    }
   );
 
   if (!res.ok) {
@@ -57,7 +57,7 @@ export async function NotificacaoPorPermissao(formData: FormData) {
     {
       method: 'POST',
       body: JSON.stringify(payload),
-    },
+    }
   );
 
   if (!res.ok) {
@@ -77,7 +77,7 @@ export async function getNotificacoesUsuario(usuarioId: string) {
     `/petrocarga/notificacoes/byUsuario/${usuarioId}`,
     {
       method: 'GET',
-    },
+    }
   );
 
   if (!res.ok) {

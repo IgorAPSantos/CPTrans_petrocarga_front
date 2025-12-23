@@ -39,7 +39,7 @@ export default function EnviarNotificacoesPage() {
 
   // Seleção de usuários
   const [usuariosSelecionados, setUsuariosSelecionados] = useState<string[]>(
-    [],
+    []
   );
   const [enviando, setEnviando] = useState(false);
   const [resultado, setResultado] = useState<{
@@ -135,9 +135,7 @@ export default function EnviarNotificacoesPage() {
 
   const toggleUsuario = (id: string) => {
     setUsuariosSelecionados((prev) =>
-      prev.includes(id)
-        ? prev.filter((userId) => userId !== id)
-        : [...prev, id],
+      prev.includes(id) ? prev.filter((userId) => userId !== id) : [...prev, id]
     );
   };
 
@@ -184,7 +182,7 @@ export default function EnviarNotificacoesPage() {
             },
             enviadoEm: new Date().toISOString(),
             tipoEnvio: 'INDIVIDUAL',
-          }),
+          })
         );
 
         const result = await Notificacao(formData);
@@ -238,7 +236,7 @@ export default function EnviarNotificacoesPage() {
           },
           enviadoEm: new Date().toISOString(),
           tipoEnvio: 'GRUPO',
-        }),
+        })
       );
 
       const result = await NotificacaoPorPermissao(formData);
@@ -520,8 +518,8 @@ export default function EnviarNotificacoesPage() {
                                 usuario.tipo === 'MOTORISTA'
                                   ? 'bg-blue-100 text-blue-800'
                                   : usuario.tipo === 'AGENTE'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-purple-100 text-purple-800'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-purple-100 text-purple-800'
                               }`}
                             >
                               {usuario.tipo}
@@ -559,8 +557,8 @@ export default function EnviarNotificacoesPage() {
                     {grupoSelecionado === 'MOTORISTA'
                       ? motoristas.length
                       : grupoSelecionado === 'AGENTE'
-                        ? agentes.length
-                        : gestores.length}{' '}
+                      ? agentes.length
+                      : gestores.length}{' '}
                     usuários)
                   </>
                 )}
