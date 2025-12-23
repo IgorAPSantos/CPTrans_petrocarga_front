@@ -5,16 +5,17 @@ import {
 } from '@/lib/actions/reservaActions';
 import { reservarVagaAgente } from '@/lib/actions/reservaActions'; // importa a função do agente
 import { Reserva } from '@/lib/types/reserva';
+import { ConfirmResult } from '@/lib/types/confirmResult';
 
 // ----------------- RESERVAS -----------------
 export const fetchReservasAtivasDoDia = async (
   vagaId: string,
-  day: Date,
+  day: Date
 ): Promise<Reserva[]> => {
   try {
     const reservas = await getReservasAtivas(vagaId);
     return reservas.filter(
-      (r: Reserva) => new Date(r.inicio).toDateString() === day.toDateString(),
+      (r: Reserva) => new Date(r.inicio).toDateString() === day.toDateString()
     );
   } catch (error) {
     console.error('Erro ao buscar reservas ativas:', error);
@@ -30,7 +31,7 @@ export const fetchReservasBloqueios = async (
     | 'VUC'
     | 'CAMINHONETA'
     | 'CAMINHAO_MEDIO'
-    | 'CAMINHAO_LONGO',
+    | 'CAMINHAO_LONGO'
 ) => {
   try {
     const bloqueios = await getReservasBloqueios(vagaId, data, tipoVeiculo);
@@ -42,23 +43,33 @@ export const fetchReservasBloqueios = async (
 };
 
 // ----------------- CONFIRMAR RESERVA MOTORISTA -----------------
-export const confirmarReserva = async (formData: FormData) => {
-  try {
-    await reservarVaga(formData);
-    return true;
-  } catch (error) {
-    console.error('Erro ao confirmar reserva:', error);
-    return false;
+export const confirmarReserva = async (
+  formData: FormData
+): Promise<ConfirmResult> => {
+  const result = await reservarVaga(formData);
+
+  if (!result.success) {
+    return {
+      success: false,
+      message: result.message,
+    };
   }
+
+  return { success: true };
 };
 
 // ----------------- CONFIRMAR RESERVA AGENTE -----------------
-export const confirmarReservaAgente = async (formData: FormData) => {
-  try {
-    await reservarVagaAgente(formData);
-    return true;
-  } catch (error) {
-    console.error('Erro ao confirmar reserva do agente:', error);
-    return false;
+export const confirmarReservaAgente = async (
+  formData: FormData
+): Promise<ConfirmResult> => {
+  const result = await reservarVagaAgente(formData);
+
+  if (!result.success) {
+    return {
+      success: false,
+      message: result.message,
+    };
   }
+
+  return { success: true };
 };

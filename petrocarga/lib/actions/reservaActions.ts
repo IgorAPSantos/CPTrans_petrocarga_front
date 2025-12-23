@@ -2,12 +2,12 @@
 
 import { serverApi } from '@/lib/serverApi';
 import { revalidatePath } from 'next/cache';
+import { ConfirmResult } from '../types/confirmResult';
 
 // ----------------------
 // POST RESERVA MOTORISTA
 // ----------------------
-
-export async function reservarVaga(formData: FormData) {
+export async function reservarVaga(formData: FormData): Promise<ConfirmResult> {
   const body = {
     vagaId: formData.get('vagaId'),
     motoristaId: formData.get('motoristaId'),
@@ -20,19 +20,33 @@ export async function reservarVaga(formData: FormData) {
 
   const res = await serverApi('/petrocarga/reservas', {
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify(body),
   });
 
+  // 🔴 erro de regra de negócio (400)
   if (!res.ok) {
-    throw new Error(await res.text());
+    const errorBody = await res.json();
+
+    return {
+      success: false,
+      message: errorBody.erro ?? 'Erro ao reservar vaga.',
+    };
   }
 
-  return res.json();
+  // sucesso
+  await res.json(); // se não precisar dos dados, só consome
+  return { success: true };
 }
+
 // ----------------------
 // POST RESERVA AGENTE
 // ----------------------
-export async function reservarVagaAgente(formData: FormData) {
+export async function reservarVagaAgente(
+  formData: FormData
+): Promise<ConfirmResult> {
   const body = {
     vagaId: formData.get('vagaId'),
     tipoVeiculo: formData.get('tipoVeiculo'),
@@ -50,10 +64,16 @@ export async function reservarVagaAgente(formData: FormData) {
   });
 
   if (!res.ok) {
-    throw new Error(await res.text());
+    const errorBody = await res.json();
+
+    return {
+      success: false,
+      message: errorBody.erro ?? 'Erro ao confirmar reserva do agente.',
+    };
   }
 
-  return res.json();
+  await res.json();
+  return { success: true };
 }
 
 // ----------------------

@@ -4,6 +4,7 @@ import { Veiculo } from '@/lib/types/veiculo';
 import { Reserva } from '@/lib/types/reserva';
 import { Vaga } from '@/lib/types/vaga';
 import { ReservaState } from '@/lib/types/reservaState';
+import { ConfirmResult } from '@/lib/types/confirmResult';
 
 import { getMotoristaByUserId } from '@/lib/actions/motoristaActions';
 import { getVeiculosUsuario } from '@/lib/actions/veiculoActions';
@@ -89,18 +90,18 @@ export function useReserva(selectedVaga: Vaga | null) {
       const bloqueios = await fetchReservasBloqueios(
         vaga.id,
         dataFormatada,
-        tipoVeiculo,
+        tipoVeiculo
       );
 
       const horariosOcupadosReais = bloqueios.flatMap((reserva: Reserva) =>
-        gerarHorariosOcupados(reserva),
+        gerarHorariosOcupados(reserva)
       );
 
       const todosHorarios = gerarHorariosDia(operacao);
 
       const horariosFiltradosHoje = removerHorariosPassadosDeHoje(
         day,
-        todosHorarios,
+        todosHorarios
       );
 
       setReservaState((prev) => ({
@@ -112,7 +113,7 @@ export function useReserva(selectedVaga: Vaga | null) {
 
       return horariosFiltradosHoje;
     },
-    [vehicles, reservaState.tipoVeiculoAgente, isAgente],
+    [vehicles, reservaState.tipoVeiculoAgente, isAgente]
   );
 
   // ====================================================
@@ -133,7 +134,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       const limiteHoras = limites[vaga.area] ?? 1;
 
       const inicio = new Date(
-        `${reservaState.selectedDay.toISOString().split('T')[0]}T${start}:00`,
+        `${reservaState.selectedDay.toISOString().split('T')[0]}T${start}:00`
       );
 
       const fimMax = new Date(inicio);
@@ -142,14 +143,14 @@ export function useReserva(selectedVaga: Vaga | null) {
       const horariosPossiveis = reservaState.availableTimes.filter(
         (t) =>
           reservaState.availableTimes.indexOf(t) >
-          reservaState.availableTimes.indexOf(start),
+          reservaState.availableTimes.indexOf(start)
       );
 
       const ocupados = [...reservaState.reservedTimesStart];
 
       const horariosBloqueados = horariosPossiveis.filter((h) => {
         const d = new Date(
-          `${reservaState.selectedDay!.toISOString().split('T')[0]}T${h}:00`,
+          `${reservaState.selectedDay!.toISOString().split('T')[0]}T${h}:00`
         );
 
         if (d > fimMax) return true;
@@ -161,7 +162,7 @@ export function useReserva(selectedVaga: Vaga | null) {
 
       return horariosBloqueados;
     },
-    [reservaState],
+    [reservaState]
   );
 
   // Quando selecionar horário inicial → recalcula bloqueios do horário final
@@ -170,7 +171,7 @@ export function useReserva(selectedVaga: Vaga | null) {
 
     const bloqueados = calcularReservedTimesEnd(
       reservaState.startHour,
-      selectedVaga,
+      selectedVaga
     );
 
     setReservaState((prev) => {
@@ -236,7 +237,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       fetchHorariosDisponiveis(
         reservaState.selectedDay,
         selectedVaga,
-        reservaState.selectedVehicleId,
+        reservaState.selectedVehicleId
       );
     }
   }, [
@@ -280,8 +281,13 @@ export function useReserva(selectedVaga: Vaga | null) {
   //  CONFIRMAR RESERVA
   // ====================================================
 
-  const handleConfirm = useCallback(async (): Promise<boolean> => {
-    if (!user?.id || !selectedVaga) return false;
+  const handleConfirm = useCallback(async (): Promise<ConfirmResult> => {
+    if (!user?.id || !selectedVaga) {
+      return {
+        success: false,
+        message: 'Sessão inválida ou vaga não selecionada.',
+      };
+    }
 
     const {
       selectedDay,
@@ -293,17 +299,26 @@ export function useReserva(selectedVaga: Vaga | null) {
       origin,
     } = reservaState;
 
-    if (!selectedDay || !startHour || !endHour) return false;
+    if (!selectedDay || !startHour || !endHour) {
+      return { success: false, message: 'Data ou horário inválido.' };
+    }
 
     const formData = new FormData();
     formData.append('vagaId', selectedVaga.id);
 
     if (isAgente) {
-      if (!tipoVeiculoAgente || !placaAgente) return false;
+      if (!tipoVeiculoAgente || !placaAgente) {
+        return {
+          success: false,
+          message: 'Informe o tipo do veículo e a placa.',
+        };
+      }
       formData.append('tipoVeiculo', tipoVeiculoAgente);
       formData.append('placa', placaAgente);
     } else {
-      if (!motoristaId || !selectedVehicleId || !origin) return false;
+      if (!motoristaId || !selectedVehicleId || !origin) {
+        return { success: false, message: 'Dados do motorista incompletos.' };
+      }
       formData.append('motoristaId', motoristaId);
       formData.append('veiculoId', selectedVehicleId);
       formData.append('cidadeOrigem', origin);
@@ -312,13 +327,23 @@ export function useReserva(selectedVaga: Vaga | null) {
     formData.append('inicio', formatDateTime(selectedDay, startHour));
     formData.append('fim', formatDateTime(selectedDay, endHour));
 
-    const success = isAgente
+    const result = isAgente
       ? await confirmarReservaAgente(formData)
       : await confirmarReserva(formData);
 
-    if (success) reset();
+    if (!result.success) {
+      return {
+        success: false,
+        message: result.message ?? 'Não foi possível confirmar a reserva.',
+      };
+    }
 
-    return success;
+    reset();
+
+    return {
+      success: true,
+      message: 'Reserva confirmada com sucesso!',
+    };
   }, [user, selectedVaga, motoristaId, reservaState, isAgente, reset]);
 
   // ====================================================

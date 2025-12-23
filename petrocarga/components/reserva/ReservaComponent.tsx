@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import StepIndicator from '@/components/reserva/StepIndicator';
@@ -8,6 +9,7 @@ import OriginVehicleStep from '@/components/reserva/OriginVehicleStep';
 import Confirmation from '@/components/reserva/Confirmation';
 import { useReserva } from './hooks/useReserva';
 import { Vaga } from '@/lib/types/vaga';
+import toast from 'react-hot-toast';
 
 interface ReservaComponentProps {
   selectedVaga: Vaga;
@@ -20,6 +22,7 @@ export default function ReservaComponent({
 }: ReservaComponentProps) {
   const router = useRouter();
   const reserva = useReserva(selectedVaga);
+
   const {
     step,
     setStep,
@@ -43,6 +46,7 @@ export default function ReservaComponent({
   } = reserva;
 
   const [success, setSuccess] = useState<boolean | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   const vehiclesForStep = vehicles.map((v) => ({
     id: v.id,
@@ -50,11 +54,21 @@ export default function ReservaComponent({
     plate: v.placa,
   }));
 
-  // confirmação da reserva
+  // ==========================
+  // CONFIRMAR RESERVA
+  // ==========================
   const onConfirm = async () => {
     const result = await handleConfirm();
-    setSuccess(result);
-    setStep(6); // step 6 = feedback visual
+
+    if (!result.success) {
+      toast.error('Erro ao confirmar reserva');
+    } else {
+      toast.success('Reserva confirmada com sucesso!');
+    }
+
+    setSuccess(result.success);
+    setFeedbackMessage(result.message ?? null);
+    setStep(6);
   };
 
   const toMinutes = (h: string) => {
@@ -90,7 +104,7 @@ export default function ReservaComponent({
               setStep(2);
             }}
             availableDays={selectedVaga.operacoesVaga?.map(
-              (op) => op.diaSemanaAsEnum,
+              (op) => op.diaSemanaAsEnum
             )}
           />
         )}
@@ -110,9 +124,8 @@ export default function ReservaComponent({
               await fetchHorariosDisponiveis(
                 selectedDay,
                 selectedVaga,
-                vehicleId,
+                vehicleId
               );
-
               setStep(3);
             }}
             onBack={() => setStep(1)}
@@ -139,9 +152,9 @@ export default function ReservaComponent({
         {step === 4 && startHour && (
           <TimeSelection
             times={availableTimes.filter(
-              (t) => toMinutes(t) > toMinutes(startHour),
+              (t) => toMinutes(t) > toMinutes(startHour)
             )}
-            reserved={reservedTimesEnd} // aqui você só marca
+            reserved={reservedTimesEnd}
             selected={endHour}
             onSelect={(t) => {
               setEndHour(t);
@@ -170,33 +183,81 @@ export default function ReservaComponent({
           />
         )}
 
-        {/* STEP 6 - Feedback */}
-        {step === 6 && success === true && (
-          <div className="text-center p-6 bg-green-100 text-green-800 rounded-lg">
-            <p className="mb-4 font-semibold text-lg">Reserva confirmada ✅</p>
-            <button
-              onClick={() => router.push('/motorista/reservas')}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg"
-            >
-              Ir para minhas reservas
-            </button>
-          </div>
-        )}
+        {/* STEP 6 - FEEDBACK */}
+        {step === 6 && (
+          <div className="flex flex-col items-center justify-center min-h-[400px] w-full p-8 animate-in fade-in zoom-in duration-300">
+            {success ? (
+              <div className="flex flex-col items-center text-center">
+                {/* Ícone de Sucesso Animado */}
+                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                  <svg
+                    className="w-10 h-10"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
 
-        {step === 6 && success === false && (
-          <div className="text-center p-6 bg-red-100 text-red-800 rounded-lg">
-            <p className="mb-4 font-semibold text-lg">
-              Erro ao confirmar a reserva ❌
-            </p>
-            <button
-              onClick={() => {
-                setStep(5); // voltar para confirmação
-                setSuccess(null);
-              }}
-              className="px-6 py-2 bg-gray-300 rounded-lg"
-            >
-              Tentar novamente
-            </button>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Reserva Confirmada!
+                </h2>
+                <p className="text-gray-600 max-w-sm mb-8 leading-relaxed">
+                  {'Sua solicitação foi processada com sucesso'}
+                </p>
+
+                <button
+                  onClick={() => router.push('/motorista/reservas')}
+                  className="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95"
+                >
+                  Ir para minhas reservas
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center text-center">
+                {/* Ícone de Erro */}
+                <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                  <svg
+                    className="w-10 h-10"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </div>
+
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Ops! Algo deu errado
+                </h2>
+                <p className="text-gray-600 max-w-sm mb-8 leading-relaxed">
+                  {feedbackMessage ??
+                    'Não foi possível confirmar sua reserva neste momento. Por favor, verifique os dados e tente novamente.'}
+                </p>
+
+                <button
+                  onClick={() => {
+                    setStep(5);
+                    setSuccess(null);
+                    setFeedbackMessage(null);
+                  }}
+                  className="w-full sm:w-auto px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all active:scale-95"
+                >
+                  Tentar novamente
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
