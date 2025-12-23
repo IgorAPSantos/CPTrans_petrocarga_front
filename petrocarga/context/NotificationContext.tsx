@@ -154,7 +154,7 @@ export function NotificationProvider({
     }
 
     try {
-      const baseUrl = `${apiUrlRef.current}/petrocarga/notificacoes/stream`;
+      const baseUrl = `${apiUrlRef.current}/notificacoes/stream`;
 
       logger.info('SSE: Conectando via cookies para usuário:', usuarioId);
 
