@@ -1,9 +1,14 @@
 'use client';
 
-import { createContext, useState, useEffect } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import { parseCookies } from 'nookies';
-import { jwtDecode } from 'jwt-decode';
-import { api, removeAuthToken, setAuthToken } from '@/service/api';
+import {
+  api,
+  removeAuthToken,
+  setAuthToken,
+  getUserFromToken,
+  getCurrentToken,
+} from '@/service/api';
 
 interface DecodedToken {
   id: string;
@@ -20,6 +25,7 @@ interface AuthContextData {
   loading: boolean;
   login: (data: { email: string; senha: string }) => Promise<DecodedToken>;
   logout: () => void;
+  refreshUser: () => void; // 🆕 Nova função para atualizar usuário
 }
 
 export const AuthContext = createContext({} as AuthContextData);
@@ -30,41 +36,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Carregar usuário do cookie quando o app inicia
   useEffect(() => {
-    const { 'auth-token': token } = parseCookies();
+    const loadUser = () => {
+      const userData = getUserFromToken();
+      setUser(userData);
+      setLoading(false);
 
-    if (token) {
-      try {
-        const decoded = jwtDecode<DecodedToken>(token);
-        setUser(decoded);
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      } catch (err) {
-        console.error('Token inválido:', err);
-        removeAuthToken();
+      if (userData) {
+        console.log('✅ Usuário carregado do cookie:', userData.nome);
+      } else {
+        console.log('ℹ️ Nenhum usuário autenticado encontrado');
       }
-    }
+    };
 
-    setLoading(false);
+    loadUser();
   }, []);
 
   const isAuthenticated = !!user;
 
+  // 🆕 Função para recarregar usuário (útil quando token é atualizado)
+  const refreshUser = () => {
+    const userData = getUserFromToken();
+    setUser(userData);
+  };
+
   async function login({ email, senha }: { email: string; senha: string }) {
-    const response = await api.post('petrocarga/auth/login', {
-      email,
-      senha,
-    });
+    try {
+      const response = await api.post('petrocarga/auth/login', {
+        email,
+        senha,
+      });
 
-    const { token } = response.data;
+      const { token } = response.data;
 
-    // salva cookie + header
-    setAuthToken(token);
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      if (!token) {
+        throw new Error('Token não recebido do servidor');
+      }
 
-    // decodifica token
-    const decoded = jwtDecode<DecodedToken>(token);
-    setUser(decoded);
+      // 🔥 Salva o token como COOKIE (para SSE funcionar)
+      setAuthToken(token);
 
-    return decoded; // 🔹 retorna o usuário decodificado
+      // Recarrega os dados do usuário
+      refreshUser();
+
+      console.log('✅ Login realizado com sucesso');
+      return getUserFromToken()!;
+    } catch (error: any) {
+      console.error('❌ Erro no login:', error);
+      throw error;
+    }
   }
 
   function logout() {
@@ -75,9 +94,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ isAuthenticated, user, loading, login, logout }}
+      value={{
+        isAuthenticated,
+        user,
+        loading,
+        login,
+        logout,
+        refreshUser, // 🆕 Exporta a função
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
+}
+
+// Hook para usar o contexto
+export function useAuth() {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error('useAuth deve ser usado dentro de AuthProvider');
+  }
+
+  return context;
 }

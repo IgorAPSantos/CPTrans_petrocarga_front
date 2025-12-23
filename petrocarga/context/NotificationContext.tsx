@@ -13,10 +13,11 @@ import {
 import { parseCookies } from 'nookies';
 import { getNotificacoesUsuario } from '@/lib/actions/notificacaoAction';
 import { Notification, NotificationContextData } from '@/lib/types/notificacao';
+import { logger } from '@/lib/logger';
 
 // Contexto
 const NotificationContext = createContext<NotificationContextData | undefined>(
-  undefined,
+  undefined
 );
 
 // Provider Props
@@ -25,6 +26,10 @@ interface NotificationProviderProps {
   usuarioId: string;
   maxNotifications?: number;
   enableSSE?: boolean;
+  autoReconnect?: boolean;
+  reconnectMaxAttempts?: number;
+  reconnectInitialDelayMs?: number;
+  reconnectMaxDelayMs?: number;
 }
 
 export function NotificationProvider({
@@ -32,6 +37,10 @@ export function NotificationProvider({
   usuarioId,
   maxNotifications = 50,
   enableSSE = true,
+  autoReconnect = true,
+  reconnectMaxAttempts = 5,
+  reconnectInitialDelayMs = 1000,
+  reconnectMaxDelayMs = 30000,
 }: NotificationProviderProps) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -41,54 +50,88 @@ export function NotificationProvider({
   const eventSourceRef = useRef<EventSource | null>(null);
   const hasLoadedInitialRef = useRef(false);
   const apiUrlRef = useRef(process.env.NEXT_PUBLIC_API_URL || '');
+  const retryCountRef = useRef(0);
+  const reconnectTimerRef = useRef<number | null>(null);
 
-  // 🔴 CARREGAR HISTÓRICO
-  const loadHistorico = useCallback(async () => {
-    if (!usuarioId) return;
+  // 🔴 CARREGAR HISTÓRICO (com merge inteligente)
+  const loadHistorico = useCallback(
+    async (silent = false) => {
+      if (!usuarioId) return;
 
-    console.log('Carregando histórico para usuário:', usuarioId);
-    setIsLoading(true);
-    try {
-      const result = await getNotificacoesUsuario(usuarioId);
+      logger.info('📥 Carregando histórico para usuário:', usuarioId);
 
-      if (result.error) {
-        console.error('Erro ao carregar histórico:', result.message);
-        setError(result.message || 'Erro ao carregar notificações');
-      } else {
-        console.log(
-          'Histórico carregado:',
-          result.notificacoes?.length || 0,
-          'notificações',
-        );
-        setNotifications(result.notificacoes || []);
-        setError(null);
+      if (!silent) {
+        setIsLoading(true);
       }
-    } catch (err) {
-      console.error('Erro ao carregar histórico de notificações:', err);
-      setError('Erro ao carregar notificações');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [usuarioId]);
 
-  // 🔴 ADICIONAR NOTIFICAÇÃO
+      try {
+        const result = await getNotificacoesUsuario(usuarioId);
+
+        if (result.error) {
+          logger.error('❌ Erro ao carregar histórico:', result.message);
+          setError(result.message || 'Erro ao carregar notificações');
+        } else {
+          const novasNotificacoes = result.notificacoes || [];
+
+          logger.info(
+            `✅ Histórico carregado: ${novasNotificacoes.length} notificações`
+          );
+
+          // 🆕 Merge inteligente: mantém notificações já existentes e adiciona novas
+          setNotifications((prev) => {
+            const notificacoesMap = new Map(prev.map((n) => [n.id, n]));
+
+            // Adiciona/atualiza notificações do servidor
+            novasNotificacoes.forEach((notif: Notification) => {
+              notificacoesMap.set(notif.id, notif);
+            });
+
+            // Converte para array e ordena por timestamp (mais recente primeiro)
+            const merged = Array.from(notificacoesMap.values()).sort(
+              (a, b) =>
+                new Date(b.criada_em).getTime() -
+                new Date(a.criada_em).getTime()
+            );
+
+            return merged.slice(0, maxNotifications);
+          });
+
+          setError(null);
+        }
+      } catch (err) {
+        logger.error('❌ Erro ao carregar histórico de notificações:', err);
+        setError('Erro ao carregar notificações');
+      } finally {
+        if (!silent) {
+          setIsLoading(false);
+        }
+      }
+    },
+    [usuarioId, maxNotifications]
+  );
+
+  // 🔴 ADICIONAR NOTIFICAÇÃO (SSE)
   const addNotification = useCallback(
     (notification: Notification) => {
       setNotifications((prev) => {
         const exists = prev.some((n) => n.id === notification.id);
-        if (exists) return prev;
+        if (exists) {
+          logger.debug('⚠️ Notificação já existe, ignorando:', notification.id);
+          return prev;
+        }
 
+        logger.info('🆕 Nova notificação adicionada:', notification.titulo);
         const newNotifications = [notification, ...prev];
         return newNotifications.slice(0, maxNotifications);
       });
     },
-    [maxNotifications],
+    [maxNotifications]
   );
 
-  // 🔴 CONECTAR SSE - SEM RECONEXÃO
+  // 🔴 CONECTAR SSE
   const connect = useCallback(() => {
     if (eventSourceRef.current?.readyState === EventSource.OPEN) {
-      console.log('SSE: Já conectado');
+      logger.debug('SSE: Já conectado');
       return;
     }
 
@@ -98,71 +141,164 @@ export function NotificationProvider({
       eventSourceRef.current = null;
     }
 
-    const { 'auth-token': token } = parseCookies();
-    if (!token) {
-      console.error('SSE: Token JWT não encontrado nos cookies');
-      setError('Usuário não autenticado. Faça login novamente.');
+    // Verificar se está no cliente
+    if (typeof window === 'undefined') {
+      logger.error('SSE: Tentativa de conexão no servidor');
+      return;
+    }
+
+    // Verificar se há usuário
+    if (!usuarioId) {
+      logger.error('SSE: usuarioId não fornecido');
       return;
     }
 
     try {
-      const url = `${apiUrlRef.current}/petrocarga/notificacoes/stream`;
+      const baseUrl = `${apiUrlRef.current}/petrocarga/notificacoes/stream`;
 
-      console.log('SSE: Conectando...', url);
+      logger.info('SSE: Conectando via cookies para usuário:', usuarioId);
 
-      const eventSource = new EventSource(url, {
+      // IMPORTANTE: withCredentials: true para enviar cookies
+      const eventSource = new EventSource(baseUrl, {
         withCredentials: true,
       });
 
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {
-        console.log('SSE: Conexão estabelecida com sucesso');
+        logger.info('✅ SSE: Conexão estabelecida com sucesso via cookies!');
         setIsConnected(true);
         setError(null);
+        retryCountRef.current = 0;
+
+        if (reconnectTimerRef.current) {
+          clearTimeout(reconnectTimerRef.current as unknown as number);
+          reconnectTimerRef.current = null;
+        }
+
+        // 🆕 Quando conectar, recarrega histórico para pegar notificações POST
+        loadHistorico(true);
       };
 
-      eventSource.onmessage = (event) => {
+      const handleIncoming = (data: string | null) => {
+        if (!data) return;
         try {
-          if (
-            event.data.trim().startsWith('{') ||
-            event.data.trim().startsWith('[')
-          ) {
-            const notification: Notification = JSON.parse(event.data);
-            console.log('SSE: Nova notificação:', notification.titulo);
-            addNotification(notification);
-          }
+          const trimmed = data.trim();
+          if (!trimmed) return;
+          const parsed = JSON.parse(trimmed);
+
+          logger.debug('SSE: Notificação recebida:', parsed);
+
+          // Normalizar para o formato do frontend
+          const notification: Notification = {
+            id: parsed.id,
+            titulo: parsed.titulo,
+            mensagem: parsed.mensagem,
+            tipo: parsed.tipo,
+            lida: parsed.lida || false,
+            criada_em: parsed.criada_em || new Date().toISOString(),
+            metadata: parsed.metadata,
+          };
+
+          logger.info('📨 SSE: Nova notificação:', notification.titulo);
+          addNotification(notification);
         } catch (err) {
-          console.error('SSE: Erro ao parsear mensagem:', err, event.data);
+          logger.error('SSE: Erro ao parsear mensagem:', err, data);
         }
       };
 
+      eventSource.onmessage = (event) => {
+        handleIncoming(event.data);
+      };
+
+      eventSource.addEventListener('notification', (ev: Event) => {
+        const me = ev as MessageEvent;
+        handleIncoming(me.data);
+      });
+
       eventSource.onerror = (err) => {
-        console.error('SSE: Erro na conexão', err);
+        logger.error('❌ SSE: Erro na conexão via cookies', {
+          error: err,
+          readyState: eventSource.readyState,
+        });
+
         setIsConnected(false);
         setError('Conexão com servidor de notificações perdida');
 
-        // 🔴 APENAS FECHA A CONEXÃO, SEM TENTAR RECONECTAR
+        // Fecha a conexão atual
         if (eventSourceRef.current) {
           eventSourceRef.current.close();
           eventSourceRef.current = null;
         }
+
+        // Reconexão automática com backoff
+        if (autoReconnect) {
+          const attempts = reconnectMaxAttempts;
+          if (attempts > 0 && retryCountRef.current >= attempts) {
+            logger.warn('⚠️ SSE: Limite de tentativas de reconexão atingido');
+            return;
+          }
+
+          retryCountRef.current += 1;
+          const delay = Math.min(
+            reconnectInitialDelayMs * Math.pow(2, retryCountRef.current - 1),
+            reconnectMaxDelayMs
+          );
+
+          logger.info(
+            `🔄 SSE: Reconectando em ${delay}ms (tentativa ${retryCountRef.current})`
+          );
+
+          if (reconnectTimerRef.current) {
+            clearTimeout(reconnectTimerRef.current as unknown as number);
+            reconnectTimerRef.current = null;
+          }
+
+          reconnectTimerRef.current = window.setTimeout(() => {
+            reconnectTimerRef.current = null;
+            connect();
+          }, delay) as unknown as number;
+        }
       };
+
+      // Fechar SSE quando a aba/página for fechada
+      if (typeof window !== 'undefined') {
+        window.addEventListener('beforeunload', () => {
+          if (eventSourceRef.current) {
+            eventSourceRef.current.close();
+          }
+        });
+      }
     } catch (err) {
-      console.error('SSE: Erro ao criar EventSource:', err);
+      logger.error('❌ SSE: Erro ao criar EventSource:', err);
       setError('Erro ao iniciar conexão em tempo real');
       setIsConnected(false);
     }
-  }, [addNotification]);
+  }, [
+    addNotification,
+    usuarioId,
+    autoReconnect,
+    reconnectMaxAttempts,
+    reconnectInitialDelayMs,
+    reconnectMaxDelayMs,
+    loadHistorico,
+  ]);
 
   // 🔴 DESCONECTAR SSE
   const disconnect = useCallback(() => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
       eventSourceRef.current = null;
-      setIsConnected(false);
-      console.log('SSE: Conexão fechada');
     }
+
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current as unknown as number);
+      reconnectTimerRef.current = null;
+    }
+
+    retryCountRef.current = 0;
+    setIsConnected(false);
+    logger.info('🔌 SSE: Conexão fechada');
   }, []);
 
   // 🔴 EFEITO: Carregar histórico UMA VEZ
@@ -175,7 +311,7 @@ export function NotificationProvider({
 
   // 🔴 EFEITO: Gerenciar conexão SSE
   useEffect(() => {
-    if (!usuarioId || usuarioId.trim() === '' || !enableSSE) {
+    if (!usuarioId || usuarioId.trim() === '') {
       return;
     }
 
@@ -184,25 +320,51 @@ export function NotificationProvider({
       return;
     }
 
-    console.log('NotificationProvider: Iniciando SSE para usuário', usuarioId);
+    logger.info(
+      '🚀 NotificationProvider: Iniciando SSE para usuário',
+      usuarioId
+    );
 
-    // Pequeno delay para garantir que o histórico foi carregado
-    const timer = setTimeout(() => {
-      connect();
-    }, 100);
+    let cancelled = false;
 
-    // Cleanup
+    const start = async () => {
+      try {
+        if (!hasLoadedInitialRef.current) {
+          await loadHistorico();
+          hasLoadedInitialRef.current = true;
+        }
+
+        if (cancelled) return;
+
+        if (enableSSE) {
+          connect();
+        }
+      } catch (err) {
+        logger.error('NotificationProvider: Erro ao preparar SSE', err);
+      }
+    };
+
+    start();
+
     return () => {
-      clearTimeout(timer);
-      console.log('NotificationProvider: Cleanup SSE');
+      cancelled = true;
+      logger.debug('🧹 NotificationProvider: Cleanup SSE');
       disconnect();
     };
-  }, [usuarioId, enableSSE, connect, disconnect]);
+  }, [usuarioId, enableSSE, connect, disconnect, loadHistorico]);
 
-  // 🔴 FUNÇÃO PARA RECONECTAR MANUALMENTE (OPCIONAL)
+  // 🔴 RECONECTAR MANUALMENTE
   const reconnect = useCallback(() => {
-    console.log('SSE: Reconexão manual solicitada');
+    logger.info('🔄 SSE: Reconexão manual solicitada');
+
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current as unknown as number);
+      reconnectTimerRef.current = null;
+    }
+
+    retryCountRef.current = 0;
     disconnect();
+
     setTimeout(() => {
       connect();
     }, 500);
@@ -219,7 +381,7 @@ export function NotificationProvider({
 
   const markAsRead = useCallback((id: string) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, lida: true } : n)),
+      prev.map((n) => (n.id === id ? { ...n, lida: true } : n))
     );
   }, []);
 
@@ -228,6 +390,7 @@ export function NotificationProvider({
   }, []);
 
   const refreshNotifications = useCallback(async () => {
+    logger.info('🔄 Refresh manual solicitado');
     await loadHistorico();
   }, [loadHistorico]);
 
@@ -245,7 +408,7 @@ export function NotificationProvider({
       markAllAsRead,
       loadHistorico,
       refreshNotifications,
-      reconnect, // 🔴 ADICIONADO PARA RECONEXÃO MANUAL
+      reconnect,
     }),
     [
       notifications,
@@ -260,7 +423,7 @@ export function NotificationProvider({
       loadHistorico,
       refreshNotifications,
       reconnect,
-    ],
+    ]
   );
 
   return (
@@ -287,7 +450,7 @@ export function useNotifications() {
       markAllAsRead: () => {},
       loadHistorico: async () => {},
       refreshNotifications: async () => {},
-      reconnect: () => {}, // 🔴 ADICIONADO
+      reconnect: () => {},
     };
   }
 

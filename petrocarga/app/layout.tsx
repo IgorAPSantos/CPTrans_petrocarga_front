@@ -3,7 +3,7 @@ import { Maven_Pro } from 'next/font/google';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
-import { NotificationWrapper } from '@/components/notificantion/notificationWrapper';
+import { NotificationWrapper } from '@/components/notification/notificationWrapper';
 import { Toaster } from 'react-hot-toast';
 
 const mavenPro = Maven_Pro({
