@@ -86,22 +86,17 @@ export default function ReservaComponent({
           Voltar ao mapa
         </button>
       )}
-
-      {/* LOCAL DA RESERVA */}
-      {step < 6 && (
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
-            Reservando vaga em
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
+          Reservando Vaga Em
+        </span>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-tight">
+          {selectedVaga.endereco.logradouro}
+          <span className="block text-base sm:text-lg font-medium text-gray-500 mt-1">
+            {selectedVaga.endereco.bairro}
           </span>
-
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-tight">
-            {selectedVaga.endereco.logradouro}
-            <span className="block text-base sm:text-lg font-medium text-gray-500 mt-1">
-              {selectedVaga.endereco.bairro}
-            </span>
-          </h2>
-        </div>
-      )}
+        </h2>
+      </div>
 
       {step < 6 && <StepIndicator step={step} />}
 
