@@ -50,12 +50,11 @@ export const getUserFromToken = () => {
 };
 
 export const setAuthToken = (newToken: string) => {
-  // Seta o cookie que será enviado automaticamente pelo navegador
   setCookie(null, TOKEN_COOKIE_NAME, newToken, {
-    maxAge: 60 * 60 * 24 * 30, // 30 dias
+    maxAge: 60 * 60 * 24 * 30,
     path: '/',
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'none', // ⚠️ Mudança crítica
+    secure: true,
   });
 
   // 🚨 ATENÇÃO: EventSource NÃO usa headers axios, apenas cookies
