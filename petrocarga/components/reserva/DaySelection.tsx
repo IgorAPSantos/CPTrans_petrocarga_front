@@ -45,7 +45,9 @@ export default function DaySelection({
         <DayPicker
           mode="single"
           selected={selected}
-          onSelect={(day) => day && onSelect(day)}
+          onDayClick={(day) => {
+            onSelect(day);
+          }}
           className="mx-auto"
           disabled={isDisabled}
           modifiersClassNames={{

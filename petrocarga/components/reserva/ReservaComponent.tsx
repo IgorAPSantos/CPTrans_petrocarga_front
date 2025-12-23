@@ -87,14 +87,25 @@ export default function ReservaComponent({
         </button>
       )}
 
-      <h2 className="text-lg sm:text-xl font-semibold text-center">
-        Reservando vaga: <br className="sm:hidden" />
-        {selectedVaga.endereco.logradouro} - {selectedVaga.endereco.bairro}
-      </h2>
+      {/* LOCAL DA RESERVA */}
+      {step < 6 && (
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
+            Reservando vaga em
+          </span>
+
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-tight">
+            {selectedVaga.endereco.logradouro}
+            <span className="block text-base sm:text-lg font-medium text-gray-500 mt-1">
+              {selectedVaga.endereco.bairro}
+            </span>
+          </h2>
+        </div>
+      )}
 
       {step < 6 && <StepIndicator step={step} />}
 
-      <div className="flex-1 overflow-y-auto pb-4">
+      <div className="flex-1 flex flex-col overflow-y-auto pb-4">
         {/* STEP 1 - Seleção do dia */}
         {step === 1 && (
           <DaySelection
@@ -185,11 +196,11 @@ export default function ReservaComponent({
 
         {/* STEP 6 - FEEDBACK */}
         {step === 6 && (
-          <div className="flex flex-col items-center justify-center min-h-[400px] w-full p-8 animate-in fade-in zoom-in duration-300">
+          <div className="flex-1 flex items-center justify-center w-full animate-in fade-in zoom-in duration-300">
             {success ? (
               <div className="flex flex-col items-center text-center">
-                {/* Ícone de Sucesso Animado */}
-                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                {/* Ícone de Sucesso */}
+                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm animate-scale">
                   <svg
                     className="w-10 h-10"
                     fill="none"
@@ -206,15 +217,17 @@ export default function ReservaComponent({
                 </div>
 
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
-                  Reserva Confirmada!
+                  Reserva confirmada!
                 </h2>
+
                 <p className="text-gray-600 max-w-sm mb-8 leading-relaxed">
-                  {'Sua solicitação foi processada com sucesso'}
+                  {feedbackMessage ??
+                    'Sua solicitação foi processada com sucesso.'}
                 </p>
 
                 <button
                   onClick={() => router.push('/motorista/reservas')}
-                  className="w-full sm:w-auto px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-blue-200 active:scale-95"
+                  className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all shadow-lg active:scale-95"
                 >
                   Ir para minhas reservas
                 </button>
@@ -222,7 +235,7 @@ export default function ReservaComponent({
             ) : (
               <div className="flex flex-col items-center text-center">
                 {/* Ícone de Erro */}
-                <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6 shadow-sm animate-scale">
                   <svg
                     className="w-10 h-10"
                     fill="none"
@@ -241,9 +254,10 @@ export default function ReservaComponent({
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">
                   Ops! Algo deu errado
                 </h2>
+
                 <p className="text-gray-600 max-w-sm mb-8 leading-relaxed">
                   {feedbackMessage ??
-                    'Não foi possível confirmar sua reserva neste momento. Por favor, verifique os dados e tente novamente.'}
+                    'Não foi possível confirmar sua reserva. Tente novamente.'}
                 </p>
 
                 <button
@@ -252,7 +266,7 @@ export default function ReservaComponent({
                     setSuccess(null);
                     setFeedbackMessage(null);
                   }}
-                  className="w-full sm:w-auto px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all active:scale-95"
+                  className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all active:scale-95"
                 >
                   Tentar novamente
                 </button>
