@@ -68,7 +68,7 @@ export async function finalizarForcado(reservaID: string) {
       headers: {
         'Content-Type': 'application/json',
       },
-    },
+    }
   );
 
   if (!res.ok) {
@@ -115,7 +115,7 @@ export async function getReservasBloqueios(
     | 'VUC'
     | 'CAMINHONETA'
     | 'CAMINHAO_MEDIO'
-    | 'CAMINHAO_LONGO',
+    | 'CAMINHAO_LONGO'
 ) {
   const queryParams = new URLSearchParams({
     data,
@@ -126,7 +126,7 @@ export async function getReservasBloqueios(
     `/petrocarga/reservas/bloqueios/${vagaId}?${queryParams}`,
     {
       method: 'GET',
-    },
+    }
   );
 
   if (!res.ok) {
@@ -155,7 +155,7 @@ export async function deleteReservaByID(reservaId: string, usuarioId: string) {
     {
       method: 'DELETE',
       cache: 'no-store',
-    },
+    }
   );
 
   if (!res.ok) {
@@ -195,7 +195,7 @@ export async function atualizarReserva(
     status: string;
   },
   reservaID: string,
-  usuarioId: string,
+  usuarioId: string
 ) {
   console.log('📤 Enviando JSON para API Java:', body);
 
@@ -207,14 +207,27 @@ export async function atualizarReserva(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-    },
+    }
   );
 
   if (!res.ok) {
-    const errorText = await res.text();
-    console.error('❌ Erro do Backend:', errorText);
-    throw new Error(errorText);
+    const errorBody = await res.json();
+
+    console.error('❌ Erro do Backend:', errorBody);
+
+    return {
+      success: false,
+      message: errorBody.erro ?? 'Erro ao reservar vaga',
+      status: res.status,
+    };
   }
+
   revalidatePath('/motorista/reservas');
-  return res.json();
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    data,
+  };
 }

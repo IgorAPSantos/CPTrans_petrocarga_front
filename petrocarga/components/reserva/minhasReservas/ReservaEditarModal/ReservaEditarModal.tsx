@@ -103,42 +103,48 @@ export default function ReservaEditarModal({
      AÇÕES
   ====================== */
   const handleSave = async () => {
-    try {
-      if (!user?.id) throw new Error('Sessão expirada');
-
-      setIsSaving(true);
-      setError(null);
-
-      await atualizarReserva(
-        {
-          veiculoId: form.veiculoId,
-          cidadeOrigem: form.cidadeOrigem,
-          inicio: form.inicio,
-          fim: form.fim,
-          status: 'RESERVADA',
-        },
-        reserva.id,
-        user.id,
-      );
-
-      const updatedReserva: ReservaGet = {
-        ...reserva,
-        ...form,
-        status: 'RESERVADA',
-      };
-
-      setSuccessMsg('Reserva atualizada com sucesso!');
-      router.refresh();
-
-      setTimeout(() => {
-        onSuccess?.(updatedReserva);
-        onClose?.();
-      }, 800);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
-    } finally {
-      setIsSaving(false);
+    if (!user?.id) {
+      setError('Sessão expirada');
+      return;
     }
+
+    setIsSaving(true);
+    setError(null);
+    setSuccessMsg(null);
+
+    const result = await atualizarReserva(
+      {
+        veiculoId: form.veiculoId,
+        cidadeOrigem: form.cidadeOrigem,
+        inicio: form.inicio,
+        fim: form.fim,
+        status: 'RESERVADA',
+      },
+      reserva.id,
+      user.id
+    );
+
+    if (!result.success) {
+      setError(result.message);
+      setIsSaving(false);
+      return;
+    }
+
+    const updatedReserva: ReservaGet = {
+      ...reserva,
+      ...form,
+      status: 'RESERVADA',
+    };
+
+    setSuccessMsg('Reserva atualizada com sucesso!');
+    router.refresh();
+
+    setTimeout(() => {
+      onSuccess?.(updatedReserva);
+      onClose?.();
+    }, 800);
+
+    setIsSaving(false);
   };
 
   const handleTimeSelectEnd = (t: string) => {
@@ -185,8 +191,8 @@ export default function ReservaEditarModal({
           {editField === 'horario'
             ? 'Selecionar horário'
             : editField === 'veiculo-origem'
-              ? 'Editar veículo'
-              : 'Gerenciar reserva'}
+            ? 'Editar veículo'
+            : 'Gerenciar reserva'}
         </h1>
 
         <button
