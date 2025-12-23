@@ -20,13 +20,25 @@ export default function ReservaRapidaPage() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="px-2 md:p-6 max-w-6xl mx-auto mt-6 md:mt-10">
       {step === 1 && (
-        <div className="flex flex-col items-center justify-center h-full">
-          <h1 className=" md:text-2xl font-semibold text-center mb-4">
-            Escolha uma vaga
+        <div className="flex flex-col items-center justify-center">
+          <h1 className="text-lg md:text-2xl font-semibold text-center mb-4">
+            Selecione uma Vaga
           </h1>
-          <div className="h-[500px] w-full">
+
+          <div
+            className="
+            w-full
+            h-[calc(88vh-120px)]
+            md:h-[70vh]
+            lg:h-[75vh]
+            rounded-lg
+            overflow-hidden
+            shadow-md
+            mb-4
+          "
+          >
             <MapReserva onClickVaga={handleSelectVaga} />
           </div>
         </div>

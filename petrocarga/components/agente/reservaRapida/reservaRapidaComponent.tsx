@@ -8,6 +8,7 @@ import TimeSelection from '@/components/reserva/TimeSelection';
 import StepIndicator from '@/components/reserva/StepIndicator';
 import Confirmation from '@/components/reserva/Confirmation';
 import { Veiculo } from '@/lib/types/veiculo';
+import toast from 'react-hot-toast';
 
 interface ReservaAgenteProps {
   selectedVaga: Vaga;
@@ -39,10 +40,22 @@ export default function ReservaAgente({
 
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState<boolean | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
+  // ==========================
+  // CONFIRMAR RESERVA
+  // ==========================
   const onConfirm = async () => {
     const result = await handleConfirm();
-    setSuccess(result);
+
+    if (!result.success) {
+      toast.error('Erro ao confirmar reserva');
+    } else {
+      toast.success('Reserva confirmada com sucesso!');
+    }
+
+    setSuccess(result.success);
+    setFeedbackMessage(result.message ?? null);
     setStep(6);
   };
 
@@ -56,20 +69,31 @@ export default function ReservaAgente({
       {onBack && step < 6 && (
         <button
           onClick={onBack}
-          className="px-3 py-2 w-fit bg-gray-200 rounded-lg text-sm sm:text-base hover:bg-gray-300 transition-colors"
+          className="px-3 py-2 w-fit bg-gray-200 rounded-lg text-sm sm:text-base"
         >
           Voltar ao mapa
         </button>
       )}
 
-      <h2 className="text-lg sm:text-xl font-semibold text-center">
-        Reservando vaga: <br className="sm:hidden" />
-        {selectedVaga.endereco.logradouro} - {selectedVaga.endereco.bairro}
-      </h2>
+      {/* LOCAL DA RESERVA */}
+      {step < 6 && (
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-xs font-bold uppercase tracking-wider text-blue-600">
+            Reservando vaga em
+          </span>
+
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-tight">
+            {selectedVaga.endereco.logradouro}
+            <span className="block text-base sm:text-lg font-medium text-gray-500 mt-1">
+              {selectedVaga.endereco.bairro}
+            </span>
+          </h2>
+        </div>
+      )}
 
       {step < 6 && <StepIndicator step={step} />}
 
-      <div className="flex-1 overflow-y-auto pb-4">
+      <div className="flex-1 flex flex-col overflow-y-auto pb-4">
         {/* STEP 1 - Cadastro veículo */}
         {step === 1 && (
           <div className="flex flex-col gap-5 p-2">
@@ -135,13 +159,13 @@ export default function ReservaAgente({
                 await fetchHorariosDisponiveis(
                   day,
                   selectedVaga,
-                  tipoVeiculoAgente,
+                  tipoVeiculoAgente
                 );
 
                 setStep(3);
               }}
               availableDays={selectedVaga.operacoesVaga?.map(
-                (op) => op.diaSemanaAsEnum,
+                (op) => op.diaSemanaAsEnum
               )}
             />
             <button
@@ -183,7 +207,7 @@ export default function ReservaAgente({
             <TimeSelection
               // Filtra garantindo que só mostre horários POSTERIORES ao início
               times={availableTimes.filter(
-                (t) => toMinutes(t) > toMinutes(startHour),
+                (t) => toMinutes(t) > toMinutes(startHour)
               )}
               reserved={reservedTimesEnd}
               selected={endHour}
@@ -211,36 +235,76 @@ export default function ReservaAgente({
           />
         )}
 
-        {/* STEP 6 - Feedback */}
-        {step === 6 && success !== null && (
-          <div
-            className={`text-center p-6 rounded-xl ${
-              success
-                ? 'bg-green-50 text-green-800 border border-green-300'
-                : 'bg-red-50 text-red-800 border border-red-300'
-            }`}
-          >
-            <p className="mb-4 font-extrabold text-xl">
-              {success
-                ? 'Reserva confirmada ✅'
-                : 'Erro ao confirmar a reserva ❌'}
-            </p>
-            <button
-              onClick={() => setStep(1)}
-              className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
-            >
-              Fazer Nova Reserva
-            </button>
-            {success === false && (
-              <button
-                onClick={() => {
-                  setStep(5);
-                  setSuccess(null);
-                }}
-                className="mt-4 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg w-full sm:w-auto"
-              >
-                Tentar novamente
-              </button>
+        {/* STEP 6 - FEEDBACK */}
+        {step === 6 && (
+          <div className="flex-1 flex items-center justify-center w-full animate-in fade-in zoom-in duration-300">
+            {success ? (
+              <div className="flex flex-col items-center text-center">
+                {/* Ícone de Sucesso */}
+                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-6 shadow-sm animate-scale">
+                  <svg
+                    className="w-10 h-10"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Reserva confirmada!
+                </h2>
+
+                <p className="text-gray-600 max-w-sm mb-8 leading-relaxed">
+                  {feedbackMessage ??
+                    'Sua solicitação foi processada com sucesso.'}
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center text-center">
+                {/* Ícone de Erro */}
+                <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-6 shadow-sm animate-scale">
+                  <svg
+                    className="w-10 h-10"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </div>
+
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                  Ops! Algo deu errado
+                </h2>
+
+                <p className="text-gray-600 max-w-sm mb-8 leading-relaxed">
+                  {feedbackMessage ??
+                    'Não foi possível confirmar sua reserva. Tente novamente.'}
+                </p>
+
+                <button
+                  onClick={() => {
+                    setStep(5);
+                    setSuccess(null);
+                    setFeedbackMessage(null);
+                  }}
+                  className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-xl transition-all active:scale-95"
+                >
+                  Tentar novamente
+                </button>
+              </div>
             )}
           </div>
         )}

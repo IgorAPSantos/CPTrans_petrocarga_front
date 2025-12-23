@@ -8,6 +8,7 @@ import { Loader2, WifiOff } from 'lucide-react'; // Ícone para estado offline
 import ReservaLista from '@/components/reserva/minhasReservas/ReservaLista';
 import { ReservaGet } from '@/lib/types/reserva';
 import jsPDF from 'jspdf';
+import toast from 'react-hot-toast';
 
 export default function MinhasReservas() {
   const { user } = useAuth();
@@ -50,7 +51,6 @@ export default function MinhasReservas() {
     } catch (err) {
       console.error('Erro ao buscar reservas:', err);
 
-      // No PWA, se cair aqui, geralmente é falha crítica ou falta de cache
       setError('Não foi possível carregar suas reservas atuais.');
 
       // Verifica se o navegador está offline para avisar o usuário
@@ -87,7 +87,7 @@ export default function MinhasReservas() {
       doc.text(
         `Local: ${reserva.logradouro || ''}, ${reserva.bairro || ''}`,
         20,
-        70,
+        70
       );
       doc.text(`Status: ${reserva.status}`, 20, 110);
       doc.output('dataurlnewwindow');
@@ -100,8 +100,8 @@ export default function MinhasReservas() {
   // --- EXCLUIR (Ação Sensível à Conexão) ---
   const handleExcluirReserva = async (reservaId: string) => {
     if (!navigator.onLine) {
-      alert(
-        'Você está offline. A exclusão de reservas só é permitida com conexão à internet.',
+      toast.error(
+        'Você está offline. A exclusão de reservas só é permitida com conexão à internet.'
       );
       return;
     }
@@ -112,9 +112,10 @@ export default function MinhasReservas() {
       const dados = await deleteReservaByID(reservaId, user!.id);
       if (!dados) return;
       await fetchReservas();
+      toast.success('Reserva Deletada Com Sucesso!');
     } catch (error) {
       console.error(error);
-      alert('Erro ao excluir. Verifique sua conexão.');
+      toast.error('Erro ao excluir. Verifique sua conexão.');
     }
   };
 
