@@ -1,5 +1,3 @@
-import { cookies } from 'next/headers';
-
 export async function serverApi(path: string, options: RequestInit = {}) {
   const isJson = options.body && typeof options.body === 'string';
 
@@ -11,16 +9,19 @@ export async function serverApi(path: string, options: RequestInit = {}) {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${path}`, {
     ...options,
     headers,
-    credentials: 'include', // CRITICO: Envia cookies automaticamente
-    cache: 'no-store',
+    cache: 'no-store', // pega dados sempre atualizados
   });
 
+  // Trata erro de forma segura
   if (!res.ok) {
-    console.error(`[serverApi] Erro ${res.status}: ${path}`);
+    let errorText = '';
     try {
-      const errorText = await res.text();
-      console.error('[serverApi] Detalhes:', errorText);
-    } catch {}
+      errorText = await res.text(); // só lê uma vez
+    } catch {
+      errorText = '<body não disponível>';
+    }
+    console.error(`[serverApi] Erro ${res.status}: ${path}`);
+    console.error('[serverApi] Detalhes:', errorText);
   }
 
   return res;

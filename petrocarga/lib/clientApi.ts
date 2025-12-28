@@ -5,18 +5,10 @@ type ClientApiOptions = RequestInit & {
 };
 
 export async function clientApi(path: string, options: ClientApiOptions = {}) {
-  const getCookie = (name: string) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop()?.split(';').shift();
-  };
-
   const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-  const token = getCookie('auth-token');
 
   const headers: Record<string, string> = {
     ...((options.headers as Record<string, string>) || {}),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
   let body = options.body;
@@ -31,10 +23,12 @@ export async function clientApi(path: string, options: ClientApiOptions = {}) {
       ...options,
       headers,
       body,
+      credentials: 'include',
     });
 
     if (res.status === 401) {
       console.warn('Sessão expirada, redirecionando...');
+      window.location.href = '/autorizacao/login';
     }
 
     if (!res.ok) {

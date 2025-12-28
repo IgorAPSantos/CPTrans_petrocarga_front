@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import VagaDetalhes from '@/components/gestor/cards/vaga-card';
-import * as vagaActions from '@/lib/actions/vagaActions';
+import * as vagaActions from '@/lib/api/vagaApi';
 import { Vaga } from '@/lib/types/vaga';
 import { useParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';

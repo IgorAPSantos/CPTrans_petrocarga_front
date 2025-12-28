@@ -2,7 +2,7 @@
 
 import { Agente } from '@/lib/types/agente';
 import { useActionState, useState } from 'react';
-import { atualizarAgente } from '@/lib/actions/agenteAction';
+import { atualizarAgente } from '@/lib/api/agenteApi';
 import {
   Card,
   CardContent,
@@ -25,7 +25,7 @@ export default function EditarAgente({ agente }: { agente: Agente }) {
 
   const [state, atualizarAgenteAction, pending] = useActionState(
     atualizar,
-    null,
+    null
   );
 
   return (
@@ -103,7 +103,7 @@ export default function EditarAgente({ agente }: { agente: Agente }) {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    '',
+                    ''
                   );
                 }}
               />
@@ -126,7 +126,7 @@ export default function EditarAgente({ agente }: { agente: Agente }) {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    '',
+                    ''
                   );
                 }}
               />

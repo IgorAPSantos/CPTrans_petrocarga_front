@@ -1,9 +1,12 @@
-'use server';
+'use client';
 
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import { Vaga, OperacoesVaga } from '../types/vaga';
-import { serverApi } from '../serverApi';
+import { clientApi } from '../clientApi';
+
+interface ApiError {
+  status?: number;
+  message: string;
+}
 
 function buildVagaPayload(formData: FormData) {
   const diasSemanaRaw = formData.get('diaSemana') as string;
@@ -41,42 +44,32 @@ function buildVagaPayload(formData: FormData) {
 // ----------------------
 export async function addVaga(formData: FormData) {
   const payload = buildVagaPayload(formData);
-
-  const res = await serverApi('/petrocarga/vagas', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    console.error('Erro ao cadastrar vaga:', await res.text());
-    return { error: true, message: 'Erro ao cadastrar vaga', valores: payload };
-    console.log('Vaga enviada:', Object.fromEntries(formData));
+  try {
+    await clientApi('/petrocarga/vagas', { method: 'POST', json: payload });
+    return {
+      error: false,
+      message: 'Vaga cadastrada com sucesso!',
+      valores: null,
+    };
+  } catch (err) {
+    const error = err as ApiError;
+    console.error('Erro ao cadastrar vaga:', error);
+    return { error: true, message: error.message, valores: payload };
   }
-
-  revalidatePath('/gestor/visualizar-vagas');
-  return {
-    error: false,
-    message: 'Vaga cadastrada com sucesso!',
-    valores: null,
-  };
-  console.log('Vaga enviada:', Object.fromEntries(formData));
 }
 
 // ----------------------
 // DELETE VAGA
 // ----------------------
 export async function deleteVaga(id: string) {
-  const res = await serverApi(`/petrocarga/vagas/${id}`, {
-    method: 'DELETE',
-  });
-
-  if (!res.ok) {
-    console.error('Erro ao deletar vaga:', await res.text());
-    return { error: true, message: 'Erro ao deletar vaga' };
+  try {
+    await clientApi(`/petrocarga/vagas/${id}`, { method: 'DELETE' });
+    return { error: false, message: 'Vaga deletada com sucesso!' };
+  } catch (err) {
+    const error = err as ApiError;
+    console.error('Erro ao deletar vaga:', error);
+    return { error: true, message: error.message };
   }
-
-  revalidatePath('/gestor/visualizar-vagas');
-  return { error: false, message: 'Vaga deletada com sucesso!' };
 }
 
 // ----------------------
@@ -86,46 +79,44 @@ export async function atualizarVaga(formData: FormData) {
   const id = formData.get('id') as string;
   const payload = buildVagaPayload(formData);
 
-  const res = await serverApi(`/petrocarga/vagas/${id}`, {
-    method: 'PATCH',
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    console.error('Erro ao atualizar vaga:', await res.text());
-    return { error: true, message: 'Erro ao atualizar vaga', valores: payload };
+  try {
+    await clientApi(`/petrocarga/vagas/${id}`, {
+      method: 'PATCH',
+      json: payload,
+    });
+    return { error: false, message: 'Vaga atualizada com sucesso!' };
+  } catch (err) {
+    const error = err as ApiError;
+    console.error('Erro ao atualizar vaga:', error);
+    return { error: true, message: error.message, valores: payload };
   }
-
-  revalidatePath('/gestor/visualizar-vagas');
-  revalidatePath(`/gestor/visualizar-vagas/${id}`);
-  redirect(`/gestor/visualizar-vagas/${id}`);
 }
 
 // ----------------------
 // GET VAGAS
 // ----------------------
 export async function getVagas(): Promise<Vaga[]> {
-  const res = await serverApi('/petrocarga/vagas/all');
-
-  if (!res.ok) {
-    console.error('Erro em getVagas:', await res.text());
+  try {
+    const res = await clientApi('/petrocarga/vagas/all', { method: 'GET' });
+    const data = await res.json();
+    return Array.isArray(data) ? data : data?.vagas ?? [];
+  } catch (err) {
+    const error = err as ApiError;
+    console.error('Erro ao buscar vagas:', error);
     return [];
   }
-
-  const data = await res.json();
-  return Array.isArray(data) ? data : (data?.vagas ?? []);
 }
 
 // ----------------------
-// GET VAGAS POR ID
+// GET VAGA POR ID
 // ----------------------
 export async function getVagaById(id: string): Promise<Vaga | null> {
-  const res = await serverApi(`/petrocarga/vagas/${id}`);
-
-  if (!res.ok) {
-    console.error(`Erro em getVagaById(${id}):`, await res.text());
+  try {
+    const res = await clientApi(`/petrocarga/vagas/${id}`, { method: 'GET' });
+    return (await res.json()) ?? null;
+  } catch (err) {
+    const error = err as ApiError;
+    console.error(`Erro ao buscar vaga ${id}:`, error);
     return null;
   }
-
-  return (await res.json()) ?? null;
 }

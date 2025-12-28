@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
-import { getVeiculosUsuario } from '@/lib/actions/veiculoActions';
+import { getVeiculosUsuario } from '@/lib/api/veiculoApi';
 import { Loader2 } from 'lucide-react';
 import { Veiculo } from '@/lib/types/veiculo';
 import VeiculoDetalhes from '@/components/motorista/cards/veiculo-card';

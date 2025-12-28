@@ -1,6 +1,6 @@
 'use client';
 
-import { deleteGestor } from '@/lib/actions/gestorActions';
+import { deleteGestor } from '@/lib/api/gestorApi';
 import { Gestor } from '@/lib/types/gestor';
 import { cn } from '@/lib/utils';
 import { Mail, Phone, UserCircle } from 'lucide-react';
@@ -29,7 +29,7 @@ export default function GestorCard({ gestor }: GestorCardProps) {
     <article
       className={cn(
         'flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full',
-        'border-blue-500',
+        'border-blue-500'
       )}
     >
       {/* Informações */}

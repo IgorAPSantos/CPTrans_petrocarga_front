@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { addVaga } from '@/lib/actions/vagaActions';
+import { addVaga } from '@/lib/api/vagaApi';
 import { ArrowLeft, CircleAlert, ParkingSquare } from 'lucide-react';
 import Form from 'next/form';
 import { useActionState } from 'react';
@@ -25,7 +25,7 @@ export default function Cadastro() {
     async (prevState: unknown, formData: FormData) => {
       return await addVaga(formData);
     },
-    null,
+    null
   );
 
   return (

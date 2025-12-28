@@ -3,13 +3,10 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
-import { getMotoristas } from '@/lib/actions/motoristaActions';
-import { getAgentes } from '@/lib/actions/agenteAction';
-import { getGestores } from '@/lib/actions/gestorActions';
-import {
-  Notificacao,
-  NotificacaoPorPermissao,
-} from '@/lib/actions/notificacaoAction';
+import { getMotoristas } from '@/lib/api/motoristaApi';
+import { getAgentes } from '@/lib/api/agenteApi';
+import { getGestores } from '@/lib/api/gestorApi';
+import { Notificacao, NotificacaoPorPermissao } from '@/lib/api/notificacaoApi';
 import { Motorista } from '@/lib/types/motorista';
 import { Agente } from '@/lib/types/agente';
 import { Gestor } from '@/lib/types/gestor';

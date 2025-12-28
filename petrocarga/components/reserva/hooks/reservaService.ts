@@ -2,8 +2,8 @@ import {
   getReservasAtivas,
   getReservasBloqueios,
   reservarVaga,
-} from '@/lib/actions/reservaActions';
-import { reservarVagaAgente } from '@/lib/actions/reservaActions'; // importa a função do agente
+  reservarVagaAgente,
+} from '@/lib/api/reservaApi';
 import { Reserva } from '@/lib/types/reserva';
 import { ConfirmResult } from '@/lib/types/confirmResult';
 

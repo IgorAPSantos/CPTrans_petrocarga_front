@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import { MapProvider } from '@/context/MapContext';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import { Navbar } from '@/components/gestor/layout/navbar';
+import PrivateRoute from '@/context/PrivateRoute';
 
 export const metadata: Metadata = {
   title: 'PetroCarga',
@@ -19,7 +20,9 @@ export default function GestorLayout({
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-1 relative">
-        <MapProvider>{children}</MapProvider>
+        <PrivateRoute>
+          <MapProvider>{children}</MapProvider>
+        </PrivateRoute>
       </main>
       <Footer />
     </div>

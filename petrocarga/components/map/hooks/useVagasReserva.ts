@@ -1,7 +1,7 @@
 // useVagas.ts
 import { useEffect, useState } from 'react';
 import { Vaga } from '@/lib/types/vaga';
-import * as vagaActions from '@/lib/actions/vagaActions';
+import { getVagas } from '@/lib/api/vagaApi';
 
 export function useVagas() {
   const [vagas, setVagas] = useState<Vaga[]>([]);
@@ -12,7 +12,7 @@ export function useVagas() {
     const fetchVagas = async () => {
       setLoading(true);
       try {
-        const data: Vaga[] = await vagaActions.getVagas();
+        const data: Vaga[] = await getVagas();
         setVagas(data);
       } catch (err) {
         console.error('Erro ao carregar vagas:', err);

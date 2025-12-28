@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { atualizarVeiculo } from '@/lib/actions/veiculoActions';
+import { atualizarVeiculo } from '@/lib/api/veiculoApi';
 import { CircleAlert, TruckIcon } from 'lucide-react';
 import Form from 'next/form';
 import { useActionState, useState } from 'react';
@@ -26,7 +26,7 @@ export default function EditarVeiculo({ veiculo }: { veiculo: Veiculo }) {
 
   const [state, atualizarVeiculoAction, pending] = useActionState(
     atualizarComToken,
-    null,
+    null
   );
   const [exibirSenha, setExibirSenha] = useState(false);
 

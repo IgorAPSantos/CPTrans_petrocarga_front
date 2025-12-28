@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { atualizarGestor } from '@/lib/actions/gestorActions';
+import { atualizarGestor } from '@/lib/api/gestorApi';
 import { Gestor } from '@/lib/types/gestor';
 import { CheckCircle, CircleAlert, UserIcon } from 'lucide-react';
 import Form from 'next/form';
@@ -25,7 +25,7 @@ export default function EditarGestor({ gestor }: { gestor: Gestor }) {
 
   const [state, atualizarGestorAction, pending] = useActionState(
     atualizar,
-    null,
+    null
   );
 
   const [exibirSenha, setExibirSenha] = useState(false);
@@ -103,7 +103,7 @@ export default function EditarGestor({ gestor }: { gestor: Gestor }) {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    '',
+                    ''
                   );
                 }}
               />
@@ -125,7 +125,7 @@ export default function EditarGestor({ gestor }: { gestor: Gestor }) {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    '',
+                    ''
                   );
                 }}
               />

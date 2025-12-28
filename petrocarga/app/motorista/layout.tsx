@@ -2,6 +2,7 @@ import Footer from '../../components/motorista/layout/footer';
 import { Navbar } from '../../components/motorista/layout/navbar';
 import { Metadata } from 'next';
 import { PushProvider } from '@/context/PushProvider/PushProvider';
+import PrivateRoute from '@/context/PrivateRoute';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 export const metadata: Metadata = {
@@ -17,11 +18,13 @@ export default function MotoristaLayout({
 }>) {
   return (
     <div className="flex min-h-screen flex-col motorista-layout">
-      <PushProvider>
-        <Navbar />
-        <main className="flex-1 relative">{children}</main>
-        <Footer />
-      </PushProvider>
+      <PrivateRoute>
+        <PushProvider>
+          <Navbar />
+          <main className="flex-1 relative">{children}</main>
+          <Footer />
+        </PushProvider>
+      </PrivateRoute>
     </div>
   );
 }
