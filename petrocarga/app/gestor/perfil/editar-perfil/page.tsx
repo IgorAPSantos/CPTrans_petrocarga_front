@@ -2,7 +2,7 @@
 
 import EditarGestor from '@/components/gestor/editar/edicao-perfil';
 import { useAuth } from '@/components/hooks/useAuth';
-import { getGestorByUserId } from '@/lib/actions/gestorActions';
+import { getGestorByUserId } from '@/lib/api/gestorApi';
 import { Gestor } from '@/lib/types/gestor';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';

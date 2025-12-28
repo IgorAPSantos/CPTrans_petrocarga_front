@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
-import { deleteReservaByID } from '@/lib/actions/reservaActions'; // Server Action (precisa de internet)
-import { clientApi } from '@/lib/clientApi';
-import { Loader2, WifiOff } from 'lucide-react'; // Ícone para estado offline
+import { deleteReservaByID, getReservasPorUsuario } from '@/lib/api/reservaApi';
+import { Loader2, WifiOff } from 'lucide-react';
 import ReservaLista from '@/components/reserva/minhasReservas/ReservaLista';
 import { ReservaGet } from '@/lib/types/reserva';
 import jsPDF from 'jspdf';
@@ -17,18 +16,6 @@ export default function MinhasReservas() {
   const [error, setError] = useState<string | null>(null);
   const [isOffline, setIsOffline] = useState(false);
 
-  // 1. Função de busca adaptada para PWA usando a clientApi
-  const getReservasPorUsuarioClient = async (userId: string) => {
-    // Ajuste o path conforme sua rota real no Java
-    const response = await clientApi(`/petrocarga/reservas/usuario/${userId}`);
-
-    if (!response.ok) {
-      throw new Error('Erro ao buscar dados do servidor.');
-    }
-
-    return response.json();
-  };
-
   const fetchReservas = async () => {
     if (!user?.id) return;
 
@@ -36,27 +23,15 @@ export default function MinhasReservas() {
     setError(null);
 
     try {
-      const data = await getReservasPorUsuarioClient(user.id);
-
-      let dadosFormatados;
-      // Mantive sua lógica de formatação original
-      if (data && typeof data === 'object' && 'veiculos' in data) {
-        dadosFormatados = data.reservas || [];
-      } else {
-        dadosFormatados = data || [];
-      }
-
-      setReservas(dadosFormatados);
+      // Usando reservaApi
+      const data = await getReservasPorUsuario(user.id);
+      setReservas(data || []);
       setIsOffline(false);
     } catch (err) {
       console.error('Erro ao buscar reservas:', err);
-
       setError('Não foi possível carregar suas reservas atuais.');
 
-      // Verifica se o navegador está offline para avisar o usuário
-      if (!navigator.onLine) {
-        setIsOffline(true);
-      }
+      if (!navigator.onLine) setIsOffline(true);
     } finally {
       setLoading(false);
     }
@@ -65,9 +40,8 @@ export default function MinhasReservas() {
   useEffect(() => {
     fetchReservas();
 
-    // Listener para avisar se a internet cair/voltar enquanto ele está na página
     const updateOnlineStatus = () => setIsOffline(!navigator.onLine);
-    window.addEventListener('online', fetchReservas); // Tenta atualizar quando a net volta
+    window.addEventListener('online', fetchReservas);
     window.addEventListener('offline', updateOnlineStatus);
 
     return () => {
@@ -76,7 +50,6 @@ export default function MinhasReservas() {
     };
   }, [user?.id]);
 
-  // --- LOGICA DO PDF (Mantida igual, jsPDF funciona offline) ---
   const handleGerarDocumento = (reserva: ReservaGet) => {
     try {
       const doc = new jsPDF();
@@ -97,7 +70,6 @@ export default function MinhasReservas() {
     }
   };
 
-  // --- EXCLUIR (Ação Sensível à Conexão) ---
   const handleExcluirReserva = async (reservaId: string) => {
     if (!navigator.onLine) {
       toast.error(
@@ -107,14 +79,11 @@ export default function MinhasReservas() {
     }
 
     try {
-      // Como o deleteReservaByID é uma Server Action,
-      // o Next.js tentará fazer um POST que falhará se estiver offline.
-      const dados = await deleteReservaByID(reservaId, user!.id);
-      if (!dados) return;
-      await fetchReservas();
-      toast.success('Reserva Deletada Com Sucesso!');
-    } catch (error) {
-      console.error(error);
+      await deleteReservaByID(reservaId, user!.id);
+      toast.success('Reserva deletada com sucesso!');
+      fetchReservas();
+    } catch (err) {
+      console.error('Erro ao deletar reserva:', err);
       toast.error('Erro ao excluir. Verifique sua conexão.');
     }
   };
@@ -132,7 +101,6 @@ export default function MinhasReservas() {
 
   return (
     <div className="p-4 flex flex-col items-center w-full min-h-screen bg-gray-50">
-      {/* Banner de Aviso Offline */}
       {isOffline && (
         <div className="w-full max-w-md mb-4 p-3 bg-amber-100 border border-amber-300 text-amber-800 rounded-lg flex items-center gap-2 text-sm">
           <WifiOff size={18} />

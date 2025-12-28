@@ -1,95 +1,96 @@
 'use client';
 
-import { createContext, useState, useEffect, useContext } from 'react';
-import { parseCookies } from 'nookies';
 import {
-  api,
-  removeAuthToken,
-  setAuthToken,
-  getUserFromToken,
-  getCurrentToken,
-} from '@/service/api';
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+} from 'react';
+import { api } from '@/service/api';
 
-interface DecodedToken {
+// Ajustei a interface. Como não decodificamos mais o token,
+// dependemos do que a rota /me retorna.
+interface UserData {
   id: string;
   nome: string;
   email: string;
   permissao: 'ADMIN' | 'GESTOR' | 'MOTORISTA' | 'AGENTE';
-  exp: number;
-  iat: number;
+  // exp e iat geralmente não vêm na rota /me, a menos que o back retorne explicitamente
 }
 
 interface AuthContextData {
   isAuthenticated: boolean;
-  user: DecodedToken | null;
+  user: UserData | null;
   loading: boolean;
-  login: (data: { email: string; senha: string }) => Promise<DecodedToken>;
+  login: (data: { email: string; senha: string }) => Promise<UserData>;
   logout: () => void;
-  refreshUser: () => void; // 🆕 Nova função para atualizar usuário
+  refreshUser: () => Promise<void>; // Agora é assíncrona
 }
 
 export const AuthContext = createContext({} as AuthContextData);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<DecodedToken | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Carregar usuário do cookie quando o app inicia
-  useEffect(() => {
-    const loadUser = () => {
-      const userData = getUserFromToken();
-      setUser(userData);
-      setLoading(false);
-
-      if (userData) {
-        console.log('✅ Usuário carregado do cookie:', userData.nome);
-      } else {
-        console.log('ℹ️ Nenhum usuário autenticado encontrado');
-      }
-    };
-
-    loadUser();
+  // Função centralizada para buscar dados do usuário no Backend
+  const refreshUser = useCallback(async () => {
+    try {
+      // O cookie httpOnly vai automaticamente aqui
+      const response = await api.get('/petrocarga/auth/me');
+      setUser(response.data);
+    } catch (error) {
+      // Se der erro (ex: 401), o usuário não está logado
+      setUser(null);
+    }
   }, []);
+
+  // 1. Carregar usuário ao iniciar o App
+  useEffect(() => {
+    async function init() {
+      await refreshUser();
+      setLoading(false);
+    }
+    init();
+  }, [refreshUser]);
 
   const isAuthenticated = !!user;
 
-  // 🆕 Função para recarregar usuário (útil quando token é atualizado)
-  const refreshUser = () => {
-    const userData = getUserFromToken();
-    setUser(userData);
-  };
-
+  // 2. Login
   async function login({ email, senha }: { email: string; senha: string }) {
     try {
-      const response = await api.post('petrocarga/auth/login', {
-        email,
-        senha,
-      });
+      // Passo A: Envia credenciais. Backend define o Cookie httpOnly
+      await api.post('petrocarga/auth/login', { email, senha });
 
-      const { token } = response.data;
+      // Passo B: Valida imediatamente chamando o /me
+      const response = await api.get('/petrocarga/auth/me');
+      const userData = response.data;
 
-      if (!token) {
-        throw new Error('Token não recebido do servidor');
-      }
+      setUser(userData);
 
-      // 🔥 Salva o token como COOKIE (para SSE funcionar)
-      setAuthToken(token);
+      console.log('✅ Login realizado via HttpOnly');
 
-      // Recarrega os dados do usuário
-      refreshUser();
-
-      console.log('✅ Login realizado com sucesso');
-      return getUserFromToken()!;
+      // Retornamos os dados para a página de Login poder fazer o switch/redirect
+      return userData;
     } catch (error: any) {
       console.error('❌ Erro no login:', error);
       throw error;
     }
   }
 
-  function logout() {
-    removeAuthToken();
-    setUser(null);
-    window.location.href = '/autorizacao/login';
+  // 3. Logout
+  async function logout() {
+    try {
+      // Avisa o backend para invalidar o cookie
+      await api.post('/petrocarga/auth/logout');
+    } catch (error) {
+      console.error('Erro ao notificar logout ao servidor', error);
+    } finally {
+      setUser(null);
+      // Força limpeza total e redirecionamento
+      window.location.href = '/autorizacao/login';
+    }
   }
 
   return (
@@ -100,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         loading,
         login,
         logout,
-        refreshUser, // 🆕 Exporta a função
+        refreshUser,
       }}
     >
       {children}

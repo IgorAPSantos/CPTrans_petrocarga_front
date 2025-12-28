@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/components/hooks/useAuth';
 import { useEffect, useState } from 'react';
-import { getMotoristaByUserId } from '@/lib/actions/motoristaActions';
+import { getMotoristaByUserId } from '@/lib/api/motoristaApi';
 
 export default function EditarMotoristaPage() {
   const { user } = useAuth();

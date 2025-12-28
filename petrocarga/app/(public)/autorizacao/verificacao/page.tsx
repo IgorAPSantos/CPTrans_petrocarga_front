@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
-import { solicitarRecuperacaoSenha } from '@/lib/actions/recuperacaoAction';
+import { solicitarRecuperacaoSenha } from '@/lib/api/recuperacaoApi';
 import { validateEmail } from '@/lib/utils';
 
 type StatusType = 'success' | 'error' | null;

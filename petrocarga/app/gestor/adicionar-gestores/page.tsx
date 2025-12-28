@@ -13,7 +13,7 @@ import Form from 'next/form';
 import { useActionState } from 'react';
 import { CircleAlert, UserIcon, CheckCircle, ArrowLeft } from 'lucide-react';
 import FormItem from '@/components/form/form-item';
-import { addGestor } from '@/lib/actions/gestorActions';
+import { addGestor } from '@/lib/actions/gestorAction';
 import Link from 'next/link';
 
 export default function CadastroGestores() {
@@ -110,7 +110,7 @@ export default function CadastroGestores() {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    '',
+                    ''
                   );
                 }}
               />
@@ -132,7 +132,7 @@ export default function CadastroGestores() {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    '',
+                    ''
                   );
                 }}
               />

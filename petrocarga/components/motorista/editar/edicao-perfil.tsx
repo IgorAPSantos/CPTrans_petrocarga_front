@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { atualizarMotorista } from '@/lib/actions/motoristaActions';
+import { atualizarMotorista } from '@/lib/api/motoristaApi';
 import { CheckCircle, CircleAlert, UserIcon } from 'lucide-react';
 import Form from 'next/form';
 import { use, useActionState, useState } from 'react';
@@ -30,7 +30,7 @@ export default function EditarMotorista({
 
   const [state, atualizarMotoristaAction, pending] = useActionState(
     atualizar,
-    null,
+    null
   );
 
   const [exibirSenha, setExibirSenha] = useState(false);

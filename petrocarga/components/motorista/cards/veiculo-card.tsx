@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Veiculo } from '@/lib/types/veiculo';
 import { useRouter } from 'next/navigation';
-import { deleteVeiculo, atualizarVeiculo } from '@/lib/actions/veiculoActions';
+import { deleteVeiculo, atualizarVeiculo } from '@/lib/api/veiculoApi';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 type VeiculoDetalhesProps = {

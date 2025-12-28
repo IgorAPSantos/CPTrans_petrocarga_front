@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
-import { getMotoristas } from '@/lib/actions/motoristaActions';
+import { getMotoristas } from '@/lib/api/motoristaApi';
 import { Loader2 } from 'lucide-react';
 import { Motorista } from '@/lib/types/motorista';
 import MotoristaCard from '@/components/gestor/cards/motoristas-card';
@@ -26,7 +26,7 @@ export default function MotoristasPage() {
       } catch (err) {
         console.error('Erro ao carregar os motoristas:', err);
         setError(
-          'Erro ao buscar os motoristas cadastrados. Tente novamente mais tarde.',
+          'Erro ao buscar os motoristas cadastrados. Tente novamente mais tarde.'
         );
       } finally {
         setLoading(false);

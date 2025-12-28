@@ -118,7 +118,7 @@ export default function CadastroAgentes() {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    '',
+                    ''
                   );
                 }}
               />
@@ -140,7 +140,7 @@ export default function CadastroAgentes() {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    '',
+                    ''
                   );
                 }}
               />

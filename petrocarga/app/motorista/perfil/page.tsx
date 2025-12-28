@@ -8,10 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useAuth } from '@/components/hooks/useAuth';
-import {
-  deleteMotorista,
-  getMotoristaByUserId,
-} from '@/lib/actions/motoristaActions';
+import { deleteMotorista, getMotoristaByUserId } from '@/lib/api/motoristaApi';
 import { Motorista } from '@/lib/types/motorista';
 import { cn } from '@/lib/utils';
 import {
@@ -231,7 +228,7 @@ export default function PerfilMotorista() {
               onClick={() => setModalAberto(true)}
               className={cn(
                 buttonVariants({ variant: 'destructive' }),
-                'flex items-center gap-2 justify-center',
+                'flex items-center gap-2 justify-center'
               )}
             >
               <Trash2 className="w-4 h-4" />

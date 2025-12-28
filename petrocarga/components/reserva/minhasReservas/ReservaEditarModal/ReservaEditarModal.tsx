@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle2, X, Loader2 } from 'lucide-react';
 
 import { ReservaGet } from '@/lib/types/reserva';
-import { atualizarReserva } from '@/lib/actions/reservaActions';
+import { atualizarReserva } from '@/lib/api/reservaApi';
 import { useAuth } from '@/components/hooks/useAuth';
 import { useReserva } from '../../hooks/useReserva';
 import OriginVehicleStep from '../../OriginVehicleStep';

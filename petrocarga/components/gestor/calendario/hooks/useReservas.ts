@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { getReservas, finalizarForcado } from '@/lib/actions/reservaActions';
-import { Notificacao } from '@/lib/actions/notificacaoAction';
+import { getReservas, finalizarForcado } from '@/lib/api/reservaApi';
+import { Notificacao } from '@/lib/api/notificacaoApi';
 import { useAuth } from '@/components/hooks/useAuth';
 import { Reserva } from '@/lib/types/reserva';
 import { toast } from 'sonner';
@@ -63,7 +63,7 @@ export function useReservas() {
             `Esta ação não pode ser desfeita` +
             (reserva.motoristaId
               ? ` e uma notificação será enviada ao motorista.`
-              : `.`),
+              : `.`)
         );
 
         if (!confirmar) {
@@ -91,9 +91,12 @@ export function useReservas() {
               `Sua reserva foi finalizada pelo gestor.\n\n` +
                 `🔹 Vaga: ${reserva.enderecoVaga.logradouro}\n` +
                 `🔹 Data: ${new Date(reserva.inicio).toLocaleDateString()}\n` +
-                `🔹 Horário: ${new Date(reserva.inicio).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n` +
+                `🔹 Horário: ${new Date(reserva.inicio).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}\n` +
                 `🔹 Veículo: ${reserva.placaVeiculo}\n\n` +
-                `Motivo: Checkout realizado pelo gestor.`,
+                `Motivo: Checkout realizado pelo gestor.`
             );
             formData.append('tipo', 'RESERVA');
             formData.append(
@@ -111,7 +114,7 @@ export function useReservas() {
                   permissao: user?.permissao,
                 },
                 realizadoEm: new Date().toISOString(),
-              }),
+              })
             );
 
             const notificacaoResult = await Notificacao(formData);
@@ -120,7 +123,7 @@ export function useReservas() {
             if (notificacaoResult.error) {
               console.warn(
                 'Notificação não enviada:',
-                notificacaoResult.message,
+                notificacaoResult.message
               );
             }
           } catch (error) {
@@ -131,8 +134,8 @@ export function useReservas() {
         // 6. Atualizar estado local
         setReservas((prev) =>
           prev.map((r) =>
-            r.id === reservaID ? { ...r, status: 'CONCLUIDA' } : r,
-          ),
+            r.id === reservaID ? { ...r, status: 'CONCLUIDA' } : r
+          )
         );
 
         // 7. Feedback ao usuário
@@ -161,7 +164,7 @@ export function useReservas() {
         setActionLoading(false);
       }
     },
-    [reservas, user],
+    [reservas, user]
   );
 
   return {

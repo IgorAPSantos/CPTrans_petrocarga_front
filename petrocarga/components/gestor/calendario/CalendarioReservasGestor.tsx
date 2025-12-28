@@ -8,7 +8,7 @@ import { ReservaModal } from './ReservaModal';
 import { useState, useMemo, useRef } from 'react';
 import { toDateKey, dayStartISO } from './utils/utils';
 import type { EventClickArg, EventInput } from '@fullcalendar/core';
-import { getVagaById } from '@/lib/actions/vagaActions';
+import { getVagaById } from '@/lib/api/vagaApi';
 import type { Reserva } from '@/lib/types/reserva';
 import type { Vaga } from '@/lib/types/vaga';
 import { Toaster } from 'sonner';
@@ -40,7 +40,6 @@ type ModalState =
 
 /* -------------------- Componente -------------------- */
 export default function CalendarioReservasGestor() {
-  // ✅ Corrigido: Pegando todas as funções necessárias do hook
   const { reservas, actionLoading, finalizarReservaForcada } = useReservas();
   const [vagaCache, setVagaCache] = useState<Record<string, Vaga | null>>({});
   const [modalState, setModalState] = useState<ModalState>({
@@ -92,7 +91,7 @@ export default function CalendarioReservasGestor() {
           (reserva) =>
             reserva.status === 'CONCLUIDA' ||
             reserva.status === 'REMOVIDA' ||
-            reserva.status === 'CANCELADA',
+            reserva.status === 'CANCELADA'
         );
       return {
         id: dateStr,
@@ -119,7 +118,7 @@ export default function CalendarioReservasGestor() {
         } catch (err) {
           console.error('Erro ao buscar vaga', id, err);
         }
-      }),
+      })
     );
   };
 
@@ -136,8 +135,8 @@ export default function CalendarioReservasGestor() {
       new Set(
         Object.values(logradouros)
           .flat()
-          .map((r) => r.vagaId),
-      ),
+          .map((r) => r.vagaId)
+      )
     );
 
     await ensureVagasInCache(todosVagaIds);
@@ -153,7 +152,7 @@ export default function CalendarioReservasGestor() {
   /* -------------------- Checkout forçado (SIMPLIFICADO) -------------------- */
   const handleCheckoutForcado = async (
     reservaId: string,
-    reservaData: Reserva,
+    reservaData: Reserva
   ) => {
     if (actionLoading) return;
 
@@ -176,7 +175,6 @@ export default function CalendarioReservasGestor() {
   /* -------------------- Render -------------------- */
   return (
     <div className="p-2 md:p-4">
-      {/* ✅ Componente Toaster para mostrar as notificações */}
       <Toaster
         position="top-right"
         richColors
@@ -226,7 +224,6 @@ export default function CalendarioReservasGestor() {
             data: { reserva, vagaInfo: vagaCache[reserva.vagaId] ?? null },
           });
         }}
-        // ✅ Passa a função handleCheckoutForcado que chama o hook
         checkoutForcado={(reservaId) => {
           if (modalState.type === 'reserva') {
             handleCheckoutForcado(reservaId, modalState.data.reserva);

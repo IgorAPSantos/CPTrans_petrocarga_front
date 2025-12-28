@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
-import { getAgentes } from '@/lib/actions/agenteAction';
+import { getAgentes } from '@/lib/api/agenteApi';
 import { Loader2 } from 'lucide-react';
 import { Agente } from '@/lib/types/agente';
 import AgenteCard from '@/components/gestor/cards/agentes-card';
@@ -26,7 +26,7 @@ export default function AgentesPage() {
       } catch (err) {
         console.error('Erro ao carregar os agentes:', err);
         setError(
-          'Erro ao buscar os agentes cadastrados. Tente novamente mais tarde.',
+          'Erro ao buscar os agentes cadastrados. Tente novamente mais tarde.'
         );
       } finally {
         setLoading(false);

@@ -1,25 +1,25 @@
 'use server';
-import { serverApi } from '../serverApi';
+
+import { serverApi } from '@/lib/serverApi';
 
 // ----------------------
-// ADD AGENTE
+// ADD GESTOR
 // ----------------------
-export async function addAgente(_: unknown, formData: FormData) {
+export async function addGestor(_: unknown, formData: FormData) {
   const payload = {
     nome: formData.get('nome') as string,
     cpf: formData.get('cpf') as string,
     telefone: formData.get('telefone') as string,
     email: formData.get('email') as string,
-    matricula: formData.get('matricula') as string,
   };
 
-  const res = await serverApi(`/petrocarga/agentes`, {
+  const res = await serverApi(`/petrocarga/gestores`, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
-    let msg = 'Erro ao cadastrar agente';
+    let msg = 'Erro ao cadastrar gestor';
 
     try {
       const data = await res.json();
@@ -29,5 +29,5 @@ export async function addAgente(_: unknown, formData: FormData) {
     return { error: true, message: msg, valores: payload };
   }
 
-  return { error: false, message: 'Agente cadastrado com sucesso!' };
+  return { error: false, message: 'Gestor cadastrado com sucesso!' };
 }

@@ -3,7 +3,7 @@ import {
   addDisponibilidadeVagas,
   editarDisponibilidadeVagas,
   deleteDisponibilidadeVagas,
-} from '@/lib/actions/disponibilidadeVagasAction';
+} from '@/lib/api/disponibilidadeVagasApi';
 
 // -------------------------------------------------------
 // GET — Carregar todas as disponibilidades
@@ -18,7 +18,7 @@ export async function fetchDisponibilidades() {
 export async function postDisponibilidade(
   vagaIds: string[],
   inicio: string,
-  fim: string,
+  fim: string
 ) {
   const form = new FormData();
 
@@ -36,7 +36,7 @@ export async function updateDisponibilidade(
   id: string,
   vagaId: string,
   inicio: string,
-  fim: string,
+  fim: string
 ) {
   return await editarDisponibilidadeVagas(id, vagaId, inicio, fim);
 }
@@ -45,8 +45,5 @@ export async function updateDisponibilidade(
 // DELETE — Deletar disponibilidade por ID
 // -------------------------------------------------------
 export async function removeDisponibilidade(id: string) {
-  const form = new FormData();
-  form.append('id', id);
-
-  return await deleteDisponibilidadeVagas(form);
+  return await deleteDisponibilidadeVagas(id);
 }

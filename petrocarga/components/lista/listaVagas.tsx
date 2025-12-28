@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import VagaItem from '@/components/gestor/cards/vagas-item';
 import { Vaga } from '@/lib/types/vaga';
 import { ChevronUp, ChevronDown } from 'lucide-react';
-import * as vagaActions from '@/lib/actions/vagaActions';
+import * as vagaActions from '@/lib/api/vagaApi';
 
 // Hook simples de debounce
 function useDebounce(value: string, delay = 300) {
@@ -63,14 +63,14 @@ export function ListaVagas() {
       return a.status === 'DISPONIVEL' && b.status !== 'DISPONIVEL'
         ? -1
         : b.status === 'DISPONIVEL' && a.status !== 'DISPONIVEL'
-          ? 1
-          : 0;
+        ? 1
+        : 0;
     } else {
       return a.status !== 'DISPONIVEL' && b.status === 'DISPONIVEL'
         ? -1
         : b.status !== 'DISPONIVEL' && a.status === 'DISPONIVEL'
-          ? 1
-          : 0;
+        ? 1
+        : 0;
     }
   });
 

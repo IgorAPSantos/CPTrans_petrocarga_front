@@ -6,8 +6,8 @@ import { Vaga } from '@/lib/types/vaga';
 import { ReservaState } from '@/lib/types/reservaState';
 import { ConfirmResult } from '@/lib/types/confirmResult';
 
-import { getMotoristaByUserId } from '@/lib/actions/motoristaActions';
-import { getVeiculosUsuario } from '@/lib/actions/veiculoActions';
+import { getMotoristaByUserId } from '@/lib/api/motoristaApi';
+import { getVeiculosUsuario } from '@/lib/api/veiculoApi';
 
 import {
   gerarHorariosDia,

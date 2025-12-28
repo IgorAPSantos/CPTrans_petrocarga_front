@@ -1,8 +1,23 @@
+'use client';
+
 import { jsPDF } from 'jspdf';
-import { getDocumentoReserva } from './reservaActions';
+import { getDocumentoReserva } from './reservaApi';
+
+interface DocumentoReserva {
+  id: string;
+  logradouro: string;
+  bairro: string;
+  cidadeOrigem: string;
+  motoristaNome: string;
+  veiculoModelo: string;
+  veiculoPlaca: string;
+  inicio: string;
+  fim: string;
+  status: string;
+}
 
 export async function gerarDocumentoReserva(reservaId: string) {
-  const dados = await getDocumentoReserva(reservaId);
+  const dados: DocumentoReserva = await getDocumentoReserva(reservaId);
 
   const doc = new jsPDF();
 
@@ -19,10 +34,10 @@ export async function gerarDocumentoReserva(reservaId: string) {
 
   doc.text(
     `Período: ${new Date(dados.inicio).toLocaleString('pt-BR')} até ${new Date(
-      dados.fim,
+      dados.fim
     ).toLocaleString('pt-BR')}`,
     20,
-    100,
+    100
   );
 
   doc.text(`Status: ${dados.status}`, 20, 110);

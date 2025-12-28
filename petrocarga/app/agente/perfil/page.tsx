@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { getAgenteByUserId } from '@/lib/actions/agenteAction';
+import { getAgenteByUserId } from '@/lib/api/agenteApi';
 import { Agente } from '@/lib/types/agente';
 import {
   FileText,

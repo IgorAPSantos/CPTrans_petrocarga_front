@@ -14,14 +14,14 @@ import { ArrowLeft, CheckCircle, CircleAlert, TruckIcon } from 'lucide-react';
 import Form from 'next/form';
 import FormItem from '@/components/form/form-item';
 import SelecaoCustomizada from '@/components/gestor/selecaoItem/selecao-customizada';
-import { addVeiculo } from '@/lib/actions/veiculoActions';
+import { addVeiculo } from '@/lib/api/veiculoApi';
 import { useAuth } from '@/components/hooks/useAuth';
 import Link from 'next/link';
 
 export default function CadastroVeiculo() {
   const { user } = useAuth();
   const [message, setMessage] = useState<{ error?: boolean; text?: string }>(
-    {},
+    {}
   );
   const [isPending, startTransition] = useTransition();
 

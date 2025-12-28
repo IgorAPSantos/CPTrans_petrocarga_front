@@ -10,8 +10,7 @@ import {
   ReactNode,
   useMemo,
 } from 'react';
-import { parseCookies } from 'nookies';
-import { getNotificacoesUsuario } from '@/lib/actions/notificacaoAction';
+import { getNotificacoesUsuario } from '@/lib/api/notificacaoApi';
 import { Notification, NotificationContextData } from '@/lib/types/notificacao';
 import { logger } from '@/lib/logger';
 
@@ -312,11 +311,6 @@ export function NotificationProvider({
   // 🔴 EFEITO: Gerenciar conexão SSE
   useEffect(() => {
     if (!usuarioId || usuarioId.trim() === '') {
-      return;
-    }
-
-    const { 'auth-token': token } = parseCookies();
-    if (!token) {
       return;
     }
 

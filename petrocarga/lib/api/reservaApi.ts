@@ -1,7 +1,6 @@
-'use server';
+'use client';
 
-import { serverApi } from '@/lib/serverApi';
-import { revalidatePath } from 'next/cache';
+import { clientApi } from '../clientApi';
 import { ConfirmResult } from '../types/confirmResult';
 
 // ----------------------
@@ -18,27 +17,17 @@ export async function reservarVaga(formData: FormData): Promise<ConfirmResult> {
     status: 'ATIVA',
   };
 
-  const res = await serverApi('/petrocarga/reservas', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-
-  // 🔴 erro de regra de negócio (400)
-  if (!res.ok) {
-    const errorBody = await res.json();
-
-    return {
-      success: false,
-      message: errorBody.erro ?? 'Erro ao reservar vaga.',
-    };
+  try {
+    await clientApi('/petrocarga/reservas', {
+      method: 'POST',
+      json: body,
+    });
+    return { success: true };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao reservar vaga.';
+    return { success: false, message };
   }
-
-  // sucesso
-  await res.json(); // se não precisar dos dados, só consome
-  return { success: true };
 }
 
 // ----------------------
@@ -55,73 +44,68 @@ export async function reservarVagaAgente(
     fim: formData.get('fim'),
   };
 
-  const res = await serverApi('/petrocarga/reserva-rapida', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const errorBody = await res.json();
-
-    return {
-      success: false,
-      message: errorBody.erro ?? 'Erro ao confirmar reserva do agente.',
-    };
+  try {
+    await clientApi('/petrocarga/reserva-rapida', {
+      method: 'POST',
+      json: body,
+    });
+    return { success: true };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : 'Erro ao confirmar reserva do agente.';
+    return { success: false, message };
   }
-
-  await res.json();
-  return { success: true };
 }
 
 // ----------------------
 // POST RESERVA CHECKOUT-FORÇADO
 // ----------------------
-
 export async function finalizarForcado(reservaID: string) {
-  const res = await serverApi(
-    `/petrocarga/reservas/${reservaID}/finalizar-forcado`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }
-  );
-
-  if (!res.ok) {
-    throw new Error(await res.text());
+  try {
+    const res = await clientApi(
+      `/petrocarga/reservas/${reservaID}/finalizar-forcado`,
+      {
+        method: 'POST',
+      }
+    );
+    return res.json();
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao finalizar reserva forçada.';
+    throw new Error(message);
   }
-
-  return res.json();
 }
 
 // ----------------------
 // GET RESERVAS POR USUARIO
 // ----------------------
 export async function getReservasPorUsuario(usuarioId: string) {
-  const res = await serverApi(`/petrocarga/reservas/usuario/${usuarioId}`);
-
-  if (!res.ok) {
-    throw new Error(await res.text());
+  try {
+    const res = await clientApi(`/petrocarga/reservas/usuario/${usuarioId}`);
+    return res.json();
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : 'Erro ao buscar reservas do usuário.';
+    throw new Error(message);
   }
-
-  return res.json();
 }
 
 // ----------------------
 // GET RESERVAS
 // ----------------------
 export async function getReservas() {
-  const res = await serverApi(`/petrocarga/reservas/all`);
-
-  if (!res.ok) {
-    throw new Error(await res.text());
+  try {
+    const res = await clientApi('/petrocarga/reservas/all');
+    return res.json();
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao buscar reservas.';
+    throw new Error(message);
   }
-
-  return res.json();
 }
 
 // ----------------------
@@ -137,75 +121,70 @@ export async function getReservasBloqueios(
     | 'CAMINHAO_MEDIO'
     | 'CAMINHAO_LONGO'
 ) {
-  const queryParams = new URLSearchParams({
-    data,
-    tipoVeiculo,
-  }).toString();
+  const queryParams = new URLSearchParams({ data, tipoVeiculo }).toString();
 
-  const res = await serverApi(
-    `/petrocarga/reservas/bloqueios/${vagaId}?${queryParams}`,
-    {
-      method: 'GET',
-    }
-  );
-
-  if (!res.ok) {
-    throw new Error(await res.text());
+  try {
+    const res = await clientApi(
+      `/petrocarga/reservas/bloqueios/${vagaId}?${queryParams}`
+    );
+    return res.json();
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao buscar bloqueios.';
+    throw new Error(message);
   }
-
-  return res.json();
 }
 
 // ----------------------
 // GET RESERVAS ATIVAS
 // ----------------------
 export async function getReservasAtivas(vagaId: string) {
-  const res = await serverApi(`/petrocarga/reservas/ativas/${vagaId}`);
-
-  if (!res.ok) {
-    throw new Error(await res.text());
+  try {
+    const res = await clientApi(`/petrocarga/reservas/ativas/${vagaId}`);
+    return res.json();
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao buscar reservas ativas.';
+    throw new Error(message);
   }
-
-  return res.json();
 }
 
+// ----------------------
+// DELETE RESERVA POR ID
+// ----------------------
 export async function deleteReservaByID(reservaId: string, usuarioId: string) {
-  const res = await serverApi(
-    `/petrocarga/reservas/${reservaId}/${usuarioId}`,
-    {
+  try {
+    await clientApi(`/petrocarga/reservas/${reservaId}/${usuarioId}`, {
       method: 'DELETE',
       cache: 'no-store',
-    }
-  );
-
-  if (!res.ok) {
-    console.error('Erro ao deletar Reserva:', await res.text());
-    return { error: true, message: 'Erro ao deletar Reserva' };
+    });
+    return { success: true };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao deletar reserva.';
+    return { error: true, message };
   }
-
-  revalidatePath('/motorista/reservas');
-
-  return { success: true };
 }
 
 // ----------------------
 // DOCUMENTO RESERVA
 // ----------------------
-
 export async function getDocumentoReserva(reservaID: string) {
-  const res = await serverApi(`/petrocarga/documentos/reservas/${reservaID}`);
-
-  if (!res.ok) {
-    throw new Error(await res.text());
+  try {
+    const res = await clientApi(`/petrocarga/documentos/reservas/${reservaID}`);
+    return res.json();
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : 'Erro ao buscar documento da reserva.';
+    throw new Error(message);
   }
-
-  return res.json();
 }
 
 // ----------------------
 // PATCH RESERVA
 // ----------------------
-
 export async function atualizarReserva(
   body: {
     veiculoId: string;
@@ -219,7 +198,7 @@ export async function atualizarReserva(
 ) {
   console.log('📤 Enviando JSON para API Java:', body);
 
-  const res = await serverApi(
+  const res = await clientApi(
     `/petrocarga/reservas/${reservaID}/${usuarioId}`,
     {
       method: 'PATCH',
@@ -241,8 +220,6 @@ export async function atualizarReserva(
       status: res.status,
     };
   }
-
-  revalidatePath('/motorista/reservas');
 
   const data = await res.json();
 

@@ -14,7 +14,7 @@ import {
 import {
   validarCodigoRecuperacao,
   redefinirSenhaComCodigo,
-} from '@/lib/actions/recuperacaoAction';
+} from '@/lib/api/recuperacaoApi';
 
 type StatusType = 'success' | 'error' | null;
 

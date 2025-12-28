@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { addMotorista } from '@/lib/actions/motoristaActions';
+import { addMotorista } from '@/lib/actions/motoristaAction';
 import { CircleAlert, Eye, EyeOff, UserIcon, CheckCircle } from 'lucide-react';
 import Form from 'next/form';
 import { useActionState } from 'react';
@@ -20,7 +20,7 @@ import SelecaoCustomizada from '@/components/gestor/selecaoItem/selecao-customiz
 export default function CadastroUsuario() {
   const [state, addMotoristaAction, pending] = useActionState(
     addMotorista,
-    null,
+    null
   );
   const [exibirSenha, setExibirSenha] = useState(false);
 
