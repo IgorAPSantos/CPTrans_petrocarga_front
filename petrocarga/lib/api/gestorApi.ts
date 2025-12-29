@@ -22,28 +22,33 @@ interface GestorResult {
 // ----------------------
 // ADD GESTOR
 // ----------------------
-export async function addGestor(formData: FormData): Promise<GestorResult> {
-  const payload: GestorPayload = {
+export async function addGestor(_: unknown, formData: FormData) {
+  const payload = {
     nome: formData.get('nome') as string,
     cpf: formData.get('cpf') as string,
     telefone: formData.get('telefone') as string,
     email: formData.get('email') as string,
   };
 
-  try {
-    await clientApi('/petrocarga/gestores', {
-      method: 'POST',
-      json: payload,
-    });
-    return { error: false, message: 'Gestor cadastrado com sucesso!' };
-  } catch (err: unknown) {
-    return {
-      error: true,
-      message: err instanceof Error ? err.message : 'Erro ao cadastrar gestor',
-      valores: payload,
-    };
+  const res = await clientApi(`/petrocarga/gestores`, {
+    method: 'POST',
+    json: payload
+  });
+
+  if (!res.ok) {
+    let msg = 'Erro ao cadastrar gestor';
+
+    try {
+      const data = await res.json();
+      msg = data.message ?? msg;
+    } catch { }
+
+    return { error: true, message: msg, valores: payload };
   }
+
+  return { error: false, message: 'Gestor cadastrado com sucesso!' };
 }
+
 
 // ----------------------
 // DELETE GESTOR
@@ -104,7 +109,7 @@ export async function getGestores() {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
@@ -125,7 +130,7 @@ export async function getGestorByUserId(userId: string) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
