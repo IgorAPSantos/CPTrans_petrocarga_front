@@ -169,18 +169,6 @@ export default function EnviarNotificacoesPage() {
         formData.append('titulo', titulo);
         formData.append('mensagem', mensagem);
         formData.append('tipo', tipo);
-        formData.append(
-          'metada',
-          JSON.stringify({
-            remetente: {
-              id: user?.id,
-              nome: user?.nome,
-              permissao: user?.permissao,
-            },
-            enviadoEm: new Date().toISOString(),
-            tipoEnvio: 'INDIVIDUAL',
-          })
-        );
 
         const result = await Notificacao(formData);
 
@@ -223,18 +211,6 @@ export default function EnviarNotificacoesPage() {
       formData.append('titulo', titulo);
       formData.append('mensagem', mensagem);
       formData.append('tipo', tipo);
-      formData.append(
-        'metada',
-        JSON.stringify({
-          remetente: {
-            id: user?.id,
-            nome: user?.nome,
-            permissao: user?.permissao,
-          },
-          enviadoEm: new Date().toISOString(),
-          tipoEnvio: 'GRUPO',
-        })
-      );
 
       const result = await NotificacaoPorPermissao(formData);
 
@@ -345,11 +321,10 @@ export default function EnviarNotificacoesPage() {
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setFiltroTipo('GRUPO')}
-                    className={`p-3 border rounded-lg transition-colors flex flex-col items-center justify-center gap-2 ${
-                      filtroTipo === 'GRUPO'
+                    className={`p-3 border rounded-lg transition-colors flex flex-col items-center justify-center gap-2 ${filtroTipo === 'GRUPO'
                         ? 'bg-blue-50 border-blue-300 text-blue-700'
                         : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <Users className="h-5 w-5" />
                     <span className="text-sm font-medium">
@@ -362,11 +337,10 @@ export default function EnviarNotificacoesPage() {
 
                   <button
                     onClick={() => setFiltroTipo('TODOS')}
-                    className={`p-3 border rounded-lg transition-colors flex flex-col items-center justify-center gap-2 ${
-                      filtroTipo !== 'GRUPO'
+                    className={`p-3 border rounded-lg transition-colors flex flex-col items-center justify-center gap-2 ${filtroTipo !== 'GRUPO'
                         ? 'bg-blue-50 border-blue-300 text-blue-700'
                         : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-                    }`}
+                      }`}
                   >
                     <Users className="h-5 w-5" />
                     <span className="text-sm font-medium">
@@ -388,11 +362,10 @@ export default function EnviarNotificacoesPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <button
                       onClick={() => setGrupoSelecionado('MOTORISTA')}
-                      className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${
-                        grupoSelecionado === 'MOTORISTA'
+                      className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${grupoSelecionado === 'MOTORISTA'
                           ? 'bg-blue-100 border-blue-300 text-blue-700'
                           : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       <span className="font-medium">Motoristas</span>
                       <span className="text-xs text-gray-500">
@@ -402,11 +375,10 @@ export default function EnviarNotificacoesPage() {
 
                     <button
                       onClick={() => setGrupoSelecionado('AGENTE')}
-                      className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${
-                        grupoSelecionado === 'AGENTE'
+                      className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${grupoSelecionado === 'AGENTE'
                           ? 'bg-blue-100 border-blue-300 text-blue-700'
                           : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       <span className="font-medium">Agentes</span>
                       <span className="text-xs text-gray-500">
@@ -417,11 +389,10 @@ export default function EnviarNotificacoesPage() {
                     {isAdmin && (
                       <button
                         onClick={() => setGrupoSelecionado('GESTOR')}
-                        className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${
-                          grupoSelecionado === 'GESTOR'
+                        className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${grupoSelecionado === 'GESTOR'
                             ? 'bg-blue-100 border-blue-300 text-blue-700'
                             : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                        }`}
+                          }`}
                       >
                         <span className="font-medium">Gestores</span>
                         <span className="text-xs text-gray-500">
@@ -486,19 +457,17 @@ export default function EnviarNotificacoesPage() {
                     {usuariosFiltrados().map((usuario) => (
                       <div
                         key={usuario.id}
-                        className={`px-4 py-3 border-b border-gray-100 flex items-center gap-3 hover:bg-gray-50 cursor-pointer ${
-                          usuariosSelecionados.includes(usuario.id)
+                        className={`px-4 py-3 border-b border-gray-100 flex items-center gap-3 hover:bg-gray-50 cursor-pointer ${usuariosSelecionados.includes(usuario.id)
                             ? 'bg-blue-50'
                             : ''
-                        }`}
+                          }`}
                         onClick={() => toggleUsuario(usuario.id)}
                       >
                         <div
-                          className={`w-5 h-5 rounded border flex items-center justify-center ${
-                            usuariosSelecionados.includes(usuario.id)
+                          className={`w-5 h-5 rounded border flex items-center justify-center ${usuariosSelecionados.includes(usuario.id)
                               ? 'bg-blue-500 border-blue-500'
                               : 'border-gray-300'
-                          }`}
+                            }`}
                         >
                           {usuariosSelecionados.includes(usuario.id) && (
                             <Check className="w-3 h-3 text-white" />
@@ -511,13 +480,12 @@ export default function EnviarNotificacoesPage() {
                           <div className="text-sm text-gray-500 flex items-center gap-2">
                             <span className="truncate">{usuario.email}</span>
                             <span
-                              className={`px-2 py-0.5 text-xs rounded-full ${
-                                usuario.tipo === 'MOTORISTA'
+                              className={`px-2 py-0.5 text-xs rounded-full ${usuario.tipo === 'MOTORISTA'
                                   ? 'bg-blue-100 text-blue-800'
                                   : usuario.tipo === 'AGENTE'
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-purple-100 text-purple-800'
-                              }`}
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-purple-100 text-purple-800'
+                                }`}
                             >
                               {usuario.tipo}
                             </span>
@@ -554,8 +522,8 @@ export default function EnviarNotificacoesPage() {
                     {grupoSelecionado === 'MOTORISTA'
                       ? motoristas.length
                       : grupoSelecionado === 'AGENTE'
-                      ? agentes.length
-                      : gestores.length}{' '}
+                        ? agentes.length
+                        : gestores.length}{' '}
                     usuários)
                   </>
                 )}
@@ -639,11 +607,10 @@ export default function EnviarNotificacoesPage() {
               {/* Resultado do envio */}
               {resultado && (
                 <div
-                  className={`p-4 rounded-lg border ${
-                    resultado.erros > 0
+                  className={`p-4 rounded-lg border ${resultado.erros > 0
                       ? 'bg-red-50 border-red-200 text-red-800'
                       : 'bg-green-50 border-green-200 text-green-800'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2 font-medium mb-1">
                     {resultado.erros > 0 ? (

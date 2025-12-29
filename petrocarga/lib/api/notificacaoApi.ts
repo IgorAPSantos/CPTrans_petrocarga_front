@@ -14,14 +14,13 @@ export async function Notificacao(formData: FormData) {
       | 'VEICULO'
       | 'MOTORISTA'
       | 'SISTEMA',
-    metada: JSON.parse(formData.get('metada') as string),
   };
 
   const res = await clientApi(
     `/petrocarga/notificacoes/sendNotification/toUsuario/${usuarioId}`,
     {
       method: 'POST',
-      body: JSON.stringify(payload),
+      json: payload
     }
   );
 
@@ -30,7 +29,7 @@ export async function Notificacao(formData: FormData) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
@@ -52,14 +51,13 @@ export async function NotificacaoPorPermissao(formData: FormData) {
       | 'VEICULO'
       | 'MOTORISTA'
       | 'SISTEMA',
-    metada: JSON.parse(formData.get('metada') as string),
   };
 
   const res = await clientApi(
-    `/petrocarga/notificacoes/sendNotification/toUsuario/${permissao}`,
+    `/petrocarga/notificacoes/sendNotification/byPermissao/${permissao}`,
     {
       method: 'POST',
-      body: JSON.stringify(payload),
+      json: payload
     }
   );
 
@@ -68,7 +66,7 @@ export async function NotificacaoPorPermissao(formData: FormData) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
@@ -91,7 +89,7 @@ export async function getNotificacoesUsuario(usuarioId: string) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
@@ -113,7 +111,7 @@ export async function getNotificacoesById(id: string) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
