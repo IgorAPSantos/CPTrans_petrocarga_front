@@ -1,5 +1,6 @@
 'use client';
 
+import { json } from 'stream/consumers';
 import { clientApi } from '../clientApi';
 
 interface Agente {
@@ -24,8 +25,8 @@ interface AgenteResponse {
 // ----------------------
 // ADD AGENTE
 // ----------------------
-export async function addAgente(formData: FormData): Promise<AgenteResponse> {
-  const payload: Agente = {
+export async function addAgente(_: unknown, formData: FormData) {
+  const payload = {
     nome: formData.get('nome') as string,
     cpf: formData.get('cpf') as string,
     telefone: formData.get('telefone') as string,
@@ -33,22 +34,25 @@ export async function addAgente(formData: FormData): Promise<AgenteResponse> {
     matricula: formData.get('matricula') as string,
   };
 
-  try {
-    await clientApi('/petrocarga/agentes', {
-      method: 'POST',
-      json: payload,
-    });
+  const res = await clientApi(`/petrocarga/agentes`, {
+    method: 'POST',
+    json: payload
+  });
 
-    return { error: false, message: 'Agente cadastrado com sucesso!' };
-  } catch (err: unknown) {
-    console.error('Erro ao cadastrar agente:', err);
-    return {
-      error: true,
-      message: err instanceof Error ? err.message : 'Erro desconhecido',
-      valores: payload,
-    };
+  if (!res.ok) {
+    let msg = 'Erro ao cadastrar agente';
+
+    try {
+      const data = await res.json();
+      msg = data.message ?? msg;
+    } catch { }
+
+    return { error: true, message: msg, valores: payload };
   }
+
+  return { error: false, message: 'Agente cadastrado com sucesso!' };
 }
+
 
 // ----------------------
 // DELETE AGENTE
@@ -111,7 +115,7 @@ export async function getAgenteByUserId(userId: string) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
@@ -132,7 +136,7 @@ export async function getAgentes() {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }

@@ -13,7 +13,7 @@ import Form from 'next/form';
 import { useActionState } from 'react';
 import { CircleAlert, UserIcon, CheckCircle, ArrowLeft } from 'lucide-react';
 import FormItem from '@/components/form/form-item';
-import { addGestor } from '@/lib/actions/gestorAction';
+import { addGestor } from '@/lib/api/gestorApi'
 import Link from 'next/link';
 
 export default function CadastroGestores() {
@@ -49,11 +49,10 @@ export default function CadastroGestores() {
           <CardContent className="p-4 md:p-6 lg:p-8">
             {(state?.error || state?.message) && (
               <div
-                className={`flex items-start gap-3 rounded-md border p-4 mb-6 ${
-                  state.error
+                className={`flex items-start gap-3 rounded-md border p-4 mb-6 ${state.error
                     ? 'border-red-200 bg-red-50 text-red-900'
                     : 'border-green-200 bg-green-50 text-green-900'
-                }`}
+                  }`}
               >
                 {state.error ? (
                   <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" />
