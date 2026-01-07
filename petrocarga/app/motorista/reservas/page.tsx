@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
-import { deleteReservaByID, getReservasPorUsuario } from '@/lib/api/reservaApi';
+import {
+  deleteReservaByID,
+  getReservasPorUsuario,
+  atualizarReserva,
+} from '@/lib/api/reservaApi';
 import { Loader2, WifiOff } from 'lucide-react';
 import ReservaLista from '@/components/reserva/minhasReservas/ReservaLista';
 import { ReservaGet } from '@/lib/types/reserva';
@@ -88,6 +92,37 @@ export default function MinhasReservas() {
     }
   };
 
+  const handleCheckoutReserva = async (reserva: ReservaGet) => {
+    if (!navigator.onLine) {
+      toast.error(
+        'Você está offline. O checkout só é permitido com conexão à internet.'
+      );
+      return;
+    }
+
+    try {
+      const body = {
+        veiculoId: reserva.veiculoId,
+        cidadeOrigem: reserva.cidadeOrigem,
+        inicio: reserva.inicio,
+        fim: reserva.fim,
+        status: 'CONCLUIDA',
+      };
+
+      const response = await atualizarReserva(body, reserva.id, user!.id);
+
+      if (response.success) {
+        toast.success('Checkout realizado com sucesso!');
+        fetchReservas();
+      } else {
+        toast.error(response.message);
+      }
+    } catch (err) {
+      console.error('Erro no checkout:', err);
+      toast.error('Erro ao finalizar reserva.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
@@ -129,6 +164,7 @@ export default function MinhasReservas() {
           reservas={reservas}
           onGerarDocumento={handleGerarDocumento}
           onExcluir={handleExcluirReserva}
+          onCheckout={handleCheckoutReserva}
         />
       )}
     </div>
