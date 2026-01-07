@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { getReservas, finalizarForcado } from '@/lib/api/reservaApi';
-import { Notificacao } from '@/lib/api/notificacaoApi';
+import { enviarNotificacaoParaUsuario } from '@/lib/actions/notificacaoAction';
 import { useAuth } from '@/components/hooks/useAuth';
 import { Reserva } from '@/lib/types/reserva';
 import { toast } from 'sonner';
@@ -117,7 +117,9 @@ export function useReservas() {
               })
             );
 
-            const notificacaoResult = await Notificacao(formData);
+            const notificacaoResult = await enviarNotificacaoParaUsuario(
+              formData
+            );
             notificacaoEnviada = !notificacaoResult.error;
 
             if (notificacaoResult.error) {
