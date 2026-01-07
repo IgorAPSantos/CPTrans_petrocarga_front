@@ -4,9 +4,7 @@ import { deleteAgente } from '@/lib/api/agenteApi';
 import { Agente } from '@/lib/types/agente';
 import { cn } from '@/lib/utils';
 import { IdCard, Mail, Phone, UserCircle, Bell, Trash2 } from 'lucide-react';
-import Link from 'next/link';
 import { useState } from 'react';
-import { NotificacaoModal } from '@/components/gestor/modals/notificacaoModal';
 
 interface AgenteCardProps {
   agente: Agente;
@@ -14,7 +12,6 @@ interface AgenteCardProps {
 
 export default function AgenteCard({ agente }: AgenteCardProps) {
   const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
-  const [isNotificacaoModalOpen, setIsNotificacaoModalOpen] = useState(false);
 
   const handleExcluir = async () => {
     try {
@@ -71,19 +68,6 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
         {/* Botões */}
         <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
           <button
-            onClick={() => setIsNotificacaoModalOpen(true)}
-            className={cn(
-              'flex items-center justify-center gap-1.5',
-              'bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200',
-              'rounded-lg transition-colors text-sm font-medium',
-              'h-9 w-full sm:w-28'
-            )}
-          >
-            <Bell className="w-4 h-4" />
-            Notificar
-          </button>
-
-          <button
             onClick={() => setModalExcluirAberto(true)}
             className={cn(
               'flex items-center justify-center gap-1.5',
@@ -97,15 +81,6 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
           </button>
         </div>
       </article>
-
-      {/* Modal de Notificação */}
-      <NotificacaoModal
-        isOpen={isNotificacaoModalOpen}
-        onClose={() => setIsNotificacaoModalOpen(false)}
-        usuarioId={agente.usuario.id}
-        usuarioNome={agente.usuario.nome}
-        tipoUsuario="AGENTE"
-      />
 
       {/* Modal de Confirmação de Exclusão */}
       {modalExcluirAberto && (

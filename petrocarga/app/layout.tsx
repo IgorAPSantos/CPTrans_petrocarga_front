@@ -5,6 +5,7 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationWrapper } from '@/components/notification/notificationWrapper';
 import { Toaster } from 'react-hot-toast';
+import VLibrasWidget from '@/components/VLibras/vlibras';
 
 const mavenPro = Maven_Pro({
   weight: 'variable',
@@ -40,7 +41,9 @@ export default function RootLayout({
       <body>
         <Toaster position="top-center" />
         <AuthProvider>
-          <NotificationWrapper>{children}</NotificationWrapper>
+          <NotificationWrapper>
+            {children} <VLibrasWidget />
+          </NotificationWrapper>
         </AuthProvider>
       </body>
     </html>

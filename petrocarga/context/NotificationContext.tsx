@@ -10,7 +10,11 @@ import {
   ReactNode,
   useMemo,
 } from 'react';
-import { getNotificacoesUsuario } from '@/lib/api/notificacaoApi';
+import {
+  deletarNotificacao,
+  getNotificacoesUsuario,
+  marcarNotificacaoComoLida,
+} from '@/lib/api/notificacaoApi';
 import { Notification, NotificationContextData } from '@/lib/types/notificacao';
 import { logger } from '@/lib/logger';
 
@@ -52,7 +56,7 @@ export function NotificationProvider({
   const retryCountRef = useRef(0);
   const reconnectTimerRef = useRef<number | null>(null);
 
-  // 🔴 CARREGAR HISTÓRICO (com merge inteligente)
+  // CARREGAR HISTÓRICO (com merge inteligente)
   const loadHistorico = useCallback(
     async (silent = false) => {
       if (!usuarioId) return;
@@ -109,7 +113,7 @@ export function NotificationProvider({
     [usuarioId, maxNotifications]
   );
 
-  // 🔴 ADICIONAR NOTIFICAÇÃO (SSE)
+  // ADICIONAR NOTIFICAÇÃO (SSE)
   const addNotification = useCallback(
     (notification: Notification) => {
       setNotifications((prev) => {
@@ -127,7 +131,74 @@ export function NotificationProvider({
     [maxNotifications]
   );
 
-  // 🔴 CONECTAR SSE
+  // REMOVER NOTIFICAÇÃO (com chamada à API)
+  const removeNotification = useCallback(
+    async (id: string) => {
+      try {
+        const result = await deletarNotificacao(usuarioId, id);
+
+        if (!result.error) {
+          setNotifications((prev) => prev.filter((n) => n.id !== id));
+          logger.info('✅ Notificação removida:', id);
+        } else {
+          logger.error('❌ Erro ao remover notificação:', result.message);
+        }
+      } catch (err) {
+        logger.error('❌ Erro ao remover notificação:', err);
+      }
+    },
+    [usuarioId]
+  );
+
+  // MARCAR COMO LIDA (com chamada à API)
+  const markAsRead = useCallback(
+    async (id: string) => {
+      try {
+        const result = await marcarNotificacaoComoLida(usuarioId);
+
+        if (!result.error) {
+          setNotifications((prev) =>
+            prev.map((n) => (n.id === id ? { ...n, lida: true } : n))
+          );
+          logger.info('✅ Notificação marcada como lida:', id);
+        } else {
+          logger.error(
+            '❌ Erro ao marcar notificação como lida:',
+            result.message
+          );
+        }
+      } catch (err) {
+        logger.error('❌ Erro ao marcar notificação como lida:', err);
+      }
+    },
+    [usuarioId]
+  );
+
+  // MARCAR TODAS COMO LIDAS (com chamada à API)
+  const markAllAsRead = useCallback(async () => {
+    try {
+      const result = await marcarNotificacaoComoLida(usuarioId);
+
+      if (!result.error) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, lida: true })));
+        logger.info('✅ Todas as notificações marcadas como lidas');
+      } else {
+        logger.error(
+          '❌ Erro ao marcar todas as notificações como lidas:',
+          result.message
+        );
+      }
+    } catch (err) {
+      logger.error('❌ Erro ao marcar todas as notificações como lidas:', err);
+    }
+  }, [usuarioId]);
+
+  // LIMPAR TODAS (apenas local, você pode adicionar endpoint se quiser)
+  const clearNotifications = useCallback(() => {
+    setNotifications([]);
+  }, []);
+
+  // CONECTAR SSE
   const connect = useCallback(() => {
     if (eventSourceRef.current?.readyState === EventSource.OPEN) {
       logger.debug('SSE: Já conectado');
@@ -283,7 +354,7 @@ export function NotificationProvider({
     loadHistorico,
   ]);
 
-  // 🔴 DESCONECTAR SSE
+  // DESCONECTAR SSE
   const disconnect = useCallback(() => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
@@ -300,7 +371,7 @@ export function NotificationProvider({
     logger.info('🔌 SSE: Conexão fechada');
   }, []);
 
-  // 🔴 EFEITO: Carregar histórico UMA VEZ
+  // EFEITO: Carregar histórico UMA VEZ
   useEffect(() => {
     if (usuarioId && !hasLoadedInitialRef.current) {
       hasLoadedInitialRef.current = true;
@@ -308,7 +379,7 @@ export function NotificationProvider({
     }
   }, [usuarioId, loadHistorico]);
 
-  // 🔴 EFEITO: Gerenciar conexão SSE
+  // EFEITO: Gerenciar conexão SSE
   useEffect(() => {
     if (!usuarioId || usuarioId.trim() === '') {
       return;
@@ -347,7 +418,7 @@ export function NotificationProvider({
     };
   }, [usuarioId, enableSSE, connect, disconnect, loadHistorico]);
 
-  // 🔴 RECONECTAR MANUALMENTE
+  // RECONECTAR MANUALMENTE
   const reconnect = useCallback(() => {
     logger.info('🔄 SSE: Reconexão manual solicitada');
 
@@ -364,31 +435,12 @@ export function NotificationProvider({
     }, 500);
   }, [connect, disconnect]);
 
-  // 🔴 OUTRAS FUNÇÕES
-  const removeNotification = useCallback((id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  }, []);
-
-  const clearNotifications = useCallback(() => {
-    setNotifications([]);
-  }, []);
-
-  const markAsRead = useCallback((id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, lida: true } : n))
-    );
-  }, []);
-
-  const markAllAsRead = useCallback(() => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, lida: true })));
-  }, []);
-
   const refreshNotifications = useCallback(async () => {
     logger.info('🔄 Refresh manual solicitado');
     await loadHistorico();
   }, [loadHistorico]);
 
-  // 🔴 VALOR DO CONTEXTO
+  // VALOR DO CONTEXTO
   const contextValue = useMemo(
     () => ({
       notifications,
