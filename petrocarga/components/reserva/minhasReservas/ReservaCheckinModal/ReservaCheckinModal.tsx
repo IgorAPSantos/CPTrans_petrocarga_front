@@ -6,6 +6,7 @@ import { checkinReserva } from '@/lib/api/reservaApi';
 import { cn } from '@/lib/utils';
 import { buttonVariants } from '@/components/ui/button';
 import { MapPin, Clock, AlertTriangle } from 'lucide-react';
+import ReservaDenuncia from './ReservaDenuncia';
 
 interface ModalCheckinReservaProps {
   reserva: ReservaGet;
@@ -21,6 +22,7 @@ export default function ReservaCheckinModal({
   onDenunciar,
 }: ModalCheckinReservaProps) {
   const [loading, setLoading] = useState(false);
+  const [abrirModal, setAbrirModal] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
   const formatarData = (data: string) =>
@@ -135,7 +137,7 @@ export default function ReservaCheckinModal({
           {/* Ações secundárias */}
           <div className="flex flex-col gap-2">
             <button
-              onClick={() => onDenunciar?.(reserva.id)}
+              onClick={() => setAbrirModal(true)}
               className={cn(
                 buttonVariants({ variant: 'default' }),
                 'w-full bg-red-600 hover:bg-red-700 transition disabled:opacity-60'
@@ -154,6 +156,12 @@ export default function ReservaCheckinModal({
           </div>
         </div>
       </div>
+      {abrirModal && (
+        <ReservaDenuncia
+          reserva={reserva}
+          onClose={() => setAbrirModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -33,10 +33,10 @@ export async function clientApi(path: string, options: ClientApiOptions = {}) {
 
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
-      throw {
-        status: res.status,
-        message: errorData.message || 'Ocorreu um erro na requisição',
-      };
+
+      throw new Error(
+        errorData.cause || errorData.erro || 'Ocorreu um erro na requisição'
+      );
     }
 
     return res;
