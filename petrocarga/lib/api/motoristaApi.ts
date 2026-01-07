@@ -16,6 +16,16 @@ interface MotoristaPayload {
   numeroCnh: string;
   dataValidadeCnh: string;
 }
+interface MotoristaPatchPayload {
+  nome: string,
+  cpf: string,
+  telefone: string,
+  email: string,
+  senha: string,
+  tipoCnh: string;
+  numeroCnh: string;
+  dataValidadeCnh: string;
+}
 
 interface MotoristaResult {
   error: boolean;
@@ -88,14 +98,12 @@ export async function atualizarMotorista(
 ): Promise<MotoristaResult> {
   const id = formData.get('id') as string;
 
-  const payload: MotoristaPayload = {
-    usuario: {
-      nome: formData.get('nome') as string,
-      cpf: formData.get('cpf') as string,
-      telefone: formData.get('telefone') as string,
-      email: formData.get('email') as string,
-      senha: formData.get('senha') as string,
-    },
+  const payload: MotoristaPatchPayload = {
+    nome: formData.get('nome') as string,
+    cpf: formData.get('cpf') as string,
+    telefone: formData.get('telefone') as string,
+    email: formData.get('email') as string,
+    senha: formData.get('senha') as string,
     tipoCnh: (formData.get('tipoCnh') as string)?.toUpperCase(),
     numeroCnh: formData.get('numeroCnh') as string,
     dataValidadeCnh: formData.get('dataValidadeCnh') as string,
@@ -128,7 +136,7 @@ export async function getMotoristaByUserId(userId: string) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }
@@ -149,7 +157,7 @@ export async function getMotoristas() {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch {}
+    } catch { }
 
     return { error: true, message: msg };
   }

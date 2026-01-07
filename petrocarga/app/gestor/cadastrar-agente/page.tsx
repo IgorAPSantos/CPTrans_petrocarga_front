@@ -20,7 +20,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import FormItem from '@/components/form/form-item';
-import { addAgente } from '@/lib/actions/agenteAction';
+import { addAgente } from '@/lib/api/agenteApi';
 import Link from 'next/link';
 
 export default function CadastroAgentes() {
@@ -57,11 +57,10 @@ export default function CadastroAgentes() {
           <CardContent className="p-4 md:p-6 lg:p-8">
             {(state?.error || state?.message) && (
               <div
-                className={`flex items-start gap-3 rounded-md border p-4 mb-6 ${
-                  state.error
+                className={`flex items-start gap-3 rounded-md border p-4 mb-6 ${state.error
                     ? 'border-red-200 bg-red-50 text-red-900'
                     : 'border-green-200 bg-green-50 text-green-900'
-                }`}
+                  }`}
               >
                 {state.error ? (
                   <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" />

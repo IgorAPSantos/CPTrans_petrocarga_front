@@ -124,18 +124,6 @@ export default function EnviarNotificacoesPage() {
         formData.append('titulo', titulo);
         formData.append('mensagem', mensagem);
         formData.append('tipo', tipo);
-        formData.append(
-          'metada',
-          JSON.stringify({
-            remetente: {
-              id: user?.id,
-              nome: user?.nome,
-              permissao: user?.permissao,
-            },
-            enviadoEm: new Date().toISOString(),
-            tipoEnvio: 'INDIVIDUAL',
-          })
-        );
 
         const result = await Notificacao(formData);
 
@@ -179,18 +167,6 @@ export default function EnviarNotificacoesPage() {
       formData.append('titulo', titulo);
       formData.append('mensagem', mensagem);
       formData.append('tipo', tipo);
-      formData.append(
-        'metada',
-        JSON.stringify({
-          remetente: {
-            id: user?.id,
-            nome: user?.nome,
-            permissao: user?.permissao,
-          },
-          enviadoEm: new Date().toISOString(),
-          tipoEnvio: 'GRUPO',
-        })
-      );
 
       const result = await NotificacaoPorPermissao(formData);
 
