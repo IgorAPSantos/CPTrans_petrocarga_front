@@ -1,5 +1,6 @@
 'use client';
 
+import toast from 'react-hot-toast';
 import { clientApi } from '../clientApi';
 import { ConfirmResult } from '../types/confirmResult';
 
@@ -227,4 +228,23 @@ export async function atualizarReserva(
     success: true,
     data,
   };
+}
+
+// ----------------------
+// CHECKIN RESERVA
+// ----------------------
+
+export async function checkinReserva(reservaID: string) {
+  try {
+    const res = await clientApi(`/petrocarga/reservas/${reservaID}/checkin`, {
+      method: 'POST',
+    });
+    toast.success('Checkin Realizado Com Sucesso!');
+    return res.json();
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao finalizar reserva forçada.';
+    toast.error(message);
+    throw new Error(message);
+  }
 }
