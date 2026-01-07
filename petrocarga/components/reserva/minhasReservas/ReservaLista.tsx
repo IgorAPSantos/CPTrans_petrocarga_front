@@ -32,12 +32,14 @@ interface ReservaListaProps {
   reservas: ReservaGet[];
   onGerarDocumento: (reserva: ReservaGet) => void;
   onExcluir: (id: string) => void;
+  onCheckout: (reserva: ReservaGet) => void;
 }
 
 export default function ReservaLista({
   reservas,
   onGerarDocumento,
   onExcluir,
+  onCheckout,
 }: ReservaListaProps) {
   const [mostrarOcultas, setMostrarOcultas] = useState(false);
 
@@ -53,7 +55,7 @@ export default function ReservaLista({
         }
         return acc;
       },
-      { visiveis: [] as ReservaGet[], ocultas: [] as ReservaGet[] },
+      { visiveis: [] as ReservaGet[], ocultas: [] as ReservaGet[] }
     );
 
     return {
@@ -73,6 +75,7 @@ export default function ReservaLista({
               reserva={reserva}
               onGerarDocumento={onGerarDocumento}
               onExcluir={onExcluir}
+              onCheckout={onCheckout}
             />
           ))
         ) : (

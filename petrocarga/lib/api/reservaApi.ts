@@ -228,3 +228,20 @@ export async function atualizarReserva(
     data,
   };
 }
+
+// ----------------------
+// CHECKIN RESERVA
+// ----------------------
+
+export async function checkinReserva(reservaID: string) {
+  try {
+    const res = await clientApi(`/petrocarga/reservas/${reservaID}/checkin`, {
+      method: 'POST',
+    });
+    return res.json();
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao finalizar reserva forçada.';
+    throw new Error(message);
+  }
+}

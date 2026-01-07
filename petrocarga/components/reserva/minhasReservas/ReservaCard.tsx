@@ -2,28 +2,68 @@
 
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { FileText, MapPin, Clock, Trash2, Pencil } from 'lucide-react';
+import {
+  FileText,
+  MapPin,
+  Clock,
+  Trash2,
+  Pencil,
+  Check,
+  CheckCheck,
+} from 'lucide-react';
 import { buttonVariants } from '@/components/ui/button';
 import { ReservaGet } from '@/lib/types/reserva';
 import ReservaEditarModal from './ReservaEditarModal/ReservaEditarModal';
+import ReservaCheckinModal from './ReservaCheckinModal/ReservaCheckinModal';
 
 interface ReservaCardProps {
   reserva: ReservaGet;
   onGerarDocumento?: (reserva: ReservaGet) => void;
   onExcluir?: (reservaId: string) => void;
+  onCheckout?: (reserva: ReservaGet) => void;
 }
 
 export default function ReservaCard({
   reserva: reservaInicial, // Renomeado para diferenciar do estado
   onGerarDocumento,
   onExcluir,
+  onCheckout,
 }: ReservaCardProps) {
   // 1. Estado local para atualização instantânea (Optimistic UI)
   const [currentReserva, setCurrentReserva] =
     useState<ReservaGet>(reservaInicial);
 
   const [modalAberto, setModalAberto] = useState(false);
+  const [modalAbertoCheckout, setModalAbertoCheckout] = useState(false);
   const [modalEditarAberto, setModalEditarAberto] = useState(false);
+  const [modalCheckinAberto, setModalCheckinAberto] = useState(false);
+  const [agora, setAgora] = useState(new Date());
+
+  // Atualizar o EDITAR e o CHECKIN
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setAgora(new Date());
+    }, 60000); // atualiza a cada 1 minuto
+
+    return () => clearInterval(interval);
+  }, []);
+  const inicioReserva = new Date(currentReserva.inicio);
+  const fimReserva = new Date(currentReserva.fim);
+
+  const minutosParaInicio =
+    (inicioReserva.getTime() - agora.getTime()) / 1000 / 60;
+
+  const podeEditar =
+    currentReserva.status === 'RESERVADA' && minutosParaInicio > 30;
+
+  const podeFazerCheckin =
+    currentReserva.status === 'RESERVADA' &&
+    agora >= new Date(inicioReserva.getTime() - 3 * 60 * 1000) &&
+    agora <= fimReserva;
+
+  const podeFazerCheckout =
+    currentReserva.status === 'ATIVA' && agora < fimReserva;
 
   // Sincroniza se a lista pai atualizar
   useEffect(() => {
@@ -58,7 +98,7 @@ export default function ReservaCard({
         currentReserva.status === 'CONCLUIDA' && 'border-b-blue-300',
         currentReserva.status === 'RESERVADA' && 'border-green-500',
         currentReserva.status === 'REMOVIDA' && 'border-red-500',
-        currentReserva.status === 'CANCELADA' && 'border-b-blue-200',
+        currentReserva.status === 'CANCELADA' && 'border-b-blue-200'
       )}
     >
       {/* Conteúdo principal */}
@@ -82,7 +122,7 @@ export default function ReservaCard({
               currentReserva.status === 'REMOVIDA' &&
                 'bg-gray-100 border-red-500',
               currentReserva.status === 'CANCELADA' &&
-                'bg-gray-100 border-b-blue-200',
+                'bg-gray-100 border-b-blue-200'
             )}
           >
             {currentReserva.status}
@@ -115,7 +155,7 @@ export default function ReservaCard({
           className={cn(
             'sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center',
             currentReserva.status === 'ATIVA' && 'bg-green-100 text-green-900',
-            currentReserva.status === 'CONCLUIDA' && 'bg-gray-100 text-red-800',
+            currentReserva.status === 'CONCLUIDA' && 'bg-gray-100 text-red-800'
           )}
         >
           {currentReserva.status}
@@ -126,41 +166,69 @@ export default function ReservaCard({
           onClick={() => onGerarDocumento?.(currentReserva)}
           className={cn(
             buttonVariants({ variant: 'outline' }),
-            'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2',
+            'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2'
           )}
         >
           <FileText className="w-4 h-4" />
           Gerar Documento
         </button>
 
-        {/* Botões Editar / Excluir */}
+        {/* Botões Editar / Excluir / Check-in */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 mt-2 w-full sm:w-auto">
+          {/* EXCLUIR (continua sempre disponível enquanto RESERVADA) */}
           {currentReserva.status === 'RESERVADA' && (
-            <>
-              {/* EXCLUIR */}
-              <button
-                onClick={() => setModalAberto(true)}
-                className={cn(
-                  buttonVariants({ variant: 'outline' }),
-                  'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 text-red-600',
-                )}
-              >
-                <Trash2 className="w-4 h-4" />
-                Excluir
-              </button>
+            <button
+              onClick={() => setModalAberto(true)}
+              className={cn(
+                buttonVariants({ variant: 'outline' }),
+                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 text-red-600'
+              )}
+            >
+              <Trash2 className="w-4 h-4" />
+              Excluir
+            </button>
+          )}
 
-              {/* EDITAR */}
-              <button
-                onClick={() => setModalEditarAberto(true)}
-                className={cn(
-                  buttonVariants({ variant: 'outline' }),
-                  'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2',
-                )}
-              >
-                <Pencil className="w-4 h-4" />
-                Editar
-              </button>
-            </>
+          {/* EDITAR */}
+          {podeEditar && (
+            <button
+              onClick={() => setModalEditarAberto(true)}
+              className={cn(
+                buttonVariants({ variant: 'outline' }),
+                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2'
+              )}
+            >
+              <Pencil className="w-4 h-4" />
+              Editar
+            </button>
+          )}
+
+          {/* CHECK-IN */}
+          {podeFazerCheckin && (
+            <button
+              onClick={() => setModalCheckinAberto(true)}
+              className={cn(
+                buttonVariants({ variant: 'default' }),
+                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 bg-green-600  hover:bg-green-700 transition disabled:opacity-60'
+              )}
+            >
+              <Check className="w-4 h-4" />
+              Check-in
+            </button>
+          )}
+
+          {/* CHECK-OUT */}
+          {podeFazerCheckout && (
+            <button
+              onClick={() => setModalAbertoCheckout(true)}
+              className={cn(
+                buttonVariants({ variant: 'default' }),
+                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2  bg-red-600  hover:bg-red-700 transition disabled:opacity-60'
+              )}
+            >
+              <CheckCheck className="w-4 h-4" />
+              Checkout
+            </button>
           )}
         </div>
       </div>
@@ -174,16 +242,16 @@ export default function ReservaCard({
           />
 
           <div className="relative bg-white rounded-2xl p-6 w-96 max-w-full shadow-2xl">
-            <h3 className="text-xl font-semibold text-gray-800 mb-3">
+            <h3 className="text-xl font-semibold text-gray-800 mb-3 text-center">
               Confirmar exclusão
             </h3>
 
-            <p className="text-gray-600 mb-6">
+            <p className="text-gray-600 mb-6 text-center">
               Tem certeza que deseja excluir esta Reserva? Esta ação não pode
               ser desfeita.
             </p>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-center gap-3 w-full">
               <button
                 onClick={() => setModalAberto(false)}
                 className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
@@ -196,6 +264,49 @@ export default function ReservaCard({
                 className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
               >
                 Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Checkout */}
+      {modalAbertoCheckout && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setModalAbertoCheckout(false)}
+          />
+
+          <div className="relative bg-white rounded-2xl p-6 w-96 max-w-full shadow-2xl flex flex-col items-center">
+            {/* Título Centralizado */}
+            <h3 className="text-xl font-semibold text-gray-800 mb-3 text-center">
+              Confirmar Checkout
+            </h3>
+
+            {/* Texto Centralizado */}
+            <p className="text-gray-600 mb-6 text-center">
+              Tem certeza que deseja fazer Checkout? Esta ação não pode ser
+              desfeita.
+            </p>
+
+            {/* Botões Centralizados */}
+            <div className="flex justify-center gap-3 w-full">
+              <button
+                onClick={() => setModalAbertoCheckout(false)}
+                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
+              >
+                Cancelar
+              </button>
+
+              <button
+                onClick={() => {
+                  onCheckout?.(currentReserva);
+                  setModalAbertoCheckout(false);
+                }}
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition"
+              >
+                Checkout
               </button>
             </div>
           </div>
@@ -239,6 +350,19 @@ export default function ReservaCard({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de Checkin */}
+
+      {modalCheckinAberto && (
+        <ReservaCheckinModal
+          reserva={currentReserva}
+          onClose={() => setModalCheckinAberto(false)}
+          onCheckinSuccess={(reservaAtualizada) =>
+            setCurrentReserva(reservaAtualizada)
+          }
+          onDenunciar={(id) => console.log('Denúncia da reserva', id)}
+        />
       )}
     </article>
   );
