@@ -61,7 +61,7 @@ export default function ReservaRapidaPage() {
 
       {reservas.length === 0 ? (
         <p className="text-gray-500 text-center">
-          Nenhuma reserva rápida encontrada.
+          Não há reserva rápida feita por você.
         </p>
       ) : (
         <div className="grid gap-4 w-full max-w-2xl">

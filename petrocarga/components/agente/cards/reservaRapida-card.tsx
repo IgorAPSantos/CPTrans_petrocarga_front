@@ -18,7 +18,7 @@ export default function ReservaRapidaCard({ reserva }: ReservaRapidaCardProps) {
     >
       {/* Informações */}
       <section className="flex-1 flex flex-col gap-3 min-w-0">
-        {/* Placa */}
+        {/* Placa do Motorista */}
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
             {reserva.placaAgente}

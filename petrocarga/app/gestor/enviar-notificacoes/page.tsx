@@ -4,7 +4,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
 import { getMotoristas } from '@/lib/api/motoristaApi';
-import { Notificacao, NotificacaoPorPermissao } from '@/lib/api/notificacaoApi';
+import {
+  enviarNotificacaoParaUsuario,
+  enviarNotificacaoPorPermissao,
+} from '@/lib/actions/notificacaoAction';
 import { Motorista } from '@/lib/types/motorista';
 import {
   Loader2,
@@ -125,7 +128,7 @@ export default function EnviarNotificacoesPage() {
         formData.append('mensagem', mensagem);
         formData.append('tipo', tipo);
 
-        const result = await Notificacao(formData);
+        const result = await enviarNotificacaoParaUsuario(formData);
 
         if (result.error) {
           console.error(`Erro para motorista ${usuarioId}:`, result.message);
@@ -168,7 +171,7 @@ export default function EnviarNotificacoesPage() {
       formData.append('mensagem', mensagem);
       formData.append('tipo', tipo);
 
-      const result = await NotificacaoPorPermissao(formData);
+      const result = await enviarNotificacaoPorPermissao(formData);
 
       if (result.error) {
         setResultado({ enviadas: 0, erros: 1 });
@@ -621,7 +624,7 @@ export default function EnviarNotificacoesPage() {
                     <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0" />
                     <span>
                       <strong>Busque por nome ou email</strong> para encontrar
-                      motoristas rapidamente
+                      motoristas mais rapidamente
                     </span>
                   </li>
                 </ul>

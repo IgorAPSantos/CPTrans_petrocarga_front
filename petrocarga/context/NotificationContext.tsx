@@ -418,7 +418,7 @@ export function NotificationProvider({
     };
   }, [usuarioId, enableSSE, connect, disconnect, loadHistorico]);
 
-  // RECONECTAR MANUALMENTE
+  // RECONECTAR MANUALMENTE O SSE
   const reconnect = useCallback(() => {
     logger.info('🔄 SSE: Reconexão manual solicitada');
 

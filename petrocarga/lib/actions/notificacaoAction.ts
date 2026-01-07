@@ -17,7 +17,7 @@ export async function enviarNotificacaoParaUsuario(formData: FormData) {
       | 'VEICULO'
       | 'MOTORISTA'
       | 'SISTEMA',
-    metada: JSON.parse(formData.get('metada') as string),
+    metada: JSON.parse(formData.get('metadata') as string),
   };
 
   const res = await serverApi(
@@ -61,7 +61,7 @@ export async function enviarNotificacaoPorPermissao(formData: FormData) {
       | 'VEICULO'
       | 'MOTORISTA'
       | 'SISTEMA',
-    metada: JSON.parse(formData.get('metada') as string),
+    metadata: JSON.parse(formData.get('metadata') as string),
   };
 
   const res = await serverApi(

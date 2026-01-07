@@ -33,7 +33,7 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
           'border-green-500'
         )}
       >
-        {/* Informações */}
+        {/* Informações do Agente */}
         <section className="flex-1 flex flex-col gap-3 min-w-0">
           {/* Nome */}
           <div className="flex items-center justify-between">

@@ -74,7 +74,7 @@ export default function NotificacoesPage() {
     }
   }, []);
 
-  // 🔴 CONTADOR DE NÃO LIDAS
+  // CONTADOR DE NÃO LIDAS
   const unreadCount = notifications.filter((n) => !n.lida).length;
 
   return (

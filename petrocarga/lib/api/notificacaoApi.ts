@@ -67,7 +67,7 @@ export async function marcarNotificacaoComoLida(notificacaoId: string) {
   );
 
   if (!res.ok) {
-    let msg = 'Erro ao marcar notificação como lida';
+    let msg = 'Erro ao alterar notificação para lida';
     try {
       const err = await res.json();
       msg = err.message ?? msg;

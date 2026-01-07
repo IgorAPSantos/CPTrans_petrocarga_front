@@ -1212,7 +1212,6 @@ export default function RelatoriosPage() {
 
           {/* Gráficos de origem */}
           <div className="flex flex-col items-center mb-6">
-            {/* Gráfico de origens */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 w-full max-w-2xl">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <TrendingUp className="h-5 w-5" />

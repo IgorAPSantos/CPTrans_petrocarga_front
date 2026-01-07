@@ -175,7 +175,7 @@ export default function MotoristasPage() {
             <Search className="h-4 w-4" />
             <span>
               <strong>Dica:</strong> Use a busca acima para encontrar motoristas
-              específicos por nome ou email.
+              por nome ou email.
             </span>
           </p>
         </div>

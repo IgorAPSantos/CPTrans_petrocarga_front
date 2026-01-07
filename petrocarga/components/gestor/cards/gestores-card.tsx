@@ -32,7 +32,7 @@ export default function GestorCard({ gestor }: GestorCardProps) {
         'border-yellow-500'
       )}
     >
-      {/* Informações */}
+      {/* Informações do Gestor */}
       <section className="flex-1 flex flex-col gap-3 min-w-0">
         {/* Nome */}
         <div className="flex items-center justify-between">

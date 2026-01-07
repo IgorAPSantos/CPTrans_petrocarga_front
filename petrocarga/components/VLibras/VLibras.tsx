@@ -14,7 +14,6 @@ export default function VLibrasWidget() {
       }
     };
 
-    // Se o script já carregou, inicializa imediatamente
     // @ts-ignore
     if (window.VLibras) {
       initVLibras();
