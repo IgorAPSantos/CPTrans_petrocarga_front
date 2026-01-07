@@ -18,7 +18,7 @@ export function Navbar() {
 
   const links = [
     { href: '/agente/reserva-rapida', label: 'Reserva Rapida' },
-    { href: '/agente/guia', label: 'Guia' },
+    { href: '/agente/lista-reserva', label: 'Lista de Reservas' },
   ];
 
   return (

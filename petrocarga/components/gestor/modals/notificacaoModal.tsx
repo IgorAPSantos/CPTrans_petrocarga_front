@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Bell, X, Send } from 'lucide-react';
-import { Notificacao } from '@/lib/api/notificacaoApi';
+import { enviarNotificacaoParaUsuario } from '@/lib/actions/notificacaoAction';
 import { useAuth } from '@/components/hooks/useAuth';
 
 interface NotificacaoModalProps {
@@ -60,7 +60,7 @@ export function NotificacaoModal({
         })
       );
 
-      const result = await Notificacao(formData);
+      const result = await enviarNotificacaoParaUsuario(formData);
 
       if (result.error) {
         setError(result.message);

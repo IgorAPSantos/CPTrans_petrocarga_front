@@ -6,6 +6,7 @@ import {
   Bell,
   BellOff,
   CheckCheck,
+  Check,
   X,
   Wifi,
   WifiOff,
@@ -23,6 +24,8 @@ export default function NotificacoesPage() {
     error,
     removeNotification,
     clearNotifications,
+    markAsRead,
+    markAllAsRead,
     reconnect,
   } = useNotifications();
 
@@ -71,6 +74,9 @@ export default function NotificacoesPage() {
     }
   }, []);
 
+  // CONTADOR DE NÃO LIDAS
+  const unreadCount = notifications.filter((n) => !n.lida).length;
+
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
       <div className="max-w-4xl mx-auto">
@@ -84,8 +90,12 @@ export default function NotificacoesPage() {
                   Notificações
                 </h1>
                 <p className="text-sm text-gray-600">
-                  {notifications.length}{' '}
-                  {notifications.length === 1 ? 'notificação' : 'notificações'}
+                  {notifications.length} total
+                  {unreadCount > 0 && (
+                    <span className="ml-2 text-red-600 font-semibold">
+                      • {unreadCount} não lida{unreadCount !== 1 ? 's' : ''}
+                    </span>
+                  )}
                 </p>
               </div>
             </div>
@@ -112,7 +122,7 @@ export default function NotificacoesPage() {
                 )}
               </div>
 
-              {/* Botão de Reconexão Manual (apenas se estiver offline) */}
+              {/* Botão de Reconexão Manual */}
               {!isConnected && (
                 <button
                   onClick={reconnect}
@@ -124,6 +134,18 @@ export default function NotificacoesPage() {
                 </button>
               )}
 
+              {/* Botão Marcar Todas como Lidas */}
+              {unreadCount > 0 && (
+                <button
+                  onClick={markAllAsRead}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  title="Marcar todas como lidas"
+                >
+                  <CheckCheck className="h-4 w-4" />
+                  Marcar todas lidas
+                </button>
+              )}
+
               {/* Botão Limpar Tudo */}
               {notifications.length > 0 && (
                 <button
@@ -131,7 +153,7 @@ export default function NotificacoesPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
                   title="Limpar todas as notificações"
                 >
-                  <CheckCheck className="h-4 w-4" />
+                  <X className="h-4 w-4" />
                   Limpar tudo
                 </button>
               )}
@@ -185,8 +207,8 @@ export default function NotificacoesPage() {
                 key={notif.id}
                 className={`bg-white rounded-lg shadow-md p-4 border-l-4 ${getCorNotificacao(
                   notif.tipo
-                )} hover:shadow-lg transition-shadow ${
-                  notif.lida ? 'opacity-80' : ''
+                )} hover:shadow-lg transition-all ${
+                  notif.lida ? 'opacity-60' : ''
                 }`}
               >
                 <div className="flex items-start justify-between gap-4">
@@ -206,7 +228,7 @@ export default function NotificacoesPage() {
                           </p>
                         </div>
                         {!notif.lida && (
-                          <span className="inline-block h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-2"></span>
+                          <span className="inline-block h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-2 animate-pulse"></span>
                         )}
                       </div>
 
@@ -217,6 +239,12 @@ export default function NotificacoesPage() {
                         <span className="text-xs text-gray-500">
                           {formatarTempo(notif.criada_em)}
                         </span>
+                        {notif.lida && (
+                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded flex items-center gap-1">
+                            <Check className="h-3 w-3" />
+                            Lida
+                          </span>
+                        )}
                       </div>
 
                       {/* Dados adicionais */}
@@ -235,14 +263,28 @@ export default function NotificacoesPage() {
                     </div>
                   </div>
 
-                  {/* Botão remover */}
-                  <button
-                    onClick={() => removeNotification(notif.id)}
-                    className="flex-shrink-0 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Remover notificação"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
+                  {/* Botões de Ação */}
+                  <div className="flex flex-col gap-2">
+                    {/* Botão Marcar como Lida */}
+                    {!notif.lida && (
+                      <button
+                        onClick={() => markAsRead(notif.id)}
+                        className="flex-shrink-0 p-2 text-green-500 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                        title="Marcar como lida"
+                      >
+                        <Check className="h-5 w-5" />
+                      </button>
+                    )}
+
+                    {/* Botão remover */}
+                    <button
+                      onClick={() => removeNotification(notif.id)}
+                      className="flex-shrink-0 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Remover notificação"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))

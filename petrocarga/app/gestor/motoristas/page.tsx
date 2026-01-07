@@ -1,17 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
 import { getMotoristas } from '@/lib/api/motoristaApi';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search, X } from 'lucide-react';
 import { Motorista } from '@/lib/types/motorista';
 import MotoristaCard from '@/components/gestor/cards/motoristas-card';
 
 export default function MotoristasPage() {
   const { user } = useAuth();
-  const [Motoristas, setMotoristas] = useState<Motorista[]>([]);
+  const [motoristas, setMotoristas] = useState<Motorista[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [busca, setBusca] = useState('');
 
   useEffect(() => {
     if (!user?.id) return;
@@ -36,6 +37,19 @@ export default function MotoristasPage() {
     fetchMotoristas();
   }, [user?.id]);
 
+  // Filtra motoristas com base na busca
+  const motoristasFiltrados = useMemo(() => {
+    if (!busca.trim()) return motoristas;
+
+    const termoBusca = busca.toLowerCase().trim();
+    return motoristas.filter(
+      (motorista) =>
+        motorista.usuario.nome.toLowerCase().includes(termoBusca) ||
+        motorista.usuario.email.toLowerCase().includes(termoBusca) ||
+        false
+    );
+  }, [motoristas, busca]);
+
   if (loading) {
     return (
       <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
@@ -57,19 +71,113 @@ export default function MotoristasPage() {
 
   return (
     <div className="p-4 flex flex-col items-center w-full min-h-screen bg-gray-50">
-      <h1 className="text-2xl font-bold mb-2 text-center">
-        Aqui estão os motoristas cadastrados.
-      </h1>
-
-      {Motoristas.length === 0 ? (
-        <p className="text-gray-500 text-center">
-          Nenhum motorista encontrado.
+      <div className="w-full max-w-2xl mb-6">
+        <h1 className="text-2xl font-bold mb-2 text-center">
+          Motoristas Cadastrados
+        </h1>
+        <p className="text-gray-600 text-center mb-6">
+          Gerencie e visualize todos os motoristas do sistema
         </p>
+
+        {/* Campo de busca */}
+        <div className="relative mb-6">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-gray-400" />
+          </div>
+          <input
+            type="text"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar motorista por nome, email ou placa do veículo..."
+            className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+          />
+          {busca && (
+            <button
+              onClick={() => setBusca('')}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center hover:bg-gray-100 rounded-r-lg p-1"
+              title="Limpar busca"
+            >
+              <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
+            </button>
+          )}
+        </div>
+
+        {/* Estatísticas e contador */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+          <div className="text-sm text-gray-600">
+            {busca ? (
+              <>
+                <span className="font-medium">
+                  {motoristasFiltrados.length}
+                </span>{' '}
+                motorista(s) encontrado(s) para "
+                <span className="font-medium text-blue-600">{busca}</span>"
+              </>
+            ) : (
+              <>
+                Total de{' '}
+                <span className="font-medium">{motoristas.length}</span>{' '}
+                motorista(s)
+              </>
+            )}
+          </div>
+
+          {busca && motoristasFiltrados.length === 0 && (
+            <button
+              onClick={() => setBusca('')}
+              className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+            >
+              Limpar busca e ver todos
+            </button>
+          )}
+        </div>
+      </div>
+
+      {motoristasFiltrados.length === 0 ? (
+        <div className="text-center py-8">
+          {busca ? (
+            <>
+              <div className="mb-4">
+                <Search className="h-12 w-12 text-gray-300 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Nenhum motorista encontrado
+              </h3>
+              <p className="text-gray-600">
+                Não encontramos motoristas para "
+                <span className="font-medium">{busca}</span>"
+              </p>
+              <button
+                onClick={() => setBusca('')}
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Ver todos os motoristas
+              </button>
+            </>
+          ) : (
+            <p className="text-gray-500 text-center">
+              Nenhum motorista cadastrado no momento.
+            </p>
+          )}
+        </div>
       ) : (
         <div className="grid gap-4 w-full max-w-2xl">
-          {Motoristas.map((motorista) => (
+          {motoristasFiltrados.map((motorista) => (
             <MotoristaCard key={motorista.usuario.id} motorista={motorista} />
           ))}
+        </div>
+      )}
+
+      {/* Dica de busca quando há muitos motoristas */}
+      {motoristas.length > 10 && !busca && (
+        <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg max-w-2xl w-full">
+          <p className="text-sm text-blue-800 flex items-center gap-2">
+            <Search className="h-4 w-4" />
+            <span>
+              <strong>Dica:</strong> Use a busca acima para encontrar motoristas
+              por nome ou email.
+            </span>
+          </p>
         </div>
       )}
     </div>

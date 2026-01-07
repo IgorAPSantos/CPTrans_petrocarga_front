@@ -1,31 +1,37 @@
 // app/gestor/enviar-notificacoes/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
 import { getMotoristas } from '@/lib/api/motoristaApi';
-import { getAgentes } from '@/lib/api/agenteApi';
-import { getGestores } from '@/lib/api/gestorApi';
-import { Notificacao, NotificacaoPorPermissao } from '@/lib/api/notificacaoApi';
+import {
+  enviarNotificacaoParaUsuario,
+  enviarNotificacaoPorPermissao,
+} from '@/lib/actions/notificacaoAction';
 import { Motorista } from '@/lib/types/motorista';
-import { Agente } from '@/lib/types/agente';
-import { Gestor } from '@/lib/types/gestor';
-import { Loader2, Send, Users, Bell, Filter, Check, X } from 'lucide-react';
+import {
+  Loader2,
+  Send,
+  Users,
+  Bell,
+  Filter,
+  Check,
+  X,
+  Search,
+} from 'lucide-react';
 
 export default function EnviarNotificacoesPage() {
   const { user } = useAuth();
   const [motoristas, setMotoristas] = useState<Motorista[]>([]);
-  const [agentes, setAgentes] = useState<Agente[]>([]);
-  const [gestores, setGestores] = useState<Gestor[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filtros simplificados
-  const [filtroTipo, setFiltroTipo] = useState<
-    'TODOS' | 'MOTORISTAS' | 'AGENTES' | 'GESTORES' | 'GRUPO'
-  >('TODOS');
-  const [grupoSelecionado, setGrupoSelecionado] = useState<
-    'MOTORISTA' | 'AGENTE' | 'GESTOR'
-  >('MOTORISTA');
+  // Modo de envio (apenas motoristas)
+  const [modoEnvio, setModoEnvio] = useState<'INDIVIDUAL' | 'GRUPO'>(
+    'INDIVIDUAL'
+  );
+
+  // Filtro de busca (apenas para modo individual)
+  const [busca, setBusca] = useState('');
 
   // Formulário
   const [titulo, setTitulo] = useState('');
@@ -34,10 +40,10 @@ export default function EnviarNotificacoesPage() {
     'RESERVA' | 'VAGA' | 'VEICULO' | 'MOTORISTA' | 'SISTEMA'
   >('SISTEMA');
 
-  // Seleção de usuários
-  const [usuariosSelecionados, setUsuariosSelecionados] = useState<string[]>(
-    []
-  );
+  // Seleção de motoristas (apenas para modo individual)
+  const [motoristasSelecionados, setMotoristasSelecionados] = useState<
+    string[]
+  >([]);
   const [enviando, setEnviando] = useState(false);
   const [resultado, setResultado] = useState<{
     enviadas: number;
@@ -50,26 +56,10 @@ export default function EnviarNotificacoesPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Busca motoristas e agentes sempre
-        const [motoristasRes, agentesRes] = await Promise.all([
-          getMotoristas(),
-          getAgentes(),
-        ]);
-
-        // Inicializa gestores como vazio
-        let gestoresArray: Gestor[] = [];
-
-        // Somente admin pode buscar gestores
-        if (user.permissao === 'ADMIN') {
-          const gestoresRes = await getGestores();
-          if (!gestoresRes.error && gestoresRes.gestores) {
-            gestoresArray = gestoresRes.gestores;
-          }
+        const motoristasRes = await getMotoristas();
+        if (!motoristasRes.error) {
+          setMotoristas(motoristasRes.motoristas || []);
         }
-
-        if (!motoristasRes.error) setMotoristas(motoristasRes.motoristas || []);
-        if (!agentesRes.error) setAgentes(agentesRes.agentes || []);
-        setGestores(gestoresArray);
       } catch (err) {
         console.error('Erro ao carregar dados:', err);
       } finally {
@@ -80,78 +70,46 @@ export default function EnviarNotificacoesPage() {
     fetchData();
   }, [user]);
 
-  // Verifica se usuário é admin (pode enviar para gestores)
-  const isAdmin = user?.permissao === 'ADMIN';
+  // Filtra motoristas com base na busca
+  const motoristasFiltrados = useMemo(() => {
+    if (!busca.trim()) return motoristas;
 
-  const usuariosFiltrados = () => {
-    switch (filtroTipo) {
-      case 'MOTORISTAS':
-        return motoristas.map((m) => ({
-          id: m.usuario.id,
-          nome: m.usuario.nome,
-          email: m.usuario.email,
-          tipo: 'MOTORISTA' as const,
-        }));
-      case 'AGENTES':
-        return agentes.map((a) => ({
-          id: a.usuario.id,
-          nome: a.usuario.nome,
-          email: a.usuario.email,
-          tipo: 'AGENTE' as const,
-        }));
-      case 'GESTORES':
-        return gestores.map((g) => ({
-          id: g.id,
-          nome: g.nome,
-          email: g.email,
-          tipo: 'GESTOR' as const,
-        }));
-      default:
-        return [
-          ...motoristas.map((m) => ({
-            id: m.usuario.id,
-            nome: m.usuario.nome,
-            email: m.usuario.email,
-            tipo: 'MOTORISTA' as const,
-          })),
-          ...agentes.map((a) => ({
-            id: a.usuario.id,
-            nome: a.usuario.nome,
-            email: a.usuario.email,
-            tipo: 'AGENTE' as const,
-          })),
-          ...gestores.map((g) => ({
-            id: g.id,
-            nome: g.nome,
-            email: g.email,
-            tipo: 'GESTOR' as const,
-          })),
-        ];
-    }
-  };
+    const termoBusca = busca.toLowerCase().trim();
+    return motoristas.filter(
+      (motorista) =>
+        motorista.usuario.nome.toLowerCase().includes(termoBusca) ||
+        motorista.usuario.email.toLowerCase().includes(termoBusca)
+    );
+  }, [motoristas, busca]);
 
-  const toggleUsuario = (id: string) => {
-    setUsuariosSelecionados((prev) =>
+  const toggleMotorista = (id: string) => {
+    setMotoristasSelecionados((prev) =>
       prev.includes(id) ? prev.filter((userId) => userId !== id) : [...prev, id]
     );
   };
 
   const selecionarTodos = () => {
-    const ids = usuariosFiltrados().map((u) => u.id);
-    setUsuariosSelecionados(ids);
+    const ids = motoristasFiltrados.map((m) => m.usuario.id);
+    setMotoristasSelecionados(ids);
   };
 
   const deselecionarTodos = () => {
-    setUsuariosSelecionados([]);
+    setMotoristasSelecionados([]);
+  };
+
+  // Selecionar todos os motoristas filtrados
+  const selecionarTodosFiltrados = () => {
+    const ids = motoristasFiltrados.map((m) => m.usuario.id);
+    setMotoristasSelecionados(ids);
   };
 
   const handleEnvioIndividual = async () => {
     if (
       !titulo.trim() ||
       !mensagem.trim() ||
-      usuariosSelecionados.length === 0
+      motoristasSelecionados.length === 0
     ) {
-      alert('Preencha título, mensagem e selecione pelo menos um destinatário');
+      alert('Preencha título, mensagem e selecione pelo menos um motorista');
       return;
     }
 
@@ -162,18 +120,18 @@ export default function EnviarNotificacoesPage() {
     let erros = 0;
 
     try {
-      // Envia notificação para cada usuário selecionado
-      for (const usuarioId of usuariosSelecionados) {
+      // Envia notificação para cada motorista selecionado
+      for (const usuarioId of motoristasSelecionados) {
         const formData = new FormData();
         formData.append('usuarioId', usuarioId);
         formData.append('titulo', titulo);
         formData.append('mensagem', mensagem);
         formData.append('tipo', tipo);
 
-        const result = await Notificacao(formData);
+        const result = await enviarNotificacaoParaUsuario(formData);
 
         if (result.error) {
-          console.error(`Erro para usuário ${usuarioId}:`, result.message);
+          console.error(`Erro para motorista ${usuarioId}:`, result.message);
           erros++;
         } else {
           enviadas++;
@@ -186,7 +144,8 @@ export default function EnviarNotificacoesPage() {
       if (erros === 0) {
         setTitulo('');
         setMensagem('');
-        setUsuariosSelecionados([]);
+        setMotoristasSelecionados([]);
+        setBusca(''); // Limpa a busca também
       }
     } catch (err) {
       console.error(err);
@@ -207,12 +166,12 @@ export default function EnviarNotificacoesPage() {
 
     try {
       const formData = new FormData();
-      formData.append('permissao', grupoSelecionado);
+      formData.append('permissao', 'MOTORISTA');
       formData.append('titulo', titulo);
       formData.append('mensagem', mensagem);
       formData.append('tipo', tipo);
 
-      const result = await NotificacaoPorPermissao(formData);
+      const result = await enviarNotificacaoPorPermissao(formData);
 
       if (result.error) {
         setResultado({ enviadas: 0, erros: 1 });
@@ -221,6 +180,7 @@ export default function EnviarNotificacoesPage() {
         setResultado({ enviadas: 1, erros: 0 }); // 1 grupo enviado
         setTitulo('');
         setMensagem('');
+        setBusca(''); // Limpa a busca também
       }
     } catch (err) {
       console.error(err);
@@ -244,10 +204,11 @@ export default function EnviarNotificacoesPage() {
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-3">
           <Bell className="h-8 w-8 text-blue-600" />
-          Enviar Notificações
+          Enviar Notificações para Motoristas
         </h1>
         <p className="text-gray-600">
-          Envie notificações para usuários individuais ou grupos inteiros
+          Envie notificações para motoristas individualmente ou para todos de
+          uma vez
         </p>
       </div>
 
@@ -288,7 +249,7 @@ export default function EnviarNotificacoesPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo
+                  Tipo de Notificação
                 </label>
                 <select
                   value={tipo}
@@ -305,11 +266,11 @@ export default function EnviarNotificacoesPage() {
             </div>
           </div>
 
-          {/* Filtros e Seleção */}
+          {/* Destinatários */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Filter className="h-5 w-5" />
-              Destinatários
+              Destinatários (Motoristas)
             </h2>
 
             <div className="space-y-4 mb-6">
@@ -320,125 +281,85 @@ export default function EnviarNotificacoesPage() {
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
-                    onClick={() => setFiltroTipo('GRUPO')}
-                    className={`p-3 border rounded-lg transition-colors flex flex-col items-center justify-center gap-2 ${filtroTipo === 'GRUPO'
+                    onClick={() => setModoEnvio('INDIVIDUAL')}
+                    className={`p-3 border rounded-lg transition-colors flex flex-col items-center justify-center gap-2 ${
+                      modoEnvio === 'INDIVIDUAL'
                         ? 'bg-blue-50 border-blue-300 text-blue-700'
                         : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-                      }`}
+                    }`}
                   >
                     <Users className="h-5 w-5" />
                     <span className="text-sm font-medium">
-                      Enviar para Grupo
+                      Enviar Individualmente
                     </span>
                     <span className="text-xs text-gray-500 text-center">
-                      Todos os usuários de um tipo
+                      Escolha motoristas específicos
                     </span>
                   </button>
 
                   <button
-                    onClick={() => setFiltroTipo('TODOS')}
-                    className={`p-3 border rounded-lg transition-colors flex flex-col items-center justify-center gap-2 ${filtroTipo !== 'GRUPO'
-                        ? 'bg-blue-50 border-blue-300 text-blue-700'
+                    onClick={() => setModoEnvio('GRUPO')}
+                    className={`p-3 border rounded-lg transition-colors flex flex-col items-center justify-center gap-2 ${
+                      modoEnvio === 'GRUPO'
+                        ? 'bg-green-50 border-green-300 text-green-700'
                         : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-                      }`}
+                    }`}
                   >
                     <Users className="h-5 w-5" />
                     <span className="text-sm font-medium">
-                      Selecionar Individualmente
+                      Enviar para Todos
                     </span>
                     <span className="text-xs text-gray-500 text-center">
-                      Escolha usuários específicos
+                      Todos os motoristas ({motoristas.length})
                     </span>
                   </button>
                 </div>
               </div>
 
-              {/* Se for modo GRUPO */}
-              {filtroTipo === 'GRUPO' && (
-                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Selecione o grupo:
-                  </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <button
-                      onClick={() => setGrupoSelecionado('MOTORISTA')}
-                      className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${grupoSelecionado === 'MOTORISTA'
-                          ? 'bg-blue-100 border-blue-300 text-blue-700'
-                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                        }`}
-                    >
-                      <span className="font-medium">Motoristas</span>
-                      <span className="text-xs text-gray-500">
-                        {motoristas.length} usuários
-                      </span>
-                    </button>
-
-                    <button
-                      onClick={() => setGrupoSelecionado('AGENTE')}
-                      className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${grupoSelecionado === 'AGENTE'
-                          ? 'bg-blue-100 border-blue-300 text-blue-700'
-                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                        }`}
-                    >
-                      <span className="font-medium">Agentes</span>
-                      <span className="text-xs text-gray-500">
-                        {agentes.length} usuários
-                      </span>
-                    </button>
-
-                    {isAdmin && (
+              {/* Modo INDIVIDUAL - Lista de motoristas */}
+              {modoEnvio === 'INDIVIDUAL' && (
+                <div className="space-y-4">
+                  {/* Campo de busca */}
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Search className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      value={busca}
+                      onChange={(e) => setBusca(e.target.value)}
+                      placeholder="Buscar motorista por nome ou email..."
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    {busca && (
                       <button
-                        onClick={() => setGrupoSelecionado('GESTOR')}
-                        className={`p-3 border rounded-lg transition-colors flex flex-col items-center gap-1 ${grupoSelecionado === 'GESTOR'
-                            ? 'bg-blue-100 border-blue-300 text-blue-700'
-                            : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                          }`}
+                        onClick={() => setBusca('')}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
                       >
-                        <span className="font-medium">Gestores</span>
-                        <span className="text-xs text-gray-500">
-                          {gestores.length} usuários
-                        </span>
-                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
-                          Admin
-                        </span>
+                        <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
                       </button>
                     )}
-                  </div>
-                </div>
-              )}
-
-              {/* Se for modo INDIVIDUAL */}
-              {filtroTipo !== 'GRUPO' && (
-                <>
-                  {/* Filtro de tipo de usuário */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Filtrar por tipo:
-                    </label>
-                    <select
-                      value={filtroTipo}
-                      onChange={(e) => setFiltroTipo(e.target.value as any)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    >
-                      <option value="TODOS">Todos os usuários</option>
-                      <option value="MOTORISTAS">Apenas motoristas</option>
-                      <option value="AGENTES">Apenas agentes</option>
-                      {isAdmin && (
-                        <option value="GESTORES">Apenas gestores</option>
-                      )}
-                    </select>
                   </div>
 
                   {/* Controles de seleção */}
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">
-                      {usuariosFiltrados().length} usuário(s) encontrado(s)
-                    </span>
+                    <div className="space-y-1">
+                      <span className="text-sm text-gray-600">
+                        {motoristasFiltrados.length} motorista(s) encontrado(s)
+                        {busca && ` para "${busca}"`}
+                      </span>
+                      {busca && motoristasFiltrados.length === 0 && (
+                        <p className="text-xs text-red-600">
+                          Nenhum motorista encontrado com este termo
+                        </p>
+                      )}
+                    </div>
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={selecionarTodos}
-                        className="text-sm px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg"
+                        onClick={selecionarTodosFiltrados}
+                        disabled={motoristasFiltrados.length === 0}
+                        className="text-sm px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Selecionar todos
                       </button>
@@ -447,51 +368,52 @@ export default function EnviarNotificacoesPage() {
                         onClick={deselecionarTodos}
                         className="text-sm px-3 py-1 bg-gray-50 text-gray-600 hover:bg-gray-100 rounded-lg"
                       >
-                        Limpar
+                        Limpar seleção
                       </button>
                     </div>
                   </div>
 
-                  {/* Lista de usuários */}
+                  {/* Lista de motoristas */}
                   <div className="border border-gray-200 rounded-lg overflow-hidden max-h-60 overflow-y-auto">
-                    {usuariosFiltrados().map((usuario) => (
+                    {motoristasFiltrados.map((motorista) => (
                       <div
-                        key={usuario.id}
-                        className={`px-4 py-3 border-b border-gray-100 flex items-center gap-3 hover:bg-gray-50 cursor-pointer ${usuariosSelecionados.includes(usuario.id)
+                        key={motorista.usuario.id}
+                        className={`px-4 py-3 border-b border-gray-100 flex items-center gap-3 hover:bg-gray-50 cursor-pointer ${
+                          motoristasSelecionados.includes(motorista.usuario.id)
                             ? 'bg-blue-50'
                             : ''
-                          }`}
-                        onClick={() => toggleUsuario(usuario.id)}
+                        }`}
+                        onClick={() => toggleMotorista(motorista.usuario.id)}
                       >
                         <div
-                          className={`w-5 h-5 rounded border flex items-center justify-center ${usuariosSelecionados.includes(usuario.id)
+                          className={`w-5 h-5 rounded border flex items-center justify-center ${
+                            motoristasSelecionados.includes(
+                              motorista.usuario.id
+                            )
                               ? 'bg-blue-500 border-blue-500'
                               : 'border-gray-300'
-                            }`}
+                          }`}
                         >
-                          {usuariosSelecionados.includes(usuario.id) && (
-                            <Check className="w-3 h-3 text-white" />
-                          )}
+                          {motoristasSelecionados.includes(
+                            motorista.usuario.id
+                          ) && <Check className="w-3 h-3 text-white" />}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-gray-900 truncate">
-                            {usuario.nome}
+                            {motorista.usuario.nome}
                           </div>
                           <div className="text-sm text-gray-500 flex items-center gap-2">
-                            <span className="truncate">{usuario.email}</span>
-                            <span
-                              className={`px-2 py-0.5 text-xs rounded-full ${usuario.tipo === 'MOTORISTA'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : usuario.tipo === 'AGENTE'
-                                    ? 'bg-green-100 text-green-800'
-                                    : 'bg-purple-100 text-purple-800'
-                                }`}
-                            >
-                              {usuario.tipo}
+                            <span className="truncate">
+                              {motorista.usuario.email}
+                            </span>
+                            <span className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">
+                              MOTORISTA
                             </span>
                           </div>
                         </div>
-                        {usuariosSelecionados.includes(usuario.id) && (
+                        {motoristasSelecionados.includes(
+                          motorista.usuario.id
+                        ) && (
                           <div className="text-blue-500">
                             <Check className="w-4 h-4" />
                           </div>
@@ -499,59 +421,90 @@ export default function EnviarNotificacoesPage() {
                       </div>
                     ))}
                   </div>
-                </>
+
+                  {/* Contador de selecionados */}
+                  {motoristasSelecionados.length > 0 && (
+                    <div className="p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-sm font-medium text-blue-700">
+                            Motoristas selecionados:
+                          </span>
+                          <span className="text-sm text-blue-600 ml-2">
+                            {motoristasSelecionados.length} de{' '}
+                            {motoristas.length} total
+                          </span>
+                        </div>
+                        <span className="font-bold text-blue-700">
+                          {motoristasSelecionados.length}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dica de busca */}
+                  {motoristas.length > 5 && (
+                    <div className="p-2 bg-gray-50 rounded text-xs text-gray-600">
+                      💡 <strong>Dica:</strong> Use a busca para encontrar
+                      motoristas específicos mais rapidamente
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Modo GRUPO - Informação */}
+              {modoEnvio === 'GRUPO' && (
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <Users className="h-6 w-6 text-green-600" />
+                    <div>
+                      <h4 className="font-medium text-green-800">
+                        Envio para todos os motoristas
+                      </h4>
+                      <p className="text-sm text-green-600 mt-1">
+                        Esta notificação será enviada para todos os{' '}
+                        {motoristas.length} motoristas cadastrados no sistema.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* Botão de envio (depende do modo) */}
-            {filtroTipo === 'GRUPO' ? (
-              <button
-                onClick={handleEnvioGrupo}
-                disabled={enviando || !titulo.trim() || !mensagem.trim()}
-                className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {enviando ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Enviando para o grupo...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4" />
-                    Enviar para todos os {grupoSelecionado.toLowerCase()}s (
-                    {grupoSelecionado === 'MOTORISTA'
-                      ? motoristas.length
-                      : grupoSelecionado === 'AGENTE'
-                        ? agentes.length
-                        : gestores.length}{' '}
-                    usuários)
-                  </>
-                )}
-              </button>
-            ) : (
-              <button
-                onClick={handleEnvioIndividual}
-                disabled={
-                  enviando ||
-                  !titulo.trim() ||
-                  !mensagem.trim() ||
-                  usuariosSelecionados.length === 0
-                }
-                className="w-full px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {enviando ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  <>
-                    <Send className="h-4 w-4" />
-                    Enviar para {usuariosSelecionados.length} usuário(s)
-                  </>
-                )}
-              </button>
-            )}
+            {/* Botão de envio */}
+            <button
+              onClick={
+                modoEnvio === 'GRUPO' ? handleEnvioGrupo : handleEnvioIndividual
+              }
+              disabled={
+                enviando ||
+                !titulo.trim() ||
+                !mensagem.trim() ||
+                (modoEnvio === 'INDIVIDUAL' &&
+                  motoristasSelecionados.length === 0)
+              }
+              className={`w-full px-4 py-3 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+                modoEnvio === 'GRUPO'
+                  ? 'bg-green-600 text-white'
+                  : 'bg-blue-600 text-white'
+              }`}
+            >
+              {enviando ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {modoEnvio === 'GRUPO'
+                    ? 'Enviando para todos...'
+                    : 'Enviando...'}
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4" />
+                  {modoEnvio === 'GRUPO'
+                    ? `Enviar para todos os motoristas (${motoristas.length})`
+                    : `Enviar para ${motoristasSelecionados.length} motorista(s)`}
+                </>
+              )}
+            </button>
           </div>
         </div>
 
@@ -562,61 +515,63 @@ export default function EnviarNotificacoesPage() {
 
             <div className="space-y-4">
               {/* Estatísticas */}
-              <div className="space-y-3">
-                <div className="p-3 bg-blue-50 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
-                      Motoristas
-                    </span>
-                    <span className="font-bold text-blue-700">
-                      {motoristas.length}
-                    </span>
-                  </div>
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-gray-700">
+                    Total de Motoristas
+                  </span>
+                  <span className="font-bold text-2xl text-blue-700">
+                    {motoristas.length}
+                  </span>
                 </div>
+                <p className="text-sm text-gray-600">
+                  Motoristas disponíveis para receber notificações
+                </p>
+              </div>
 
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
-                      Agentes
-                    </span>
-                    <span className="font-bold text-green-700">
-                      {agentes.length}
-                    </span>
-                  </div>
+              {/* Modo atual */}
+              <div
+                className={`p-4 rounded-lg border ${
+                  modoEnvio === 'GRUPO'
+                    ? 'bg-green-50 border-green-200 text-green-800'
+                    : 'bg-blue-50 border-blue-200 text-blue-800'
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  {modoEnvio === 'GRUPO' ? (
+                    <Users className="h-4 w-4" />
+                  ) : (
+                    <Filter className="h-4 w-4" />
+                  )}
+                  <span className="font-medium">
+                    {modoEnvio === 'GRUPO'
+                      ? 'Modo: Envio em Grupo'
+                      : 'Modo: Seleção Individual'}
+                  </span>
                 </div>
-
-                {isAdmin && (
-                  <div className="p-3 bg-purple-50 rounded-lg border border-purple-200">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-gray-700">
-                          Gestores
-                        </span>
-                        <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full">
-                          Admin
-                        </span>
-                      </div>
-                      <span className="font-bold text-purple-700">
-                        {gestores.length}
-                      </span>
-                    </div>
-                  </div>
-                )}
+                <p className="text-sm">
+                  {modoEnvio === 'GRUPO'
+                    ? 'Enviando para todos os motoristas'
+                    : `Selecionados: ${motoristasSelecionados.length} motorista(s)`}
+                </p>
               </div>
 
               {/* Resultado do envio */}
               {resultado && (
                 <div
-                  className={`p-4 rounded-lg border ${resultado.erros > 0
+                  className={`p-4 rounded-lg border ${
+                    resultado.erros > 0
                       ? 'bg-red-50 border-red-200 text-red-800'
                       : 'bg-green-50 border-green-200 text-green-800'
-                    }`}
+                  }`}
                 >
                   <div className="flex items-center gap-2 font-medium mb-1">
                     {resultado.erros > 0 ? (
                       <>
                         <X className="h-4 w-4" />
-                        Envio parcial
+                        {modoEnvio === 'GRUPO'
+                          ? 'Erro no envio'
+                          : 'Envio parcial'}
                       </>
                     ) : (
                       <>
@@ -626,8 +581,8 @@ export default function EnviarNotificacoesPage() {
                     )}
                   </div>
                   <div className="text-sm">
-                    {filtroTipo === 'GRUPO' ? (
-                      <p>Notificação enviada para o grupo</p>
+                    {modoEnvio === 'GRUPO' ? (
+                      <p>Notificação enviada para todos os motoristas</p>
                     ) : (
                       <>
                         <p>
@@ -647,30 +602,31 @@ export default function EnviarNotificacoesPage() {
 
               {/* Dicas */}
               <div className="p-4 bg-gray-50 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-2">Dicas:</h4>
+                <h4 className="font-medium text-gray-900 mb-2">
+                  Dicas de uso:
+                </h4>
                 <ul className="text-sm text-gray-600 space-y-1.5">
                   <li className="flex items-start gap-2">
-                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full mt-1.5 flex-shrink-0" />
                     <span>
-                      Use <strong>Enviar para Grupo</strong> para comunicados
+                      Use <strong>Enviar para Todos</strong> para comunicados
                       gerais
                     </span>
                   </li>
                   <li className="flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-1.5 flex-shrink-0" />
                     <span>
-                      Use <strong>Selecionar Individualmente</strong> para
-                      mensagens específicas
+                      Use <strong>Enviar Individualmente</strong> para mensagens
+                      específicas
                     </span>
                   </li>
-                  {isAdmin && (
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full mt-1.5 flex-shrink-0" />
-                      <span>
-                        <strong>Apenas admin</strong> pode enviar para gestores
-                      </span>
-                    </li>
-                  )}
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 bg-orange-500 rounded-full mt-1.5 flex-shrink-0" />
+                    <span>
+                      <strong>Busque por nome ou email</strong> para encontrar
+                      motoristas mais rapidamente
+                    </span>
+                  </li>
                 </ul>
               </div>
             </div>

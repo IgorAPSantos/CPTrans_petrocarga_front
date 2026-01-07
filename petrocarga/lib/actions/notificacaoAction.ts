@@ -2,7 +2,10 @@
 
 import { serverApi } from '../serverApi';
 
-export async function Notificacao(formData: FormData) {
+// ----------------------
+// ENVIAR NOTIFICAÇÃO PARA UM USUÁRIO
+// ----------------------
+export async function enviarNotificacaoParaUsuario(formData: FormData) {
   const usuarioId = formData.get('usuarioId') as string;
 
   const payload = {
@@ -14,7 +17,7 @@ export async function Notificacao(formData: FormData) {
       | 'VEICULO'
       | 'MOTORISTA'
       | 'SISTEMA',
-    metada: JSON.parse(formData.get('metada') as string),
+    metada: JSON.parse(formData.get('metadata') as string),
   };
 
   const res = await serverApi(
@@ -34,11 +37,20 @@ export async function Notificacao(formData: FormData) {
 
     return { error: true, message: msg };
   }
+
   return { error: false, message: 'Notificação enviada com sucesso' };
 }
 
-export async function NotificacaoPorPermissao(formData: FormData) {
-  const permissao = formData.get('permissao') as 'ADMIN' | 'GESTOR' | 'AGENTE';
+// ----------------------
+// ENVIAR NOTIFICAÇÃO POR PERMISSÃO
+// ----------------------
+export async function enviarNotificacaoPorPermissao(formData: FormData) {
+  const permissao = formData.get('permissao') as
+    | 'ADMIN'
+    | 'GESTOR'
+    | 'AGENTE'
+    | 'EMPRESA'
+    | 'MOTORISTA';
 
   const payload = {
     titulo: formData.get('titulo') as string,
@@ -49,11 +61,11 @@ export async function NotificacaoPorPermissao(formData: FormData) {
       | 'VEICULO'
       | 'MOTORISTA'
       | 'SISTEMA',
-    metada: JSON.parse(formData.get('metada') as string),
+    metadata: JSON.parse(formData.get('metadata') as string),
   };
 
   const res = await serverApi(
-    `/petrocarga/notificacoes/sendNotification/toUsuario/${permissao}`,
+    `/petrocarga/notificacoes/sendNotification/byPermissao/${permissao}`,
     {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -61,27 +73,7 @@ export async function NotificacaoPorPermissao(formData: FormData) {
   );
 
   if (!res.ok) {
-    let msg = 'Erro ao enviar notificação';
-    try {
-      const err = await res.json();
-      msg = err.message ?? msg;
-    } catch {}
-
-    return { error: true, message: msg };
-  }
-  return { error: false, message: 'Notificação enviada com sucesso' };
-}
-
-export async function getNotificacoesUsuario(usuarioId: string) {
-  const res = await serverApi(
-    `/petrocarga/notificacoes/byUsuario/${usuarioId}`,
-    {
-      method: 'GET',
-    }
-  );
-
-  if (!res.ok) {
-    let msg = 'Erro ao buscar notificações';
+    let msg = 'Erro ao enviar notificação por permissão';
     try {
       const err = await res.json();
       msg = err.message ?? msg;
@@ -90,25 +82,5 @@ export async function getNotificacoesUsuario(usuarioId: string) {
     return { error: true, message: msg };
   }
 
-  const data = await res.json();
-  return { error: false, notificacoes: data };
-}
-
-export async function getNotificacoesById(id: string) {
-  const res = await serverApi(`/petrocarga/notificacoes/${id}`, {
-    method: 'GET',
-  });
-
-  if (!res.ok) {
-    let msg = 'Erro ao buscar notificações';
-    try {
-      const err = await res.json();
-      msg = err.message ?? msg;
-    } catch {}
-
-    return { error: true, message: msg };
-  }
-
-  const data = await res.json();
-  return { error: false, notificacoes: data };
+  return { error: false, message: 'Notificações enviadas com sucesso' };
 }
