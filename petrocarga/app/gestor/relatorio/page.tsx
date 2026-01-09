@@ -1,4 +1,3 @@
-// app/gestor/relatorios/page.tsx
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -45,7 +44,6 @@ interface RelatorioVaga {
   id: string;
   endereco: string;
   bairro: string;
-  zona: 'CENTRO' | 'ZONA_SUL' | 'ZONA_NORTE' | 'ZONA_LESTE' | 'ZONA_OESTE';
   utilizacao: number; // porcentagem 0-100
   tempoMedioOcupacao: number; // em minutos
   totalUtilizacoes: number;
@@ -85,7 +83,6 @@ interface FiltrosRelatorio {
     inicio: Date;
     fim: Date;
   };
-  zonas: string[];
   tiposVeiculo: TipoVeiculo[];
   minUtilizacao: number;
   maxUtilizacao: number;
@@ -103,7 +100,6 @@ export default function RelatoriosPage() {
       inicio: new Date(new Date().setDate(new Date().getDate() - 30)), // Últimos 30 dias
       fim: new Date(),
     },
-    zonas: [],
     tiposVeiculo: [],
     minUtilizacao: 0,
     maxUtilizacao: 100,
@@ -124,13 +120,6 @@ export default function RelatoriosPage() {
     '#8884D8',
     '#82CA9D',
   ];
-  const ZONA_COLORS: Record<string, string> = {
-    CENTRO: '#0088FE',
-    ZONA_SUL: '#00C49F',
-    ZONA_NORTE: '#FFBB28',
-    ZONA_LESTE: '#FF8042',
-    ZONA_OESTE: '#8884D8',
-  };
 
   // Lista de pontos de acesso
   const pontosAcesso = [
@@ -169,7 +158,6 @@ export default function RelatoriosPage() {
             id: '1',
             endereco: 'Rua do Imperador, 123',
             bairro: 'Centro',
-            zona: 'CENTRO',
             utilizacao: 85,
             tempoMedioOcupacao: 45,
             totalUtilizacoes: 124,
@@ -186,7 +174,6 @@ export default function RelatoriosPage() {
             id: '2',
             endereco: 'Av. Koeler, 456',
             bairro: 'Centro',
-            zona: 'CENTRO',
             utilizacao: 72,
             tempoMedioOcupacao: 60,
             totalUtilizacoes: 98,
@@ -203,7 +190,6 @@ export default function RelatoriosPage() {
             id: '3',
             endereco: 'Rua Teresa, 789',
             bairro: 'Centro',
-            zona: 'CENTRO',
             utilizacao: 45,
             tempoMedioOcupacao: 90,
             totalUtilizacoes: 67,
@@ -220,7 +206,6 @@ export default function RelatoriosPage() {
             id: '4',
             endereco: 'Rua do Imperador, 321',
             bairro: 'Centro',
-            zona: 'CENTRO',
             utilizacao: 92,
             tempoMedioOcupacao: 55,
             totalUtilizacoes: 156,
@@ -237,7 +222,6 @@ export default function RelatoriosPage() {
             id: '5',
             endereco: 'Av. Ipiranga, 101',
             bairro: 'Corrêas',
-            zona: 'ZONA_SUL',
             utilizacao: 38,
             tempoMedioOcupacao: 120,
             totalUtilizacoes: 45,
@@ -254,7 +238,6 @@ export default function RelatoriosPage() {
             id: '6',
             endereco: 'Rua Bingen, 202',
             bairro: 'Bingen',
-            zona: 'ZONA_SUL',
             utilizacao: 25,
             tempoMedioOcupacao: 75,
             totalUtilizacoes: 32,
@@ -271,7 +254,6 @@ export default function RelatoriosPage() {
             id: '7',
             endereco: 'Estrada União e Indústria, 303',
             bairro: 'Itaipava',
-            zona: 'ZONA_NORTE',
             utilizacao: 65,
             tempoMedioOcupacao: 85,
             totalUtilizacoes: 89,
@@ -288,7 +270,6 @@ export default function RelatoriosPage() {
             id: '8',
             endereco: 'Rua do Imperador, 404',
             bairro: 'Centro',
-            zona: 'CENTRO',
             utilizacao: 78,
             tempoMedioOcupacao: 50,
             totalUtilizacoes: 112,
@@ -441,11 +422,6 @@ export default function RelatoriosPage() {
   // Função para aplicar filtros às vagas
   const vagasFiltradas = useMemo(() => {
     return vagas.filter((vaga) => {
-      // Filtro por zona
-      if (filtros.zonas.length > 0 && !filtros.zonas.includes(vaga.zona)) {
-        return false;
-      }
-
       // Filtro por faixa de utilização
       if (
         vaga.utilizacao < filtros.minUtilizacao ||
@@ -480,25 +456,9 @@ export default function RelatoriosPage() {
         utilizacao: v.utilizacao,
         totalUtilizacoes: v.totalUtilizacoes,
         tempoMedio: v.tempoMedioOcupacao,
-        zona: v.zona,
+        bairro: v.bairro,
       }))
       .sort((a, b) => b.utilizacao - a.utilizacao);
-  }, [vagasFiltradas]);
-
-  const dadosGraficoZonas = useMemo(() => {
-    const porZona = vagasFiltradas.reduce((acc, vaga) => {
-      if (!acc[vaga.zona]) {
-        acc[vaga.zona] = { total: 0, count: 0 };
-      }
-      acc[vaga.zona].total += vaga.utilizacao;
-      acc[vaga.zona].count += 1;
-      return acc;
-    }, {} as Record<string, { total: number; count: number }>);
-
-    return Object.entries(porZona).map(([zona, dados]) => ({
-      name: zona.replace('_', ' '),
-      value: Math.round(dados.total / dados.count),
-    }));
   }, [vagasFiltradas]);
 
   const dadosGraficoTiposVeiculo = useMemo(() => {
@@ -556,15 +516,6 @@ export default function RelatoriosPage() {
         trajeto.destino.municipio.toLowerCase().includes(termoBusca)
     );
   }, [trajetos, buscaTrajeto]);
-
-  const toggleZonaFilter = (zona: string) => {
-    setFiltros((prev) => ({
-      ...prev,
-      zonas: prev.zonas.includes(zona)
-        ? prev.zonas.filter((z) => z !== zona)
-        : [...prev.zonas, zona],
-    }));
-  };
 
   const toggleTipoVeiculoFilter = (tipo: TipoVeiculo) => {
     setFiltros((prev) => ({
@@ -632,13 +583,11 @@ export default function RelatoriosPage() {
           <FilterIcon className="h-5 w-5 text-gray-500" />
           <h3 className="font-medium text-gray-900">Filtros</h3>
           {/* Contador de filtros ativos */}
-          {(filtros.zonas.length > 0 ||
-            filtros.tiposVeiculo.length > 0 ||
+          {(filtros.tiposVeiculo.length > 0 ||
             filtros.minUtilizacao > 0 ||
             filtros.maxUtilizacao < 100) && (
             <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-              {(filtros.zonas.length > 0 ? 1 : 0) +
-                (filtros.tiposVeiculo.length > 0 ? 1 : 0) +
+              {(filtros.tiposVeiculo.length > 0 ? 1 : 0) +
                 (filtros.minUtilizacao > 0 || filtros.maxUtilizacao < 100
                   ? 1
                   : 0)}{' '}
@@ -646,8 +595,7 @@ export default function RelatoriosPage() {
             </span>
           )}
           {/* Botão para limpar filtros */}
-          {(filtros.zonas.length > 0 ||
-            filtros.tiposVeiculo.length > 0 ||
+          {(filtros.tiposVeiculo.length > 0 ||
             filtros.minUtilizacao > 0 ||
             filtros.maxUtilizacao < 100) && (
             <button
@@ -659,7 +607,6 @@ export default function RelatoriosPage() {
                     ),
                     fim: new Date(),
                   },
-                  zonas: [],
                   tiposVeiculo: [],
                   minUtilizacao: 0,
                   maxUtilizacao: 100,
@@ -672,7 +619,7 @@ export default function RelatoriosPage() {
           )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {/* Filtro por período */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -704,31 +651,6 @@ export default function RelatoriosPage() {
                   }))
                 }
               />
-            </div>
-          </div>
-
-          {/* Filtro por zona */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Zonas
-            </label>
-            <div className="flex flex-wrap gap-1">
-              {Object.keys(ZONA_COLORS).map((zona) => (
-                <button
-                  key={zona}
-                  onClick={() => toggleZonaFilter(zona)}
-                  className={`px-2 py-1 rounded text-xs flex items-center gap-1 ${
-                    filtros.zonas.includes(zona)
-                      ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <span>{zona.replace('_', ' ')}</span>
-                  {filtros.zonas.includes(zona) && (
-                    <span className="text-[10px]">✓</span>
-                  )}
-                </button>
-              ))}
             </div>
           </div>
 
@@ -958,38 +880,35 @@ export default function RelatoriosPage() {
               </div>
             </div>
 
-            {/* Gráfico de pizza - Distribuição por zona */}
+            {/* Gráfico de tipos de veículos */}
             <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                Distribuição por Zona
+                <Truck className="h-5 w-5" />
+                Distribuição por Tipo de Veículo
               </h3>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={dadosGraficoZonas}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      label={({ name, percent = 0 }) =>
-                        `${name}\n${(percent * 100).toFixed(0)}%`
-                      }
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                    >
-                      {dadosGraficoZonas.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value) => [`${value}%`, 'Utilização Média']}
+                  <BarChart
+                    data={dadosGraficoTiposVeiculo}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="name"
+                      angle={-45}
+                      textAnchor="end"
+                      height={60}
+                      fontSize={12}
                     />
-                  </PieChart>
+                    <YAxis fontSize={12} />
+                    <Tooltip />
+                    <Bar
+                      dataKey="value"
+                      name="Quantidade de Usos"
+                      fill="#00C49F"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
@@ -1011,7 +930,7 @@ export default function RelatoriosPage() {
                       Endereço
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Zona
+                      Bairro
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Utilização
@@ -1049,20 +968,8 @@ export default function RelatoriosPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            vaga.zona === 'CENTRO'
-                              ? 'bg-blue-100 text-blue-800'
-                              : vaga.zona === 'ZONA_SUL'
-                              ? 'bg-green-100 text-green-800'
-                              : vaga.zona === 'ZONA_NORTE'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : vaga.zona === 'ZONA_LESTE'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-purple-100 text-purple-800'
-                          }`}
-                        >
-                          {vaga.zona.replace('_', ' ')}
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                          {vaga.bairro}
                         </span>
                       </td>
                       <td className="px-4 py-3">
@@ -1104,39 +1011,6 @@ export default function RelatoriosPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
-          </div>
-
-          {/* Gráfico de tipos de veículos */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <Truck className="h-5 w-5" />
-              Distribuição por Tipo de Veículo
-            </h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={dadosGraficoTiposVeiculo}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="name"
-                    angle={-45}
-                    textAnchor="end"
-                    height={60}
-                    fontSize={12}
-                  />
-                  <YAxis fontSize={12} />
-                  <Tooltip />
-                  <Bar
-                    dataKey="value"
-                    name="Quantidade de Usos"
-                    fill="#00C49F"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
             </div>
           </div>
         </>
@@ -1266,7 +1140,7 @@ export default function RelatoriosPage() {
                       Endereço
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Zona
+                      Bairro
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Utilização
@@ -1317,20 +1191,8 @@ export default function RelatoriosPage() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                vaga.zona === 'CENTRO'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : vaga.zona === 'ZONA_SUL'
-                                  ? 'bg-green-100 text-green-800'
-                                  : vaga.zona === 'ZONA_NORTE'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : vaga.zona === 'ZONA_LESTE'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-purple-100 text-purple-800'
-                              }`}
-                            >
-                              {vaga.zona.replace('_', ' ')}
+                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                              {vaga.bairro}
                             </span>
                           </td>
                           <td className="px-4 py-3">
