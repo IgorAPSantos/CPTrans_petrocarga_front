@@ -18,7 +18,7 @@ export default function MotoristaLayout({
 }>) {
   return (
     <div className="flex min-h-screen flex-col motorista-layout">
-      <PrivateRoute>
+      <PrivateRoute allowedRoles={['MOTORISTA']}>
         <PushProvider>
           <Navbar />
           <main className="flex-1 relative">{children}</main>

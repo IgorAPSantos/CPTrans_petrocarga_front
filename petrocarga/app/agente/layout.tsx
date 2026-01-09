@@ -20,7 +20,7 @@ export default function GestorLayout({
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-1 relative">
-        <PrivateRoute>
+        <PrivateRoute allowedRoles={['AGENTE']}>
           <MapProvider>{children}</MapProvider>
         </PrivateRoute>
       </main>

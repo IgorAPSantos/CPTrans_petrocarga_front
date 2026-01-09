@@ -1,26 +1,39 @@
-// src/components/PrivateRoute.tsx (Crie este arquivo)
 'use client';
 
 import { useEffect } from 'react';
-import { useAuth } from '@/components/hooks/useAuth'; // Ajuste o caminho
+import { useAuth } from '@/components/hooks/useAuth';
 import { useRouter } from 'next/navigation';
+
+type Role = 'ADMIN' | 'GESTOR' | 'MOTORISTA' | 'AGENTE';
+
+interface PrivateRouteProps {
+  children: React.ReactNode;
+  allowedRoles?: Role[];
+}
 
 export default function PrivateRoute({
   children,
-}: {
-  children: React.ReactNode;
-}) {
-  const { isAuthenticated, loading } = useAuth();
+  allowedRoles,
+}: PrivateRouteProps) {
+  const { isAuthenticated, loading, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !isAuthenticated) {
-      router.push('/autorizacao/login');
+    if (!loading) {
+      // Não está logado
+      if (!isAuthenticated) {
+        router.push('/autorizacao/login');
+        return;
+      }
+
+      // Está logado, mas não tem permissão
+      if (allowedRoles && user && !allowedRoles.includes(user.permissao)) {
+        router.push('/autorizacao/login');
+      }
     }
-  }, [loading, isAuthenticated, router]);
+  }, [loading, isAuthenticated, user, allowedRoles, router]);
 
   if (loading) {
-    // Pode colocar um Spinner bonito aqui
     return (
       <div className="flex h-screen items-center justify-center">
         Carregando...
@@ -29,6 +42,10 @@ export default function PrivateRoute({
   }
 
   if (!isAuthenticated) {
+    return null;
+  }
+
+  if (allowedRoles && user && !allowedRoles.includes(user.permissao)) {
     return null;
   }
 
