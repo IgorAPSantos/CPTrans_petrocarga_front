@@ -3,6 +3,7 @@
 import toast from 'react-hot-toast';
 import { clientApi } from '../clientApi';
 import { ConfirmResult } from '../types/confirmResult';
+import { ReservaRapida } from '@/lib/types/reservaRapida';
 
 // ----------------------
 // POST RESERVA MOTORISTA
@@ -57,6 +58,28 @@ export async function reservarVagaAgente(
         ? err.message
         : 'Erro ao confirmar reserva do agente.';
     return { success: false, message };
+  }
+}
+
+// ----------------------
+// GET RESERVAS
+// ----------------------
+export async function getReservasRapidas(
+  agenteId: string
+): Promise<ReservaRapida[]> {
+  try {
+    const res = await clientApi(`/petrocarga/reserva-rapida/${agenteId}`);
+
+    if (!res.ok) {
+      throw new Error(`Erro na requisição: ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data.reservas || data; // Flexível para ambos os formatos
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao buscar reservas do agente.';
+    throw new Error(message);
   }
 }
 
