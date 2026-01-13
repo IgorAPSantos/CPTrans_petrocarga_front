@@ -20,8 +20,10 @@ export function Navbar() {
   const router = useRouter();
   const { notifications, isConnected } = useNotifications();
 
-  // Conta notificações não lidas (você pode adicionar uma propriedade 'read' no tipo Notification)
-  const unreadCount = notifications.length;
+  // ✅ CORREÇÃO: Conta apenas notificações NÃO LIDAS
+  const unreadCount = notifications.filter(
+    (notification) => !notification.lida
+  ).length;
 
   const links = [
     { href: '/motorista/reservar-vaga', label: 'Reservar Vaga' },
@@ -106,13 +108,15 @@ export function Navbar() {
             <Link
               href="/motorista/notificacoes"
               className="relative flex items-center gap-1 hover:text-gray-300 p-2 rounded-lg hover:bg-blue-700 transition-colors"
-              aria-label={`Notificações${unreadCount > 0 ? `, ${unreadCount} não lidas` : ''}`}
+              aria-label={`Notificações${
+                unreadCount > 0 ? `, ${unreadCount} não lidas` : ''
+              }`}
             >
               <Bell className="h-5 w-5" />
 
               {/* Badge de contador */}
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -120,7 +124,7 @@ export function Navbar() {
               {/* Indicador de conexão (opcional) */}
               {!isConnected && (
                 <span
-                  className="absolute -bottom-1 -right-1 bg-yellow-500 rounded-full h-2 w-2"
+                  className="absolute -bottom-1 -right-1 bg-yellow-500 rounded-full h-2 w-2 animate-pulse"
                   title="Reconectando..."
                 />
               )}
@@ -170,7 +174,7 @@ export function Navbar() {
                 Notificações
               </span>
               {unreadCount > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
