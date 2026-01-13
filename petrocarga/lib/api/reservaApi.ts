@@ -65,17 +65,17 @@ export async function reservarVagaAgente(
 // GET RESERVAS
 // ----------------------
 export async function getReservasRapidas(
-  agenteId: string
+  usuarioId: string
 ): Promise<ReservaRapida[]> {
   try {
-    const res = await clientApi(`/petrocarga/reserva-rapida/${agenteId}`);
+    const res = await clientApi(`/petrocarga/reserva-rapida/${usuarioId}`);
 
     if (!res.ok) {
       throw new Error(`Erro na requisição: ${res.status}`);
     }
 
     const data = await res.json();
-    return data.reservas || data; // Flexível para ambos os formatos
+    return data;
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : 'Erro ao buscar reservas do agente.';
