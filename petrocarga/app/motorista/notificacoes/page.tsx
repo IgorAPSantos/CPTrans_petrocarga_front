@@ -74,7 +74,7 @@ export default function NotificacoesPage() {
     }
   }, []);
 
-  // CONTADOR DE NÃO LIDAS
+  // 🔴 CONTADOR DE NÃO LIDAS
   const unreadCount = notifications.filter((n) => !n.lida).length;
 
   return (
@@ -91,6 +91,7 @@ export default function NotificacoesPage() {
                 </h1>
                 <p className="text-sm text-gray-600">
                   {notifications.length} total
+                  {notifications.length !== 1 ? 's' : ''}
                   {unreadCount > 0 && (
                     <span className="ml-2 text-red-600 font-semibold">
                       • {unreadCount} não lida{unreadCount !== 1 ? 's' : ''}

@@ -6,26 +6,22 @@ import { getReservasRapidas } from '@/lib/api/reservaApi';
 import { ReservaRapida } from '@/lib/types/reservaRapida';
 import { Loader2 } from 'lucide-react';
 import { use, useEffect, useState } from 'react';
-interface PageProps {
-  params: Promise<{ agenteId: string }>;
-}
 
-export default function ReservaRapidaPage({ params }: PageProps) {
-  const { agenteId } = use(params);
+export default function ReservaRapidaPage() {
   const { user } = useAuth();
   const [reservas, setReservas] = useState<ReservaRapida[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!agenteId) return;
+    if (!user?.id) return;
 
     const fetchReservas = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const result = await getReservasRapidas(agenteId);
+        const result = await getReservasRapidas(user.id);
         setReservas(result);
       } catch (err) {
         console.error('Erro ao carregar as reservas:', err);
@@ -36,7 +32,7 @@ export default function ReservaRapidaPage({ params }: PageProps) {
     };
 
     fetchReservas();
-  }, [agenteId]);
+  }, [user?.id]);
 
   if (loading) {
     return (
