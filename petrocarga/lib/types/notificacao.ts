@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 export interface Notification {
   id: string;
   titulo: string;
@@ -15,10 +17,21 @@ export interface NotificationContextData {
   error: string | null;
   addNotification: (notification: Notification) => void;
   removeNotification: (id: string) => void;
-  clearNotifications: () => void;
   markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
+  markSelectedAsRead: (ids: string[]) => Promise<void>;
+  deleteSelectedNotifications: (ids: string[]) => Promise<void>;
   loadHistorico: () => Promise<void>;
   refreshNotifications: () => Promise<void>;
   reconnect: () => void;
+}
+
+export interface NotificationProviderProps {
+  children: ReactNode;
+  usuarioId: string;
+  maxNotifications?: number;
+  enableSSE?: boolean;
+  autoReconnect?: boolean;
+  reconnectMaxAttempts?: number;
+  reconnectInitialDelayMs?: number;
+  reconnectMaxDelayMs?: number;
 }

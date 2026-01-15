@@ -5,7 +5,7 @@ import { useAuth } from '@/components/hooks/useAuth';
 import { getVeiculosUsuario } from '@/lib/api/veiculoApi';
 import { Loader2 } from 'lucide-react';
 import { Veiculo } from '@/lib/types/veiculo';
-import VeiculoCard from '@/components/motorista/cards/veiculo-item'; // 🔹 futuro componente de card
+import VeiculoCard from '@/components/motorista/cards/veiculo-item';
 
 export default function VeiculosPage() {
   const { user } = useAuth();

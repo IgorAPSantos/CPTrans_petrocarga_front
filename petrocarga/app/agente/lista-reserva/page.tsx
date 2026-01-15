@@ -2,14 +2,14 @@
 
 import ReservaRapidaCard from '@/components/agente/cards/reservaRapida-card';
 import { useAuth } from '@/components/hooks/useAuth';
-import { getReservas } from '@/lib/api/reservaApi';
-import { ReservaState } from '@/lib/types/reservaState';
+import { getReservasRapidas } from '@/lib/api/reservaApi';
+import { ReservaRapida } from '@/lib/types/reservaRapida';
 import { Loader2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 
 export default function ReservaRapidaPage() {
   const { user } = useAuth();
-  const [reservas, setReservas] = useState<ReservaState[]>([]);
+  const [reservas, setReservas] = useState<ReservaRapida[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,8 +21,8 @@ export default function ReservaRapidaPage() {
       setError(null);
 
       try {
-        const result = await getReservas();
-        setReservas(result.reservas);
+        const result = await getReservasRapidas(user.id);
+        setReservas(result);
       } catch (err) {
         console.error('Erro ao carregar as reservas:', err);
         setError('Erro ao buscar as reservas. Tente novamente mais tarde.');
@@ -38,9 +38,7 @@ export default function ReservaRapidaPage() {
     return (
       <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
         <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
-        <span className="text-gray-600">
-          Carregando informação dos agentes...
-        </span>
+        <span className="text-gray-600">Carregando reservas rápidas...</span>
       </div>
     );
   }
@@ -56,17 +54,17 @@ export default function ReservaRapidaPage() {
   return (
     <div className="p-4 flex flex-col items-center w-full min-h-screen bg-gray-50">
       <h1 className="text-2xl font-bold mb-2 text-center">
-        Aqui estão os reservas rápidas criadas.
+        Reservas Rápidas Criadas
       </h1>
 
       {reservas.length === 0 ? (
         <p className="text-gray-500 text-center">
-          Não há reserva rápida feita por você.
+          Você ainda não criou nenhuma reserva rápida.
         </p>
       ) : (
         <div className="grid gap-4 w-full max-w-2xl">
           {reservas.map((reserva) => (
-            <ReservaRapidaCard reserva={reserva} />
+            <ReservaRapidaCard key={reserva.id} reserva={reserva} />
           ))}
         </div>
       )}

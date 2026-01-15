@@ -14,12 +14,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   ChevronDown,
-  ParkingSquare,
   User,
   Bell,
   FileText,
   Calendar,
-  Car,
   Users,
   UserCircle,
   BookOpen,
@@ -40,6 +38,9 @@ export function Navbar() {
     mounted && user?.permissao === 'ADMIN'
       ? { href: '/gestor/adicionar-gestores', label: 'Adicionar Gestores' }
       : null;
+
+  // 🔥 Verifica se é ADMIN para esconder o link de perfil
+  const isAdmin = mounted && user?.permissao === 'ADMIN';
 
   return (
     <header className="bg-blue-800 text-white relative">
@@ -185,37 +186,36 @@ export function Navbar() {
             </li>
           )}
 
-          {/* Perfil Dropdown */}
-          <li>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
-                Perfil
-                <ChevronDown className="h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
-                <DropdownMenuItem asChild>
-                  <Link
-                    href="/gestor/perfil"
-                    className="flex items-center gap-2 cursor-pointer w-full"
-                  >
-                    <UserCircle className="h-4 w-4" />
-                    Meu Perfil
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="p-0 m-0 focus:bg-gray-100">
-                  {/* Redirect após logout */}
-                  <LogoutButton />
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </li>
-
-          {/* Guia */}
-          <li className="hover:text-gray-300">
-            <Link href="/gestor/guia" className="flex items-center gap-1">
-              Guia
-            </Link>
-          </li>
+          {/* 🔥 Se for ADMIN, mostra apenas botão Sair. Se não, mostra dropdown Perfil */}
+          {isAdmin ? (
+            <li className="hover:text-gray-300">
+              <LogoutButton />
+            </li>
+          ) : (
+            <li>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                  Perfil
+                  <ChevronDown className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/gestor/perfil"
+                      className="flex items-center gap-2 cursor-pointer w-full"
+                    >
+                      <UserCircle className="h-4 w-4" />
+                      Meu Perfil
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="p-0 m-0 focus:bg-gray-100">
+                    {/* Redirect após logout */}
+                    <LogoutButton />
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </li>
+          )}
         </ul>
 
         {/* BOTÃO HAMBURGUER (mobile) */}
@@ -374,17 +374,19 @@ export function Navbar() {
             </>
           )}
 
-          {/* Perfil */}
-          <li className="hover:bg-blue-700 rounded">
-            <Link
-              href="/gestor/perfil"
-              onClick={() => setMenuAberto(false)}
-              className="block px-2 py-1 w-full flex items-center gap-2"
-            >
-              <UserCircle className="h-4 w-4" />
-              Meu Perfil
-            </Link>
-          </li>
+          {/* 🔥 Perfil - Só mostra se NÃO for ADMIN */}
+          {!isAdmin && (
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/gestor/perfil"
+                onClick={() => setMenuAberto(false)}
+                className="block px-2 py-1 w-full flex items-center gap-2"
+              >
+                <UserCircle className="h-4 w-4" />
+                Meu Perfil
+              </Link>
+            </li>
+          )}
 
           {/* Guia */}
           <li className="hover:bg-blue-700 rounded">

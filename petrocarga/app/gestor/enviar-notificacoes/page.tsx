@@ -7,7 +7,7 @@ import { getMotoristas } from '@/lib/api/motoristaApi';
 import {
   enviarNotificacaoParaUsuario,
   enviarNotificacaoPorPermissao,
-} from '@/lib/actions/notificacaoAction';
+} from '@/lib/api/notificacaoApi';
 import { Motorista } from '@/lib/types/motorista';
 import {
   Loader2,

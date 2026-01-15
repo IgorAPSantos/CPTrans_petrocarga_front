@@ -1,7 +1,7 @@
 'use client';
 
 import { Agente } from '@/lib/types/agente';
-import { useActionState, useState } from 'react';
+import { useActionState } from 'react';
 import { atualizarAgente } from '@/lib/api/agenteApi';
 import {
   Card,
