@@ -11,10 +11,12 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
+  Trash2,
+  CheckCircle,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 export default function NotificacoesPage() {
   const {
@@ -23,11 +25,16 @@ export default function NotificacoesPage() {
     isLoading,
     error,
     removeNotification,
-    clearNotifications,
     markAsRead,
-    markAllAsRead,
+    markSelectedAsRead, // 🆕
+    deleteSelectedNotifications, // 🆕
     reconnect,
   } = useNotifications();
+
+  // 🔴 Estados para seleção múltipla
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showMarkReadModal, setShowMarkReadModal] = useState(false);
 
   const formatarTempo = useCallback((timestamp: string) => {
     try {
@@ -76,6 +83,90 @@ export default function NotificacoesPage() {
 
   // 🔴 CONTADOR DE NÃO LIDAS
   const unreadCount = notifications.filter((n) => !n.lida).length;
+
+  // 🔴 FUNÇÕES DE SELEÇÃO
+  const toggleSelectAll = () => {
+    if (selectedIds.length === notifications.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(notifications.map((n) => n.id));
+    }
+  };
+
+  const toggleSelectNotification = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleDeleteSelected = async () => {
+    try {
+      await deleteSelectedNotifications(selectedIds);
+      setSelectedIds([]);
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error('Erro ao deletar notificações:', error);
+    }
+  };
+
+  const handleMarkSelectedAsRead = async () => {
+    try {
+      await markSelectedAsRead(selectedIds);
+      setSelectedIds([]);
+      setShowMarkReadModal(false);
+    } catch (error) {
+      console.error('Erro ao marcar notificações como lidas:', error);
+    }
+  };
+
+  // 🔴 Verifica se todas estão selecionadas
+  const allSelected =
+    selectedIds.length === notifications.length && notifications.length > 0;
+
+  // 🔴 MODAL DE CONFIRMAÇÃO
+  const ConfirmModal = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    message,
+    confirmText,
+    confirmColor = 'bg-red-600 hover:bg-red-700',
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    title: string;
+    message: string;
+    confirmText: string;
+    confirmColor?: string;
+  }) => {
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+          <p className="text-gray-600 mb-6">{message}</p>
+
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={onConfirm}
+              className={`px-4 py-2 text-white ${confirmColor} rounded-lg transition-colors`}
+            >
+              {confirmText}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-8 px-4">
@@ -134,36 +225,71 @@ export default function NotificacoesPage() {
                   Reconectar
                 </button>
               )}
-
-              {/* Botão Marcar Todas como Lidas */}
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                  title="Marcar todas como lidas"
-                >
-                  <CheckCheck className="h-4 w-4" />
-                  Marcar todas lidas
-                </button>
-              )}
-
-              {/* Botão Limpar Tudo */}
-              {notifications.length > 0 && (
-                <button
-                  onClick={clearNotifications}
-                  className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
-                  title="Limpar todas as notificações"
-                >
-                  <X className="h-4 w-4" />
-                  Limpar tudo
-                </button>
-              )}
             </div>
           </div>
 
+          {/* 🔴 BARRA DE AÇÕES EM MASSA */}
+          {selectedIds.length > 0 ? (
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="text-blue-700 font-medium">
+                    {selectedIds.length} notificação(ões) selecionada(s)
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowMarkReadModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    Marcar como lida(s)
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteModal(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Remover selecionada(s)
+                  </button>
+                  <button
+                    onClick={() => setSelectedIds([])}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // 🔴 APENAS BOTÃO "SELECIONAR TODAS" QUANDO NÃO HÁ SELEÇÃO
+            notifications.length > 0 && (
+              <div className="mt-4">
+                <button
+                  onClick={toggleSelectAll}
+                  className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                >
+                  <div
+                    className={`w-5 h-5 rounded border flex items-center justify-center ${
+                      selectedIds.length === notifications.length
+                        ? 'bg-blue-500 border-blue-500'
+                        : 'border-gray-300'
+                    }`}
+                  >
+                    {selectedIds.length === notifications.length && (
+                      <Check className="w-3 h-3 text-white" />
+                    )}
+                  </div>
+                  <span>Selecionar todas ({notifications.length})</span>
+                </button>
+              </div>
+            )
+          )}
+
           {/* Mensagens de Status SSE */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
+            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
               ⚠️ {error}
               <div className="mt-1 text-xs text-red-600">
                 As notificações em tempo real estão temporariamente
@@ -173,7 +299,7 @@ export default function NotificacoesPage() {
           )}
 
           {!isConnected && !error && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-yellow-700 text-sm">
+            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-yellow-700 text-sm">
               ⚡ Conectando ao servidor de notificações...
               <div className="mt-1 text-xs text-yellow-600">
                 As notificações serão recebidas em tempo real quando a conexão
@@ -210,9 +336,37 @@ export default function NotificacoesPage() {
                   notif.tipo
                 )} hover:shadow-lg transition-all ${
                   notif.lida ? 'opacity-60' : ''
+                } ${
+                  selectedIds.includes(notif.id)
+                    ? 'ring-2 ring-blue-500 ring-opacity-50'
+                    : ''
                 }`}
+                onClick={(e) => {
+                  // Impede a seleção ao clicar nos botões
+                  if ((e.target as HTMLElement).closest('button')) return;
+                  toggleSelectNotification(notif.id);
+                }}
               >
                 <div className="flex items-start justify-between gap-4">
+                  {/* 🔴 CHECKBOX DE SELEÇÃO */}
+                  <div className="flex-shrink-0 pt-1">
+                    <div
+                      className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer ${
+                        selectedIds.includes(notif.id)
+                          ? 'bg-blue-500 border-blue-500'
+                          : 'border-gray-300'
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleSelectNotification(notif.id);
+                      }}
+                    >
+                      {selectedIds.includes(notif.id) && (
+                        <Check className="w-3 h-3 text-white" />
+                      )}
+                    </div>
+                  </div>
+
                   {/* Conteúdo */}
                   <div className="flex items-start gap-3 flex-1">
                     <span className="text-2xl flex-shrink-0">
@@ -228,7 +382,7 @@ export default function NotificacoesPage() {
                             {notif.mensagem}
                           </p>
                         </div>
-                        {!notif.lida && (
+                        {!notif.lida && !selectedIds.includes(notif.id) && (
                           <span className="inline-block h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-2 animate-pulse"></span>
                         )}
                       </div>
@@ -269,7 +423,10 @@ export default function NotificacoesPage() {
                     {/* Botão Marcar como Lida */}
                     {!notif.lida && (
                       <button
-                        onClick={() => markAsRead(notif.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          markAsRead(notif.id);
+                        }}
                         className="flex-shrink-0 p-2 text-green-500 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
                         title="Marcar como lida"
                       >
@@ -279,7 +436,10 @@ export default function NotificacoesPage() {
 
                     {/* Botão remover */}
                     <button
-                      onClick={() => removeNotification(notif.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeNotification(notif.id);
+                      }}
                       className="flex-shrink-0 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Remover notificação"
                     >
@@ -292,6 +452,35 @@ export default function NotificacoesPage() {
           )}
         </div>
       </div>
+
+      {/* 🔴 MODAIS DE CONFIRMAÇÃO */}
+      <ConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleDeleteSelected}
+        title="Remover notificações"
+        message={`Tem certeza que deseja remover ${
+          allSelected
+            ? 'todas as notificações'
+            : `${selectedIds.length} notificação(ões) selecionada(s)`
+        }? Esta ação não pode ser desfeita.`}
+        confirmText="Remover"
+        confirmColor="bg-red-600 hover:bg-red-700"
+      />
+
+      <ConfirmModal
+        isOpen={showMarkReadModal}
+        onClose={() => setShowMarkReadModal(false)}
+        onConfirm={handleMarkSelectedAsRead}
+        title="Marcar como lidas"
+        message={`Deseja marcar ${
+          allSelected
+            ? 'todas as notificações'
+            : `${selectedIds.length} notificação(ões) selecionada(s)`
+        } como lida(s)?`}
+        confirmText="Marcar como lidas"
+        confirmColor="bg-green-600 hover:bg-green-700"
+      />
     </div>
   );
 }

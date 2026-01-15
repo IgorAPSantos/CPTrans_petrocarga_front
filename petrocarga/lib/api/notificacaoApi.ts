@@ -2,116 +2,75 @@
 
 import { clientApi } from '../clientApi';
 
-// ----------------------
-// ENVIAR NOTIFICAÇÃO PARA UM USUÁRIO
-// ----------------------
 export async function enviarNotificacaoParaUsuario(formData: FormData) {
-  try {
-    const usuarioId = formData.get('usuarioId') as string;
+  const usuarioId = formData.get('usuarioId') as string;
 
-    // Obtém metadata de forma segura
-    const metadataRaw = formData.get('metadata') as string;
-    let metadata = {};
-    if (metadataRaw && metadataRaw !== 'undefined') {
-      try {
-        metadata = JSON.parse(metadataRaw);
-      } catch (e) {
-        console.warn('Metadata inválido, usando objeto vazio:', e);
-      }
+  const payload = {
+    titulo: formData.get('titulo') as string,
+    mensagem: formData.get('mensagem') as string,
+    tipo: formData.get('tipo') as
+      | 'RESERVA'
+      | 'VAGA'
+      | 'VEICULO'
+      | 'MOTORISTA'
+      | 'SISTEMA',
+  };
+
+  const res = await clientApi(
+    `/petrocarga/notificacoes/sendNotification/toUsuario/${usuarioId}`,
+    {
+      method: 'POST',
+      json: payload,
     }
+  );
 
-    const payload = {
-      titulo: formData.get('titulo') as string,
-      mensagem: formData.get('mensagem') as string,
-      tipo: formData.get('tipo') as string,
-      metadata: metadata, // Campo correto
-    };
+  if (!res.ok) {
+    let msg = 'Erro ao enviar notificação';
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
 
-    console.log('Enviando payload:', payload); // Para debug
-
-    const res = await clientApi(
-      `/petrocarga/notificacoes/sendNotification/toUsuario/${usuarioId}`,
-      {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      }
-    );
-
-    if (!res.ok) {
-      let msg = 'Erro ao enviar notificação';
-      try {
-        const err = await res.json();
-        msg = err.message ?? msg;
-        console.error('Erro da API:', err);
-      } catch {}
-
-      return { error: true, message: msg };
-    }
-
-    return { error: false, message: 'Notificação enviada com sucesso' };
-  } catch (error: any) {
-    console.error('Erro em enviarNotificacaoParaUsuario:', error);
-    return {
-      error: true,
-      message: error.message || 'Erro ao processar notificação',
-    };
+    return { error: true, message: msg };
   }
+  return { error: false, message: 'Notificação enviada com sucesso' };
 }
 
 // ----------------------
 // ENVIAR NOTIFICAÇÃO POR PERMISSÃO
 // ----------------------
 export async function enviarNotificacaoPorPermissao(formData: FormData) {
-  try {
-    const permissao = formData.get('permissao') as string;
+  const permissao = formData.get('permissao') as 'ADMIN' | 'GESTOR' | 'AGENTE';
 
-    // Obtém metadata de forma segura
-    const metadataRaw = formData.get('metadata') as string;
-    let metadata = {};
-    if (metadataRaw && metadataRaw !== 'undefined') {
-      try {
-        metadata = JSON.parse(metadataRaw);
-      } catch (e) {
-        console.warn('Metadata inválido, usando objeto vazio:', e);
-      }
+  const payload = {
+    titulo: formData.get('titulo') as string,
+    mensagem: formData.get('mensagem') as string,
+    tipo: formData.get('tipo') as
+      | 'RESERVA'
+      | 'VAGA'
+      | 'VEICULO'
+      | 'MOTORISTA'
+      | 'SISTEMA',
+  };
+
+  const res = await clientApi(
+    `/petrocarga/notificacoes/sendNotification/byPermissao/${permissao}`,
+    {
+      method: 'POST',
+      json: payload,
     }
+  );
 
-    const payload = {
-      titulo: formData.get('titulo') as string,
-      mensagem: formData.get('mensagem') as string,
-      tipo: formData.get('tipo') as string,
-      metadata: metadata, // Campo correto
-    };
+  if (!res.ok) {
+    let msg = 'Erro ao enviar notificação';
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
 
-    console.log('Enviando payload por permissão:', payload); // Para debug
-
-    const res = await clientApi(
-      `/petrocarga/notificacoes/sendNotification/byPermissao/${permissao}`,
-      {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      }
-    );
-
-    if (!res.ok) {
-      let msg = 'Erro ao enviar notificação por permissão';
-      try {
-        const err = await res.json();
-        msg = err.message ?? msg;
-        console.error('Erro da API:', err);
-      } catch {}
-
-      return { error: true, message: msg };
-    }
-
-    return { error: false, message: 'Notificações enviadas com sucesso' };
-  } catch (error: any) {
-    console.error('Erro em enviarNotificacaoPorPermissao:', error);
-    return {
-      error: true,
-      message: error.message || 'Erro ao processar notificação',
-    };
+    return { error: true, message: msg };
   }
+  return { error: false, message: 'Notificação enviada com sucesso' };
 }
 
 // ----------------------
@@ -197,6 +156,41 @@ export async function marcarNotificacaoComoLida(notificacaoId: string) {
 }
 
 // ----------------------
+// MARCAR NOTIFICAÇÕES SELECIONADAS COMO LIDAS
+// ----------------------
+export async function marcarTodasNotificacoesComoLidas(
+  usuarioId: string,
+  listaNotificacaoId: string[]
+) {
+  const params = new URLSearchParams();
+  listaNotificacaoId.forEach((id) => params.append('listaNotificacaoId', id));
+
+  const res = await clientApi(
+    `/petrocarga/notificacoes/marcarSelecionadasComoLida/${usuarioId}?${params.toString()}`,
+    {
+      method: 'PATCH',
+    }
+  );
+
+  if (!res.ok) {
+    let msg = 'Erro ao marcar notificações como lidas';
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
+  }
+
+  const data = await res.json();
+  return {
+    error: false,
+    message: 'Notificações marcadas como lidas',
+    notificacoes: data,
+  };
+}
+
+// ----------------------
 // DELETAR NOTIFICAÇÃO
 // ----------------------
 export async function deletarNotificacao(
@@ -221,4 +215,34 @@ export async function deletarNotificacao(
   }
 
   return { error: false, message: 'Notificação deletada com sucesso' };
+}
+
+// ----------------------
+// DELETAR NOTIFICAÇÕES SELECIONADAS
+// ----------------------
+export async function deletarNotificacoesSelecionadas(
+  usuarioId: string,
+  listaNotificacaoId: string[]
+) {
+  const params = new URLSearchParams();
+  listaNotificacaoId.forEach((id) => params.append('listaNotificacaoId', id));
+
+  const res = await clientApi(
+    `/petrocarga/notificacoes/deletarSelecionadas/${usuarioId}?${params.toString()}`,
+    {
+      method: 'DELETE',
+    }
+  );
+
+  if (!res.ok) {
+    let msg = 'Erro ao deletar notificações';
+    try {
+      const err = await res.json();
+      msg = err.message ?? msg;
+    } catch {}
+
+    return { error: true, message: msg };
+  }
+
+  return { error: false, message: 'Notificações deletadas com sucesso' };
 }

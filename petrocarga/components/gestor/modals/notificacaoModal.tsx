@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Bell, X, Send } from 'lucide-react';
-import { enviarNotificacaoParaUsuario } from '@/lib/actions/notificacaoAction';
+import { enviarNotificacaoParaUsuario } from '@/lib/api/notificacaoApi';
 import { useAuth } from '@/components/hooks/useAuth';
 
 interface NotificacaoModalProps {

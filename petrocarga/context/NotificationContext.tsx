@@ -7,33 +7,26 @@ import {
   useState,
   useCallback,
   useRef,
-  ReactNode,
   useMemo,
 } from 'react';
 import {
   deletarNotificacao,
   getNotificacoesUsuario,
   marcarNotificacaoComoLida,
+  marcarTodasNotificacoesComoLidas,
+  deletarNotificacoesSelecionadas,
 } from '@/lib/api/notificacaoApi';
-import { Notification, NotificationContextData } from '@/lib/types/notificacao';
+import {
+  Notification,
+  NotificationContextData,
+  NotificationProviderProps,
+} from '@/lib/types/notificacao';
 import { logger } from '@/lib/logger';
 
 // Contexto
 const NotificationContext = createContext<NotificationContextData | undefined>(
   undefined
 );
-
-// Provider Props
-interface NotificationProviderProps {
-  children: ReactNode;
-  usuarioId: string;
-  maxNotifications?: number;
-  enableSSE?: boolean;
-  autoReconnect?: boolean;
-  reconnectMaxAttempts?: number;
-  reconnectInitialDelayMs?: number;
-  reconnectMaxDelayMs?: number;
-}
 
 export function NotificationProvider({
   children,
@@ -150,11 +143,37 @@ export function NotificationProvider({
     [usuarioId]
   );
 
+  // 🆕 DELETAR SELECIONADAS (com chamada à API)
+  const deleteSelectedNotifications = useCallback(
+    async (ids: string[]) => {
+      if (ids.length === 0) return;
+
+      try {
+        const result = await deletarNotificacoesSelecionadas(usuarioId, ids);
+
+        if (!result.error) {
+          setNotifications((prev) => prev.filter((n) => !ids.includes(n.id)));
+          logger.info(`✅ ${ids.length} notificação(ões) removida(s)`);
+        } else {
+          logger.error(
+            '❌ Erro ao deletar notificações selecionadas:',
+            result.message
+          );
+          throw new Error(result.message);
+        }
+      } catch (err) {
+        logger.error('❌ Erro ao deletar notificações selecionadas:', err);
+        throw err;
+      }
+    },
+    [usuarioId]
+  );
+
   // MARCAR COMO LIDA (com chamada à API)
   const markAsRead = useCallback(
     async (id: string) => {
       try {
-        const result = await marcarNotificacaoComoLida(usuarioId);
+        const result = await marcarNotificacaoComoLida(id);
 
         if (!result.error) {
           setNotifications((prev) =>
@@ -174,29 +193,38 @@ export function NotificationProvider({
     [usuarioId]
   );
 
-  // MARCAR TODAS COMO LIDAS (com chamada à API)
-  const markAllAsRead = useCallback(async () => {
-    try {
-      const result = await marcarNotificacaoComoLida(usuarioId);
+  // 🆕 MARCAR SELECIONADAS COMO LIDAS (com chamada à API)
+  const markSelectedAsRead = useCallback(
+    async (ids: string[]) => {
+      if (ids.length === 0) return;
 
-      if (!result.error) {
-        setNotifications((prev) => prev.map((n) => ({ ...n, lida: true })));
-        logger.info('✅ Todas as notificações marcadas como lidas');
-      } else {
+      try {
+        const result = await marcarTodasNotificacoesComoLidas(usuarioId, ids);
+
+        if (!result.error) {
+          setNotifications((prev) =>
+            prev.map((n) => (ids.includes(n.id) ? { ...n, lida: true } : n))
+          );
+          logger.info(
+            `✅ ${ids.length} notificação(ões) marcada(s) como lida(s)`
+          );
+        } else {
+          logger.error(
+            '❌ Erro ao marcar notificações selecionadas como lidas:',
+            result.message
+          );
+          throw new Error(result.message);
+        }
+      } catch (err) {
         logger.error(
-          '❌ Erro ao marcar todas as notificações como lidas:',
-          result.message
+          '❌ Erro ao marcar notificações selecionadas como lidas:',
+          err
         );
+        throw err;
       }
-    } catch (err) {
-      logger.error('❌ Erro ao marcar todas as notificações como lidas:', err);
-    }
-  }, [usuarioId]);
-
-  // LIMPAR TODAS (apenas local, você pode adicionar endpoint se quiser)
-  const clearNotifications = useCallback(() => {
-    setNotifications([]);
-  }, []);
+    },
+    [usuarioId]
+  );
 
   // CONECTAR SSE
   const connect = useCallback(() => {
@@ -449,9 +477,9 @@ export function NotificationProvider({
       error,
       addNotification,
       removeNotification,
-      clearNotifications,
       markAsRead,
-      markAllAsRead,
+      markSelectedAsRead,
+      deleteSelectedNotifications,
       loadHistorico,
       refreshNotifications,
       reconnect,
@@ -463,9 +491,9 @@ export function NotificationProvider({
       error,
       addNotification,
       removeNotification,
-      clearNotifications,
       markAsRead,
-      markAllAsRead,
+      markSelectedAsRead,
+      deleteSelectedNotifications,
       loadHistorico,
       refreshNotifications,
       reconnect,
@@ -490,10 +518,12 @@ export function useNotifications() {
       isLoading: false,
       error: null,
       addNotification: () => {},
-      removeNotification: () => {},
+      removeNotification: async () => {},
       clearNotifications: () => {},
-      markAsRead: () => {},
-      markAllAsRead: () => {},
+      markAsRead: async () => {},
+      markAllAsRead: async () => {},
+      markSelectedAsRead: async () => {}, // 🆕
+      deleteSelectedNotifications: async () => {}, // 🆕
       loadHistorico: async () => {},
       refreshNotifications: async () => {},
       reconnect: () => {},
