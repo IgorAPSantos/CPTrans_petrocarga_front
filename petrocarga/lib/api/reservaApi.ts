@@ -33,57 +33,6 @@ export async function reservarVaga(formData: FormData): Promise<ConfirmResult> {
 }
 
 // ----------------------
-// POST RESERVA AGENTE
-// ----------------------
-export async function reservarVagaAgente(
-  formData: FormData
-): Promise<ConfirmResult> {
-  const body = {
-    vagaId: formData.get('vagaId'),
-    tipoVeiculo: formData.get('tipoVeiculo'),
-    placa: formData.get('placa'),
-    inicio: formData.get('inicio'),
-    fim: formData.get('fim'),
-  };
-
-  try {
-    await clientApi('/petrocarga/reserva-rapida', {
-      method: 'POST',
-      json: body,
-    });
-    return { success: true };
-  } catch (err: unknown) {
-    const message =
-      err instanceof Error
-        ? err.message
-        : 'Erro ao confirmar reserva do agente.';
-    return { success: false, message };
-  }
-}
-
-// ----------------------
-// GET RESERVAS
-// ----------------------
-export async function getReservasRapidas(
-  usuarioId: string
-): Promise<ReservaRapida[]> {
-  try {
-    const res = await clientApi(`/petrocarga/reserva-rapida/${usuarioId}`);
-
-    if (!res.ok) {
-      throw new Error(`Erro na requisição: ${res.status}`);
-    }
-
-    const data = await res.json();
-    return data;
-  } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : 'Erro ao buscar reservas do agente.';
-    throw new Error(message);
-  }
-}
-
-// ----------------------
 // POST RESERVA CHECKOUT-FORÇADO
 // ----------------------
 export async function finalizarForcado(reservaID: string) {
@@ -268,6 +217,61 @@ export async function checkinReserva(reservaID: string) {
     const message =
       err instanceof Error ? err.message : 'Erro ao finalizar reserva forçada.';
     toast.error(message);
+    throw new Error(message);
+  }
+}
+
+// ---------------------------------------------------------
+// RESERVA RÁPIDA - AGENTE
+// ---------------------------------------------------------
+
+// ----------------------
+// POST RESERVA AGENTE
+// ----------------------
+export async function reservarVagaAgente(
+  formData: FormData
+): Promise<ConfirmResult> {
+  const body = {
+    vagaId: formData.get('vagaId'),
+    tipoVeiculo: formData.get('tipoVeiculo'),
+    placa: formData.get('placa'),
+    inicio: formData.get('inicio'),
+    fim: formData.get('fim'),
+  };
+
+  try {
+    await clientApi('/petrocarga/reserva-rapida', {
+      method: 'POST',
+      json: body,
+    });
+    return { success: true };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : 'Erro ao confirmar reserva do agente.';
+    return { success: false, message };
+  }
+}
+
+// ----------------------
+// GET RESERVAS
+// ----------------------
+export async function getReservasRapidas(
+  usuarioId: string
+): Promise<ReservaRapida[]> {
+  try {
+    const res = await clientApi(`/petrocarga/reserva-rapida/${usuarioId}`);
+
+    if (!res.ok) {
+      throw new Error(`Erro na requisição: ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao buscar reservas do agente.';
     throw new Error(message);
   }
 }
