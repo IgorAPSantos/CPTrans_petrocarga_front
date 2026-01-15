@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { getReservas, finalizarForcado } from '@/lib/api/reservaApi';
-import { enviarNotificacaoParaUsuario } from '@/lib/actions/notificacaoAction';
+import { enviarNotificacaoParaUsuario } from '@/lib/api/notificacaoApi';
 import { useAuth } from '@/components/hooks/useAuth';
 import { Reserva } from '@/lib/types/reserva';
 import { toast } from 'sonner';
