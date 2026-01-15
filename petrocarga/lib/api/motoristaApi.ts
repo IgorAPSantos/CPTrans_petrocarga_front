@@ -17,11 +17,11 @@ interface MotoristaPayload {
   dataValidadeCnh: string;
 }
 interface MotoristaPatchPayload {
-  nome: string,
-  cpf: string,
-  telefone: string,
-  email: string,
-  senha: string,
+  nome: string;
+  cpf: string;
+  telefone: string;
+  email: string;
+  senha: string;
   tipoCnh: string;
   numeroCnh: string;
   dataValidadeCnh: string;
@@ -40,7 +40,8 @@ interface MotoristaResult {
 // ADD MOTORISTA
 // ----------------------
 export async function addMotorista(
-  formData: FormData
+  prevState: MotoristaResult | null, // Adicionar este parâmetro
+  formData: FormData // Manter este parâmetro
 ): Promise<MotoristaResult> {
   const payload: MotoristaPayload = {
     usuario: {
@@ -136,7 +137,7 @@ export async function getMotoristaByUserId(userId: string) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch { }
+    } catch {}
 
     return { error: true, message: msg };
   }
@@ -157,7 +158,7 @@ export async function getMotoristas() {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch { }
+    } catch {}
 
     return { error: true, message: msg };
   }
