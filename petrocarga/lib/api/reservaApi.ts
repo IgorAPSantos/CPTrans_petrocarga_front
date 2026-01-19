@@ -156,6 +156,25 @@ export async function getDocumentoReserva(reservaID: string) {
 }
 
 // ----------------------
+// DOCUMENTO RESERVA ID
+// ----------------------
+
+export async function getGerarComprovanteReserva(reservaID: string) {
+  try {
+    const res = await clientApi(
+      `/petrocarga/reservas/${reservaID}/comprovante`,
+    );
+    return res.json();
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : 'Erro ao gerar comprovante da reserva.';
+    throw new Error(message);
+  }
+}
+
+// ----------------------
 // PATCH RESERVA
 // ----------------------
 export async function atualizarReserva(
