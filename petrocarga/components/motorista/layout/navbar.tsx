@@ -10,7 +10,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CarIcon, ChevronDown, User, Bell } from 'lucide-react';
+import {
+  CarIcon,
+  ChevronDown,
+  User,
+  Bell,
+  TriangleAlert,
+  Archive,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { LogoutButton } from '@/components/logoutButton/logoutButton';
 import { useNotifications } from '@/context/NotificationContext';
@@ -22,13 +29,10 @@ export function Navbar() {
 
   // ✅ CORREÇÃO: Conta apenas notificações NÃO LIDAS
   const unreadCount = notifications.filter(
-    (notification) => !notification.lida
+    (notification) => !notification.lida,
   ).length;
 
-  const links = [
-    { href: '/motorista/reservar-vaga', label: 'Reservar Vaga' },
-    { href: '/motorista/reservas', label: 'Minhas Reservas' },
-  ];
+  const links = [{ href: '/motorista/reservar-vaga', label: 'Reservar Vaga' }];
 
   return (
     <header className="bg-blue-800 text-white relative">
@@ -48,6 +52,35 @@ export function Navbar() {
               <Link href={href}>{label}</Link>
             </li>
           ))}
+          {/* Dropdown Veículo */}
+          <li>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                Reservas
+                <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/motorista/reservas"
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
+                    <Archive className="h-4 w-4" />
+                    Minhas Reservas
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/motorista/reservas/minhas-denuncias"
+                    className="flex items-center gap-2 cursor-pointer w-full"
+                  >
+                    <TriangleAlert className="h-4 w-4" />
+                    Minhas Denuncias
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </li>
 
           {/* Dropdown Veículo */}
           <li>
