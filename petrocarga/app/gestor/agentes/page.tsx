@@ -27,7 +27,7 @@ export default function AgentesPage() {
       } catch (err) {
         console.error('Erro ao carregar os agentes:', err);
         setError(
-          'Erro ao buscar os agentes cadastrados. Tente novamente mais tarde.'
+          'Erro ao buscar os agentes cadastrados. Tente novamente mais tarde.',
         );
       } finally {
         setLoading(false);
@@ -45,7 +45,7 @@ export default function AgentesPage() {
       (agente) =>
         agente.usuario.nome.toLowerCase().includes(termoBusca) ||
         agente.usuario.email.toLowerCase().includes(termoBusca) ||
-        false
+        false,
     );
   }, [Agentes, busca]);
 
@@ -87,7 +87,7 @@ export default function AgentesPage() {
             type="text"
             value={busca}
             onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar agente por nome, email ou placa do veículo..."
+            placeholder="Buscar agente por nome ou email..."
             className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
           />
           {busca && (
@@ -137,7 +137,7 @@ export default function AgentesPage() {
                 <Search className="h-12 w-12 text-gray-300 mx-auto" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Nenhum motorista encontrado
+                Nenhum agente encontrado
               </h3>
               <p className="text-gray-600">
                 Não encontramos agentes para "
