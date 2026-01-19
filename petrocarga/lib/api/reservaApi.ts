@@ -227,16 +227,17 @@ export async function checkinReserva(reservaID: string) {
 
 export async function checkoutReserva(reservaID: string) {
   try {
-    const res = await clientApi(`/petrocarga/reservas/checkout/${reservaID}`, {
+    await clientApi(`/petrocarga/reservas/checkout/${reservaID}`, {
       method: 'PATCH',
     });
+
     toast.success('Checkout Realizado Com Sucesso!');
-    return res.json();
+    return { success: true };
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : 'Erro ao finalizar reserva.';
     toast.error(message);
-    throw new Error(message);
+    return { success: false, message };
   }
 }
 
