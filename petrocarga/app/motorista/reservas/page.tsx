@@ -7,6 +7,7 @@ import {
   getReservasPorUsuario,
   checkoutReserva,
 } from '@/lib/api/reservaApi';
+import { gerarDocumentoReserva } from '@/lib/api/gerarDocumentoReservaApi';
 import { Loader2, WifiOff } from 'lucide-react';
 import ReservaLista from '@/components/reserva/minhasReservas/ReservaLista';
 import { ReservaGet } from '@/lib/types/reserva';
@@ -54,23 +55,13 @@ export default function MinhasReservas() {
     };
   }, [user?.id]);
 
-  const handleGerarDocumento = (reserva: ReservaGet) => {
+  const handleGerarDocumento = async (reservaId: string) => {
     try {
-      const doc = new jsPDF();
-      doc.setFontSize(18);
-      doc.text('Documento da Reserva', 20, 20);
-      doc.setFontSize(12);
-      doc.text(`ID: ${reserva.id}`, 20, 40);
-      doc.text(
-        `Local: ${reserva.logradouro || ''}, ${reserva.bairro || ''}`,
-        20,
-        70,
-      );
-      doc.text(`Status: ${reserva.status}`, 20, 110);
-      doc.output('dataurlnewwindow');
+      await gerarDocumentoReserva(reservaId);
+      toast.success('Documento Gerado com sucesso!');
     } catch (err) {
       console.error('Erro ao gerar PDF:', err);
-      alert('Erro ao gerar o PDF.');
+      toast.error('Erro ao Gerar Documento!');
     }
   };
 

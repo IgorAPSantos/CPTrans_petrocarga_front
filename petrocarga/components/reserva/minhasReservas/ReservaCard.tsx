@@ -18,7 +18,7 @@ import ReservaCheckinModal from './ReservaCheckinModal/ReservaCheckinModal';
 
 interface ReservaCardProps {
   reserva: ReservaGet;
-  onGerarDocumento?: (reserva: ReservaGet) => void;
+  onGerarDocumento?: (reservaId: string) => void;
   onExcluir?: (reservaId: string) => void;
   onCheckout?: (reserva: ReservaGet) => void;
 }
@@ -98,7 +98,7 @@ export default function ReservaCard({
         currentReserva.status === 'CONCLUIDA' && 'border-b-blue-300',
         currentReserva.status === 'RESERVADA' && 'border-green-500',
         currentReserva.status === 'REMOVIDA' && 'border-red-500',
-        currentReserva.status === 'CANCELADA' && 'border-b-blue-200'
+        currentReserva.status === 'CANCELADA' && 'border-b-blue-200',
       )}
     >
       {/* Conteúdo principal */}
@@ -122,7 +122,7 @@ export default function ReservaCard({
               currentReserva.status === 'REMOVIDA' &&
                 'bg-gray-100 border-red-500',
               currentReserva.status === 'CANCELADA' &&
-                'bg-gray-100 border-b-blue-200'
+                'bg-gray-100 border-b-blue-200',
             )}
           >
             {currentReserva.status}
@@ -155,7 +155,7 @@ export default function ReservaCard({
           className={cn(
             'sm:hidden px-3 py-1 rounded-full text-xs font-semibold shadow-sm text-center',
             currentReserva.status === 'ATIVA' && 'bg-green-100 text-green-900',
-            currentReserva.status === 'CONCLUIDA' && 'bg-gray-100 text-red-800'
+            currentReserva.status === 'CONCLUIDA' && 'bg-gray-100 text-red-800',
           )}
         >
           {currentReserva.status}
@@ -163,10 +163,10 @@ export default function ReservaCard({
 
         {/* Botão Gerar Documento */}
         <button
-          onClick={() => onGerarDocumento?.(currentReserva)}
+          onClick={() => onGerarDocumento?.(currentReserva.id)}
           className={cn(
             buttonVariants({ variant: 'outline' }),
-            'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2'
+            'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2',
           )}
         >
           <FileText className="w-4 h-4" />
@@ -181,7 +181,7 @@ export default function ReservaCard({
               onClick={() => setModalAberto(true)}
               className={cn(
                 buttonVariants({ variant: 'outline' }),
-                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 text-red-600'
+                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 text-red-600',
               )}
             >
               <Trash2 className="w-4 h-4" />
@@ -195,7 +195,7 @@ export default function ReservaCard({
               onClick={() => setModalEditarAberto(true)}
               className={cn(
                 buttonVariants({ variant: 'outline' }),
-                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2'
+                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2',
               )}
             >
               <Pencil className="w-4 h-4" />
@@ -209,7 +209,7 @@ export default function ReservaCard({
               onClick={() => setModalCheckinAberto(true)}
               className={cn(
                 buttonVariants({ variant: 'default' }),
-                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 bg-green-600  hover:bg-green-700 transition disabled:opacity-60'
+                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2 bg-green-600  hover:bg-green-700 transition disabled:opacity-60',
               )}
             >
               <Check className="w-4 h-4" />
@@ -223,7 +223,7 @@ export default function ReservaCard({
               onClick={() => setModalAbertoCheckout(true)}
               className={cn(
                 buttonVariants({ variant: 'default' }),
-                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2  bg-red-600  hover:bg-red-700 transition disabled:opacity-60'
+                'text-sm w-full sm:w-auto text-center flex items-center justify-center gap-2 py-2  bg-red-600  hover:bg-red-700 transition disabled:opacity-60',
               )}
             >
               <CheckCheck className="w-4 h-4" />
