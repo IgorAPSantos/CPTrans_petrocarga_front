@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import Form from 'next/form';
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import {
   CircleAlert,
   UserIcon,
@@ -26,6 +26,43 @@ import Link from 'next/link';
 export default function CadastroAgentes() {
   const [state, action, pending] = useActionState(addAgente, null);
   const [exibirSenha, setExibirSenha] = useState(false);
+  const [email, setEmail] = useState('');
+  const [confirmarEmail, setConfirmarEmail] = useState('');
+  const [emailsIguais, setEmailsIguais] = useState(true);
+  const [emailValido, setEmailValido] = useState(true);
+
+  // Validação dos emails
+  useEffect(() => {
+    if (confirmarEmail === '') {
+      setEmailsIguais(true);
+    } else {
+      setEmailsIguais(email === confirmarEmail);
+    }
+  }, [email, confirmarEmail]);
+
+  // Validação do formato do email
+  useEffect(() => {
+    if (email === '') {
+      setEmailValido(true);
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      setEmailValido(emailRegex.test(email));
+    }
+  }, [email]);
+
+  // Função para lidar com o envio do formulário
+  const handleSubmit = async (formData: FormData) => {
+    if (!emailsIguais) {
+      return; // Impede o envio se os emails não forem iguais
+    }
+
+    if (!emailValido) {
+      return; // Impede o envio se o email não for válido
+    }
+
+    // Chama a action original
+    return await action(formData);
+  };
 
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
@@ -53,14 +90,15 @@ export default function CadastroAgentes() {
           </CardDescription>
         </CardHeader>
 
-        <Form action={action}>
+        <Form action={handleSubmit}>
           <CardContent className="p-4 md:p-6 lg:p-8">
             {(state?.error || state?.message) && (
               <div
-                className={`flex items-start gap-3 rounded-md border p-4 mb-6 ${state.error
+                className={`flex items-start gap-3 rounded-md border p-4 mb-6 ${
+                  state.error
                     ? 'border-red-200 bg-red-50 text-red-900'
                     : 'border-green-200 bg-green-50 text-green-900'
-                  }`}
+                }`}
               >
                 {state.error ? (
                   <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" />
@@ -68,6 +106,27 @@ export default function CadastroAgentes() {
                   <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 )}
                 <span className="text-sm md:text-base">{state.message}</span>
+              </div>
+            )}
+
+            {/* Mensagem de erro para emails diferentes */}
+            {!emailsIguais && (
+              <div className="flex items-start gap-3 rounded-md border border-red-200 bg-red-50 text-red-900 p-4 mb-6">
+                <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <span className="text-sm md:text-base">
+                  Os emails não coincidem. Por favor, verifique.
+                </span>
+              </div>
+            )}
+
+            {/* Mensagem de erro para email inválido */}
+            {!emailValido && email !== '' && (
+              <div className="flex items-start gap-3 rounded-md border border-red-200 bg-red-50 text-red-900 p-4 mb-6">
+                <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <span className="text-sm md:text-base">
+                  O formato do email é inválido. Use um email válido como
+                  "exemplo@dominio.com".
+                </span>
               </div>
             )}
 
@@ -92,13 +151,50 @@ export default function CadastroAgentes() {
             {/* Email */}
             <FormItem name="Email" description="Digite o email do agente.">
               <Input
-                className="rounded-sm border-gray-400 text-sm md:text-base"
+                className={`rounded-sm border-gray-400 text-sm md:text-base ${
+                  !emailValido && email !== ''
+                    ? 'border-red-500 focus:ring-red-500'
+                    : ''
+                }`}
                 type="email"
                 id="email"
                 name="email"
                 placeholder="agente@email.com"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
+              {!emailValido && email !== '' && (
+                <p className="text-red-500 text-xs mt-1">
+                  Digite um email válido
+                </p>
+              )}
+            </FormItem>
+
+            {/* Confirmar Email */}
+            <FormItem
+              name="Confirmar Email"
+              description="Digite novamente o email para confirmação."
+            >
+              <Input
+                className={`rounded-sm border-gray-400 text-sm md:text-base ${
+                  !emailsIguais && confirmarEmail !== ''
+                    ? 'border-red-500 focus:ring-red-500'
+                    : ''
+                }`}
+                type="email"
+                id="confirmarEmail"
+                name="confirmarEmail"
+                placeholder="agente@email.com"
+                required
+                value={confirmarEmail}
+                onChange={(e) => setConfirmarEmail(e.target.value)}
+              />
+              {!emailsIguais && confirmarEmail !== '' && (
+                <p className="text-red-500 text-xs mt-1">
+                  Os emails não coincidem
+                </p>
+              )}
             </FormItem>
 
             {/* CPF */}
@@ -117,7 +213,7 @@ export default function CadastroAgentes() {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    ''
+                    '',
                   );
                 }}
               />
@@ -139,7 +235,7 @@ export default function CadastroAgentes() {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    ''
+                    '',
                   );
                 }}
               />
@@ -163,7 +259,7 @@ export default function CadastroAgentes() {
           <CardFooter className="px-4 md:px-6 lg:px-8 pb-6 pt-2">
             <Button
               type="submit"
-              disabled={pending}
+              disabled={pending || !emailsIguais || !emailValido}
               className="w-full md:w-auto md:ml-auto rounded-sm px-6 md:px-10 py-2 md:py-2.5 text-sm md:text-base font-medium text-blue-800 bg-blue-200 hover:bg-blue-300 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {pending ? 'Salvando...' : 'Cadastrar'}

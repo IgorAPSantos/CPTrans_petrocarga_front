@@ -13,16 +13,43 @@ import { addMotorista } from '@/lib/api/motoristaApi';
 import { CircleAlert, Eye, EyeOff, UserIcon, CheckCircle } from 'lucide-react';
 import Form from 'next/form';
 import { useActionState } from 'react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import FormItem from '@/components/form/form-item';
 import SelecaoCustomizada from '@/components/gestor/selecaoItem/selecao-customizada';
 
 export default function CadastroUsuario() {
   const [state, addMotoristaAction, pending] = useActionState(
     addMotorista,
-    null
+    null,
   );
   const [exibirSenha, setExibirSenha] = useState(false);
+  const [exibirConfirmarSenha, setExibirConfirmarSenha] = useState(false);
+  const [senha, setSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+  const [senhasIguais, setSenhasIguais] = useState(true);
+
+  // Validação das senhas
+  useEffect(() => {
+    if (confirmarSenha === '') {
+      setSenhasIguais(true);
+    } else {
+      setSenhasIguais(senha === confirmarSenha);
+    }
+  }, [senha, confirmarSenha]);
+
+  // Função para lidar com o envio do formulário
+  const handleSubmit = async (formData: FormData) => {
+    if (!senhasIguais) {
+      // Impede o envio se as senhas não forem iguais
+      return;
+    }
+
+    // Adiciona a senha ao formData
+    formData.append('senha', senha);
+
+    // Chama a action
+    return await addMotoristaAction(formData);
+  };
 
   return (
     <main className="container mx-auto px-3 sm:px-4 py-4 md:py-8">
@@ -39,7 +66,7 @@ export default function CadastroUsuario() {
           </CardDescription>
         </CardHeader>
 
-        <Form action={addMotoristaAction}>
+        <Form action={handleSubmit}>
           <CardContent className="p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6">
             {/* Mensagem de erro ou sucesso */}
             {(state?.error || state?.message) && (
@@ -57,6 +84,16 @@ export default function CadastroUsuario() {
                 )}
                 <span className="text-xs sm:text-sm md:text-base">
                   {state.message}
+                </span>
+              </div>
+            )}
+
+            {/* Mensagem de erro para senhas diferentes */}
+            {!senhasIguais && (
+              <div className="flex items-start gap-2 sm:gap-3 rounded-md border border-red-200 bg-red-50 text-red-900 p-3 sm:p-4 mb-4 sm:mb-6">
+                <CircleAlert className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0 mt-0.5" />
+                <span className="text-xs sm:text-sm md:text-base">
+                  As senhas não coincidem. Por favor, verifique.
                 </span>
               </div>
             )}
@@ -212,34 +249,80 @@ export default function CadastroUsuario() {
                   </div>
 
                   {/* Senha */}
-                  <div className="md:col-span-2">
-                    <FormItem name="Senha" description="Digite sua senha">
-                      <div className="relative">
-                        <Input
-                          type={exibirSenha ? 'text' : 'password'}
-                          className="rounded-sm border-gray-400 text-sm sm:text-base pr-10"
-                          id="senha"
-                          name="senha"
-                          placeholder="••••••••"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setExibirSenha(!exibirSenha)}
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-                          aria-label={
-                            exibirSenha ? 'Ocultar senha' : 'Mostrar senha'
-                          }
-                        >
-                          {exibirSenha ? (
-                            <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
-                          ) : (
-                            <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
-                          )}
-                        </button>
-                      </div>
-                    </FormItem>
-                  </div>
+                  <FormItem name="Senha" description="Digite sua senha">
+                    <div className="relative">
+                      <Input
+                        type={exibirSenha ? 'text' : 'password'}
+                        className="rounded-sm border-gray-400 text-sm sm:text-base pr-10"
+                        id="senha"
+                        name="senha"
+                        placeholder="••••••••"
+                        required
+                        value={senha}
+                        onChange={(e) => setSenha(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setExibirSenha(!exibirSenha)}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        aria-label={
+                          exibirSenha ? 'Ocultar senha' : 'Mostrar senha'
+                        }
+                      >
+                        {exibirSenha ? (
+                          <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                        ) : (
+                          <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
+                        )}
+                      </button>
+                    </div>
+                  </FormItem>
+
+                  {/* Confirmar Senha */}
+                  <FormItem
+                    name="Confirmar Senha"
+                    description="Digite novamente sua senha"
+                  >
+                    <div className="relative">
+                      <Input
+                        type={exibirConfirmarSenha ? 'text' : 'password'}
+                        className={`rounded-sm border-gray-400 text-sm sm:text-base pr-10 ${
+                          !senhasIguais && confirmarSenha !== ''
+                            ? 'border-red-500 focus:ring-red-500'
+                            : ''
+                        }`}
+                        id="confirmarSenha"
+                        name="confirmarSenha"
+                        placeholder="••••••••"
+                        required
+                        value={confirmarSenha}
+                        onChange={(e) => setConfirmarSenha(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExibirConfirmarSenha(!exibirConfirmarSenha)
+                        }
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        aria-label={
+                          exibirConfirmarSenha
+                            ? 'Ocultar senha'
+                            : 'Mostrar senha'
+                        }
+                      >
+                        {exibirConfirmarSenha ? (
+                          <EyeOff className="w-4 h-4 sm:w-5 sm:h-5" />
+                        ) : (
+                          <Eye className="w-4 h-4 sm:w-5 sm:h-5" />
+                        )}
+                      </button>
+                    </div>
+                    {!senhasIguais && confirmarSenha !== '' && (
+                      <p className="text-red-500 text-xs mt-1">
+                        As senhas não coincidem
+                      </p>
+                    )}
+                  </FormItem>
                 </div>
               </div>
             </div>
@@ -249,7 +332,7 @@ export default function CadastroUsuario() {
           <CardFooter className="px-3 sm:px-4 md:px-6 lg:px-8 pb-4 sm:pb-6 pt-0">
             <Button
               type="submit"
-              disabled={pending}
+              disabled={pending || !senhasIguais}
               className="w-full rounded-sm px-4 sm:px-6 md:px-10 py-2 sm:py-2.5 text-sm sm:text-base font-medium text-blue-800 bg-blue-200 hover:bg-blue-300 focus:ring-4 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {pending ? 'Salvando...' : 'Salvar'}
