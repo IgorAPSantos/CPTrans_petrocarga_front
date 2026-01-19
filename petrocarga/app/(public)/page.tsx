@@ -4,8 +4,38 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/components/hooks/useAuth';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function Home() {
+  const { user, loading, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && isAuthenticated && user) {
+      // Redireciona conforme a permissão
+      switch (user.permissao) {
+        case 'ADMIN':
+        case 'GESTOR':
+          router.replace('/gestor/visualizar-vagas');
+          break;
+        case 'MOTORISTA':
+          router.replace('/motorista/reservar-vaga');
+          break;
+        case 'AGENTE':
+          router.replace('/agente/reserva-rapida');
+          break;
+      }
+    }
+  }, [loading, isAuthenticated, user, router]);
+
+  // Enquanto o /me está sendo carregado
+  if (loading) return null;
+
+  // Se já estiver logado, nem renderiza a Home (vai redirecionar)
+  if (isAuthenticated) return null;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       {/* Seção da Hero */}
