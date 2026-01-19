@@ -5,7 +5,7 @@ import { useAuth } from '@/components/hooks/useAuth';
 import {
   deleteReservaByID,
   getReservasPorUsuario,
-  atualizarReserva,
+  checkoutReserva,
 } from '@/lib/api/reservaApi';
 import { Loader2, WifiOff } from 'lucide-react';
 import ReservaLista from '@/components/reserva/minhasReservas/ReservaLista';
@@ -64,7 +64,7 @@ export default function MinhasReservas() {
       doc.text(
         `Local: ${reserva.logradouro || ''}, ${reserva.bairro || ''}`,
         20,
-        70
+        70,
       );
       doc.text(`Status: ${reserva.status}`, 20, 110);
       doc.output('dataurlnewwindow');
@@ -77,7 +77,7 @@ export default function MinhasReservas() {
   const handleExcluirReserva = async (reservaId: string) => {
     if (!navigator.onLine) {
       toast.error(
-        'Você está offline. A exclusão de reservas só é permitida com conexão à internet.'
+        'Você está offline. A exclusão de reservas só é permitida com conexão à internet.',
       );
       return;
     }
@@ -95,31 +95,19 @@ export default function MinhasReservas() {
   const handleCheckoutReserva = async (reserva: ReservaGet) => {
     if (!navigator.onLine) {
       toast.error(
-        'Você está offline. O checkout só é permitido com conexão à internet.'
+        'Você está offline. O checkout só é permitido com conexão à internet.',
       );
       return;
     }
 
     try {
-      const body = {
-        veiculoId: reserva.veiculoId,
-        cidadeOrigem: reserva.cidadeOrigem,
-        inicio: reserva.inicio,
-        fim: reserva.fim,
-        status: 'CONCLUIDA',
-      };
-
-      const response = await atualizarReserva(body, reserva.id, user!.id);
+      const response = await checkoutReserva(reserva.id);
 
       if (response.success) {
-        toast.success('Checkout realizado com sucesso!');
         fetchReservas();
-      } else {
-        toast.error(response.message);
       }
     } catch (err) {
       console.error('Erro no checkout:', err);
-      toast.error('Erro ao finalizar reserva.');
     }
   };
 
