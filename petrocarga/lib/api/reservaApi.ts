@@ -41,7 +41,7 @@ export async function finalizarForcado(reservaID: string) {
       `/petrocarga/reservas/${reservaID}/finalizar-forcado`,
       {
         method: 'POST',
-      }
+      },
     );
     return res.json();
   } catch (err: unknown) {
@@ -92,13 +92,13 @@ export async function getReservasBloqueios(
     | 'VUC'
     | 'CAMINHONETA'
     | 'CAMINHAO_MEDIO'
-    | 'CAMINHAO_LONGO'
+    | 'CAMINHAO_LONGO',
 ) {
   const queryParams = new URLSearchParams({ data, tipoVeiculo }).toString();
 
   try {
     const res = await clientApi(
-      `/petrocarga/reservas/bloqueios/${vagaId}?${queryParams}`
+      `/petrocarga/reservas/bloqueios/${vagaId}?${queryParams}`,
     );
     return res.json();
   } catch (err: unknown) {
@@ -167,7 +167,7 @@ export async function atualizarReserva(
     status: string;
   },
   reservaID: string,
-  usuarioId: string
+  usuarioId: string,
 ) {
   console.log('📤 Enviando JSON para API Java:', body);
 
@@ -179,7 +179,7 @@ export async function atualizarReserva(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-    }
+    },
   );
 
   if (!res.ok) {
@@ -215,7 +215,26 @@ export async function checkinReserva(reservaID: string) {
     return res.json();
   } catch (err: unknown) {
     const message =
-      err instanceof Error ? err.message : 'Erro ao finalizar reserva forçada.';
+      err instanceof Error ? err.message : 'Erro ao fazer checkin.';
+    toast.error(message);
+    throw new Error(message);
+  }
+}
+
+// ----------------------
+// CHECKOUT RESERVA
+// ----------------------
+
+export async function checkoutReserva(reservaID: string) {
+  try {
+    const res = await clientApi(`/petrocarga/reservas/checkout/${reservaID}`, {
+      method: 'PATCH',
+    });
+    toast.success('Checkout Realizado Com Sucesso!');
+    return res.json();
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao finalizar reserva.';
     toast.error(message);
     throw new Error(message);
   }
@@ -229,7 +248,7 @@ export async function checkinReserva(reservaID: string) {
 // POST RESERVA AGENTE
 // ----------------------
 export async function reservarVagaAgente(
-  formData: FormData
+  formData: FormData,
 ): Promise<ConfirmResult> {
   const body = {
     vagaId: formData.get('vagaId'),
@@ -258,7 +277,7 @@ export async function reservarVagaAgente(
 // GET RESERVAS
 // ----------------------
 export async function getReservasRapidas(
-  usuarioId: string
+  usuarioId: string,
 ): Promise<ReservaRapida[]> {
   try {
     const res = await clientApi(`/petrocarga/reserva-rapida/${usuarioId}`);
