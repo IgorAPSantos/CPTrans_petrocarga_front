@@ -100,6 +100,13 @@ export function Navbar() {
             </Link>
           </li>
 
+          {/* Denuncias */}
+          <li className="hover:text-gray-300">
+            <Link href="/gestor/denuncias" className="flex items-center gap-1">
+              Denuncias
+            </Link>
+          </li>
+
           {/* Reservas */}
           <li className="hover:text-gray-300">
             <Link href="/gestor/reservas" className="flex items-center gap-1">

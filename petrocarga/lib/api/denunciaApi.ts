@@ -61,3 +61,55 @@ export async function getDenunciasByUsuario(usuarioId: string) {
     throw new Error(message);
   }
 }
+
+// ----------------------
+// PATCH DENUNCIA INICIAR ANALISE
+// ----------------------
+
+export async function iniciarAnaliseDenuncia(denunciaId: string) {
+  try {
+    await clientApi(`/petrocarga/denuncias/iniciarAnalise/${denunciaId}`, {
+      method: 'PATCH',
+    });
+    toast.success('Análise Iniciada Com Sucesso!');
+    return { success: true };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao Iniciar Denúncia Reserva.';
+    toast.error(message);
+    return { success: false, message };
+  }
+}
+
+// ----------------------
+// PATCH DENUNCIA FINALIZAR ANALISE
+// ----------------------
+
+export async function finalizarAnaliseDenuncia(
+  denunciaId: string,
+  body: {
+    status: 'PROCEDENTE' | 'IMPROCEDENTE';
+    resposta: string;
+  },
+) {
+  try {
+    await clientApi(`/petrocarga/denuncias/finalizarAnalise/${denunciaId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    toast.success('Análise Finalizada com sucesso!');
+    return { success: true };
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error
+        ? err.message
+        : 'Erro ao finalizar análise da denúncia.';
+
+    toast.error(message);
+    return { success: false, message };
+  }
+}
