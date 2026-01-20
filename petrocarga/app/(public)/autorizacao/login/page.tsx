@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -13,38 +13,18 @@ import {
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/components/hooks/useAuth';
-import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [loadingLogin, setLoadingLogin] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const { login, user, loading, isAuthenticated } = useAuth();
-  const router = useRouter();
-
-  // Se já estiver logado, redireciona automaticamente
-  useEffect(() => {
-    if (!loading && isAuthenticated && user) {
-      switch (user.permissao) {
-        case 'ADMIN':
-        case 'GESTOR':
-          router.replace('/gestor/visualizar-vagas');
-          break;
-        case 'MOTORISTA':
-          router.replace('/motorista/reservar-vaga');
-          break;
-        case 'AGENTE':
-          router.replace('/agente/reserva-rapida');
-          break;
-      }
-    }
-  }, [loading, isAuthenticated, user, router]);
+  const { login } = useAuth();
 
   async function handleLogin() {
-    setLoadingLogin(true);
+    setLoading(true);
     setError('');
 
     try {
@@ -54,33 +34,34 @@ export default function LoginPage() {
       switch (decodedUser.permissao) {
         case 'ADMIN':
         case 'GESTOR':
-          router.replace('/gestor/visualizar-vagas');
+          window.location.href = '/gestor/visualizar-vagas';
           break;
         case 'MOTORISTA':
-          router.replace('/motorista/reservar-vaga');
+          window.location.href = '/motorista/reservar-vaga';
           break;
         case 'AGENTE':
-          router.replace('/agente/reserva-rapida');
+          window.location.href = '/agente/reserva-rapida';
           break;
         default:
           setError('Permissão desconhecida');
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
       setError('Email ou senha incorretos');
     } finally {
-      setLoadingLogin(false);
+      setLoading(false);
     }
   }
 
-  //  Enquanto valida a sessão pelo /me
-  if (loading) return null;
-
-  // Se já estiver logado, não renderiza a tela
-  if (isAuthenticated) return null;
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100">
+      {/* Background decorativo */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob-delayed"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-pink-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob-more-delayed"></div>
+      </div>
+
       <Card className="w-full max-w-md relative z-10 shadow-2xl backdrop-blur-sm bg-white/90 border-0">
         <CardHeader className="space-y-3 text-center pb-6">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -120,8 +101,8 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="seu@email.com"
-                  className="pl-10 h-12"
-                  disabled={loadingLogin}
+                  className="pl-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -137,14 +118,14 @@ export default function LoginPage() {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-10 pr-10 h-12"
-                  disabled={loadingLogin}
+                  className="pl-10 pr-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
+                  disabled={loading}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                  disabled={loadingLogin}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  disabled={loading}
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" />
@@ -158,7 +139,7 @@ export default function LoginPage() {
             <div className="flex items-center justify-end">
               <Link
                 href="/autorizacao/verificacao"
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
               >
                 Esqueceu sua senha?
               </Link>
@@ -166,12 +147,50 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              disabled={loadingLogin || !email || !senha}
-              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={loading || !email || !senha}
+              className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70"
             >
-              {loadingLogin ? 'Entrando...' : 'Entrar'}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Entrando...</span>
+                </div>
+              ) : (
+                'Entrar'
+              )}
             </Button>
           </form>
+
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center">
+              <div className="flex-1 border-t border-gray-300"></div>
+              <span className="px-4 text-sm text-gray-500">ou</span>
+              <div className="flex-1 border-t border-gray-300"></div>
+            </div>
+
+            <Link href="/autorizacao/cadastro">
+              <Button className="w-full h-12 bg-gradient-to-r from-blue-800 to-blue-900 hover:from-blue-900 hover:to-blue-950 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200">
+                Criar Conta
+              </Button>
+            </Link>
+          </div>
+
+          <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+            <p className="font-semibold text-blue-900 mb-2">
+              💡 Credenciais de teste:
+            </p>
+            <div className="space-y-1 text-blue-700">
+              <p>
+                <strong>Gestor:</strong> gestor@teste.com / 123456
+              </p>
+              <p>
+                <strong>Motorista:</strong> motorista@teste.com / 123456
+              </p>
+              <p>
+                <strong>Agente:</strong> agente@teste.com / 123456
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
