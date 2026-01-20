@@ -140,31 +140,28 @@ export async function deleteReservaByID(reservaId: string, usuarioId: string) {
 }
 
 // ----------------------
-// DOCUMENTO RESERVA
-// ----------------------
-export async function getDocumentoReserva(reservaID: string) {
-  try {
-    const res = await clientApi(`/petrocarga/documentos/reservas/${reservaID}`);
-    return res.json();
-  } catch (err: unknown) {
-    const message =
-      err instanceof Error
-        ? err.message
-        : 'Erro ao buscar documento da reserva.';
-    throw new Error(message);
-  }
-}
-
-// ----------------------
-// DOCUMENTO RESERVA ID
+// DOCUMENTO RESERVA ID PDF
 // ----------------------
 
 export async function getGerarComprovanteReserva(reservaID: string) {
   try {
     const res = await clientApi(
-      `/petrocarga/reservas/${reservaID}/comprovante`,
+      `/petrocarga/documentos/reservas/${reservaID}/comprovante`,
     );
-    return res.json();
+
+    if (!res.ok) {
+      throw new Error('Erro ao gerar comprovante da reserva.');
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `comprovante-${reservaID}.pdf`;
+    a.click();
+
+    window.URL.revokeObjectURL(url);
   } catch (err: unknown) {
     const message =
       err instanceof Error
