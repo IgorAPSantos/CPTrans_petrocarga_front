@@ -7,11 +7,10 @@ import {
   getReservasPorUsuario,
   checkoutReserva,
 } from '@/lib/api/reservaApi';
-import { gerarDocumentoReserva } from '@/lib/api/gerarDocumentoReservaApi';
+import { getGerarComprovanteReserva } from '@/lib/api/reservaApi';
 import { Loader2, WifiOff } from 'lucide-react';
 import ReservaLista from '@/components/reserva/minhasReservas/ReservaLista';
 import { ReservaGet } from '@/lib/types/reserva';
-import jsPDF from 'jspdf';
 import toast from 'react-hot-toast';
 
 export default function MinhasReservas() {
@@ -57,11 +56,11 @@ export default function MinhasReservas() {
 
   const handleGerarDocumento = async (reservaId: string) => {
     try {
-      await gerarDocumentoReserva(reservaId);
-      toast.success('Documento Gerado com sucesso!');
+      await getGerarComprovanteReserva(reservaId);
+      toast.success('Comprovante Gerado com sucesso!');
     } catch (err) {
-      console.error('Erro ao gerar PDF:', err);
-      toast.error('Erro ao Gerar Documento!');
+      console.error('Erro ao gerar comprovante:', err);
+      toast.error('Erro ao Gerar Comprovante!');
     }
   };
 
