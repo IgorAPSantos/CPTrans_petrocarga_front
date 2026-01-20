@@ -75,7 +75,7 @@ export function Navbar() {
                     className="flex items-center gap-2 cursor-pointer w-full"
                   >
                     <TriangleAlert className="h-4 w-4" />
-                    Minhas Denuncias
+                    Minhas Denúncias
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -211,6 +211,28 @@ export function Navbar() {
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
+            </Link>
+          </li>
+
+          {/* Minhas Reservas no Mobile */}
+          <li className="hover:bg-blue-700 rounded">
+            <Link
+              href="/motorista/reservas"
+              onClick={() => setMenuAberto(false)}
+              className="block px-2 py-1 w-full"
+            >
+              Minhas Reservas
+            </Link>
+          </li>
+
+          {/* Minhas Denuncias no Mobile */}
+          <li className="hover:bg-blue-700 rounded">
+            <Link
+              href="/motorista/reservas/minhas-denuncias"
+              onClick={() => setMenuAberto(false)}
+              className="block px-2 py-1 w-full"
+            >
+              Minhas Denúncias
             </Link>
           </li>
 
