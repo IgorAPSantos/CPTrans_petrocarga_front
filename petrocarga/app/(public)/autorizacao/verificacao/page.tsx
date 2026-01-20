@@ -1,8 +1,17 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
-import { solicitarRecuperacaoSenha } from '@/lib/api/recuperacaoApi';
+import {
+  Mail,
+  ArrowLeft,
+  CheckCircle2,
+  AlertCircle,
+  RefreshCw,
+} from 'lucide-react';
+import {
+  solicitarRecuperacaoSenha,
+  reenviarEmailRecuperacao,
+} from '@/lib/api/recuperacaoApi';
 import { validateEmail } from '@/lib/utils';
 
 type StatusType = 'success' | 'error' | null;
@@ -15,6 +24,7 @@ export default function RecuperacaoSenha() {
   const [mensagem, setMensagem] = useState('');
   const [mostrarModal, setMostrarModal] = useState(false);
   const [emailEnviado, setEmailEnviado] = useState(false);
+  const [estaReenviando, setEstaReenviando] = useState(false);
 
   // Validações
   const emailValido = useCallback((email: string): boolean => {
@@ -27,7 +37,7 @@ export default function RecuperacaoSenha() {
     return null;
   };
 
-  // Função principal
+  // Função para enviar email de recuperação - VERSÃO CORRIGIDA
   const enviarEmailRecuperacao = async () => {
     const erroValidacao = validarFormulario();
     if (erroValidacao) {
@@ -50,7 +60,14 @@ export default function RecuperacaoSenha() {
       setEmailEnviado(true);
     } catch (erro: any) {
       setStatus('error');
-      setMensagem(erro.message || 'Erro ao enviar email de recuperação.');
+      // Mensagem mais específica para erros JSON
+      if (erro.message.includes('Unexpected end of JSON')) {
+        setMensagem(
+          'Erro no formato da resposta do servidor. Tente novamente.',
+        );
+      } else {
+        setMensagem(erro.message || 'Erro ao enviar email de recuperação.');
+      }
       console.error('Erro ao recuperar senha:', erro);
     } finally {
       setEstaCarregando(false);
@@ -73,6 +90,7 @@ export default function RecuperacaoSenha() {
     setEmailEnviado(false);
     setStatus(null);
     setMensagem('');
+    setMostrarModal(false);
   };
 
   const fecharModal = () => {
@@ -98,12 +116,34 @@ export default function RecuperacaoSenha() {
                 Um email foi enviado para o seu endereço de email para redefinir
                 sua senha.
               </p>
-              <button
-                onClick={fecharModal}
-                className="w-full bg-indigo-600 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-indigo-700 transition"
-              >
-                Voltar para o login
-              </button>
+
+              {/* Status de reenvio */}
+              {status && (
+                <div
+                  className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg flex items-start gap-2 sm:gap-3 border ${
+                    status === 'success'
+                      ? 'bg-green-50 border-green-200 text-green-800'
+                      : 'bg-red-50 border-red-200 text-red-800'
+                  }`}
+                >
+                  {status === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" />
+                  )}
+                  <p className="text-xs sm:text-sm">{mensagem}</p>
+                </div>
+              )}
+
+              <div className="space-y-4 sm:space-y-6">
+                {/* Botão Voltar para Login */}
+                <button
+                  onClick={fecharModal}
+                  className="w-full bg-gray-100 text-gray-700 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-gray-200 transition"
+                >
+                  Voltar para o login
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -124,7 +164,7 @@ export default function RecuperacaoSenha() {
             </p>
           </div>
 
-          {/* Mensagem de Status */}
+          {/* Mensagem de Status (fora do modal) */}
           {status && !mostrarModal && (
             <div
               className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg flex items-start gap-2 sm:gap-3 border ${
