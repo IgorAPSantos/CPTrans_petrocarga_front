@@ -148,6 +148,14 @@ export function useMapbox({
       geocoder.on('result', (e: GeocoderResultEvent) => {
         const [lng, lat] = e.result.geometry.coordinates;
 
+        const input = document.querySelector(
+          '.mapboxgl-ctrl-geocoder input',
+        ) as HTMLInputElement;
+
+        if (input) {
+          input.blur();
+        }
+
         onSelectPlace?.({
           id: e.result.id,
           place_name: e.result.place_name,
