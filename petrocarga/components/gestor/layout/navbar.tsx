@@ -21,6 +21,7 @@ import {
   Users,
   UserCircle,
   BookOpen,
+  TriangleAlert,
 } from 'lucide-react';
 
 export function Navbar() {
@@ -276,40 +277,25 @@ export function Navbar() {
             </div>
           </li>
 
-          {/* Disponibilidade */}
-          <li className="hover:bg-blue-700 rounded">
-            <Link
-              href="/gestor/disponibilidade-vagas"
-              onClick={() => setMenuAberto(false)}
-              className="block px-2 py-1 w-full flex items-center gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              Disponibilidade
-            </Link>
-          </li>
-
-          {/* Reservas */}
-          <li className="hover:bg-blue-700 rounded">
-            <Link
-              href="/gestor/reservas"
-              onClick={() => setMenuAberto(false)}
-              className="block px-2 py-1 w-full flex items-center gap-2"
-            >
-              <Calendar className="h-4 w-4" />
-              Reservas
-            </Link>
-          </li>
-
-          {/* Notificações */}
-          <li className="hover:bg-blue-700 rounded">
-            <Link
-              href="/gestor/enviar-notificacoes"
-              onClick={() => setMenuAberto(false)}
-              className="block px-2 py-1 w-full flex items-center gap-2"
-            >
-              <Bell className="h-4 w-4" />
-              Notificações
-            </Link>
+          {/* Calendario Submenu */}
+          <li>
+            <div className="text-white font-medium px-2 py-1">Calendário</div>
+            <div className="pl-4 space-y-2">
+              <Link
+                href="/gestor/disponibilidade-vagas"
+                onClick={() => setMenuAberto(false)}
+                className="block text-gray-200 hover:text-white"
+              >
+                Disponibilidade
+              </Link>
+              <Link
+                href="/gestor/reservas"
+                onClick={() => setMenuAberto(false)}
+                className="block text-gray-200 hover:text-white"
+              >
+                Reservas
+              </Link>
+            </div>
           </li>
 
           {/* Motoristas Submenu */}
@@ -329,6 +315,20 @@ export function Navbar() {
                 className="block text-gray-200 hover:text-white"
               >
                 Adicionar Motorista
+              </Link>
+              <Link
+                href="/gestor/denuncias"
+                onClick={() => setMenuAberto(false)}
+                className="block text-gray-200 hover:text-white"
+              >
+                Denúncias
+              </Link>
+              <Link
+                href="/gestor/enviar-notificacoes"
+                onClick={() => setMenuAberto(false)}
+                className="block text-gray-200 hover:text-white"
+              >
+                Notificações
               </Link>
             </div>
           </li>
