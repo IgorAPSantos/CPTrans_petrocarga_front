@@ -36,14 +36,37 @@ export function Navbar() {
 
   return (
     <header className="bg-blue-800 text-white relative">
-      <nav className="flex items-center justify-between p-4 max-w-6xl mx-auto">
-        {/* Logo */}
+      <nav className="grid grid-cols-3 items-center p-4 max-w-6xl mx-auto md:flex md:justify-between">
+        {/* SINO - MOBILE */}
+        <Link
+          href="/motorista/notificacoes"
+          className="md:hidden flex items-center justify-start"
+        >
+          <div className="relative w-8 h-8 flex items-center justify-center">
+            <Bell className="h-6 w-6" />
+
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center ">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </div>
+        </Link>
+
+        {/* LOGO */}
         <Link
           href="/motorista/reservar-vaga"
-          className="flex items-center space-x-2 text-xl font-bold hover:text-gray-300"
+          className="flex justify-center md:justify-start"
         >
           <Image src={Logo} alt="Logo da Cptrans" className="w-16 h-auto" />
         </Link>
+        {/* BOTÃO MENU - MOBILE */}
+        <button
+          className="md:hidden text-2xl hover:text-gray-300 flex justify-end"
+          onClick={() => setMenuAberto(!menuAberto)}
+        >
+          ☰
+        </button>
 
         {/* MENU DESKTOP */}
         <ul className="hidden md:flex gap-6 text-lg items-center">
@@ -164,16 +187,6 @@ export function Navbar() {
             </Link>
           </li>
         </ul>
-
-        {/* BOTÃO HAMBURGUER (mobile) */}
-        <button
-          className="md:hidden text-2xl hover:text-gray-300"
-          onClick={() => setMenuAberto(!menuAberto)}
-          aria-expanded={menuAberto}
-          aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
-        >
-          ☰
-        </button>
       </nav>
 
       {/* MENU MOBILE COM ANIMAÇÃO */}
@@ -194,25 +207,6 @@ export function Navbar() {
               </Link>
             </li>
           ))}
-
-          {/* NOTIFICAÇÕES - MOBILE */}
-          <li className="hover:bg-blue-700 rounded">
-            <Link
-              href="/motorista/notificacoes"
-              onClick={() => setMenuAberto(false)}
-              className="flex items-center justify-between px-2 py-1 w-full"
-            >
-              <span className="flex items-center gap-2">
-                <Bell className="h-4 w-4" />
-                Notificações
-              </span>
-              {unreadCount > 0 && (
-                <span className="bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
-              )}
-            </Link>
-          </li>
 
           {/* Minhas Reservas no Mobile */}
           <li className="hover:bg-blue-700 rounded">
