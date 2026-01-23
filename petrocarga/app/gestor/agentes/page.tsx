@@ -3,16 +3,29 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
 import { getAgentes } from '@/lib/api/agenteApi';
-import { Loader2, Search, X } from 'lucide-react';
+import {
+  Loader2,
+  Search,
+  X,
+  Users,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from 'lucide-react';
 import { Agente } from '@/lib/types/agente';
 import AgenteCard from '@/components/gestor/cards/agentes-card';
 
+const ITENS_POR_PAGINA = 9;
+
 export default function AgentesPage() {
   const { user } = useAuth();
-  const [Agentes, setAgentes] = useState<Agente[]>([]);
+  const [agentes, setAgentes] = useState<Agente[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
+  const [paginaAtual, setPaginaAtual] = useState(1);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -38,144 +51,423 @@ export default function AgentesPage() {
   }, [user?.id]);
 
   const agentesFiltrados = useMemo(() => {
-    if (!busca.trim()) return Agentes;
+    if (!busca.trim()) return agentes;
 
     const termoBusca = busca.toLowerCase().trim();
-    return Agentes.filter(
+    return agentes.filter(
       (agente) =>
         agente.usuario.nome.toLowerCase().includes(termoBusca) ||
         agente.usuario.email.toLowerCase().includes(termoBusca) ||
+        agente.matricula.toLowerCase().includes(termoBusca) ||
+        (agente.usuario.telefone &&
+          agente.usuario.telefone.includes(termoBusca)) ||
         false,
     );
-  }, [Agentes, busca]);
+  }, [agentes, busca]);
+
+  // Cálculos de paginação
+  const totalPaginas = Math.ceil(agentesFiltrados.length / ITENS_POR_PAGINA);
+
+  const agentesPaginados = useMemo(() => {
+    const inicio = (paginaAtual - 1) * ITENS_POR_PAGINA;
+    const fim = inicio + ITENS_POR_PAGINA;
+    return agentesFiltrados.slice(inicio, fim);
+  }, [agentesFiltrados, paginaAtual]);
+
+  // Resetar para página 1 quando buscar
+  useEffect(() => {
+    setPaginaAtual(1);
+  }, [busca]);
+
+  const irParaPagina = (pagina: number) => {
+    setPaginaAtual(Math.max(1, Math.min(pagina, totalPaginas)));
+  };
+
+  const irParaPrimeiraPagina = () => irParaPagina(1);
+  const irParaUltimaPagina = () => irParaPagina(totalPaginas);
+  const irParaPaginaAnterior = () => irParaPagina(paginaAtual - 1);
+  const irParaProximaPagina = () => irParaPagina(paginaAtual + 1);
 
   if (loading) {
     return (
-      <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
-        <Loader2 className="animate-spin w-6 h-6 text-gray-500" />
-        <span className="text-gray-600">
-          Carregando informação dos agentes...
-        </span>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col items-center justify-center p-4">
+        <div className="text-center max-w-sm w-full">
+          <div className="relative mb-6">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center">
+              <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 text-blue-600 animate-spin" />
+            </div>
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-white rounded-full border-4 border-gray-50 flex items-center justify-center">
+                <Users className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
+              </div>
+            </div>
+          </div>
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-800 mb-2">
+            Carregando agentes
+          </h3>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Buscando informações dos agentes...
+          </p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 flex items-center justify-center text-red-600 min-h-[60vh] text-center">
-        {error}
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 sm:p-8 text-center">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+              <Users className="w-8 h-8 sm:w-10 sm:h-10 text-red-600" />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-3">
+              Erro ao carregar agentes
+            </h2>
+            <p className="text-gray-600 mb-6 text-sm sm:text-base">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="inline-flex items-center justify-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium text-sm sm:text-base"
+            >
+              Tentar novamente
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 flex flex-col items-center w-full min-h-screen bg-gray-50">
-      <div className="w-full max-w-2xl mb-6">
-        <h1 className="text-2xl font-bold mb-2 text-center">
-          Agentes Cadastrados
-        </h1>
-        <p className="text-gray-600 text-center mb-6">
-          Gerencie e visualize todos os agentes do sistema
-        </p>
-
-        {/* Campo de busca */}
-        <div className="relative mb-6">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-gray-400" />
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Cabeçalho */}
+        <div className="mb-6 sm:mb-8 lg:mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+                Agentes Cadastrados
+              </h1>
+              <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
+                Gerencie e visualize todos os agentes do sistema
+              </p>
+            </div>
           </div>
-          <input
-            type="text"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            placeholder="Buscar agente por nome ou email..."
-            className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-          />
-          {busca && (
-            <button
-              onClick={() => setBusca('')}
-              className="absolute inset-y-0 right-0 pr-3 flex items-center hover:bg-gray-100 rounded-r-lg p-1"
-              title="Limpar busca"
-            >
-              <X className="h-4 w-4 text-gray-400 hover:text-gray-600" />
-            </button>
-          )}
-        </div>
 
-        {/* Estatísticas e contador */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
-          <div className="text-sm text-gray-600">
-            {busca ? (
-              <>
-                <span className="font-medium">{agentesFiltrados.length}</span>{' '}
-                agente(s) encontrado(s) para "
-                <span className="font-medium text-blue-600">{busca}</span>"
-              </>
-            ) : (
-              <>
-                Total de <span className="font-medium">{Agentes.length}</span>{' '}
-                agente(s)
-              </>
+          {/* Barra de busca e filtros */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 sm:p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              {/* Barra de busca */}
+              <div className="flex-1">
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="text"
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                    placeholder="Buscar por nome, email, matrícula ou telefone..."
+                    className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-sm sm:text-base"
+                  />
+                  {busca && (
+                    <button
+                      onClick={() => setBusca('')}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center hover:bg-gray-100 rounded-r-lg p-1 transition-colors"
+                      title="Limpar busca"
+                    >
+                      <X className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400 hover:text-gray-600" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Estatísticas */}
+              <div className="flex items-center gap-3">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg">
+                  <Users className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-800">
+                    {agentes.length} agentes
+                  </span>
+                </div>
+                {busca && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg">
+                    <Filter className="h-4 w-4 text-gray-600" />
+                    <span className="text-sm font-medium text-gray-700">
+                      {agentesFiltrados.length} resultado(s)
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Informação da busca */}
+            {busca && (
+              <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="text-sm text-gray-600">
+                  Resultados para "
+                  <span className="font-medium text-blue-600">{busca}</span>"
+                </div>
+                {agentesFiltrados.length === 0 ? (
+                  <button
+                    onClick={() => setBusca('')}
+                    className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
+                  >
+                    Limpar busca
+                  </button>
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    Mostrando {agentesFiltrados.length} de {agentes.length}{' '}
+                    agentes
+                  </div>
+                )}
+              </div>
             )}
           </div>
+        </div>
 
-          {busca && agentesFiltrados.length === 0 && (
-            <button
-              onClick={() => setBusca('')}
-              className="text-sm text-blue-600 hover:text-blue-800 hover:underline"
-            >
-              Limpar busca e ver todos
-            </button>
+        {/* Conteúdo principal */}
+        <div className="space-y-4 sm:space-y-6">
+          {/* Estado vazio */}
+          {agentesFiltrados.length === 0 ? (
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 sm:p-12 text-center">
+              {busca ? (
+                <div className="max-w-md mx-auto">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                    <Search className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+                    Nenhum agente encontrado
+                  </h3>
+                  <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                    Não encontramos agentes para "
+                    <span className="font-medium">{busca}</span>". Tente buscar
+                    por nome, email, matrícula ou telefone.
+                  </p>
+                  <button
+                    onClick={() => setBusca('')}
+                    className="px-4 sm:px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm sm:text-base"
+                  >
+                    Ver todos os agentes
+                  </button>
+                </div>
+              ) : (
+                <div className="max-w-md mx-auto">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                    <Users className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+                    Nenhum agente cadastrado
+                  </h3>
+                  <p className="text-gray-600 mb-6 text-sm sm:text-base">
+                    Não há agentes cadastrados no sistema no momento.
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Informações de paginação no topo */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                <div className="text-sm text-gray-600">
+                  Mostrando{' '}
+                  <span className="font-medium text-blue-600">
+                    {Math.min(
+                      (paginaAtual - 1) * ITENS_POR_PAGINA + 1,
+                      agentesFiltrados.length,
+                    )}{' '}
+                    -{' '}
+                    {Math.min(
+                      paginaAtual * ITENS_POR_PAGINA,
+                      agentesFiltrados.length,
+                    )}
+                  </span>{' '}
+                  de{' '}
+                  <span className="font-medium">{agentesFiltrados.length}</span>{' '}
+                  agente(s)
+                  {busca && ' encontrados'}
+                </div>
+
+                {totalPaginas > 1 && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600 hidden sm:inline">
+                      Página {paginaAtual} de {totalPaginas}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={irParaPrimeiraPagina}
+                        disabled={paginaAtual === 1}
+                        className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        title="Primeira página"
+                      >
+                        <ChevronsLeft className="h-4 w-4 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={irParaPaginaAnterior}
+                        disabled={paginaAtual === 1}
+                        className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        title="Página anterior"
+                      >
+                        <ChevronLeft className="h-4 w-4 text-gray-600" />
+                      </button>
+
+                      {/* Números das páginas */}
+                      <div className="flex items-center gap-1">
+                        {[...Array(totalPaginas)].map((_, i) => {
+                          const paginaNumero = i + 1;
+                          // Mostrar apenas algumas páginas ao redor da atual
+                          if (
+                            paginaNumero === 1 ||
+                            paginaNumero === totalPaginas ||
+                            (paginaNumero >= paginaAtual - 1 &&
+                              paginaNumero <= paginaAtual + 1)
+                          ) {
+                            return (
+                              <button
+                                key={paginaNumero}
+                                onClick={() => irParaPagina(paginaNumero)}
+                                className={`min-w-8 h-8 flex items-center justify-center px-2 rounded-lg text-sm font-medium transition-colors ${
+                                  paginaAtual === paginaNumero
+                                    ? 'bg-blue-600 text-white'
+                                    : 'border border-gray-300 text-gray-700 hover:bg-gray-50'
+                                }`}
+                              >
+                                {paginaNumero}
+                              </button>
+                            );
+                          } else if (
+                            paginaNumero === paginaAtual - 2 ||
+                            paginaNumero === paginaAtual + 2
+                          ) {
+                            return (
+                              <span
+                                key={paginaNumero}
+                                className="px-1 text-gray-400"
+                              >
+                                ...
+                              </span>
+                            );
+                          }
+                          return null;
+                        })}
+                      </div>
+
+                      <button
+                        onClick={irParaProximaPagina}
+                        disabled={paginaAtual === totalPaginas}
+                        className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        title="Próxima página"
+                      >
+                        <ChevronRight className="h-4 w-4 text-gray-600" />
+                      </button>
+                      <button
+                        onClick={irParaUltimaPagina}
+                        disabled={paginaAtual === totalPaginas}
+                        className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        title="Última página"
+                      >
+                        <ChevronsRight className="h-4 w-4 text-gray-600" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Grid de agentes */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {agentesPaginados.map((agente) => (
+                  <div key={agente.usuario.id} className="h-full">
+                    <AgenteCard agente={agente} />
+                  </div>
+                ))}
+              </div>
+
+              {/* Paginação na parte inferior */}
+              {totalPaginas > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                  <div className="text-sm text-gray-600">
+                    Mostrando {agentesPaginados.length} agente(s) nesta página
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={irParaPrimeiraPagina}
+                      disabled={paginaAtual === 1}
+                      className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronsLeft className="h-4 w-4" />
+                      <span className="hidden sm:inline">Primeira</span>
+                    </button>
+                    <button
+                      onClick={irParaPaginaAnterior}
+                      disabled={paginaAtual === 1}
+                      className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      <span className="hidden sm:inline">Anterior</span>
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm text-gray-700 px-2">
+                        Página{' '}
+                        <select
+                          value={paginaAtual}
+                          onChange={(e) => irParaPagina(Number(e.target.value))}
+                          className="ml-1 px-2 py-1 border border-gray-300 rounded-lg bg-white text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          {[...Array(totalPaginas)].map((_, i) => (
+                            <option key={i + 1} value={i + 1}>
+                              {i + 1}
+                            </option>
+                          ))}
+                        </select>{' '}
+                        de {totalPaginas}
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={irParaProximaPagina}
+                      disabled={paginaAtual === totalPaginas}
+                      className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <span className="hidden sm:inline">Próxima</span>
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={irParaUltimaPagina}
+                      disabled={paginaAtual === totalPaginas}
+                      className="inline-flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      <span className="hidden sm:inline">Última</span>
+                      <ChevronsRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Dica de busca */}
+              {agentes.length > 9 && !busca && (
+                <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-blue-50 border border-blue-200 rounded-xl">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-blue-900 text-sm sm:text-base mb-1">
+                        Use a busca para filtrar resultados
+                      </h4>
+                      <p className="text-blue-700 text-xs sm:text-sm">
+                        Encontre agentes específicos rapidamente buscando por
+                        nome, email, matrícula ou telefone. A paginação divide
+                        automaticamente os resultados.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
-
-      {agentesFiltrados.length === 0 ? (
-        <div className="text-center py-8">
-          {busca ? (
-            <>
-              <div className="mb-4">
-                <Search className="h-12 w-12 text-gray-300 mx-auto" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Nenhum agente encontrado
-              </h3>
-              <p className="text-gray-600">
-                Não encontramos agentes para "
-                <span className="font-medium">{busca}</span>"
-              </p>
-              <button
-                onClick={() => setBusca('')}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Ver todos os agentes
-              </button>
-            </>
-          ) : (
-            <p className="text-gray-500 text-center">
-              Nenhum agente cadastrado no momento.
-            </p>
-          )}
-        </div>
-      ) : (
-        <div className="grid gap-4 w-full max-w-2xl">
-          {agentesFiltrados.map((agente) => (
-            <AgenteCard key={agente.usuario.id} agente={agente} />
-          ))}
-        </div>
-      )}
-
-      {/* Dica de busca quando há muitos agentes */}
-      {Agentes.length > 10 && !busca && (
-        <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg max-w-2xl w-full">
-          <p className="text-sm text-blue-800 flex items-center gap-2">
-            <Search className="h-4 w-4" />
-            <span>
-              <strong>Dica:</strong> Use a busca acima para encontrar agentes
-              específicos por nome ou email.
-            </span>
-          </p>
-        </div>
-      )}
     </div>
   );
 }
