@@ -5,7 +5,6 @@ import { Notification } from '@/lib/types/notificacao';
 import {
   Bell,
   BellOff,
-  CheckCheck,
   Check,
   X,
   Wifi,
@@ -13,6 +12,7 @@ import {
   RefreshCw,
   Trash2,
   CheckCircle,
+  Menu,
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -26,15 +26,15 @@ export default function NotificacoesPage() {
     error,
     removeNotification,
     markAsRead,
-    markSelectedAsRead, // 🆕
-    deleteSelectedNotifications, // 🆕
+    markSelectedAsRead,
+    deleteSelectedNotifications,
     reconnect,
   } = useNotifications();
 
-  // 🔴 Estados para seleção múltipla
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showMarkReadModal, setShowMarkReadModal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const formatarTempo = useCallback((timestamp: string) => {
     try {
@@ -81,10 +81,8 @@ export default function NotificacoesPage() {
     }
   }, []);
 
-  // 🔴 CONTADOR DE NÃO LIDAS
   const unreadCount = notifications.filter((n) => !n.lida).length;
 
-  // 🔴 FUNÇÕES DE SELEÇÃO
   const toggleSelectAll = () => {
     if (selectedIds.length === notifications.length) {
       setSelectedIds([]);
@@ -95,7 +93,7 @@ export default function NotificacoesPage() {
 
   const toggleSelectNotification = (id: string) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   };
 
@@ -119,11 +117,9 @@ export default function NotificacoesPage() {
     }
   };
 
-  // 🔴 Verifica se todas estão selecionadas
   const allSelected =
     selectedIds.length === notifications.length && notifications.length > 0;
 
-  // 🔴 MODAL DE CONFIRMAÇÃO
   const ConfirmModal = ({
     isOpen,
     onClose,
@@ -149,16 +145,16 @@ export default function NotificacoesPage() {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
           <p className="text-gray-600 mb-6">{message}</p>
 
-          <div className="flex justify-end gap-3">
+          <div className="flex flex-col sm:flex-row justify-end gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors order-2 sm:order-1"
             >
               Cancelar
             </button>
             <button
               onClick={onConfirm}
-              className={`px-4 py-2 text-white ${confirmColor} rounded-lg transition-colors`}
+              className={`px-4 py-2 text-white ${confirmColor} rounded-lg transition-colors order-1 sm:order-2`}
             >
               {confirmText}
             </button>
@@ -169,33 +165,45 @@ export default function NotificacoesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 py-8 px-4">
+    <div className="min-h-screen bg-gray-100 py-4 sm:py-8 px-3 sm:px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Bell className="h-8 w-8 text-blue-800" />
-              <div>
-                <h1 className="text-2xl font-bold text-gray-800">
-                  Notificações
-                </h1>
-                <p className="text-sm text-gray-600">
-                  {notifications.length} total
-                  {notifications.length !== 1 ? 's' : ''}
-                  {unreadCount > 0 && (
-                    <span className="ml-2 text-red-600 font-semibold">
-                      • {unreadCount} não lida{unreadCount !== 1 ? 's' : ''}
-                    </span>
-                  )}
-                </p>
+        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <div className="flex items-center justify-between sm:justify-start gap-3">
+              <div className="flex items-center gap-3">
+                <Bell className="h-6 w-6 sm:h-8 sm:w-8 text-blue-800" />
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+                    Notificações
+                  </h1>
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    {notifications.length} total
+                    {notifications.length !== 1 ? 's' : ''}
+                    {unreadCount > 0 && (
+                      <span className="ml-1 sm:ml-2 text-red-600 font-semibold">
+                        • {unreadCount} não lida{unreadCount !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </p>
+                </div>
               </div>
+
+              {/* Botão de menu móvel */}
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="sm:hidden p-2 rounded-lg hover:bg-gray-100"
+              >
+                <Menu className="h-5 w-5 text-gray-600" />
+              </button>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div
+              className={`flex-col sm:flex-row items-start sm:items-center gap-3 ${showMobileMenu ? 'flex' : 'hidden sm:flex'}`}
+            >
               {/* Status da conexão SSE */}
               <div
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs sm:text-sm ${
                   isConnected
                     ? 'bg-green-100 text-green-700'
                     : 'bg-yellow-100 text-yellow-700'
@@ -204,12 +212,12 @@ export default function NotificacoesPage() {
                 {isConnected ? (
                   <>
                     <Wifi className="h-3 w-3" />
-                    <span>Tempo real ativo</span>
+                    <span className="whitespace-nowrap">Tempo real ativo</span>
                   </>
                 ) : (
                   <>
                     <WifiOff className="h-3 w-3" />
-                    <span>Conexão offline</span>
+                    <span className="whitespace-nowrap">Conexão offline</span>
                   </>
                 )}
               </div>
@@ -218,11 +226,11 @@ export default function NotificacoesPage() {
               {!isConnected && (
                 <button
                   onClick={reconnect}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                  className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors whitespace-nowrap mt-2 sm:mt-0"
                   title="Tentar reconectar"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  Reconectar
+                  <span>Reconectar</span>
                 </button>
               )}
             </div>
@@ -231,54 +239,53 @@ export default function NotificacoesPage() {
           {/* 🔴 BARRA DE AÇÕES EM MASSA */}
           {selectedIds.length > 0 ? (
             <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="text-blue-700 font-medium">
+                  <div className="text-blue-700 font-medium text-sm sm:text-base">
                     {selectedIds.length} notificação(ões) selecionada(s)
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <button
                     onClick={() => setShowMarkReadModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm sm:text-base"
                   >
                     <CheckCircle className="h-4 w-4" />
-                    Marcar como lida(s)
+                    <span>Marcar como lida(s)</span>
                   </button>
                   <button
                     onClick={() => setShowDeleteModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors text-sm sm:text-base"
                   >
                     <Trash2 className="h-4 w-4" />
-                    Remover selecionada(s)
+                    <span>Remover selecionada(s)</span>
                   </button>
                   <button
                     onClick={() => setSelectedIds([])}
-                    className="flex items-center gap-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
+                    className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm sm:text-base"
                   >
                     <X className="h-4 w-4" />
-                    Cancelar
+                    <span>Cancelar</span>
                   </button>
                 </div>
               </div>
             </div>
           ) : (
-            // 🔴 APENAS BOTÃO "SELECIONAR TODAS" QUANDO NÃO HÁ SELEÇÃO
             notifications.length > 0 && (
               <div className="mt-4">
                 <button
                   onClick={toggleSelectAll}
-                  className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors text-sm sm:text-base"
                 >
                   <div
-                    className={`w-5 h-5 rounded border flex items-center justify-center ${
+                    className={`w-4 h-4 sm:w-5 sm:h-5 rounded border flex items-center justify-center ${
                       selectedIds.length === notifications.length
                         ? 'bg-blue-500 border-blue-500'
                         : 'border-gray-300'
                     }`}
                   >
                     {selectedIds.length === notifications.length && (
-                      <Check className="w-3 h-3 text-white" />
+                      <Check className="w-2 h-2 sm:w-3 sm:h-3 text-white" />
                     )}
                   </div>
                   <span>Selecionar todas ({notifications.length})</span>
@@ -289,7 +296,7 @@ export default function NotificacoesPage() {
 
           {/* Mensagens de Status SSE */}
           {error && (
-            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
+            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-xs sm:text-sm">
               ⚠️ {error}
               <div className="mt-1 text-xs text-red-600">
                 As notificações em tempo real estão temporariamente
@@ -299,7 +306,7 @@ export default function NotificacoesPage() {
           )}
 
           {!isConnected && !error && (
-            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-yellow-700 text-sm">
+            <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-yellow-700 text-xs sm:text-sm">
               ⚡ Conectando ao servidor de notificações...
               <div className="mt-1 text-xs text-yellow-600">
                 As notificações serão recebidas em tempo real quando a conexão
@@ -312,19 +319,19 @@ export default function NotificacoesPage() {
         {/* Lista de Notificações */}
         <div className="space-y-3">
           {isLoading && notifications.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-12 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-              <h2 className="text-xl font-semibold text-gray-600 mb-2">
+            <div className="bg-white rounded-lg shadow-md p-8 sm:p-12 text-center">
+              <div className="animate-spin rounded-full h-8 w-8 sm:h-12 sm:w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">
                 Carregando notificações...
               </h2>
             </div>
           ) : notifications.length === 0 ? (
-            <div className="bg-white rounded-lg shadow-md p-12 text-center">
-              <BellOff className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-600 mb-2">
+            <div className="bg-white rounded-lg shadow-md p-8 sm:p-12 text-center">
+              <BellOff className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 mx-auto mb-4" />
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-600 mb-2">
                 Nenhuma notificação
               </h2>
-              <p className="text-gray-500">
+              <p className="text-gray-500 text-sm sm:text-base">
                 Você está em dia! Não há notificações no momento.
               </p>
             </div>
@@ -332,8 +339,8 @@ export default function NotificacoesPage() {
             notifications.map((notif: Notification) => (
               <div
                 key={notif.id}
-                className={`bg-white rounded-lg shadow-md p-4 border-l-4 ${getCorNotificacao(
-                  notif.tipo
+                className={`bg-white rounded-lg shadow-md p-3 sm:p-4 border-l-4 ${getCorNotificacao(
+                  notif.tipo,
                 )} hover:shadow-lg transition-all ${
                   notif.lida ? 'opacity-60' : ''
                 } ${
@@ -342,16 +349,15 @@ export default function NotificacoesPage() {
                     : ''
                 }`}
                 onClick={(e) => {
-                  // Impede a seleção ao clicar nos botões
                   if ((e.target as HTMLElement).closest('button')) return;
                   toggleSelectNotification(notif.id);
                 }}
               >
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start justify-between gap-3 sm:gap-4">
                   {/* 🔴 CHECKBOX DE SELEÇÃO */}
                   <div className="flex-shrink-0 pt-1">
                     <div
-                      className={`w-5 h-5 rounded border flex items-center justify-center cursor-pointer ${
+                      className={`w-4 h-4 sm:w-5 sm:h-5 rounded border flex items-center justify-center cursor-pointer ${
                         selectedIds.includes(notif.id)
                           ? 'bg-blue-500 border-blue-500'
                           : 'border-gray-300'
@@ -362,40 +368,40 @@ export default function NotificacoesPage() {
                       }}
                     >
                       {selectedIds.includes(notif.id) && (
-                        <Check className="w-3 h-3 text-white" />
+                        <Check className="w-2 h-2 sm:w-3 sm:h-3 text-white" />
                       )}
                     </div>
                   </div>
 
                   {/* Conteúdo */}
-                  <div className="flex items-start gap-3 flex-1">
-                    <span className="text-2xl flex-shrink-0">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <span className="text-xl sm:text-2xl flex-shrink-0">
                       {getIconeNotificacao(notif.tipo)}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-gray-800 font-medium mb-1">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="text-gray-800 font-medium text-sm sm:text-base mb-1 truncate">
                             {notif.titulo}
                           </p>
-                          <p className="text-gray-600 text-sm mb-2">
+                          <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">
                             {notif.mensagem}
                           </p>
                         </div>
                         {!notif.lida && !selectedIds.includes(notif.id) && (
-                          <span className="inline-block h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 mt-2 animate-pulse"></span>
+                          <span className="inline-block h-2 w-2 rounded-full bg-blue-500 flex-shrink-0 self-start sm:self-center animate-pulse"></span>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-4 mt-2">
-                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
+                        <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded whitespace-nowrap">
                           {notif.tipo}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-gray-500 whitespace-nowrap">
                           {formatarTempo(notif.criada_em)}
                         </span>
                         {notif.lida && (
-                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded flex items-center gap-1">
+                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded flex items-center gap-1 whitespace-nowrap">
                             <Check className="h-3 w-3" />
                             Lida
                           </span>
@@ -405,13 +411,13 @@ export default function NotificacoesPage() {
                       {/* Dados adicionais */}
                       {notif.metadata &&
                         Object.keys(notif.metadata).length > 0 && (
-                          <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600">
+                          <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600 overflow-x-auto">
                             {Object.entries(notif.metadata).map(
                               ([key, value]) => (
                                 <div key={key} className="truncate">
                                   <strong>{key}:</strong> {String(value)}
                                 </div>
-                              )
+                              ),
                             )}
                           </div>
                         )}
@@ -419,7 +425,7 @@ export default function NotificacoesPage() {
                   </div>
 
                   {/* Botões de Ação */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-row sm:flex-col gap-1 sm:gap-2">
                     {/* Botão Marcar como Lida */}
                     {!notif.lida && (
                       <button
@@ -427,10 +433,10 @@ export default function NotificacoesPage() {
                           e.stopPropagation();
                           markAsRead(notif.id);
                         }}
-                        className="flex-shrink-0 p-2 text-green-500 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
+                        className="flex-shrink-0 p-1 sm:p-2 text-green-500 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors"
                         title="Marcar como lida"
                       >
-                        <Check className="h-5 w-5" />
+                        <Check className="h-4 w-4 sm:h-5 sm:w-5" />
                       </button>
                     )}
 
@@ -440,10 +446,10 @@ export default function NotificacoesPage() {
                         e.stopPropagation();
                         removeNotification(notif.id);
                       }}
-                      className="flex-shrink-0 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                      className="flex-shrink-0 p-1 sm:p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Remover notificação"
                     >
-                      <X className="h-5 w-5" />
+                      <X className="h-4 w-4 sm:h-5 sm:w-5" />
                     </button>
                   </div>
                 </div>
