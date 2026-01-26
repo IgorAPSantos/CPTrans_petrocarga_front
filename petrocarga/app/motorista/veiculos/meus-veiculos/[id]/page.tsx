@@ -72,7 +72,7 @@ export default function EditarVeiculoPage() {
         <p>{error}</p>
         <Link
           href="/motorista/veiculos/meus-veiculos"
-          className="text-blue-600 underline"
+          className="text-blue-600 underline px-4 py-2 hover:bg-blue-50 rounded-md transition-colors"
         >
           Voltar para todos os veículos
         </Link>
@@ -81,18 +81,52 @@ export default function EditarVeiculoPage() {
   }
 
   return (
-    <div className="p-4 flex flex-col items-center  w-full min-h-screen bg-gray-50">
-      <div className="mb-6 w-full max-w-2xl">
-        <Link
-          href="/motorista/veiculos/meus-veiculos"
-          className="text-muted-foreground hover:text-foreground inline-flex items-center"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar para todos os veículos
-        </Link>
-      </div>
+    <div className="p-4 sm:p-6 lg:p-8 flex flex-col items-center w-full min-h-screen bg-gray-50">
+      <div className="w-full max-w-4xl lg:max-w-6xl">
+        {/* Header responsivo */}
+        <div className="mb-6 sm:mb-8">
+          <Link
+            href="/motorista/veiculos/meus-veiculos"
+            className="text-muted-foreground hover:text-foreground inline-flex items-center px-3 py-2 sm:px-4 sm:py-2 bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            <span className="text-sm sm:text-base">
+              Voltar para meus veículos
+            </span>
+          </Link>
+        </div>
 
-      {veiculo && <VeiculoDetalhes veiculo={veiculo} />}
+        {/* Container responsivo para o card */}
+        <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Card ocupa 2 colunas em telas grandes */}
+          <div className="lg:col-span-2">
+            {veiculo && <VeiculoDetalhes veiculo={veiculo} />}
+          </div>
+
+          {/* Espaço para informações adicionais em telas grandes */}
+          <div className="hidden lg:block">
+            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Informações Úteis
+              </h3>
+              <ul className="space-y-3 text-sm text-gray-600">
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <span>Placa deve estar sempre atualizada</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <span>Documentos devem estar em dia</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+                  <span>Verifique regularmente os dados</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
