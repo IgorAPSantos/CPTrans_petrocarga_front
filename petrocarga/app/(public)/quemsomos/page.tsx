@@ -10,8 +10,8 @@ export default function QuemSomos() {
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 md:mb-6 text-center">
             Quem <span className="text-blue-600">Somos</span>
           </h1>
-          <Card className="mb-8 md:mb-12">
-            <div className="flex items-start gap-4 md:gap-6">
+          <Card className="mb-4 md:mb-2">
+            <div className="flex items-start gap-2 md:gap-2">
               <h1 className="text-sm md:text-lg font-bold mb-8 md:mb-12 text-center max-w-3xl mx-auto">
                 Conheça a CPTrans - Companhia Petropolitana de Trânsito e
                 Transporte.
@@ -159,45 +159,6 @@ export default function QuemSomos() {
         </div>
       </section>
 
-      {/* <section className="container mx-auto px-4 py-8 md:py-16">
-                <div className="w-full max-w-5xl mx-auto">
-                <h2 className="text-xl md:text-3xl font-bold text-center mb-8 md:mb-12">
-                    Números que Representam Nosso Trabalho
-                </h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                    {[
-                    {
-                        number: "500+",
-                        label: "Áreas Gerenciadas"
-                    },
-                    {
-                        number: "10K+",
-                        label: "Reservas Mensais"
-                    },
-                    {
-                        number: "24/7",
-                        label: "Sistema Disponível"
-                    },
-                    {
-                        number: "98%",
-                        label: "Satisfação dos Usuários"
-                    }
-                    ].map((item, index) => (
-                    <Card key={index} className="text-center">
-                        <CardContent className="p-4 md:p-6">
-                        <div className="text-2xl md:text-4xl font-bold text-blue-600 mb-2">
-                            {item.number}
-                        </div>
-                        <div className="text-xs md:text-sm text-gray-600 font-medium">
-                            {item.label}
-                        </div>
-                        </CardContent>
-                    </Card>
-                    ))}
-                </div>
-                </div>
-            </section> */}
-
       {/* Compromisso com a Inovação */}
       <section className="bg-blue-600 text-white py-8 md:py-16">
         <div className="container mx-auto px-4">
@@ -211,11 +172,6 @@ export default function QuemSomos() {
               carga e descarga, promovendo mais eficiência e transparência para
               todos os usuários.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center">
-              <button className="bg-white text-blue-600 hover:bg-gray-100 px-4 md:px-6 py-2 md:py-3 rounded-sm text-sm md:text-base font-medium transition-colors">
-                Conhecer Nossos Projetos
-              </button>
-            </div>
           </div>
         </div>
       </section>
