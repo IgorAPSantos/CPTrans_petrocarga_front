@@ -25,7 +25,7 @@ export default function EditarAgente({ agente }: { agente: Agente }) {
 
   const [state, atualizarAgenteAction, pending] = useActionState(
     atualizar,
-    null
+    null,
   );
 
   return (
@@ -86,29 +86,6 @@ export default function EditarAgente({ agente }: { agente: Agente }) {
               />
             </FormItem>
 
-            {/* CPF */}
-            <FormItem
-              name="CPF"
-              description="Apenas números. Exemplo: 12345678900"
-            >
-              <Input
-                className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="cpf"
-                name="cpf"
-                placeholder="00000000000"
-                maxLength={11}
-                inputMode="numeric"
-                defaultValue={agente.usuario.cpf}
-                required
-                onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(
-                    /\D/g,
-                    ''
-                  );
-                }}
-              />
-            </FormItem>
-
             {/* Telefone */}
             <FormItem
               name="Telefone"
@@ -126,24 +103,9 @@ export default function EditarAgente({ agente }: { agente: Agente }) {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    ''
+                    '',
                   );
                 }}
-              />
-            </FormItem>
-
-            {/* Matricula */}
-            <FormItem
-              name="Matricula"
-              description="Insira a matricula completa do agente."
-            >
-              <Input
-                className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="matricula"
-                name="matricula"
-                placeholder="Ex.: MSD20231"
-                defaultValue={agente.matricula}
-                required
               />
             </FormItem>
           </CardContent>
