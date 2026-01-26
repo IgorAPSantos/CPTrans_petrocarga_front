@@ -25,7 +25,7 @@ export default function EditarGestor({ gestor }: { gestor: Gestor }) {
 
   const [state, atualizarGestorAction, pending] = useActionState(
     atualizar,
-    null
+    null,
   );
 
   const [exibirSenha, setExibirSenha] = useState(false);
@@ -87,28 +87,6 @@ export default function EditarGestor({ gestor }: { gestor: Gestor }) {
               />
             </FormItem>
 
-            {/* CPF */}
-            <FormItem
-              name="CPF"
-              description="Apenas números. Exemplo: 12345678900"
-            >
-              <Input
-                className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="cpf"
-                name="cpf"
-                defaultValue={gestor.cpf}
-                maxLength={11}
-                inputMode="numeric"
-                required
-                onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(
-                    /\D/g,
-                    ''
-                  );
-                }}
-              />
-            </FormItem>
-
             {/* Telefone */}
             <FormItem
               name="Telefone"
@@ -125,7 +103,7 @@ export default function EditarGestor({ gestor }: { gestor: Gestor }) {
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(
                     /\D/g,
-                    ''
+                    '',
                   );
                 }}
               />
