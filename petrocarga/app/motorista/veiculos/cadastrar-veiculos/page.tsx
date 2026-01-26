@@ -235,82 +235,156 @@ export default function CadastroVeiculo() {
 
                   {/* Container Principal para CPF e CNPJ */}
                   <div className="max-w-5xl mx-auto">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-                      {/* CPF */}
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                          <label className="font-semibold text-gray-800">
-                            CPF do Proprietário
-                          </label>
+                    {/* Container Principal para CPF e CNPJ */}
+                    <div className="max-w-5xl mx-auto">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                        {/* CPF */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <label className="font-semibold text-gray-800">
+                              CPF do Proprietário
+                            </label>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-4">
+                            Para pessoa física. Apenas números. Exemplo:
+                            12345678900
+                          </p>
+                          <Input
+                            className="w-full rounded-xl border-2 border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 h-12 text-lg md:text-xl shadow-sm px-6"
+                            id="cpfProprietario"
+                            name="cpfProprietario"
+                            placeholder="12345678900"
+                            maxLength={11}
+                            type="text"
+                            inputMode="numeric"
+                            onKeyDown={(e) => {
+                              // Permite apenas números e teclas de controle
+                              const allowedKeys = [
+                                '0',
+                                '1',
+                                '2',
+                                '3',
+                                '4',
+                                '5',
+                                '6',
+                                '7',
+                                '8',
+                                '9',
+                                'Backspace',
+                                'Delete',
+                                'Tab',
+                                'ArrowLeft',
+                                'ArrowRight',
+                                'Home',
+                                'End',
+                                'Control',
+                                'a',
+                                'A',
+                                'c',
+                                'C',
+                                'v',
+                                'V',
+                                'x',
+                                'X',
+                              ];
+
+                              if (!allowedKeys.includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
+                            onPaste={(e) => {
+                              // Remove caracteres não numéricos ao colar
+                              const pasteData = e.clipboardData.getData('text');
+                              const onlyNumbers = pasteData.replace(/\D/g, '');
+                              e.preventDefault();
+
+                              const target = e.target as HTMLInputElement;
+                              const currentValue = target.value.replace(
+                                /\D/g,
+                                '',
+                              );
+                              const newValue = (
+                                currentValue + onlyNumbers
+                              ).slice(0, 11);
+                              target.value = newValue;
+                            }}
+                          />
                         </div>
-                        <p className="text-sm text-gray-600 mb-4">
-                          Para pessoa física. Apenas números. Exemplo:
-                          123.456.789-00
-                        </p>
-                        <Input
-                          className="w-full rounded-xl border-2 border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 h-12 text-lg md:text-xl shadow-sm px-6"
-                          id="cpfProprietario"
-                          name="cpfProprietario"
-                          placeholder="123.456.789-00"
-                          maxLength={14}
-                          type="text"
-                          inputMode="numeric"
-                          onInput={(e) => {
-                            const target = e.target as HTMLInputElement;
-                            let value = target.value.replace(/\D/g, '');
-                            if (value.length > 11)
-                              value = value.substring(0, 11);
 
-                            // Formatação automática
-                            if (value.length <= 11) {
-                              value = value
-                                .replace(/(\d{3})(\d)/, '$1.$2')
-                                .replace(/(\d{3})(\d)/, '$1.$2')
-                                .replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-                            }
-                            target.value = value;
-                          }}
-                        />
-                      </div>
+                        {/* CNPJ */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
+                            <label className="font-semibold text-gray-800">
+                              CNPJ do Proprietário
+                            </label>
+                          </div>
+                          <p className="text-sm text-gray-600 mb-4">
+                            Para pessoa jurídica. Apenas números. Exemplo:
+                            12345678000190
+                          </p>
+                          <Input
+                            className="w-full rounded-xl border-2 border-indigo-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-12 text-lg md:text-xl shadow-sm px-6"
+                            id="cnpjProprietario"
+                            name="cnpjProprietario"
+                            placeholder="12345678000190"
+                            maxLength={14}
+                            type="text"
+                            inputMode="numeric"
+                            onKeyDown={(e) => {
+                              // Permite apenas números e teclas de controle
+                              const allowedKeys = [
+                                '0',
+                                '1',
+                                '2',
+                                '3',
+                                '4',
+                                '5',
+                                '6',
+                                '7',
+                                '8',
+                                '9',
+                                'Backspace',
+                                'Delete',
+                                'Tab',
+                                'ArrowLeft',
+                                'ArrowRight',
+                                'Home',
+                                'End',
+                                'Control',
+                                'a',
+                                'A',
+                                'c',
+                                'C',
+                                'v',
+                                'V',
+                                'x',
+                                'X',
+                              ];
 
-                      {/* CNPJ */}
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="w-3 h-3 bg-indigo-500 rounded-full"></div>
-                          <label className="font-semibold text-gray-800">
-                            CNPJ do Proprietário
-                          </label>
+                              if (!allowedKeys.includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
+                            onPaste={(e) => {
+                              // Remove caracteres não numéricos ao colar
+                              const pasteData = e.clipboardData.getData('text');
+                              const onlyNumbers = pasteData.replace(/\D/g, '');
+                              e.preventDefault();
+
+                              const target = e.target as HTMLInputElement;
+                              const currentValue = target.value.replace(
+                                /\D/g,
+                                '',
+                              );
+                              const newValue = (
+                                currentValue + onlyNumbers
+                              ).slice(0, 14);
+                              target.value = newValue;
+                            }}
+                          />
                         </div>
-                        <p className="text-sm text-gray-600 mb-4">
-                          Para pessoa jurídica. Apenas números. Exemplo:
-                          12.345.678/0001-90
-                        </p>
-                        <Input
-                          className="w-full rounded-xl border-2 border-indigo-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 h-12 text-lg md:text-xl shadow-sm px-6"
-                          id="cnpjProprietario"
-                          name="cnpjProprietario"
-                          placeholder="12.345.678/0001-90"
-                          maxLength={18}
-                          type="text"
-                          inputMode="numeric"
-                          onInput={(e) => {
-                            const target = e.target as HTMLInputElement;
-                            let value = target.value.replace(/\D/g, '');
-                            if (value.length > 14)
-                              value = value.substring(0, 14);
-
-                            // Formatação automática
-                            if (value.length <= 14) {
-                              value = value
-                                .replace(/^(\d{2})(\d)/, '$1.$2')
-                                .replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-                                .replace(/\.(\d{3})(\d)/, '.$1/$2')
-                                .replace(/(\d{4})(\d)/, '$1-$2');
-                            }
-                            target.value = value;
-                          }}
-                        />
                       </div>
                     </div>
 
