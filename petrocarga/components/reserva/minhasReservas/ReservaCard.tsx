@@ -44,7 +44,7 @@ export default function ReservaCard({
   useEffect(() => {
     const interval = setInterval(() => {
       setAgora(new Date());
-    }, 60000); // atualiza a cada 1 minuto
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -59,7 +59,7 @@ export default function ReservaCard({
 
   const podeFazerCheckin =
     currentReserva.status === 'RESERVADA' &&
-    agora >= new Date(inicioReserva.getTime() - 3 * 60 * 1000) &&
+    agora >= new Date(inicioReserva.getTime() - 5 * 60 * 1000) &&
     agora <= fimReserva;
 
   const podeFazerCheckout =
