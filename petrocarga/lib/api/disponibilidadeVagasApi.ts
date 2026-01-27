@@ -56,13 +56,32 @@ export async function getDisponibilidadeVagas() {
 }
 
 // ----------------------
+// GET DISPONIBILIDADE VAGAS POR VAGAID
+
+export async function getDisponibilidadeVagasByVagaId(vagaId: string) {
+  try {
+    const res = await clientApi(
+      `/petrocarga/disponibilidade-vagas/vaga/${vagaId}`,
+      {
+        method: 'GET',
+      },
+    );
+    return await res.json();
+  } catch (err) {
+    console.error('Erro ao buscar disponibilidade por vagaId', err);
+    throw err;
+  }
+}
+// ----------------------
+
+// ----------------------
 // PATCH DISPONIBILIDADE VAGAS
 // ----------------------
 export async function editarDisponibilidadeVagas(
   id: string,
   vagaId: string,
   inicio: string,
-  fim: string
+  fim: string,
 ): Promise<DisponibilidadeResponse> {
   const body: DisponibilidadeVaga = { vagaId, inicio, fim };
 

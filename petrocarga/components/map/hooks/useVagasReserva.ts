@@ -1,9 +1,10 @@
-// useVagas.ts
+'use client';
+
 import { useEffect, useState } from 'react';
 import { Vaga } from '@/lib/types/vaga';
-import { getVagas } from '@/lib/api/vagaApi';
+import * as vagaApi from '@/lib/api/vagaApi';
 
-export function useVagas() {
+export function useVagasReserva() {
   const [vagas, setVagas] = useState<Vaga[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -12,19 +13,21 @@ export function useVagas() {
     const fetchVagas = async () => {
       setLoading(true);
       try {
-        const data: Vaga[] = await getVagas();
+        const data: Vaga[] = await vagaApi.getVagas('DISPONIVEL');
         setVagas(data);
       } catch (err) {
         console.error('Erro ao carregar vagas:', err);
-        setError(err instanceof Error ? err.message : 'Erro desconhecido');
-        setVagas([]); // garante array vazio
+        const message =
+          (err as { message?: string }).message || 'Erro desconhecido';
+        setError(message);
+        setVagas([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchVagas();
-  });
+  }, []);
 
   return { vagas, loading, error };
 }

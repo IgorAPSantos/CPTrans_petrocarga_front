@@ -5,7 +5,7 @@ import mapboxgl from 'mapbox-gl';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-import { useVagas } from './hooks/useVagas';
+import { useVagasReserva } from './hooks/useVagasReserva';
 import { useMapbox } from './hooks/useMapbox';
 import { addVagaMarkersReserva } from './utils/markerUtilsReserva';
 import { Vaga } from '@/lib/types/vaga';
@@ -18,7 +18,7 @@ export function MapReserva({ onClickVaga }: MapReservaProps) {
   const mapContainer = useRef<HTMLDivElement>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
 
-  const { vagas, loading, error } = useVagas();
+  const { vagas, loading, error } = useVagasReserva();
   const { map } = useMapbox({
     containerRef: mapContainer,
     enableSearch: true,
