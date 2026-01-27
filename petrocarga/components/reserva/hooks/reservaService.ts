@@ -1,27 +1,12 @@
 import {
-  getReservasAtivas,
   getReservasBloqueios,
   reservarVaga,
   reservarVagaAgente,
 } from '@/lib/api/reservaApi';
-import { Reserva } from '@/lib/types/reserva';
+import { getDisponibilidadeVagasByVagaId } from '@/lib/api/disponibilidadeVagasApi';
 import { ConfirmResult } from '@/lib/types/confirmResult';
 
 // ----------------- RESERVAS -----------------
-export const fetchReservasAtivasDoDia = async (
-  vagaId: string,
-  day: Date
-): Promise<Reserva[]> => {
-  try {
-    const reservas = await getReservasAtivas(vagaId);
-    return reservas.filter(
-      (r: Reserva) => new Date(r.inicio).toDateString() === day.toDateString()
-    );
-  } catch (error) {
-    console.error('Erro ao buscar reservas ativas:', error);
-    return [];
-  }
-};
 
 export const fetchReservasBloqueios = async (
   vagaId: string,
@@ -31,7 +16,7 @@ export const fetchReservasBloqueios = async (
     | 'VUC'
     | 'CAMINHONETA'
     | 'CAMINHAO_MEDIO'
-    | 'CAMINHAO_LONGO'
+    | 'CAMINHAO_LONGO',
 ) => {
   try {
     const bloqueios = await getReservasBloqueios(vagaId, data, tipoVeiculo);
@@ -42,9 +27,20 @@ export const fetchReservasBloqueios = async (
   }
 };
 
+// ----------------- DISPONIBILIDADE POR VAGAID -----------------
+
+export const fetchDisponibilidadeByVagaId = async (vagaId: string) => {
+  try {
+    const disponibilidades = await getDisponibilidadeVagasByVagaId(vagaId);
+    return disponibilidades;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+};
 // ----------------- CONFIRMAR RESERVA MOTORISTA -----------------
 export const confirmarReserva = async (
-  formData: FormData
+  formData: FormData,
 ): Promise<ConfirmResult> => {
   const result = await reservarVaga(formData);
 
@@ -60,7 +56,7 @@ export const confirmarReserva = async (
 
 // ----------------- CONFIRMAR RESERVA AGENTE -----------------
 export const confirmarReservaAgente = async (
-  formData: FormData
+  formData: FormData,
 ): Promise<ConfirmResult> => {
   const result = await reservarVagaAgente(formData);
 
