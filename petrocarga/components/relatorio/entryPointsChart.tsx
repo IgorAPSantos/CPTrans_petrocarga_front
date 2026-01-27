@@ -55,7 +55,7 @@ export default function EntryPointsChart() {
 
       const total = entryNeighborhoods.reduce(
         (sum, item) => sum + item.value,
-        0
+        0,
       );
 
       return {
@@ -213,13 +213,6 @@ export default function EntryPointsChart() {
                 labelFormatter={(label) =>
                   selectedEntry ? `Bairro: ${label}` : `Entrada: ${label}`
                 }
-              />
-              <Legend
-                verticalAlign="bottom"
-                height={36}
-                wrapperStyle={{
-                  paddingTop: '10px',
-                }}
               />
 
               {selectedEntry ? (

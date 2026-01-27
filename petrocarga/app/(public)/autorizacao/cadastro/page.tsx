@@ -177,13 +177,13 @@ export default function CadastroUsuario() {
                   <div className="md:col-span-2">
                     <FormItem
                       name="Número da CNH"
-                      description="Ponha o número da CNH. Exemplo: 123456789-0"
+                      description="Ponha o número da CNH. Exemplo: 12345678900"
                     >
                       <Input
                         className="rounded-sm border-gray-400 text-sm sm:text-base"
                         id="numeroCnh"
                         name="numeroCnh"
-                        placeholder="123456789-0"
+                        placeholder="12345678900"
                         required
                       />
                     </FormItem>

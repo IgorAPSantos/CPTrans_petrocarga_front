@@ -30,7 +30,7 @@ export default function EditarMotorista({
 
   const [state, atualizarMotoristaAction, pending] = useActionState(
     atualizar,
-    null
+    null,
   );
 
   const [exibirSenha, setExibirSenha] = useState(false);
@@ -88,28 +88,6 @@ export default function EditarMotorista({
               />
             </FormItem>
 
-            {/* CPF */}
-            <FormItem
-              name="CPF"
-              description="Insira seu CPF (apenas números). Exemplo: 12345678900"
-            >
-              <Input
-                className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="cpf"
-                name="cpf"
-                placeholder="12345678900"
-                maxLength={11}
-                type="text"
-                inputMode="numeric"
-                defaultValue={motorista.usuario.cpf}
-                required
-                onInput={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  target.value = target.value.replace(/\D/g, '');
-                }}
-              />
-            </FormItem>
-
             {/* Telefone */}
             <FormItem
               name="Número de Telefone"
@@ -136,22 +114,7 @@ export default function EditarMotorista({
               CNH
             </CardDescription>
 
-            {/* CNH - CORRIGIDO PARA numeroCNH */}
-            <FormItem
-              name="Número da CNH"
-              description="Ponha o número da CNH. Exemplo: 123456789-0"
-            >
-              <Input
-                className="rounded-sm border-gray-400 text-sm md:text-base"
-                id="numeroCnh"
-                name="numeroCnh"
-                placeholder="123456789-0"
-                defaultValue={motorista.numeroCnh}
-                required
-              />
-            </FormItem>
-
-            {/* Tipo da CNH - CORRIGIDO PARA tipoCNH */}
+            {/* Tipo da CNH */}
             <FormItem
               name="Categoria da CNH"
               description="Selecione a categoria da sua CNH"

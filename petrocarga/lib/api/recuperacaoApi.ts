@@ -14,36 +14,34 @@ function extractMessage(error: unknown): string {
 // ----------------------
 export async function solicitarRecuperacaoSenha(email: string): Promise<void> {
   try {
-    const res = await clientApi('/petrocarga/auth/solicitar-recuperacao', {
+    // Faz a requisição e não tenta parsear JSON
+    const res = await clientApi('/petrocarga/auth/forgot-password', {
       method: 'POST',
       json: { email },
     });
 
-    const data = await res.json();
-
-    if (!data.success) {
-      throw new Error(
-        data.message || 'Não foi possível enviar o código de recuperação'
-      );
+    // Verifica apenas se o status HTTP é OK
+    if (!res.ok) {
+      throw new Error(`Erro ${res.status}: ${res.statusText}`);
     }
+
+    // Se chegou aqui, a requisição foi bem-sucedida
+    // Não tentamos ler .json() se sabemos que pode ser vazio
+    return;
   } catch (error: unknown) {
     throw new Error(extractMessage(error));
   }
 }
 
 // ----------------------
-// 2. VALIDAR CÓDIGO
+// 2. REENVIAR EMAIL
 // ----------------------
-export async function validarCodigoRecuperacao(
-  email: string,
-  codigo: string
-): Promise<void> {
+export async function reenviarEmailRecuperacao(email: string): Promise<void> {
   try {
-    const res = await clientApi('/petrocarga/auth/validar-codigo', {
+    const res = await clientApi('/petrocarga/auth/resend-code', {
       method: 'POST',
       json: {
         email: email.trim(),
-        codigo: codigo.trim().toUpperCase(),
       },
     });
 
@@ -63,10 +61,10 @@ export async function validarCodigoRecuperacao(
 export async function redefinirSenhaComCodigo(
   email: string,
   codigo: string,
-  novaSenha: string
+  novaSenha: string,
 ): Promise<void> {
   try {
-    const res = await clientApi('/petrocarga/auth/redefinir-senha-com-codigo', {
+    const res = await clientApi('/petrocarga/auth/reset-password', {
       method: 'POST',
       json: {
         email: email.trim(),
@@ -79,6 +77,30 @@ export async function redefinirSenhaComCodigo(
 
     if (!data.success) {
       throw new Error(data.message || 'Não foi possível redefinir a senha');
+    }
+  } catch (error: unknown) {
+    throw new Error(extractMessage(error));
+  }
+}
+// ----------------------
+// 4. ATIVAR CONTA
+// ----------------------
+export async function ativarConta(
+  email: string,
+  codigo: string,
+): Promise<void> {
+  try {
+    const res = await clientApi('/petrocarga/auth/activate', {
+      method: 'POST',
+      json: {
+        email: email.trim(),
+        codigo: codigo.trim(),
+      },
+    });
+    const data = await res.json();
+
+    if (!data.success) {
+      throw new Error(data.message || 'Não foi possível ativar a conta');
     }
   } catch (error: unknown) {
     throw new Error(extractMessage(error));
