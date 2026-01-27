@@ -22,77 +22,61 @@ const tipoImagem = {
   VEICULO: '/image-firebase/imag-veiculo.png',
 };
 
-const image = tipoImagem[data.tipo] || '';
+messaging.onBackgroundMessage((payload) => {
+  const data = payload.data || {};
 
-messaging.showNotification(data.title || 'PetroCarga', {
-  body: data.body || 'Você tem uma nova atualização',
-  icon: '/web-app-manifest-192x192.png',
-  badge: '/icons/badge.png',
-  image,
+  const image = tipoImagem[data.tipo] || '/web-app-manifest-512x512.png';
 
-  vibrate: [100, 50, 100],
+  self.registration.showNotification(data.title || 'PetroCarga', {
+    body: data.body || 'Você tem uma nova atualização',
+    icon: '/web-app-manifest-192x192.png',
+    badge: '/badge.png',
+    image,
 
-  tag: data.id || 'petrocarga',
-  renotify: true,
+    vibrate: [100, 50, 100],
 
-  actions: [
-    {
-      action: 'abrir',
-      title: 'Ver detalhes',
+    tag: data.notificacaoId || 'petrocarga',
+    renotify: true,
+
+    actions: [
+      { action: 'abrir', title: 'Ver detalhes' },
+      { action: 'fechar', title: 'Ignorar' },
+    ],
+
+    data: {
+      id: data.notificacaoId,
+      tipo: data.tipo,
     },
-    {
-      action: 'fechar',
-      title: 'Ignorar',
-    },
-  ],
-
-  data: {
-    url: data.url || '/',
-    id: data.id,
-    tipo: data.tipo,
-  },
+  });
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const action = event.action;
+  if (event.action === 'fechar') return;
+
   const data = event.notification.data;
+  let url = '/';
 
-  if (action === 'fechar') {
-    return;
-  }
-
-  let url = data?.url || '/';
-
-  if (!data?.url) {
-    switch (data?.tipo) {
-      case 'DENUNCIA':
-        url = `/motorista/reservas/minhas-denuncias`;
-        break;
-      case 'MOTORISTA':
-        url = `/motoristas/reservas`;
-        break;
-      case 'VAGA':
-        url = `/motorista/reservas`;
-        break;
-      case 'RESERVA':
-        url = `/motorista/reservas`;
-        break;
-      case 'VEICULO':
-        url = `/motorista/veiculos/meus-veiculos`;
-        break;
-      default:
-        url = '/';
-    }
+  switch (data?.tipo) {
+    case 'DENUNCIA':
+      url = '/motorista/reservas/minhas-denuncias';
+      break;
+    case 'MOTORISTA':
+      url = '/motoristas/reservas';
+      break;
+    case 'VAGA':
+    case 'RESERVA':
+      url = '/motorista/reservas';
+      break;
+    case 'VEICULO':
+      url = '/motorista/veiculos/meus-veiculos';
+      break;
   }
 
   event.waitUntil(
     clients
-      .matchAll({
-        type: 'window',
-        includeUncontrolled: true,
-      })
+      .matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
         for (const client of clientList) {
           if (client.url.includes(self.location.origin)) {
