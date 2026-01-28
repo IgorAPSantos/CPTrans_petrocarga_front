@@ -1,30 +1,18 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import {
-  Mail,
-  ArrowLeft,
-  CheckCircle2,
-  AlertCircle,
-  RefreshCw,
-} from 'lucide-react';
-import {
-  solicitarRecuperacaoSenha,
-  reenviarEmailRecuperacao,
-} from '@/lib/api/recuperacaoApi';
+import { Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { solicitarRecuperacaoSenha } from '@/lib/api/recuperacaoApi';
 import { validateEmail } from '@/lib/utils';
-
-type StatusType = 'success' | 'error' | null;
 
 export default function RecuperacaoSenha() {
   // Estados
   const [email, setEmail] = useState('');
   const [estaCarregando, setEstaCarregando] = useState(false);
-  const [status, setStatus] = useState<StatusType>(null);
+  const [status, setStatus] = useState<'success' | 'error' | null>(null);
   const [mensagem, setMensagem] = useState('');
   const [mostrarModal, setMostrarModal] = useState(false);
   const [emailEnviado, setEmailEnviado] = useState(false);
-  const [estaReenviando, setEstaReenviando] = useState(false);
 
   // Validações
   const emailValido = useCallback((email: string): boolean => {
@@ -37,7 +25,7 @@ export default function RecuperacaoSenha() {
     return null;
   };
 
-  // Função para enviar email de recuperação - VERSÃO CORRIGIDA
+  // Função para enviar email de recuperação - VERSÃO ATUALIZADA
   const enviarEmailRecuperacao = async () => {
     const erroValidacao = validarFormulario();
     if (erroValidacao) {
@@ -52,23 +40,14 @@ export default function RecuperacaoSenha() {
 
     try {
       await solicitarRecuperacaoSenha(email);
-
-      // Se chegou aqui, é sucesso
       setStatus('success');
-      setMensagem('Email enviado com sucesso!');
+      setMensagem(
+        'Se este email estiver cadastrado, você receberá um código em instantes.',
+      );
       setMostrarModal(true);
       setEmailEnviado(true);
-    } catch (erro: any) {
+    } catch (erro: unknown) {
       setStatus('error');
-      // Mensagem mais específica para erros JSON
-      if (erro.message.includes('Unexpected end of JSON')) {
-        setMensagem(
-          'Erro no formato da resposta do servidor. Tente novamente.',
-        );
-      } else {
-        setMensagem(erro.message || 'Erro ao enviar email de recuperação.');
-      }
-      console.error('Erro ao recuperar senha:', erro);
     } finally {
       setEstaCarregando(false);
     }
@@ -95,6 +74,8 @@ export default function RecuperacaoSenha() {
 
   const fecharModal = () => {
     setMostrarModal(false);
+    setStatus(null);
+    setMensagem('');
     irParaLogin();
   };
 
@@ -110,12 +91,8 @@ export default function RecuperacaoSenha() {
                 <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-green-600" />
               </div>
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
-                Verifique seu email
+                Solicitação recebida
               </h2>
-              <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6">
-                Um email foi enviado para o seu endereço de email para redefinir
-                sua senha.
-              </p>
 
               {/* Status de reenvio */}
               {status && (
@@ -160,7 +137,7 @@ export default function RecuperacaoSenha() {
               Recuperar Senha
             </h1>
             <p className="text-xs sm:text-sm text-gray-600">
-              Digite seu email para receber as instruções de recuperação
+              Digite seu email para receber o token de recuperação.
             </p>
           </div>
 
@@ -205,7 +182,7 @@ export default function RecuperacaoSenha() {
                   autoComplete="email"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Digite o email cadastrado na sua conta para receber o link de
+                  Digite o email cadastrado na sua conta para receber o token de
                   recuperação.
                 </p>
               </div>
@@ -225,9 +202,9 @@ export default function RecuperacaoSenha() {
                 ) : (
                   <>
                     <span className="hidden sm:inline">
-                      Enviar link de recuperação
+                      Enviar token de recuperação
                     </span>
-                    <span className="inline sm:hidden">Enviar link</span>
+                    <span className="inline sm:hidden">Enviar token</span>
                   </>
                 )}
               </button>
@@ -252,14 +229,14 @@ export default function RecuperacaoSenha() {
               </div>
               <div>
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">
-                  Email enviado com sucesso!
+                  Solicitação recebida!
                 </h3>
-                <p className="text-xs sm:text-sm text-gray-600">
-                  Enviamos as instruções para recuperação de senha para:
-                  <br />
-                  <span className="font-medium text-indigo-600 break-all sm:break-normal">
-                    {email}
-                  </span>
+                <p className="text-xs sm:text-sm text-gray-600 mb-2">
+                  Se este email estiver cadastrado, você receberá um código em
+                  instantes.
+                </p>
+                <p className="text-xs sm:text-sm text-gray-500">
+                  Verifique sua caixa de entrada e também a pasta de spam.
                 </p>
               </div>
               <div className="space-y-2 sm:space-y-3">
@@ -273,7 +250,7 @@ export default function RecuperacaoSenha() {
                   onClick={tentarOutroEmail}
                   className="w-full bg-gray-100 text-gray-700 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-gray-200 transition"
                 >
-                  Enviar para outro email
+                  Tentar outro email
                 </button>
               </div>
             </div>
@@ -283,7 +260,7 @@ export default function RecuperacaoSenha() {
         {/* Texto informativo */}
         <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
           <p className="text-center text-xs sm:text-sm text-gray-600">
-            Não recebeu o email? Verifique sua caixa de spam ou tente novamente.
+            O token tem validade de 15 minutos. Não compartilhe com ninguém.
           </p>
         </div>
       </div>

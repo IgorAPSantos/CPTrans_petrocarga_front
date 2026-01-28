@@ -13,28 +13,6 @@ import {
 } from 'lucide-react';
 import { redefinirSenhaComCodigo } from '@/lib/api/recuperacaoApi';
 
-type StatusType = 'success' | 'error' | null;
-
-// Função auxiliar para extrair mensagem de erro de forma segura
-function extrairMensagemErro(erro: unknown): string {
-  if (erro instanceof Error) {
-    return erro.message;
-  }
-
-  if (typeof erro === 'object' && erro !== null && 'message' in erro) {
-    const erroObj = erro as { message?: unknown };
-    if (typeof erroObj.message === 'string') {
-      return erroObj.message;
-    }
-  }
-
-  if (typeof erro === 'string') {
-    return erro;
-  }
-
-  return 'Ocorreu um erro inesperado. Tente novamente.';
-}
-
 export default function ResetarSenhaComCodigo() {
   // Estados principais
   const [email, setEmail] = useState('');
@@ -44,12 +22,12 @@ export default function ResetarSenhaComCodigo() {
 
   // Estados de controle
   const [estaCarregando, setEstaCarregando] = useState(false);
-  const [status, setStatus] = useState<StatusType>(null);
+  const [status, setStatus] = useState<'success' | 'error' | null>(null);
   const [mensagem, setMensagem] = useState('');
   const [mostrarModalSucesso, setMostrarModalSucesso] = useState(false);
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [mostrarConfirmarSenha, setMostrarConfirmarSenha] = useState(false);
-  const [etapa, setEtapa] = useState<'codigo' | 'senha'>('codigo'); // Nova etapa
+  const [etapa, setEtapa] = useState<'codigo' | 'senha'>('codigo');
 
   // Bloqueia scroll quando modal está aberto
   useEffect(() => {
@@ -124,10 +102,11 @@ export default function ResetarSenhaComCodigo() {
     try {
       await redefinirSenhaComCodigo(email, codigo, novaSenha);
 
+      setStatus('success');
       setMostrarModalSucesso(true);
     } catch (erro: unknown) {
       setStatus('error');
-      setMensagem(extrairMensagemErro(erro));
+      setMensagem('Não foi possível redefinir a senha. Tente novamente.');
     } finally {
       setEstaCarregando(false);
     }
@@ -223,7 +202,7 @@ export default function ResetarSenhaComCodigo() {
           </div>
 
           {/* Mensagem de Status */}
-          {status && (
+          {mensagem && (
             <div
               className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg flex items-start gap-2 sm:gap-3 border ${
                 status === 'success'
