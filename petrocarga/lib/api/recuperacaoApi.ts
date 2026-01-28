@@ -14,20 +14,16 @@ function extractMessage(error: unknown): string {
 // ----------------------
 export async function solicitarRecuperacaoSenha(email: string): Promise<void> {
   try {
-    // Faz a requisição e não tenta parsear JSON
     const res = await clientApi('/petrocarga/auth/forgot-password', {
       method: 'POST',
       json: { email },
     });
-
-    // Verifica apenas se o status HTTP é OK
     if (!res.ok) {
-      throw new Error(`Erro ${res.status}: ${res.statusText}`);
+      const data = await res.json();
+      throw new Error(
+        data.message || 'Não foi possível processar a solicitação',
+      );
     }
-
-    // Se chegou aqui, a requisição foi bem-sucedida
-    // Não tentamos ler .json() se sabemos que pode ser vazio
-    return;
   } catch (error: unknown) {
     throw new Error(extractMessage(error));
   }
@@ -94,7 +90,7 @@ export async function ativarConta(
       method: 'POST',
       json: {
         email: email.trim(),
-        codigo: codigo.trim(),
+        codigo: codigo.trim().toUpperCase(),
       },
     });
     const data = await res.json();

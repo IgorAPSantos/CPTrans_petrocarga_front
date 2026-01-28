@@ -14,3 +14,37 @@ export type Motorista = {
   empresaId?: string | null;
   usuario: Usuario;
 };
+
+export type MotoristaUsuario = {
+  nome: string;
+  cpf: string;
+  telefone: string;
+  email: string;
+  senha: string;
+};
+
+export type MotoristaPayload = {
+  usuario: MotoristaUsuario;
+  tipoCnh: string;
+  numeroCnh: string;
+  dataValidadeCnh: string;
+};
+export type MotoristaPatchPayload = {
+  nome: string;
+  cpf: string;
+  telefone: string;
+  email: string;
+  senha: string;
+  tipoCnh: string;
+  numeroCnh: string;
+  dataValidadeCnh: string;
+};
+
+export type MotoristaResult = {
+  error: boolean;
+  message?: string;
+  valores?: MotoristaPayload;
+  motoristaId?: string;
+  motorista?: unknown;
+  motoristas?: unknown[];
+};

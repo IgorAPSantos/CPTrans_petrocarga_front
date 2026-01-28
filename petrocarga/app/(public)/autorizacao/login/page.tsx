@@ -49,7 +49,7 @@ export default function LoginPage() {
   const [modalLoading, setModalLoading] = useState(false);
   const [solicitandoNovoCodigo, setSolicitandoNovoCodigo] = useState(false);
 
-  const { login } = useAuth(); // Apenas a função login existe no hook
+  const { login } = useAuth();
 
   async function handleLogin() {
     setLoading(true);
@@ -74,8 +74,7 @@ export default function LoginPage() {
           setError('Permissão desconhecida');
       }
     } catch (err: unknown) {
-      console.error(err);
-      setError('Email ou senha incorretos');
+      setError('Credênciais inválidas ou conta não ativada.');
     } finally {
       setLoading(false);
     }

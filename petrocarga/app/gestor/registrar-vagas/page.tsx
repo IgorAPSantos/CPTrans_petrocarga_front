@@ -15,7 +15,6 @@ import { ArrowLeft, CircleAlert, ParkingSquare } from 'lucide-react';
 import Form from 'next/form';
 import { useActionState } from 'react';
 import FormItem from '../../../components/form/form-item';
-import React from 'react';
 import DiaSemana from '../../../components/gestor/dia-semana/dia-semana';
 import SelecaoCustomizada from '../../../components/gestor/selecaoItem/selecao-customizada';
 import Link from 'next/link';
@@ -25,7 +24,7 @@ export default function Cadastro() {
     async (prevState: unknown, formData: FormData) => {
       return await addVaga(formData);
     },
-    null
+    null,
   );
 
   return (

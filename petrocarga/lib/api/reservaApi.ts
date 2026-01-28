@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { clientApi } from '../clientApi';
 import { ConfirmResult } from '../types/confirmResult';
 import { ReservaRapida } from '@/lib/types/reservaRapida';
+import { ReservaPlaca } from '@/lib/types/reservaPlaca';
 
 // ----------------------
 // POST RESERVA MOTORISTA
@@ -243,9 +244,9 @@ export async function checkoutReserva(reservaID: string) {
   }
 }
 
-// ---------------------------------------------------------
+// =================================================================
 // RESERVA RÁPIDA - AGENTE
-// ---------------------------------------------------------
+// =================================================================
 
 // ----------------------
 // POST RESERVA AGENTE
@@ -294,6 +295,31 @@ export async function getReservasRapidas(
   } catch (err: unknown) {
     const message =
       err instanceof Error ? err.message : 'Erro ao buscar reservas do agente.';
+    throw new Error(message);
+  }
+}
+
+// ----------------------
+// GET RESERVAS POR PLACA
+// ----------------------
+export async function getReservasPorPlaca(
+  placa: string,
+): Promise<ReservaPlaca[]> {
+  try {
+    const res = await clientApi(
+      `/petrocarga/reservas/placa?placa=${placa.trim().toUpperCase()}`,
+      { method: 'GET' },
+    );
+
+    if (!res.ok) {
+      throw new Error(`Erro na requisição: ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (err: unknown) {
+    const message =
+      err instanceof Error ? err.message : 'Erro ao buscar reservas por placa.';
     throw new Error(message);
   }
 }
