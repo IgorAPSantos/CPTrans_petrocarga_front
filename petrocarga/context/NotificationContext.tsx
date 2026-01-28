@@ -25,7 +25,7 @@ import { logger } from '@/lib/logger';
 
 // Contexto
 const NotificationContext = createContext<NotificationContextData | undefined>(
-  undefined
+  undefined,
 );
 
 export function NotificationProvider({
@@ -70,7 +70,7 @@ export function NotificationProvider({
           const novasNotificacoes = result.notificacoes || [];
 
           logger.info(
-            `✅ Histórico carregado: ${novasNotificacoes.length} notificações`
+            `✅ Histórico carregado: ${novasNotificacoes.length} notificações`,
           );
 
           // 🆕 Merge inteligente: mantém notificações já existentes e adiciona novas
@@ -86,7 +86,7 @@ export function NotificationProvider({
             const merged = Array.from(notificacoesMap.values()).sort(
               (a, b) =>
                 new Date(b.criada_em).getTime() -
-                new Date(a.criada_em).getTime()
+                new Date(a.criada_em).getTime(),
             );
 
             return merged.slice(0, maxNotifications);
@@ -103,7 +103,7 @@ export function NotificationProvider({
         }
       }
     },
-    [usuarioId, maxNotifications]
+    [usuarioId, maxNotifications],
   );
 
   // ADICIONAR NOTIFICAÇÃO (SSE)
@@ -121,7 +121,7 @@ export function NotificationProvider({
         return newNotifications.slice(0, maxNotifications);
       });
     },
-    [maxNotifications]
+    [maxNotifications],
   );
 
   // REMOVER NOTIFICAÇÃO (com chamada à API)
@@ -140,7 +140,7 @@ export function NotificationProvider({
         logger.error('❌ Erro ao remover notificação:', err);
       }
     },
-    [usuarioId]
+    [usuarioId],
   );
 
   // 🆕 DELETAR SELECIONADAS (com chamada à API)
@@ -157,7 +157,7 @@ export function NotificationProvider({
         } else {
           logger.error(
             '❌ Erro ao deletar notificações selecionadas:',
-            result.message
+            result.message,
           );
           throw new Error(result.message);
         }
@@ -166,7 +166,7 @@ export function NotificationProvider({
         throw err;
       }
     },
-    [usuarioId]
+    [usuarioId],
   );
 
   // MARCAR COMO LIDA (com chamada à API)
@@ -177,20 +177,20 @@ export function NotificationProvider({
 
         if (!result.error) {
           setNotifications((prev) =>
-            prev.map((n) => (n.id === id ? { ...n, lida: true } : n))
+            prev.map((n) => (n.id === id ? { ...n, lida: true } : n)),
           );
           logger.info('✅ Notificação marcada como lida:', id);
         } else {
           logger.error(
             '❌ Erro ao marcar notificação como lida:',
-            result.message
+            result.message,
           );
         }
       } catch (err) {
         logger.error('❌ Erro ao marcar notificação como lida:', err);
       }
     },
-    [usuarioId]
+    [usuarioId],
   );
 
   // 🆕 MARCAR SELECIONADAS COMO LIDAS (com chamada à API)
@@ -203,27 +203,27 @@ export function NotificationProvider({
 
         if (!result.error) {
           setNotifications((prev) =>
-            prev.map((n) => (ids.includes(n.id) ? { ...n, lida: true } : n))
+            prev.map((n) => (ids.includes(n.id) ? { ...n, lida: true } : n)),
           );
           logger.info(
-            `✅ ${ids.length} notificação(ões) marcada(s) como lida(s)`
+            `✅ ${ids.length} notificação(ões) marcada(s) como lida(s)`,
           );
         } else {
           logger.error(
             '❌ Erro ao marcar notificações selecionadas como lidas:',
-            result.message
+            result.message,
           );
           throw new Error(result.message);
         }
       } catch (err) {
         logger.error(
           '❌ Erro ao marcar notificações selecionadas como lidas:',
-          err
+          err,
         );
         throw err;
       }
     },
-    [usuarioId]
+    [usuarioId],
   );
 
   // CONECTAR SSE
@@ -274,9 +274,18 @@ export function NotificationProvider({
           reconnectTimerRef.current = null;
         }
 
-        // 🆕 Quando conectar, recarrega histórico para pegar notificações POST
         loadHistorico(true);
       };
+
+      eventSource.addEventListener('INIT', (ev: Event) => {
+        const me = ev as MessageEvent;
+        logger.info('🟢 SSE INIT recebido:', me.data);
+      });
+
+      eventSource.addEventListener('notificacao', (ev: Event) => {
+        const me = ev as MessageEvent;
+        handleIncoming(me.data);
+      });
 
       const handleIncoming = (data: string | null) => {
         if (!data) return;
@@ -293,8 +302,9 @@ export function NotificationProvider({
             titulo: parsed.titulo,
             mensagem: parsed.mensagem,
             tipo: parsed.tipo,
-            lida: parsed.lida || false,
-            criada_em: parsed.criada_em || new Date().toISOString(),
+            lida: parsed.lida ?? false,
+            criada_em:
+              parsed.criadaEm ?? parsed.criada_em ?? new Date().toISOString(),
             metadata: parsed.metadata,
           };
 
@@ -309,7 +319,7 @@ export function NotificationProvider({
         handleIncoming(event.data);
       };
 
-      eventSource.addEventListener('notification', (ev: Event) => {
+      eventSource.addEventListener('notificacao', (ev: Event) => {
         const me = ev as MessageEvent;
         handleIncoming(me.data);
       });
@@ -340,11 +350,11 @@ export function NotificationProvider({
           retryCountRef.current += 1;
           const delay = Math.min(
             reconnectInitialDelayMs * Math.pow(2, retryCountRef.current - 1),
-            reconnectMaxDelayMs
+            reconnectMaxDelayMs,
           );
 
           logger.info(
-            `🔄 SSE: Reconectando em ${delay}ms (tentativa ${retryCountRef.current})`
+            `🔄 SSE: Reconectando em ${delay}ms (tentativa ${retryCountRef.current})`,
           );
 
           if (reconnectTimerRef.current) {
@@ -415,7 +425,7 @@ export function NotificationProvider({
 
     logger.info(
       '🚀 NotificationProvider: Iniciando SSE para usuário',
-      usuarioId
+      usuarioId,
     );
 
     let cancelled = false;
@@ -497,7 +507,7 @@ export function NotificationProvider({
       loadHistorico,
       refreshNotifications,
       reconnect,
-    ]
+    ],
   );
 
   return (
