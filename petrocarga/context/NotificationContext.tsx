@@ -48,44 +48,43 @@ export function NotificationProvider({
   const retryCountRef = useRef(0);
   const reconnectTimerRef = useRef<number | null>(null);
 
-  // CARREGAR HISTÓRICO
-  const loadHistorico = useCallback(
-    async (silent = false) => {
-      if (!usuarioId) return;
+ // CARREGAR HISTÓRICO
+const loadHistorico = useCallback(
+  async (silent = false) => {
+    if (!usuarioId) return;
 
-      if (!silent) setIsLoading(true);
+    if (!silent) setIsLoading(true);
 
-      try {
-        const result = await getNotificacoesUsuario(usuarioId);
+    try {
+      const result = await getNotificacoesUsuario(usuarioId);
 
-        if (result.error) {
-          setError(result.message || 'Erro ao carregar notificações');
-        } else {
-          const novasNotificacoes = result.notificacoes || [];
-
-          setNotifications((prev) => {
-            const map = new Map(prev.map((n) => [n.id, n]));
-            novasNotificacoes.forEach((n: Notification) => map.set(n.id, n));
-
-            return Array.from(map.values())
-              .sort(
-                (a, b) =>
-                  new Date(b.criada_em).getTime() -
-                  new Date(a.criada_em).getTime(),
-              )
-              .slice(0, maxNotifications);
-          });
-
-          setError(null);
-        }
-      } catch {
-        setError('Erro ao carregar notificações');
-      } finally {
-        if (!silent) setIsLoading(false);
+      if (result.error) {
+        setError(result.message || 'Erro ao carregar notificações');
+        return;
       }
-    },
-    [usuarioId, maxNotifications],
-  );
+
+      const novasNotificacoes = result.notificacoes || [];
+
+      setNotifications(
+        novasNotificacoes
+          .sort(
+            (a: Notification, b: Notification) =>
+              new Date(b.criadaEm).getTime() -
+              new Date(a.criadaEm).getTime(),
+          )
+          .slice(0, maxNotifications),
+      );
+
+      setError(null);
+    } catch {
+      setError('Erro ao carregar notificações');
+    } finally {
+      if (!silent) setIsLoading(false);
+    }
+  },
+  [usuarioId, maxNotifications],
+);
+
 
   // ADICIONAR NOTIFICAÇÃO
   const addNotification = useCallback(
@@ -184,8 +183,7 @@ export function NotificationProvider({
           mensagem: parsed.mensagem,
           tipo: parsed.tipo,
           lida: parsed.lida ?? false,
-          criada_em:
-            parsed.criadaEm ?? parsed.criada_em ?? new Date().toISOString(),
+          criadaEm: parsed.criadaEm,
           metadata: parsed.metadata,
         });
       } catch {}
