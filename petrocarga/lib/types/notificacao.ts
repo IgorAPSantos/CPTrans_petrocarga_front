@@ -6,7 +6,7 @@ export interface Notification {
   mensagem: string;
   tipo: 'RESERVA' | 'VAGA' | 'VEICULO' | 'MOTORISTA' | 'SISTEMA';
   lida: boolean;
-  criada_em: string;
+  criadaEm: string;
   metadata: Record<string, unknown>;
 }
 
