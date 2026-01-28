@@ -1,16 +1,33 @@
-export type Usuario = {
-  id: string;
+interface MotoristaUsuario {
   nome: string;
-  email: string;
-  telefone: string;
   cpf: string;
-};
+  telefone: string;
+  email: string;
+  senha: string;
+}
 
-export type Motorista = {
-  id: string;
-  numeroCnh: string;
+interface MotoristaPayload {
+  usuario: MotoristaUsuario;
   tipoCnh: string;
+  numeroCnh: string;
   dataValidadeCnh: string;
-  empresaId?: string | null;
-  usuario: Usuario;
-};
+}
+interface MotoristaPatchPayload {
+  nome: string;
+  cpf: string;
+  telefone: string;
+  email: string;
+  senha: string;
+  tipoCnh: string;
+  numeroCnh: string;
+  dataValidadeCnh: string;
+}
+
+interface MotoristaResult {
+  error: boolean;
+  message?: string;
+  valores?: MotoristaPayload;
+  motoristaId?: string;
+  motorista?: unknown;
+  motoristas?: unknown[];
+}

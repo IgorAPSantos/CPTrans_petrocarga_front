@@ -2,46 +2,12 @@
 
 import { clientApi } from '../clientApi';
 
-interface MotoristaUsuario {
-  nome: string;
-  cpf: string;
-  telefone: string;
-  email: string;
-  senha: string;
-}
-
-interface MotoristaPayload {
-  usuario: MotoristaUsuario;
-  tipoCnh: string;
-  numeroCnh: string;
-  dataValidadeCnh: string;
-}
-interface MotoristaPatchPayload {
-  nome: string;
-  cpf: string;
-  telefone: string;
-  email: string;
-  senha: string;
-  tipoCnh: string;
-  numeroCnh: string;
-  dataValidadeCnh: string;
-}
-
-interface MotoristaResult {
-  error: boolean;
-  message?: string;
-  valores?: MotoristaPayload;
-  motoristaId?: string;
-  motorista?: unknown;
-  motoristas?: unknown[];
-}
-
 // ----------------------
 // ADD MOTORISTA
 // ----------------------
 export async function addMotorista(
-  prevState: MotoristaResult | null, // Adicionar este parâmetro
-  formData: FormData // Manter este parâmetro
+  prevState: MotoristaResult | null,
+  formData: FormData,
 ): Promise<MotoristaResult> {
   const payload: MotoristaPayload = {
     usuario: {
@@ -76,7 +42,7 @@ export async function addMotorista(
 // DELETE MOTORISTA
 // ----------------------
 export async function deleteMotorista(
-  motoristaId: string
+  motoristaId: string,
 ): Promise<MotoristaResult> {
   try {
     await clientApi(`/petrocarga/motoristas/${motoristaId}`, {
@@ -95,7 +61,7 @@ export async function deleteMotorista(
 // ATUALIZAR MOTORISTA
 // ----------------------
 export async function atualizarMotorista(
-  formData: FormData
+  formData: FormData,
 ): Promise<MotoristaResult> {
   const id = formData.get('id') as string;
 
