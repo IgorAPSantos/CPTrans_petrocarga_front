@@ -27,7 +27,7 @@ export default function EnviarNotificacoesPage() {
 
   // Modo de envio (apenas motoristas)
   const [modoEnvio, setModoEnvio] = useState<'INDIVIDUAL' | 'GRUPO'>(
-    'INDIVIDUAL'
+    'INDIVIDUAL',
   );
 
   // Filtro de busca (apenas para modo individual)
@@ -78,13 +78,15 @@ export default function EnviarNotificacoesPage() {
     return motoristas.filter(
       (motorista) =>
         motorista.usuario.nome.toLowerCase().includes(termoBusca) ||
-        motorista.usuario.email.toLowerCase().includes(termoBusca)
+        motorista.usuario.email.toLowerCase().includes(termoBusca),
     );
   }, [motoristas, busca]);
 
   const toggleMotorista = (id: string) => {
     setMotoristasSelecionados((prev) =>
-      prev.includes(id) ? prev.filter((userId) => userId !== id) : [...prev, id]
+      prev.includes(id)
+        ? prev.filter((userId) => userId !== id)
+        : [...prev, id],
     );
   };
 
@@ -388,14 +390,14 @@ export default function EnviarNotificacoesPage() {
                         <div
                           className={`w-5 h-5 rounded border flex items-center justify-center ${
                             motoristasSelecionados.includes(
-                              motorista.usuario.id
+                              motorista.usuario.id,
                             )
                               ? 'bg-blue-500 border-blue-500'
                               : 'border-gray-300'
                           }`}
                         >
                           {motoristasSelecionados.includes(
-                            motorista.usuario.id
+                            motorista.usuario.id,
                           ) && <Check className="w-3 h-3 text-white" />}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -412,7 +414,7 @@ export default function EnviarNotificacoesPage() {
                           </div>
                         </div>
                         {motoristasSelecionados.includes(
-                          motorista.usuario.id
+                          motorista.usuario.id,
                         ) && (
                           <div className="text-blue-500">
                             <Check className="w-4 h-4" />

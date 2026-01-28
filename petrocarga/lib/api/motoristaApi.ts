@@ -1,6 +1,11 @@
 'use client';
 
 import { clientApi } from '../clientApi';
+import {
+  MotoristaPayload,
+  MotoristaPatchPayload,
+  MotoristaResult,
+} from '../types/motorista';
 
 // ----------------------
 // ADD MOTORISTA
