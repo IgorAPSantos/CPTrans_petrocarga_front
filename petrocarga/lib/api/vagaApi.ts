@@ -95,11 +95,16 @@ export async function atualizarVaga(formData: FormData) {
 // ----------------------
 // GET VAGAS
 // ----------------------
-export async function getVagas(): Promise<Vaga[]> {
+export async function getVagas(status?: string): Promise<Vaga[]> {
   try {
-    const res = await clientApi('/petrocarga/vagas/all', { method: 'GET' });
+    const query = status ? `?status=${encodeURIComponent(status)}` : '';
+
+    const res = await clientApi(`/petrocarga/vagas/all${query}`, {
+      method: 'GET',
+    });
+
     const data = await res.json();
-    return Array.isArray(data) ? data : data?.vagas ?? [];
+    return Array.isArray(data) ? data : (data?.vagas ?? []);
   } catch (err) {
     const error = err as ApiError;
     console.error('Erro ao buscar vagas:', error);

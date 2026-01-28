@@ -1,29 +1,19 @@
+import { useMemo } from 'react';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 
 interface DaySelectionProps {
   selected?: Date;
   onSelect: (day: Date) => void;
-  availableDays?: string[];
+  availableDays: Date[];
 }
 
 export default function DaySelection({
   selected,
   onSelect,
-  availableDays = [],
+  availableDays,
 }: DaySelectionProps) {
   const today = new Date();
-
-  // Mapear número do dia da semana (0=Domingo, 1=Segunda, ...) para string DiaSemana
-  const diasSemanaMap = [
-    'DOMINGO',
-    'SEGUNDA',
-    'TERCA',
-    'QUARTA',
-    'QUINTA',
-    'SEXTA',
-    'SABADO',
-  ];
 
   const isBeforeDay = (date1: Date, date2: Date) => {
     const d1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate());
@@ -31,9 +21,22 @@ export default function DaySelection({
     return d1 < d2;
   };
 
+  const availableDaysSet = useMemo(() => {
+    return new Set(
+      availableDays.map((d) =>
+        new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString(),
+      ),
+    );
+  }, [availableDays]);
+
   const isDisabled = (date: Date) => {
-    const dayName = diasSemanaMap[date.getDay()];
-    return !availableDays.includes(dayName) || isBeforeDay(date, today);
+    const normalized = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+    ).toISOString();
+
+    return !availableDaysSet.has(normalized) || isBeforeDay(date, today);
   };
 
   return (
@@ -42,12 +45,11 @@ export default function DaySelection({
         <p className="font-semibold mb-4 text-center text-lg">
           Selecione o dia:
         </p>
+
         <DayPicker
           mode="single"
           selected={selected}
-          onDayClick={(day) => {
-            onSelect(day);
-          }}
+          onDayClick={onSelect}
           className="mx-auto"
           disabled={isDisabled}
           modifiersClassNames={{

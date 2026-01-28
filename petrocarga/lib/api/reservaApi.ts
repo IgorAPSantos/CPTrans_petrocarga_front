@@ -110,20 +110,6 @@ export async function getReservasBloqueios(
 }
 
 // ----------------------
-// GET RESERVAS ATIVAS
-// ----------------------
-export async function getReservasAtivas(vagaId: string) {
-  try {
-    const res = await clientApi(`/petrocarga/reservas/ativas/${vagaId}`);
-    return res.json();
-  } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : 'Erro ao buscar reservas ativas.';
-    throw new Error(message);
-  }
-}
-
-// ----------------------
 // DELETE RESERVA POR ID
 // ----------------------
 export async function deleteReservaByID(reservaId: string, usuarioId: string) {

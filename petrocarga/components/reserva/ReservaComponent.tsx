@@ -25,6 +25,7 @@ export default function ReservaComponent({
 
   const {
     step,
+    availableDates,
     setStep,
     selectedDay,
     setSelectedDay,
@@ -109,9 +110,7 @@ export default function ReservaComponent({
               setSelectedDay(day);
               setStep(2);
             }}
-            availableDays={selectedVaga.operacoesVaga?.map(
-              (op) => op.diaSemanaAsEnum
-            )}
+            availableDays={availableDates}
           />
         )}
 
@@ -130,7 +129,7 @@ export default function ReservaComponent({
               await fetchHorariosDisponiveis(
                 selectedDay,
                 selectedVaga,
-                vehicleId
+                vehicleId,
               );
               setStep(3);
             }}
@@ -158,7 +157,7 @@ export default function ReservaComponent({
         {step === 4 && startHour && (
           <TimeSelection
             times={availableTimes.filter(
-              (t) => toMinutes(t) > toMinutes(startHour)
+              (t) => toMinutes(t) > toMinutes(startHour),
             )}
             reserved={reservedTimesEnd}
             selected={endHour}

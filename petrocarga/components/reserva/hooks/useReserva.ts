@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
+import { DIAS_SEMANA } from './reservaHelpers';
 import { Veiculo } from '@/lib/types/veiculo';
 import { Reserva } from '@/lib/types/reserva';
-import { Vaga } from '@/lib/types/vaga';
+import { DiaSemana, Vaga } from '@/lib/types/vaga';
 import { ReservaState } from '@/lib/types/reservaState';
 import { ConfirmResult } from '@/lib/types/confirmResult';
 
@@ -19,6 +20,7 @@ import {
 
 import {
   fetchReservasBloqueios,
+  fetchDisponibilidadeByVagaId,
   confirmarReserva,
   confirmarReservaAgente,
 } from './reservaService';
@@ -44,6 +46,7 @@ export function useReserva(selectedVaga: Vaga | null) {
   });
 
   const [motoristaId, setMotoristaId] = useState<string | null>(null);
+  const [availableDates, setAvailableDates] = useState<Date[]>([]);
   const [vehicles, setVehicles] = useState<Veiculo[]>([]);
   const [loadingMotorista, setLoadingMotorista] = useState(true);
 
@@ -65,7 +68,62 @@ export function useReserva(selectedVaga: Vaga | null) {
   }, []);
 
   // ====================================================
-  //  1) BUSCA HORÁRIOS DISPONÍVEIS (STEP 3)
+  //  BUSCA DIAS DISPONÍVEIS
+  // ====================================================
+
+  const fetchDiasDisponiveis = useCallback(async () => {
+    if (!selectedVaga) return;
+
+    const diasPermitidos: DiaSemana[] =
+      selectedVaga.operacoesVaga?.map((op) => op.diaSemanaAsEnum) ?? [];
+
+    if (diasPermitidos.length === 0) {
+      setAvailableDates([]);
+      return;
+    }
+
+    const disponibilidades = await fetchDisponibilidadeByVagaId(
+      selectedVaga.id,
+    );
+
+    if (!disponibilidades || disponibilidades.length === 0) {
+      setAvailableDates([]);
+      return;
+    }
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const datasValidasSet = new Set<string>();
+
+    for (const disp of disponibilidades) {
+      const atual = new Date(disp.inicio);
+      const fim = new Date(disp.fim);
+
+      atual.setHours(0, 0, 0, 0);
+      fim.setHours(0, 0, 0, 0);
+
+      while (atual <= fim) {
+        const diaSemana: DiaSemana = DIAS_SEMANA[atual.getDay()];
+
+        if (diasPermitidos.includes(diaSemana) && atual >= hoje) {
+          datasValidasSet.add(atual.toISOString());
+        }
+
+        atual.setDate(atual.getDate() + 1);
+      }
+    }
+
+    setAvailableDates(Array.from(datasValidasSet).map((d) => new Date(d)));
+  }, [selectedVaga]);
+
+  useEffect(() => {
+    if (!selectedVaga) return;
+    fetchDiasDisponiveis();
+  }, [selectedVaga?.id, fetchDiasDisponiveis]);
+
+  // ====================================================
+  //  BUSCA HORÁRIOS DISPONÍVEIS
   // ====================================================
 
   const fetchHorariosDisponiveis = useCallback(
@@ -90,18 +148,18 @@ export function useReserva(selectedVaga: Vaga | null) {
       const bloqueios = await fetchReservasBloqueios(
         vaga.id,
         dataFormatada,
-        tipoVeiculo
+        tipoVeiculo,
       );
 
       const horariosOcupadosReais = bloqueios.flatMap((reserva: Reserva) =>
-        gerarHorariosOcupados(reserva)
+        gerarHorariosOcupados(reserva),
       );
 
       const todosHorarios = gerarHorariosDia(operacao);
 
       const horariosFiltradosHoje = removerHorariosPassadosDeHoje(
         day,
-        todosHorarios
+        todosHorarios,
       );
 
       setReservaState((prev) => ({
@@ -113,11 +171,11 @@ export function useReserva(selectedVaga: Vaga | null) {
 
       return horariosFiltradosHoje;
     },
-    [vehicles, reservaState.tipoVeiculoAgente, isAgente]
+    [vehicles, reservaState.tipoVeiculoAgente, isAgente],
   );
 
   // ====================================================
-  //  2) CALCULA HORÁRIOS BLOQUEADOS PARA O HORÁRIO FINAL (STEP 4)
+  //  CALCULA HORÁRIOS BLOQUEADOS PARA O HORÁRIO FINAL (STEP 4)
   // ====================================================
 
   const calcularReservedTimesEnd = useCallback(
@@ -134,7 +192,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       const limiteHoras = limites[vaga.area] ?? 1;
 
       const inicio = new Date(
-        `${reservaState.selectedDay.toISOString().split('T')[0]}T${start}:00`
+        `${reservaState.selectedDay.toISOString().split('T')[0]}T${start}:00`,
       );
 
       const fimMax = new Date(inicio);
@@ -143,14 +201,14 @@ export function useReserva(selectedVaga: Vaga | null) {
       const horariosPossiveis = reservaState.availableTimes.filter(
         (t) =>
           reservaState.availableTimes.indexOf(t) >
-          reservaState.availableTimes.indexOf(start)
+          reservaState.availableTimes.indexOf(start),
       );
 
       const ocupados = [...reservaState.reservedTimesStart];
 
       const horariosBloqueados = horariosPossiveis.filter((h) => {
         const d = new Date(
-          `${reservaState.selectedDay!.toISOString().split('T')[0]}T${h}:00`
+          `${reservaState.selectedDay!.toISOString().split('T')[0]}T${h}:00`,
         );
 
         if (d > fimMax) return true;
@@ -162,7 +220,7 @@ export function useReserva(selectedVaga: Vaga | null) {
 
       return horariosBloqueados;
     },
-    [reservaState]
+    [reservaState],
   );
 
   // Quando selecionar horário inicial → recalcula bloqueios do horário final
@@ -171,7 +229,7 @@ export function useReserva(selectedVaga: Vaga | null) {
 
     const bloqueados = calcularReservedTimesEnd(
       reservaState.startHour,
-      selectedVaga
+      selectedVaga,
     );
 
     setReservaState((prev) => {
@@ -237,7 +295,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       fetchHorariosDisponiveis(
         reservaState.selectedDay,
         selectedVaga,
-        reservaState.selectedVehicleId
+        reservaState.selectedVehicleId,
       );
     }
   }, [
@@ -356,8 +414,8 @@ export function useReserva(selectedVaga: Vaga | null) {
     isAgente,
     vehicles,
     loadingMotorista,
-
-    // setters
+    fetchDiasDisponiveis,
+    availableDates,
     setStep,
     setSelectedDay,
     setStartHour,

@@ -398,7 +398,7 @@ export default function NotificacoesPage() {
                           {notif.tipo}
                         </span>
                         <span className="text-xs text-gray-500 whitespace-nowrap">
-                          {formatarTempo(notif.criada_em)}
+                          {formatarTempo(notif.criadaEm)}
                         </span>
                         {notif.lida && (
                           <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded flex items-center gap-1 whitespace-nowrap">
@@ -407,20 +407,6 @@ export default function NotificacoesPage() {
                           </span>
                         )}
                       </div>
-
-                      {/* Dados adicionais */}
-                      {notif.metadata &&
-                        Object.keys(notif.metadata).length > 0 && (
-                          <div className="mt-3 p-2 bg-gray-50 rounded text-xs text-gray-600 overflow-x-auto">
-                            {Object.entries(notif.metadata).map(
-                              ([key, value]) => (
-                                <div key={key} className="truncate">
-                                  <strong>{key}:</strong> {String(value)}
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        )}
                     </div>
                   </div>
 

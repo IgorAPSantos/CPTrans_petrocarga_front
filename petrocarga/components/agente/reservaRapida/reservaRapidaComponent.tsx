@@ -36,6 +36,7 @@ export default function ReservaAgente({
     setEndHour,
     fetchHorariosDisponiveis,
     handleConfirm,
+    availableDates,
   } = reserva;
 
   const [step, setStep] = useState(1);
@@ -159,14 +160,12 @@ export default function ReservaAgente({
                 await fetchHorariosDisponiveis(
                   day,
                   selectedVaga,
-                  tipoVeiculoAgente
+                  tipoVeiculoAgente,
                 );
 
                 setStep(3);
               }}
-              availableDays={selectedVaga.operacoesVaga?.map(
-                (op) => op.diaSemanaAsEnum
-              )}
+              availableDays={availableDates}
             />
             <button
               onClick={() => setStep(1)}
@@ -207,7 +206,7 @@ export default function ReservaAgente({
             <TimeSelection
               // Filtra garantindo que só mostre horários POSTERIORES ao início
               times={availableTimes.filter(
-                (t) => toMinutes(t) > toMinutes(startHour)
+                (t) => toMinutes(t) > toMinutes(startHour),
               )}
               reserved={reservedTimesEnd}
               selected={endHour}
