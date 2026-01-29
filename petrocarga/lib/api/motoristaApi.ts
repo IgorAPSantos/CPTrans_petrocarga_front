@@ -47,10 +47,10 @@ export async function addMotorista(
 // DELETE MOTORISTA
 // ----------------------
 export async function deleteMotorista(
-  motoristaId: string,
+  usuarioId: string,
 ): Promise<MotoristaResult> {
   try {
-    await clientApi(`/petrocarga/motoristas/${motoristaId}`, {
+    await clientApi(`/petrocarga/motoristas/${usuarioId}`, {
       method: 'DELETE',
     });
     return { error: false, message: 'Motorista deletado com sucesso!' };

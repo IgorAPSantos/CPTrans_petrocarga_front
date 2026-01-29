@@ -35,9 +35,9 @@ export async function clientApi(path: string, options: ClientApiOptions = {}) {
       const errorData = await res.json().catch(() => ({}));
 
       throw new Error(
-        errorData.cause !== 'unknown' ||
+        (errorData.cause !== 'unknown' ? errorData.cause : null) ||
           errorData.erro ||
-          'Ocorreu um erro na requisição'
+          'Ocorreu um erro na requisição',
       );
     }
 

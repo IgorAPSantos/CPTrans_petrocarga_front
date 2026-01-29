@@ -1,6 +1,5 @@
 'use client';
 
-import { json } from 'stream/consumers';
 import { clientApi } from '../clientApi';
 
 interface Agente {
@@ -36,7 +35,7 @@ export async function addAgente(_: unknown, formData: FormData) {
 
   const res = await clientApi(`/petrocarga/agentes`, {
     method: 'POST',
-    json: payload
+    json: payload,
   });
 
   if (!res.ok) {
@@ -45,14 +44,13 @@ export async function addAgente(_: unknown, formData: FormData) {
     try {
       const data = await res.json();
       msg = data.message ?? msg;
-    } catch { }
+    } catch {}
 
     return { error: true, message: msg, valores: payload };
   }
 
   return { error: false, message: 'Agente cadastrado com sucesso!' };
 }
-
 
 // ----------------------
 // DELETE AGENTE
@@ -74,7 +72,7 @@ export async function deleteAgente(agenteId: string): Promise<AgenteResponse> {
 // ATUALIZAR AGENTE
 // ----------------------
 export async function atualizarAgente(
-  formData: FormData
+  formData: FormData,
 ): Promise<AgenteResponse> {
   const usuarioid = formData.get('id') as string;
 
@@ -115,7 +113,7 @@ export async function getAgenteByUserId(userId: string) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch { }
+    } catch {}
 
     return { error: true, message: msg };
   }
@@ -136,7 +134,7 @@ export async function getAgentes() {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch { }
+    } catch {}
 
     return { error: true, message: msg };
   }
