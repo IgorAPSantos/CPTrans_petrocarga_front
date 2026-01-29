@@ -1,47 +1,56 @@
-import axios from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-// 🚀 CONFIGURAÇÃO PRINCIPAL
-// O withCredentials: true é o segredo. Ele diz ao navegador:
-// "Envie os cookies httpOnly ocultos junto com essa requisição"
+// --- Configurações de Constantes ---
+const LOGIN_PATH = '/autorizacao/login';
+
+// 🚀 Instância Principal
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-// ---------------------
-// Interceptors Limpos
-// ---------------------
-
-// REQUEST: Não precisamos fazer NADA.
-// O navegador injeta o cookie automaticamente antes de sair.
+/**
+ * INTERCEPTOR DE REQUISIÇÃO
+ * Embora os cookies httpOnly sejam automáticos, manter o interceptor
+ * permite adicionar logs de debug ou headers específicos no futuro.
+ */
 api.interceptors.request.use(
-  (config) => {
+  (config: InternalAxiosRequestConfig) => {
+    // Exemplo: Log de requisições em desenvolvimento
+    // if (process.env.NODE_ENV === 'development') console.log(`🚀 Request: ${config.url}`);
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error: AxiosError) => Promise.reject(error),
 );
 
-// RESPONSE: Tratamento global de erros (Sessão Expirada)
+/**
+ * INTERCEPTOR DE RESPOSTA
+ * Tratamento global de erros e expiração de sessão.
+ */
 api.interceptors.response.use(
-  (response) => {
-    return response;
-  },
-  (error) => {
-    // Se recebermos 401 (Unauthorized), significa que o cookie
-    // expirou, foi adulterado ou não existe.
+  (response) => response,
+  (error: AxiosError) => {
+    const isClient = typeof window !== 'undefined';
+
+    // 401: Unauthorized (Sessão expirada ou Token inválido)
     if (error.response?.status === 401) {
-      // Verificação para rodar apenas no browser (client-side)
-      if (typeof window !== 'undefined') {
-        // 🛡️ Proteção contra Loop Infinito:
-        // Só redireciona se o usuário JÁ NÃO ESTIVER na tela de login.
-        if (!window.location.pathname.includes('/autorizacao/login')) {
-          console.warn('Sessão expirada. Redirecionando para login...');
-          window.location.href = '/autorizacao/login';
+      if (isClient) {
+        const isLoginPage = window.location.pathname.includes(LOGIN_PATH);
+
+        if (!isLoginPage) {
+          // Limpeza opcional de algum dado no localStorage se houver
+          // localStorage.removeItem('@Petrocarga:user');
+
+          console.warn('Sessão expirada. Redirecionando...');
+          window.location.href = LOGIN_PATH;
         }
       }
     }
+
+    // Tratamento de erro padronizado para o console
     return Promise.reject(error);
-  }
+  },
 );
