@@ -107,6 +107,31 @@ export function useReserva(selectedVaga: Vaga | null) {
         const diaSemana: DiaSemana = DIAS_SEMANA[atual.getDay()];
 
         if (diasPermitidos.includes(diaSemana) && atual >= hoje) {
+          if (atual.getTime() === hoje.getTime()) {
+            const operacaoHoje = selectedVaga.operacoesVaga.find(
+              (op) => op.diaSemanaAsEnum === diaSemana,
+            );
+
+            if (!operacaoHoje) {
+              atual.setDate(atual.getDate() + 1);
+              continue;
+            }
+
+            const agora = new Date();
+
+            const [hFim, mFim, sFim] = operacaoHoje.horaFim
+              .split(':')
+              .map(Number);
+
+            const dataHoraFim = new Date();
+            dataHoraFim.setHours(hFim, mFim, sFim ?? 0, 0);
+
+            if (agora >= dataHoraFim) {
+              atual.setDate(atual.getDate() + 1);
+              continue;
+            }
+          }
+
           datasValidasSet.add(atual.toISOString());
         }
 
