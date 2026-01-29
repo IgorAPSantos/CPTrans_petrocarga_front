@@ -18,16 +18,13 @@ import {
   TriangleAlert,
   Archive,
 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { LogoutButton } from '@/components/logoutButton/logoutButton';
 import { useNotifications } from '@/context/NotificationContext';
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
-  const router = useRouter();
   const { notifications, isConnected } = useNotifications();
 
-  // ✅ CORREÇÃO: Conta apenas notificações NÃO LIDAS
   const unreadCount = notifications.filter(
     (notification) => !notification.lida,
   ).length;
