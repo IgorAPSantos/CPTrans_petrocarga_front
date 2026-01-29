@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, Archive, AlertTriangle } from 'lucide-react';
-import DenunciaGestorCard from '@/components/gestor/cards/denuncia-card-gestor';
+import DenunciaCard from '@/components/gestor/cards/denuncia-card';
 import { Denuncia } from '@/lib/types/denuncias';
 
 // prioridade de exibição
@@ -59,7 +59,7 @@ export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
       <section className="flex flex-col gap-4 animate-in fade-in duration-500">
         {visiveis.length > 0 ? (
           visiveis.map((denuncia) => (
-            <DenunciaGestorCard key={denuncia.id} denuncia={denuncia} />
+            <DenunciaCard key={denuncia.id} denuncia={denuncia} />
           ))
         ) : (
           <EmptyState />
@@ -103,7 +103,7 @@ export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
                     key={denuncia.id}
                     className="opacity-75 hover:opacity-100 transition-opacity"
                   >
-                    <DenunciaGestorCard denuncia={denuncia} />
+                    <DenunciaCard denuncia={denuncia} />
                   </div>
                 ))}
               </div>
