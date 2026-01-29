@@ -24,11 +24,9 @@ export function DateRangePicker({
   defaultStartDate = new Date(),
   defaultEndDate = new Date(),
 }: DateRangePickerProps) {
-  // ✅ Estados separados ao invés de objeto aninhado
   const [dateFrom, setDateFrom] = useState<Date>(defaultStartDate);
   const [dateTo, setDateTo] = useState<Date>(defaultEndDate);
 
-  // ✅ useCallback para memoizar onDateChange e evitar re-renders
   const handleDateChangeCallback = useCallback(() => {
     if (dateFrom && dateTo) {
       const startDate = dateFrom.toISOString();
@@ -37,7 +35,6 @@ export function DateRangePicker({
     }
   }, [dateFrom, dateTo, onDateChange]);
 
-  // ✅ useEffect com dependências corretas
   useEffect(() => {
     handleDateChangeCallback();
   }, [handleDateChangeCallback]);
@@ -64,13 +61,14 @@ export function DateRangePicker({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
+    <div className="space-y-3">
+      {/* Botões rápidos responsivos */}
+      <div className="flex flex-wrap gap-2">
         <Button
           variant="outline"
           size="sm"
           onClick={handleToday}
-          className="text-xs"
+          className="text-xs flex-1 min-w-[80px]"
         >
           Hoje
         </Button>
@@ -78,7 +76,7 @@ export function DateRangePicker({
           variant="outline"
           size="sm"
           onClick={handleYesterday}
-          className="text-xs"
+          className="text-xs flex-1 min-w-[80px]"
         >
           Ontem
         </Button>
@@ -86,28 +84,30 @@ export function DateRangePicker({
           variant="outline"
           size="sm"
           onClick={handleLast7Days}
-          className="text-xs"
+          className="text-xs flex-1 min-w-[80px]"
         >
           Últimos 7 dias
         </Button>
       </div>
 
-      <div className="flex gap-2">
+      {/* Seletor de datas responsivo */}
+      <div className="flex flex-col sm:flex-row gap-2">
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               className={cn(
-                'w-full justify-start text-left font-normal',
+                'w-full sm:flex-1 justify-start text-left font-normal',
                 !dateFrom && 'text-muted-foreground',
               )}
+              size="sm"
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateFrom ? (
-                format(dateFrom, 'PPP', { locale: ptBR })
-              ) : (
-                <span>Data inicial</span>
-              )}
+              <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+              <span className="truncate">
+                {dateFrom
+                  ? format(dateFrom, 'dd/MM/yyyy', { locale: ptBR })
+                  : 'Data inicial'}
+              </span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0">
@@ -121,21 +121,26 @@ export function DateRangePicker({
           </PopoverContent>
         </Popover>
 
+        <div className="hidden sm:flex items-center justify-center text-gray-500">
+          até
+        </div>
+
         <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
               className={cn(
-                'w-full justify-start text-left font-normal',
+                'w-full sm:flex-1 justify-start text-left font-normal',
                 !dateTo && 'text-muted-foreground',
               )}
+              size="sm"
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateTo ? (
-                format(dateTo, 'PPP', { locale: ptBR })
-              ) : (
-                <span>Data final</span>
-              )}
+              <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0" />
+              <span className="truncate">
+                {dateTo
+                  ? format(dateTo, 'dd/MM/yyyy', { locale: ptBR })
+                  : 'Data final'}
+              </span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0">
@@ -149,6 +154,9 @@ export function DateRangePicker({
           </PopoverContent>
         </Popover>
       </div>
+
+      {/* Indicador "até" para mobile */}
+      <div className="sm:hidden text-center text-xs text-gray-500">até</div>
     </div>
   );
 }
