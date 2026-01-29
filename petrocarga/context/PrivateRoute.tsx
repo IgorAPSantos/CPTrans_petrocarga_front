@@ -33,14 +33,6 @@ export default function PrivateRoute({
     }
   }, [loading, isAuthenticated, user, allowedRoles, router]);
 
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        Carregando...
-      </div>
-    );
-  }
-
   if (!isAuthenticated) {
     return null;
   }

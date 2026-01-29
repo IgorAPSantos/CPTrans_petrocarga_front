@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ChevronDown, ChevronUp, Archive, AlertTriangle } from 'lucide-react';
-import DenunciaCard from '@/components/gestor/cards/denuncia-card';
+import DenunciaCard from './denuncia-card';
 import { Denuncia } from '@/lib/types/denuncias';
 
-// prioridade de exibição
+/* ---------------- Constantes ---------------- */
+
 const PRIORIDADE: Record<string, number> = {
   ABERTA: 1,
   EM_ANALISE: 2,
@@ -16,17 +17,21 @@ const PRIORIDADE: Record<string, number> = {
 const VISIBLE_STATUSES = new Set(['ABERTA', 'EM_ANALISE']);
 const HIDDEN_STATUSES = new Set(['PROCEDENTE', 'IMPROCEDENTE']);
 
+/* ---------------- Ordenação ---------------- */
+
 const sortDenuncias = (a: Denuncia, b: Denuncia) => {
   const sa = (a.status || '').toUpperCase();
   const sb = (b.status || '').toUpperCase();
-  const pa = PRIORIDADE[sa] ?? 999;
-  const pb = PRIORIDADE[sb] ?? 999;
-  return pa - pb;
+  return (PRIORIDADE[sa] ?? 999) - (PRIORIDADE[sb] ?? 999);
 };
+
+/* ---------------- Props ---------------- */
 
 interface DenunciaListaProps {
   denuncias: Denuncia[];
 }
+
+/* ---------------- Componente ---------------- */
 
 export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
   const [mostrarOcultas, setMostrarOcultas] = useState(false);
@@ -35,13 +40,8 @@ export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
     const buckets = denuncias.reduce(
       (acc, d) => {
         const status = (d.status || '').toUpperCase();
-
-        if (VISIBLE_STATUSES.has(status)) {
-          acc.visiveis.push(d);
-        } else if (HIDDEN_STATUSES.has(status)) {
-          acc.ocultas.push(d);
-        }
-
+        if (VISIBLE_STATUSES.has(status)) acc.visiveis.push(d);
+        else if (HIDDEN_STATUSES.has(status)) acc.ocultas.push(d);
         return acc;
       },
       { visiveis: [] as Denuncia[], ocultas: [] as Denuncia[] },
@@ -54,8 +54,8 @@ export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
   }, [denuncias]);
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col gap-6">
-      {/* --- DENÚNCIAS ATIVAS --- */}
+    <div className="w-full max-w-2xl mx-auto flex flex-col gap-6">
+      {/* -------- Denúncias Ativas -------- */}
       <section className="flex flex-col gap-4 animate-in fade-in duration-500">
         {visiveis.length > 0 ? (
           visiveis.map((denuncia) => (
@@ -66,12 +66,14 @@ export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
         )}
       </section>
 
-      {/* --- HISTÓRICO --- */}
+      {/* -------- Histórico -------- */}
       {ocultas.length > 0 && (
         <div className="border-t border-gray-100 pt-6">
           <button
-            onClick={() => setMostrarOcultas((s) => !s)}
+            onClick={() => setMostrarOcultas((v) => !v)}
             className="group w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all active:scale-[0.99]"
+            aria-expanded={mostrarOcultas}
+            aria-controls="lista-denuncias-historico"
           >
             <div className="flex items-center gap-3 text-gray-600">
               <Archive className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
@@ -90,8 +92,9 @@ export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
             )}
           </button>
 
-          {/* animação suave */}
+          {/* Collapse suave */}
           <div
+            id="lista-denuncias-historico"
             className={`grid transition-[grid-template-rows] duration-300 ease-out ${
               mostrarOcultas ? 'grid-rows-[1fr] mt-4' : 'grid-rows-[0fr]'
             }`}
@@ -115,6 +118,8 @@ export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
   );
 }
 
+/* ---------------- Empty State ---------------- */
+
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-12 px-4 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
@@ -122,12 +127,11 @@ function EmptyState() {
         <AlertTriangle className="w-8 h-8 text-gray-400" />
       </div>
 
-      <h3 className="text-gray-900 font-medium text-lg mb-2">
+      <h3 className="text-gray-900 font-medium text-lg mb-1">
         Nenhuma denúncia ativa
       </h3>
-
-      <p className="text-gray-500 text-sm">
-        Todas as denúncias já foram analisadas.
+      <p className="text-sm text-gray-500">
+        Quando houver denúncias abertas ou em análise, elas aparecerão aqui.
       </p>
     </div>
   );

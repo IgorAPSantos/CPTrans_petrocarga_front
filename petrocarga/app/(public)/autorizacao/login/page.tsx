@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -49,7 +50,32 @@ export default function LoginPage() {
   const [modalLoading, setModalLoading] = useState(false);
   const [solicitandoNovoCodigo, setSolicitandoNovoCodigo] = useState(false);
 
-  const { login } = useAuth();
+  const { login, isAuthenticated, user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && isAuthenticated && user) {
+      // Redireciona conforme a permissão
+      switch (user.permissao) {
+        case 'ADMIN':
+        case 'GESTOR':
+          router.replace('/gestor/visualizar-vagas');
+          break;
+        case 'MOTORISTA':
+          router.replace('/motorista/reservar-vaga');
+          break;
+        case 'AGENTE':
+          router.replace('/agente/reserva-rapida');
+          break;
+      }
+    }
+  }, [loading, isAuthenticated, user, router]);
+
+  // Enquanto o /me está sendo carregado
+  if (loading) return null;
+
+  // Se já estiver logado, nem renderiza a Home (vai redirecionar)
+  if (isAuthenticated) return null;
 
   async function handleLogin() {
     setLoading(true);

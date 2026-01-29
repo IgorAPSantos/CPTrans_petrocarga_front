@@ -7,7 +7,7 @@ import { MapPin, FileText, Tag, Clock } from 'lucide-react';
 import { DenunciaAnaliseModal } from './denuncia-analise-modal';
 import { iniciarAnaliseDenuncia } from '@/lib/api/denunciaApi';
 
-interface DenunciaGestorCardProps {
+interface DenuProps {
   denuncia: Denuncia;
 }
 
@@ -42,9 +42,7 @@ const statusStyles: Record<
   },
 };
 
-export default function DenunciaGestorCard({
-  denuncia,
-}: DenunciaGestorCardProps) {
+export default function Denu({ denuncia }: DenuProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [statusAtual, setStatusAtual] = useState(denuncia.status);

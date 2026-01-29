@@ -57,11 +57,9 @@ export default function EditarMotoristaPage() {
 
   if (loading) {
     return (
-      <div className="p-4 sm:p-6 md:p-8 flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center">
-        <Loader2 className="animate-spin w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-gray-500" />
-        <span className="text-gray-600 text-sm sm:text-base">
-          Carregando perfil do motorista...
-        </span>
+      <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
+        <Loader2 className="animate-spin w-6 h-6 text-blue-600" />
+        <span className="text-gray-600">Carregando perfil do motorista...</span>
       </div>
     );
   }

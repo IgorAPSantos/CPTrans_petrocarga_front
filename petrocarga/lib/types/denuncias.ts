@@ -7,18 +7,32 @@ export type EnderecoVaga = {
 
 export type Denuncia = {
   id: string;
-  descricao: string;
   criadoPorId: string;
   vagaId: string;
   reservaId: string;
+  veiculoId: string;
+
+  nomeMotorista: string;
+  telefoneMotorista: string;
+
+  descricao: string;
+
   enderecoVaga: EnderecoVaga;
   numeroEndereco: string;
   referenciaEndereco: string;
+
+  marcaVeiculo: string;
+  modeloVeiculo: string;
+  placaVeiculo: string;
+  tamanhoVeiculo: number;
+
   status: 'ABERTA' | 'EM_ANALISE' | 'PROCEDENTE' | 'IMPROCEDENTE';
-  tipo: 'USO_INDEVIDO_DA_VAGA' | string;
-  resposta: string | null;
-  atualizadoPorId: string | null;
+  tipo: 'USO_INDEVIDO_DA_VAGA';
+
+  resposta: string;
+  atualizadoPorId: string;
+
   criadoEm: string;
-  atualizadoEm: string | null;
-  encerradoEm: string | null;
+  atualizadoEm: string;
+  encerradoEm: string;
 };
