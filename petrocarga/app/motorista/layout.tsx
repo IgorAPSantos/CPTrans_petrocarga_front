@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import { PushProvider } from '@/context/PushProvider/PushProvider';
 import PrivateRoute from '@/context/PrivateRoute';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import { MapProvider } from '@/context/MapContext';
 
 export const metadata: Metadata = {
   title: 'PetroCarga',
@@ -21,7 +22,11 @@ export default function MotoristaLayout({
       <PrivateRoute allowedRoles={['MOTORISTA']}>
         <PushProvider>
           <Navbar />
-          <main className="flex-1 relative">{children}</main>
+
+          <main className="flex-1 relative">
+            <MapProvider>{children}</MapProvider>
+          </main>
+
           <Footer />
         </PushProvider>
       </PrivateRoute>
