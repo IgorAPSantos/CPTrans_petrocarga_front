@@ -1,620 +1,651 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useAuth } from '@/components/hooks/useAuth';
+import { RelatorioSumario, RelatorioKpis } from '@/lib/api/dashboardApi';
+import { DashboardSummary, DashboardKPIs } from '@/lib/types/dashboard';
+import { KPICard } from '@/components/dashboard/KPICard';
+import { VehicleTypesChart } from '@/components/dashboard/VehicleTypesChart';
+import { LocationStats } from '@/components/dashboard/LocationStats';
+import { DateRangePicker } from '@/components/dashboard/DateRangePicker';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
-import {
-  Filter,
-  Download,
-  Calendar,
-  MapPin,
-  Truck,
+  Loader2,
   BarChart3,
+  ParkingSquare,
+  CheckCircle,
+  XCircle,
+  Car,
+  MapPin,
+  Calendar,
   TrendingUp,
-  TrendingDown,
-  Route,
-  Layers,
-  Home,
+  Users,
+  AlertCircle,
+  RefreshCw,
   Menu,
-  X,
-} from 'lucide-react';
-import EntryPointsChart from '@/components/relatorio/entryPointsChart';
-import VehicleTypeChart from '@/components/relatorio/vehicleTypeChart';
-import ParkingUsageChart from '@/components/relatorio/parkingUsageChart';
-import AccessRouteAnalysis from '@/components/relatorio/accessRouteAnalysis';
-import VehicleUsageByParking from '@/components/relatorio/vehicleUsageByParking';
+  Clock,
+  Trash2,
+  DoorOpen,
+} from 'lucide-react'; // NOVOS ÍCONES
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
-// Dados mockados
-const parkingData = [
-  { id: 1, name: 'Centro Comercial', usage: 85, totalUses: 450 },
-  { id: 2, name: 'Supermercado A', usage: 72, totalUses: 320 },
-  { id: 3, name: 'Shopping Center', usage: 92, totalUses: 520 },
-  { id: 4, name: 'Distribuidora B', usage: 45, totalUses: 180 },
-  { id: 5, name: 'Depósito Central', usage: 68, totalUses: 290 },
-  { id: 6, name: 'Mercado Municipal', usage: 38, totalUses: 150 },
-  { id: 7, name: 'Galpão Industrial', usage: 25, totalUses: 95 },
-  { id: 8, name: 'Loja de Materiais', usage: 55, totalUses: 210 },
-  { id: 9, name: 'Aeroporto Regional', usage: 30, totalUses: 110 },
-  { id: 10, name: 'Terminal Rodoviário', usage: 75, totalUses: 340 },
-];
+export default function RelatoriosPage() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState<DashboardSummary | null>(
+    null,
+  );
+  const [kpisData, setKpisData] = useState<DashboardKPIs | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-const neighborhoods = [
-  'Centro',
-  'Quitandinha',
-  'Corrêas',
-  'Itaipava',
-  'Alto da Serra',
-  'Bingen',
-  'Cascatinha',
-  'Valparaíso',
-  'Independência',
-  'Mosela',
-];
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isFetching = useRef(false);
 
-export default function ReportPage() {
-  const [viewMode, setViewMode] = useState<'most' | 'least'>('most');
-  const [dateRange, setDateRange] = useState({
-    start: '2024-01-01',
-    end: '2024-12-31',
-  });
-  const [selectedNeighborhood, setSelectedNeighborhood] =
-    useState<string>('Todos');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const fetchDashboardData = useCallback(
+    async (forceRefresh = false) => {
+      if (isFetching.current && !forceRefresh) return;
+      if (!user?.id) return;
 
-  // Filtrar dados por uso
-  const filteredParkingData = useMemo(() => {
-    const sorted = [...parkingData].sort((a, b) => b.usage - a.usage);
-    return viewMode === 'most'
-      ? sorted.slice(0, 8) // Vagas mais utilizadas
-      : sorted.slice(-8).reverse(); // Vagas menos utilizadas
-  }, [viewMode]);
+      isFetching.current = true;
+      setLoading(true);
+      setError(null);
 
-  // Dados para gráfico de uso de vagas
-  const usageChartData = useMemo(() => {
-    return filteredParkingData.map((item) => ({
-      name:
-        item.name.length > 15 ? item.name.substring(0, 15) + '...' : item.name,
-      'Uso (%)': item.usage,
-      'Total de Usos': item.totalUses / 10,
-    }));
-  }, [filteredParkingData]);
+      try {
+        console.log('Buscando dados do dashboard com filtros:', {
+          startDate,
+          endDate,
+        });
 
-  // Dados para distribuição por bairro
-  const neighborhoodDistribution = useMemo(() => {
-    const baseValues: { [key: string]: number } = {
-      Centro: 180,
-      Quitandinha: 145,
-      Corrêas: 120,
-      Itaipava: 95,
-      'Alto da Serra': 80,
-      Bingen: 65,
-      Cascatinha: 50,
-      Valparaíso: 40,
-      Independência: 35,
-      Mosela: 25,
-    };
+        const [summaryResult, kpisResult] = await Promise.allSettled([
+          RelatorioSumario(startDate || undefined, endDate || undefined),
+          RelatorioKpis(startDate || undefined, endDate || undefined),
+        ]);
 
-    return neighborhoods.map((neighborhood) => ({
-      name:
-        neighborhood.length > 8
-          ? neighborhood.substring(0, 8) + '...'
-          : neighborhood,
-      fullName: neighborhood,
-      Entradas: baseValues[neighborhood] || Math.floor(Math.random() * 80) + 20,
-    }));
-  }, []);
+        if (summaryResult.status === 'fulfilled') {
+          const data = summaryResult.value;
+          setDashboardData(data);
+          console.log('Dashboard summary carregado:', data);
+        } else {
+          console.error('Erro ao carregar summary:', summaryResult.reason);
+          setError('Erro ao carregar resumo do dashboard');
+        }
 
-  const handleExport = () => {
-    alert('Relatório exportado com sucesso!');
+        if (kpisResult.status === 'fulfilled') {
+          const data = kpisResult.value;
+          setKpisData(data);
+          console.log('Dashboard KPIs carregado:', data);
+        } else {
+          console.error('Erro ao carregar KPIs:', kpisResult.reason);
+          setError((prev) =>
+            prev
+              ? `${prev}; Erro ao carregar KPIs`
+              : 'Erro ao carregar KPIs do dashboard',
+          );
+        }
+
+        if (
+          summaryResult.status === 'rejected' &&
+          kpisResult.status === 'rejected'
+        ) {
+          setError(
+            'Não foi possível carregar os dados do dashboard. Verifique se o serviço está disponível.',
+          );
+        }
+      } catch (err) {
+        console.error('Erro inesperado ao carregar dados do dashboard:', err);
+        setError('Erro interno ao processar os dados');
+      } finally {
+        setLoading(false);
+        isFetching.current = false;
+      }
+    },
+    [user?.id, startDate, endDate],
+  );
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
+
+  const handleDateChange = (newStartDate: string, newEndDate: string) => {
+    setStartDate(newStartDate);
+    setEndDate(newEndDate);
   };
 
-  const handleDateChange = (type: 'start' | 'end', value: string) => {
-    setDateRange((prev) => ({ ...prev, [type]: value }));
+  const handleRefresh = () => {
+    fetchDashboardData(true);
   };
+
+  if (loading && !dashboardData && !kpisData) {
+    return (
+      <div className="p-4 md:p-8 flex flex-col items-center justify-center min-h-[60vh] md:min-h-screen">
+        <Loader2 className="animate-spin w-8 h-8 md:w-12 md:h-12 text-blue-600 mb-4" />
+        <p className="text-gray-600 text-sm md:text-base">
+          Carregando dados do dashboard...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-3 sm:p-4 md:p-6 lg:p-8">
-      {/* Cabeçalho com menu mobile */}
-      <div className="mb-6 sm:mb-8">
-        <div className="flex flex-col gap-4 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
-              >
-                {mobileMenuOpen ? (
-                  <X className="h-6 w-6 text-gray-700" />
-                ) : (
-                  <Menu className="h-6 w-6 text-gray-700" />
-                )}
-              </button>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
-                <BarChart3 className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 text-blue-600" />
-                <span className="text-base sm:text-xl md:text-2xl">
-                  Relatório de Vagas
-                </span>
-              </h1>
-            </div>
-
-            <button
-              onClick={handleExport}
-              className="px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-1 sm:gap-2 transition-colors whitespace-nowrap text-sm sm:text-base"
-            >
-              <Download className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Exportar</span>
-              <span className="sm:hidden">Exp.</span>
-            </button>
-          </div>
-
-          <p className="text-gray-600 text-xs sm:text-sm md:text-base ml-0 lg:ml-11">
-            Análise detalhada do uso de vagas por veículos de carga no município
-          </p>
-        </div>
-
-        {/* Menu mobile */}
-        {mobileMenuOpen && (
-          <div className="lg:hidden bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  <Calendar className="inline h-3 w-3 mr-1" />
-                  Data Inicial
-                </label>
-                <input
-                  type="date"
-                  value={dateRange.start}
-                  onChange={(e) => handleDateChange('start', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  <Calendar className="inline h-3 w-3 mr-1" />
-                  Data Final
-                </label>
-                <input
-                  type="date"
-                  value={dateRange.end}
-                  onChange={(e) => handleDateChange('end', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  <MapPin className="inline h-3 w-3 mr-1" />
-                  Bairro
-                </label>
-                <select
-                  value={selectedNeighborhood}
-                  onChange={(e) => setSelectedNeighborhood(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                >
-                  <option value="Todos">Todos os Bairros</option>
-                  {neighborhoods.map((neighborhood) => (
-                    <option key={neighborhood} value={neighborhood}>
-                      {neighborhood}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-2">
-                  Modo de Visualização
-                </label>
-                <div className="flex gap-2 h-10">
-                  <button
-                    onClick={() => {
-                      setViewMode('most');
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`flex-1 px-2 py-2 rounded-lg text-xs font-medium transition-all ${
-                      viewMode === 'most'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    <TrendingUp className="inline h-3 w-3 mr-1" />
-                    Mais Usadas
-                  </button>
-                  <button
-                    onClick={() => {
-                      setViewMode('least');
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`flex-1 px-2 py-2 rounded-lg text-xs font-medium transition-all ${
-                      viewMode === 'least'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    <TrendingDown className="inline h-3 w-3 mr-1" />
-                    Menos Usadas
-                  </button>
+    <div className="p-3 md:p-6 lg:p-8 max-w-7xl mx-auto">
+      {/* Header Responsivo */}
+      <div className="mb-4 md:mb-6 lg:mb-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
+          <div className="flex items-center justify-between md:justify-start gap-3">
+            <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="outline" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[280px] sm:w-[350px]">
+                <div className="py-6">
+                  <h2 className="text-lg font-semibold mb-4">Filtros</h2>
+                  <DateRangePicker onDateChange={handleDateChange} />
                 </div>
+              </SheetContent>
+            </Sheet>
+
+            <div className="flex items-center gap-2 md:gap-3">
+              <BarChart3 className="h-6 w-6 md:h-8 md:w-8 text-blue-600 flex-shrink-0" />
+              <div>
+                <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
+                  Relatórios e Dashboard
+                </h1>
+                <p className="text-gray-600 text-sm md:text-base hidden md:block">
+                  Visualize métricas e estatísticas do sistema
+                </p>
               </div>
             </div>
           </div>
-        )}
 
-        {/* Filtros desktop */}
-        <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filtros do Relatório
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Calendar className="inline h-4 w-4 mr-1" />
-                Data Inicial
-              </label>
-              <input
-                type="date"
-                value={dateRange.start}
-                onChange={(e) => handleDateChange('start', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <Calendar className="inline h-4 w-4 mr-1" />
-                Data Final
-              </label>
-              <input
-                type="date"
-                value={dateRange.end}
-                onChange={(e) => handleDateChange('end', e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                <MapPin className="inline h-4 w-4 mr-1" />
-                Bairro
-              </label>
-              <select
-                value={selectedNeighborhood}
-                onChange={(e) => setSelectedNeighborhood(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-              >
-                <option value="Todos">Todos os Bairros</option>
-                {neighborhoods.map((neighborhood) => (
-                  <option key={neighborhood} value={neighborhood}>
-                    {neighborhood}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Modo de Visualização
-              </label>
-              <div className="flex gap-2 h-11">
-                <button
-                  onClick={() => setViewMode('most')}
-                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    viewMode === 'most'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <TrendingUp className="inline h-4 w-4 mr-1" />
-                  Mais Usadas
-                </button>
-                <button
-                  onClick={() => setViewMode('least')}
-                  className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    viewMode === 'least'
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  <TrendingDown className="inline h-4 w-4 mr-1" />
-                  Menos Usadas
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                Total de Vagas
-              </p>
-              <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                {parkingData.length}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">pontos monitorados</p>
-            </div>
-            <Layers className="h-8 w-8 sm:h-10 sm:w-10 text-blue-500 opacity-80" />
-          </div>
-        </div>
-
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                Utilização Média
-              </p>
-              <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                {Math.round(
-                  parkingData.reduce((acc, curr) => acc + curr.usage, 0) /
-                    parkingData.length,
-                )}
-                %
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                taxa média de ocupação
-              </p>
-            </div>
-            <TrendingUp className="h-8 w-8 sm:h-10 sm:w-10 text-green-500 opacity-80" />
-          </div>
-        </div>
-
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs sm:text-sm text-gray-600 mb-1">
-                Total de Usos
-              </p>
-              <p className="text-xl sm:text-2xl font-bold text-gray-900">
-                {parkingData.reduce((acc, curr) => acc + curr.totalUses, 0)}
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                utilizações registradas
-              </p>
-            </div>
-            <Route className="h-8 w-8 sm:h-10 sm:w-10 text-purple-500 opacity-80" />
-          </div>
-        </div>
-      </div>
-
-      {/* Gráfico Principal - Uso de Vagas */}
-      <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 mb-8 sm:mb-10">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2 sm:gap-3">
-            <Layers className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
-            {viewMode === 'most'
-              ? 'Vagas Mais Utilizadas'
-              : 'Vagas Menos Utilizadas'}
-          </h2>
-          <div className="text-xs sm:text-sm text-gray-500 bg-gray-50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg">
-            Período: {new Date(dateRange.start).toLocaleDateString('pt-BR')} -{' '}
-            {new Date(dateRange.end).toLocaleDateString('pt-BR')}
-          </div>
-        </div>
-
-        <div className="h-64 sm:h-80">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={usageChartData}
-              margin={{ top: 20, right: 10, left: 0, bottom: 50 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis
-                dataKey="name"
-                angle={-45}
-                textAnchor="end"
-                height={50}
-                fontSize={10}
-                tick={{ fill: '#4b5563' }}
-              />
-              <YAxis fontSize={10} tick={{ fill: '#4b5563' }} />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '0.5rem',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                  fontSize: '12px',
-                }}
-              />
-              <Legend
-                verticalAlign="bottom"
-                height={30}
-                wrapperStyle={{
-                  paddingTop: '10px',
-                  fontSize: '11px',
-                }}
-              />
-              <Bar
-                dataKey="Uso (%)"
-                fill="#8884d8"
-                name="Uso (%)"
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                dataKey="Total de Usos"
-                fill="#82ca9d"
-                name="Total de Usos"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-100">
-          <p className="text-xs sm:text-sm text-gray-600">
-            <span className="font-medium">Observação:</span> O "Total de Usos"
-            representa o número de vezes que cada vaga foi utilizada durante o
-            período selecionado, ajustado para melhor visualização.
+          <p className="text-gray-600 text-sm md:hidden mt-2">
+            Visualize métricas e estatísticas do sistema
           </p>
-        </div>
-      </div>
 
-      {/* Gráficos em Grid - Primeira Linha */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-10">
-        {/* Entradas para a cidade */}
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-          <EntryPointsChart />
-        </div>
-
-        {/* Tipos de Veículos */}
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-          <VehicleTypeChart />
-        </div>
-      </div>
-
-      {/* Análise de Rotas de Acesso */}
-      <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 mb-8 sm:mb-10">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-          <Route className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
-          Análise de Acesso Viário e Uso de Vagas
-        </h2>
-        <AccessRouteAnalysis />
-      </div>
-
-      {/* Distribuição por Bairro */}
-      <div className="mb-8 sm:mb-10">
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2 sm:gap-3">
-              <Home className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
-              Distribuição de Veículos por Bairro
-            </h2>
-            <div className="text-xs text-gray-500 bg-blue-50 text-blue-700 px-2 sm:px-3 py-1 rounded-full">
-              Veículos de carga por bairro
-            </div>
+          <div className="flex items-center gap-2 md:gap-3 mt-3 md:mt-0">
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
+              className="flex items-center gap-2 w-full md:w-auto"
+              disabled={loading}
+              size="sm"
+            >
+              {loading ? (
+                <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3 w-3 md:h-4 md:w-4" />
+              )}
+              <span className="hidden sm:inline">
+                {loading ? 'Atualizando...' : 'Atualizar'}
+              </span>
+              <span className="sm:hidden">Atualizar</span>
+            </Button>
           </div>
+        </div>
+      </div>
 
-          <div className="h-64 sm:h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={neighborhoodDistribution}
-                margin={{ top: 20, right: 10, left: 0, bottom: 40 }}
-                barSize={25}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#e5e7eb"
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="name"
-                  axisLine={false}
-                  tickLine={false}
-                  fontSize={10}
-                  tick={{ fill: '#4b5563' }}
-                  interval={0}
-                />
-                <YAxis
-                  axisLine={false}
-                  tickLine={false}
-                  fontSize={10}
-                  tick={{ fill: '#4b5563' }}
-                  width={35}
-                />
-                <Tooltip
-                  formatter={(value) => [`${value} veículos`, 'Quantidade']}
-                  labelFormatter={(label) => `Bairro: ${label}`}
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '0.5rem',
-                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    fontSize: '12px',
-                  }}
-                />
-                <Bar
-                  dataKey="Entradas"
-                  name="Veículos de Carga"
-                  fill="#4F46E5"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-100">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-              <div className="text-center p-3 bg-blue-50 rounded-lg">
-                <p className="text-xs text-blue-700 mb-1">MAIOR FLUXO</p>
-                <p className="text-sm font-semibold text-gray-900">Centro</p>
-                <p className="text-xs text-gray-600">180 veículos</p>
+      {error && (
+        <Card className="mb-4 md:mb-6">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex flex-col items-center justify-center gap-3 md:gap-4">
+              <div className="w-12 h-12 md:w-16 md:h-16 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 md:h-8 md:w-8 text-red-600" />
               </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-700 mb-1">FLUXO MÉDIO</p>
-                <p className="text-sm font-semibold text-gray-900">Corrêas</p>
-                <p className="text-xs text-gray-600">120 veículos</p>
-              </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-700 mb-1">MENOR FLUXO</p>
-                <p className="text-sm font-semibold text-gray-900">Mosela</p>
-                <p className="text-xs text-gray-600">25 veículos</p>
+              <div className="text-center">
+                <h3 className="text-base md:text-lg font-medium text-gray-900 mb-2">
+                  Serviço Indisponível
+                </h3>
+                <p className="text-gray-600 text-sm md:text-base mb-3 md:mb-4 break-words">
+                  {error}
+                </p>
+                <Button
+                  onClick={handleRefresh}
+                  className="flex items-center gap-2 w-full md:w-auto"
+                  size="sm"
+                >
+                  <RefreshCw className="h-3 w-3 md:h-4 md:w-4" />
+                  Tentar Novamente
+                </Button>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Uso de Vagas */}
-      <div className="mb-8 sm:mb-10">
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2 sm:gap-3">
-              <Truck className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
-              Análise de Uso
-            </h2>
-            <div className="text-xs text-gray-500 bg-green-50 text-green-700 px-2 sm:px-3 py-1 rounded-full">
-              Selecione as vagas para análise
+      {!error && (dashboardData || kpisData) ? (
+        <>
+          <Card className="mb-4 md:mb-6 hidden md:block">
+            <CardHeader className="p-4 md:p-6">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                <Calendar className="h-4 w-4 md:h-5 md:w-5" />
+                Filtros
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 md:p-6 pt-0">
+              <DateRangePicker onDateChange={handleDateChange} />
+              {startDate && endDate && (
+                <p className="text-xs md:text-sm text-gray-500 mt-3 md:mt-4">
+                  Mostrando dados de{' '}
+                  {new Date(startDate.split('T')[0]).toLocaleDateString(
+                    'pt-BR',
+                  )}{' '}
+                  até{' '}
+                  {new Date(endDate.split('T')[0]).toLocaleDateString('pt-BR')}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-4 md:space-y-6"
+          >
+            <div className="overflow-x-auto pb-2 md:pb-0">
+              <TabsList className="inline-flex h-10 w-full min-w-[300px] md:w-auto md:grid md:grid-cols-3 md:max-w-md">
+                <TabsTrigger value="overview" className="flex-1 min-w-[100px]">
+                  <span className="truncate">Visão Geral</span>
+                </TabsTrigger>
+                <TabsTrigger value="vehicles" className="flex-1 min-w-[100px]">
+                  <span className="truncate">Veículos</span>
+                </TabsTrigger>
+                <TabsTrigger value="locations" className="flex-1 min-w-[100px]">
+                  <span className="truncate">Localizações</span>
+                </TabsTrigger>
+              </TabsList>
             </div>
-          </div>
-          <ParkingUsageChart />
-        </div>
-      </div>
 
-      {/* Tipos de Caminhões por Vaga */}
-      <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-200 mb-8 sm:mb-10">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
-          <Truck className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
-          Tipos de Veículos por Vaga Ocupada
-        </h2>
-        <VehicleUsageByParking />
-      </div>
+            {/* Overview Tab - ATUALIZADO COM NOVOS KPIs */}
+            <TabsContent value="overview" className="space-y-4 md:space-y-6">
+              {kpisData && (
+                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                  <KPICard
+                    title="Total de Vagas"
+                    value={kpisData.totalSlots}
+                    icon={ParkingSquare}
+                    description="Vagas disponíveis"
+                  />
+                  <KPICard
+                    title="Taxa de Ocupação"
+                    value={`${kpisData.occupancyRate}%`}
+                    icon={TrendingUp}
+                    description="Uso das vagas"
+                  />
+                  <KPICard
+                    title="Reservas Pendentes"
+                    value={kpisData.pendingReservations} // NOVO KPI
+                    icon={Clock}
+                    description="Reservas aguardando"
+                  />
+                  <KPICard
+                    title="Reservas Ativas"
+                    value={kpisData.activeReservations}
+                    icon={Users}
+                    description="Reservas em andamento"
+                  />
+                  <KPICard
+                    title="Reservas Concluídas"
+                    value={kpisData.completedReservations}
+                    icon={CheckCircle}
+                    description="Reservas finalizadas"
+                  />
+                  <KPICard
+                    title="Reservas Canceladas"
+                    value={kpisData.canceledReservations}
+                    icon={XCircle}
+                    description="Reservas canceladas"
+                  />
+                  <KPICard
+                    title="Reservas Removidas"
+                    value={kpisData.removedReservations} // NOVO KPI
+                    icon={Trash2}
+                    description="Reservas removidas"
+                  />
+                  <KPICard
+                    title="Reservas Totais"
+                    value={kpisData.totalReservations}
+                    icon={BarChart3}
+                    description="Total de reservas"
+                  />
+                  <KPICard
+                    title="Múltiplas Vagas"
+                    value={kpisData.multipleSlotReservations}
+                    icon={Car}
+                    description="Reservas com +1 vaga"
+                  />
+                </div>
+              )}
 
-      {/* Rodapé */}
-      <div className="mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200">
-        <div className="text-center">
-          <div className="inline-flex flex-col items-center gap-2 bg-gray-50 px-4 sm:px-6 py-3 sm:py-4 rounded-xl">
-            <p className="text-xs sm:text-sm text-gray-600">
-              Relatório gerado em {new Date().toLocaleDateString('pt-BR')} às{' '}
-              {new Date().toLocaleTimeString('pt-BR', {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
-            </p>
-            <p className="text-xs sm:text-sm text-gray-500">
-              Período analisado:{' '}
-              {new Date(dateRange.start).toLocaleDateString('pt-BR')} a{' '}
-              {new Date(dateRange.end).toLocaleDateString('pt-BR')}
-            </p>
-            <p className="text-gray-700 font-medium text-xs sm:text-sm mt-1 sm:mt-2">
-              Companhia Petropolitana de Trânsito e Transporte - CPTRANS
-            </p>
-          </div>
-        </div>
-      </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                {dashboardData?.vehicleTypes &&
+                dashboardData.vehicleTypes.length > 0 ? (
+                  <VehicleTypesChart data={dashboardData.vehicleTypes} />
+                ) : (
+                  <Card className="h-full">
+                    <CardContent className="flex flex-col items-center justify-center h-full p-4 md:p-6 min-h-[300px]">
+                      <Car className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mb-2 md:mb-3" />
+                      <p className="text-gray-600 text-center text-sm md:text-base">
+                        Nenhum dado de tipos de veículo disponível
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {dashboardData?.districts &&
+                dashboardData.districts.length > 0 ? (
+                  <LocationStats
+                    title="Bairros com Mais Reservas"
+                    data={dashboardData.districts}
+                    icon="district"
+                  />
+                ) : (
+                  <Card className="h-full">
+                    <CardContent className="flex flex-col items-center justify-center h-full p-4 md:p-6 min-h-[300px]">
+                      <MapPin className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mb-2 md:mb-3" />
+                      <p className="text-gray-600 text-center text-sm md:text-base">
+                        Nenhum dado de bairros disponível
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Vehicles Tab - MANTIDO IGUAL */}
+            <TabsContent value="vehicles" className="space-y-4 md:space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                {dashboardData?.vehicleTypes &&
+                dashboardData.vehicleTypes.length > 0 ? (
+                  <>
+                    <VehicleTypesChart data={dashboardData.vehicleTypes} />
+                    <Card>
+                      <CardHeader className="p-4 md:p-6">
+                        <CardTitle className="text-base md:text-lg">
+                          Detalhes por Tipo de Veículo
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 md:p-6 pt-0">
+                        <div className="space-y-3 md:space-y-4">
+                          {dashboardData.vehicleTypes.map((vehicle) => (
+                            <div
+                              key={vehicle.type}
+                              className="p-3 md:p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <h3 className="font-semibold text-sm md:text-lg truncate mr-2">
+                                  {vehicle.type}
+                                </h3>
+                                <span className="text-xs md:text-sm text-gray-500 whitespace-nowrap">
+                                  {vehicle.count} reservas
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3 md:gap-4">
+                                <div className="space-y-1">
+                                  <p className="text-xs md:text-sm text-gray-600">
+                                    Veículos únicos:
+                                  </p>
+                                  <p className="text-lg md:text-2xl font-bold text-blue-600">
+                                    {vehicle.uniqueVehicles}
+                                  </p>
+                                </div>
+                                <div className="space-y-1">
+                                  <p className="text-xs md:text-sm text-gray-600">
+                                    Média por veículo:
+                                  </p>
+                                  <p className="text-lg md:text-2xl font-bold text-green-600">
+                                    {vehicle.uniqueVehicles > 0
+                                      ? (
+                                          vehicle.count / vehicle.uniqueVehicles
+                                        ).toFixed(1)
+                                      : 0}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </>
+                ) : (
+                  <div className="col-span-2">
+                    <Card>
+                      <CardContent className="flex flex-col items-center justify-center p-6 md:p-12 min-h-[300px]">
+                        <Car className="h-12 w-12 md:h-16 md:w-16 text-gray-400 mb-3 md:mb-4" />
+                        <h3 className="text-base md:text-lg font-medium text-gray-900 mb-2 text-center">
+                          Nenhum dado de veículos
+                        </h3>
+                        <p className="text-gray-600 text-center text-sm md:text-base">
+                          Não há dados de tipos de veículos disponíveis
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            {/* Locations Tab - ATUALIZADO COM ENTRY ORIGINS */}
+            <TabsContent value="locations" className="space-y-4 md:space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+                {dashboardData?.districts &&
+                dashboardData.districts.length > 0 ? (
+                  <LocationStats
+                    title="Bairros"
+                    data={dashboardData.districts}
+                    icon="district"
+                  />
+                ) : (
+                  <Card className="h-full">
+                    <CardContent className="flex flex-col items-center justify-center h-full p-4 md:p-6 min-h-[300px]">
+                      <MapPin className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mb-2 md:mb-3" />
+                      <p className="text-gray-600 text-center text-sm md:text-base">
+                        Nenhum dado de bairros disponível
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {dashboardData?.origins && dashboardData.origins.length > 0 ? (
+                  <LocationStats
+                    title="Cidades de Origem"
+                    data={dashboardData.origins}
+                    icon="origin"
+                  />
+                ) : (
+                  <Card className="h-full">
+                    <CardContent className="flex flex-col items-center justify-center h-full p-4 md:p-6 min-h-[300px]">
+                      <MapPin className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mb-2 md:mb-3" />
+                      <p className="text-gray-600 text-center text-sm md:text-base">
+                        Nenhum dado de cidades de origem disponível
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {dashboardData?.entryOrigins &&
+                dashboardData.entryOrigins.length > 0 ? (
+                  <LocationStats
+                    title="Cidades de Entrada"
+                    data={dashboardData.entryOrigins}
+                    icon="entry-origin"
+                  />
+                ) : (
+                  <Card className="h-full">
+                    <CardContent className="flex flex-col items-center justify-center h-full p-4 md:p-6 min-h-[300px]">
+                      <DoorOpen className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mb-2 md:mb-3" />
+                      <p className="text-gray-600 text-center text-sm md:text-base">
+                        Nenhum dado de cidades de entrada disponível
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {(dashboardData?.districts ||
+                dashboardData?.origins ||
+                dashboardData?.entryOrigins) && (
+                <Card>
+                  <CardHeader className="p-4 md:p-6">
+                    <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                      <MapPin className="h-4 w-4 md:h-5 md:w-5" />
+                      Insights de Localização
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 md:p-6 pt-0">
+                    <div className="space-y-3 md:space-y-4">
+                      {dashboardData?.districts?.[0] && (
+                        <div className="p-3 md:p-4 bg-blue-50 rounded-lg">
+                          <h4 className="font-medium text-blue-900 mb-2 text-sm md:text-base">
+                            Localização Mais Popular
+                          </h4>
+                          <p className="text-blue-700 text-sm md:text-base">
+                            <span className="font-semibold">
+                              {dashboardData.districts[0].name}
+                            </span>{' '}
+                            é o bairro com mais reservas (
+                            {dashboardData.districts[0].reservationCount})
+                          </p>
+                        </div>
+                      )}
+
+                      {dashboardData?.origins?.[0] && (
+                        <div className="p-3 md:p-4 bg-green-50 rounded-lg">
+                          <h4 className="font-medium text-green-900 mb-2 text-sm md:text-base">
+                            Origem Principal
+                          </h4>
+                          <p className="text-green-700 text-sm md:text-base">
+                            <span className="font-semibold">
+                              {dashboardData.origins[0].name}
+                            </span>{' '}
+                            é a cidade de origem mais comum (
+                            {dashboardData.origins[0].reservationCount}{' '}
+                            reservas)
+                          </p>
+                        </div>
+                      )}
+
+                      {dashboardData?.entryOrigins?.[0] && (
+                        <div className="p-3 md:p-4 bg-purple-50 rounded-lg">
+                          <h4 className="font-medium text-purple-900 mb-2 text-sm md:text-base">
+                            Entrada Principal
+                          </h4>
+                          <p className="text-purple-700 text-sm md:text-base">
+                            <span className="font-semibold">
+                              {dashboardData.entryOrigins[0].name}
+                            </span>{' '}
+                            é a cidade de entrada mais comum (
+                            {dashboardData.entryOrigins[0].reservationCount}{' '}
+                            reservas)
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </TabsContent>
+          </Tabs>
+
+          {kpisData && (
+            <Card className="mt-4 md:mt-6">
+              <CardHeader className="p-4 md:p-6">
+                <CardTitle className="text-base md:text-lg">
+                  Resumo do Período
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4 md:p-6 pt-0">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+                  <div className="p-3 md:p-4 bg-gray-50 rounded-lg">
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Período analisado
+                    </p>
+                    <p className="font-semibold text-sm md:text-base truncate">
+                      {kpisData.startDate
+                        ? new Date(kpisData.startDate).toLocaleDateString(
+                            'pt-BR',
+                          )
+                        : 'Data inicial'}{' '}
+                      -{' '}
+                      {kpisData.endDate
+                        ? new Date(kpisData.endDate).toLocaleDateString('pt-BR')
+                        : 'Data final'}
+                    </p>
+                  </div>
+
+                  <div className="p-3 md:p-4 bg-gray-50 rounded-lg">
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Reservas por vaga
+                    </p>
+                    <p className="font-semibold text-sm md:text-base">
+                      {kpisData.totalSlots
+                        ? (
+                            kpisData.totalReservations / kpisData.totalSlots
+                          ).toFixed(1)
+                        : 0}{' '}
+                      reservas/vaga
+                    </p>
+                  </div>
+
+                  <div className="p-3 md:p-4 bg-gray-50 rounded-lg">
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Taxa de cancelamento
+                    </p>
+                    <p className="font-semibold text-sm md:text-base">
+                      {kpisData.totalReservations
+                        ? (
+                            (kpisData.canceledReservations /
+                              kpisData.totalReservations) *
+                            100
+                          ).toFixed(1)
+                        : 0}
+                      %
+                    </p>
+                  </div>
+
+                  <div className="p-3 md:p-4 bg-gray-50 rounded-lg">
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Taxa de conclusão
+                    </p>
+                    <p className="font-semibold text-sm md:text-base">
+                      {kpisData.totalReservations
+                        ? (
+                            (kpisData.completedReservations /
+                              kpisData.totalReservations) *
+                            100
+                          ).toFixed(1)
+                        : 0}
+                      %
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      ) : !error && !loading ? (
+        <Card className="mb-4 md:mb-6">
+          <CardContent className="p-6 md:p-12 text-center min-h-[300px] flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center gap-3 md:gap-4">
+              <BarChart3 className="h-12 w-12 md:h-16 md:w-16 text-gray-400" />
+              <div>
+                <h3 className="text-base md:text-lg font-medium text-gray-900 mb-2">
+                  Nenhum dado disponível
+                </h3>
+                <p className="text-gray-600 text-sm md:text-base">
+                  Não há dados para exibir no momento
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : null}
     </div>
   );
 }

@@ -59,13 +59,13 @@ export default function PerfilMotorista() {
   }, [user]);
 
   const handleExcluir = async () => {
-    if (!motorista) {
+    if (!user) {
       alert('Você precisa estar logado para excluir a conta.');
       return;
     }
 
     try {
-      const resultado = await deleteMotorista(motorista.id);
+      const resultado = await deleteMotorista(user.id);
 
       if (resultado?.error) {
         alert(resultado.message || 'Erro ao excluir conta.');

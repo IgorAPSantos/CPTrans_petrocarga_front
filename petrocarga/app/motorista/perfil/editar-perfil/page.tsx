@@ -4,7 +4,7 @@ import EditarMotorista from '@/components/motorista/editar/edicao-perfil';
 import { Motorista } from '@/lib/types/motorista';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/components/hooks/useAuth';
 import { useEffect, useState } from 'react';
 import { getMotoristaByUserId } from '@/lib/api/motoristaApi';
@@ -12,10 +12,15 @@ import { getMotoristaByUserId } from '@/lib/api/motoristaApi';
 export default function EditarMotoristaPage() {
   const { user } = useAuth();
   const params = useParams() as { id: string };
+  const router = useRouter();
 
   const [motorista, setMotorista] = useState<Motorista | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+
+  const handleEdicaoSuccess = () => {
+    router.push('/motorista/perfil');
+  };
 
   useEffect(() => {
     if (!user?.id) {
@@ -181,7 +186,11 @@ export default function EditarMotoristaPage() {
           <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {motorista ? (
               <div className="p-3 xs:p-4 sm:p-6 lg:p-8">
-                <EditarMotorista motorista={motorista} />
+                {/* Passe a função de callback para o componente filho */}
+                <EditarMotorista
+                  motorista={motorista}
+                  onSuccess={handleEdicaoSuccess}
+                />
               </div>
             ) : (
               <div className="p-4 sm:p-6 md:p-8 text-center">

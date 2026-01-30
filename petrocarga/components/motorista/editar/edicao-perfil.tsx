@@ -12,17 +12,20 @@ import { Input } from '@/components/ui/input';
 import { atualizarMotorista } from '@/lib/api/motoristaApi';
 import { CheckCircle, CircleAlert, UserIcon } from 'lucide-react';
 import Form from 'next/form';
-import { use, useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react'; // Adicione useEffect
 import FormItem from '@/components/form/form-item';
-import React from 'react';
 import { Motorista } from '@/lib/types/motorista';
 import SelecaoCustomizada from '@/components/gestor/selecaoItem/selecao-customizada';
 
+interface EditarMotoristaProps {
+  motorista: Motorista;
+  onSuccess?: () => void;
+}
+
 export default function EditarMotorista({
   motorista,
-}: {
-  motorista: Motorista;
-}) {
+  onSuccess,
+}: EditarMotoristaProps) {
   // Wrapper para passar o token na action
   const atualizar = async (prevState: unknown, formData: FormData) => {
     return atualizarMotorista(formData);
@@ -34,6 +37,16 @@ export default function EditarMotorista({
   );
 
   const [exibirSenha, setExibirSenha] = useState(false);
+
+  useEffect(() => {
+    if (state && !state.error && state.message && onSuccess) {
+      const timer = setTimeout(() => {
+        onSuccess();
+      }, 250);
+
+      return () => clearTimeout(timer);
+    }
+  }, [state, onSuccess]);
 
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
@@ -50,7 +63,7 @@ export default function EditarMotorista({
           </CardDescription>
         </CardHeader>
         <Form action={atualizarMotoristaAction}>
-          {/* Campo hidden com o ID da vaga */}
+          {/* Campo hidden com o ID do usuário */}
           <input type="hidden" name="id" value={motorista.usuario.id} />
 
           <CardContent className="p-4 md:p-6 lg:p-8">
@@ -68,7 +81,14 @@ export default function EditarMotorista({
                 ) : (
                   <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 )}
-                <span className="text-sm md:text-base">{state.message}</span>
+                <div>
+                  <span className="text-sm md:text-base">{state.message}</span>
+                  {!state.error && (
+                    <p className="text-green-700 text-sm mt-1">
+                      Redirecionando para o perfil...
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 

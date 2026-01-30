@@ -7,6 +7,7 @@ interface ConfirmationProps {
   vehicleName?: string;
   onConfirm: () => void;
   onReset?: () => void;
+  isSubmitting?: boolean;
 }
 
 export default function Confirmation({
@@ -18,6 +19,7 @@ export default function Confirmation({
   vehicleName,
   onConfirm,
   onReset,
+  isSubmitting = false,
 }: ConfirmationProps) {
   return (
     <div className="p-4 border rounded shadow-md">
@@ -45,12 +47,24 @@ export default function Confirmation({
       )}
       <div className="mt-4 flex gap-2">
         <button
-          className="px-4 py-2 bg-green-600 text-white rounded"
+          className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed" //
           onClick={onConfirm}
+          disabled={isSubmitting}
         >
-          Confirmar
+          {isSubmitting ? (
+            <>
+              <div className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2 align-middle"></div>
+              Confirmando...
+            </>
+          ) : (
+            'Confirmar'
+          )}
         </button>
-        <button className="px-4 py-2 bg-gray-300 rounded" onClick={onReset}>
+        <button
+          className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed" // 👈 ADICIONE disabled:
+          onClick={onReset}
+          disabled={isSubmitting}
+        >
           Reiniciar
         </button>
       </div>

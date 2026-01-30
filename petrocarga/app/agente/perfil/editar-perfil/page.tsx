@@ -6,16 +6,22 @@ import { getAgenteByUserId } from '@/lib/api/agenteApi';
 import { Agente } from '@/lib/types/agente';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function EditarAgentePerfil() {
   const { user } = useAuth();
   const params = useParams() as { id: string };
+  const router = useRouter();
 
   const [agente, setAgente] = useState<Agente | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+
+  // Função para redirecionar após edição bem-sucedida
+  const handleEdicaoSuccess = () => {
+    router.push('/agente/perfil');
+  };
 
   useEffect(() => {
     if (!user?.id) {
@@ -127,7 +133,7 @@ export default function EditarAgentePerfil() {
                 </Link>
               </div>
 
-              {/* Conteúdo centralizado com destaque */}
+              {/* Conteúdo */}
               <div className="text-center pt-4 sm:pt-8 lg:pt-12 pb-6 sm:pb-8">
                 {/* Ícone decorativo */}
                 <div className="flex justify-center mb-4 sm:mb-6">
@@ -177,7 +183,8 @@ export default function EditarAgentePerfil() {
           <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {agente ? (
               <div className="p-3 xs:p-4 sm:p-6 lg:p-8">
-                <EditarAgente agente={agente} />
+                {/* Passe a função de callback para o componente filho */}
+                <EditarAgente agente={agente} onSuccess={handleEdicaoSuccess} />
               </div>
             ) : (
               <div className="p-4 sm:p-6 md:p-8 text-center">

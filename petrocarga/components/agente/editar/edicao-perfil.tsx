@@ -1,7 +1,7 @@
 'use client';
 
 import { Agente } from '@/lib/types/agente';
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
 import { atualizarAgente } from '@/lib/api/agenteApi';
 import {
   Card,
@@ -17,7 +17,13 @@ import FormItem from '@/components/form/form-item';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-export default function EditarAgente({ agente }: { agente: Agente }) {
+// Adicione a interface com onSuccess
+interface EditarAgenteProps {
+  agente: Agente;
+  onSuccess?: () => void;
+}
+
+export default function EditarAgente({ agente, onSuccess }: EditarAgenteProps) {
   // Wrapper para passar o token na action
   const atualizar = async (prevState: unknown, formData: FormData) => {
     return atualizarAgente(formData);
@@ -27,6 +33,16 @@ export default function EditarAgente({ agente }: { agente: Agente }) {
     atualizar,
     null,
   );
+
+  useEffect(() => {
+    if (state && !state.error && state.message && onSuccess) {
+      const timer = setTimeout(() => {
+        onSuccess();
+      }, 250);
+
+      return () => clearTimeout(timer);
+    }
+  }, [state, onSuccess]);
 
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
@@ -63,7 +79,14 @@ export default function EditarAgente({ agente }: { agente: Agente }) {
                 ) : (
                   <CheckCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
                 )}
-                <span className="text-sm md:text-base">{state.message}</span>
+                <div>
+                  <span className="text-sm md:text-base">{state.message}</span>
+                  {!state.error && (
+                    <p className="text-green-700 text-sm mt-1">
+                      Redirecionando para o perfil...
+                    </p>
+                  )}
+                </div>
               </div>
             )}
 

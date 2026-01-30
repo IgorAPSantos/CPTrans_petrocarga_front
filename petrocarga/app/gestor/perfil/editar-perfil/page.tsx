@@ -6,16 +6,21 @@ import { getGestorByUserId } from '@/lib/api/gestorApi';
 import { Gestor } from '@/lib/types/gestor';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function EditarGestorPerfil() {
   const { user } = useAuth();
   const params = useParams() as { id: string };
+  const router = useRouter();
 
   const [gestor, setGestor] = useState<Gestor | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
+
+  const handleEdicaoSuccess = () => {
+    router.push('/gestor/perfil');
+  };
 
   useEffect(() => {
     if (!user?.id) {
@@ -156,7 +161,7 @@ export default function EditarGestorPerfil() {
 
                 {/* Título principal */}
                 <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight mb-3">
-                  Editção de Perfil
+                  Edição de Perfil
                 </h1>
 
                 {/* Descrição específica para gestor */}
@@ -183,7 +188,8 @@ export default function EditarGestorPerfil() {
           <div className="bg-white rounded-lg sm:rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             {gestor ? (
               <div className="p-3 xs:p-4 sm:p-6 lg:p-8">
-                <EditarGestor gestor={gestor} />
+                {/* Passe a função de callback para o componente filho */}
+                <EditarGestor gestor={gestor} onSuccess={handleEdicaoSuccess} />
               </div>
             ) : (
               <div className="p-4 sm:p-6 md:p-8 text-center">
