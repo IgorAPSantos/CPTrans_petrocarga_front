@@ -39,7 +39,6 @@ export function Navbar() {
   return (
     <header className="bg-blue-800 text-white relative">
       <nav className="p-4 max-w-[1400px] mx-auto flex items-center justify-between">
-        
         {/* --- LADO ESQUERDO: SINO (MOBILE) / LOGO (DESKTOP/MOBILE) --- */}
         <div className="flex items-center justify-start md:w-1/4">
           {/* Sino Mobile */}
@@ -78,7 +77,9 @@ export function Navbar() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
                   <DropdownMenuItem asChild>
-                    <Link href="/gestor/visualizar-vagas">Visualizar Vagas</Link>
+                    <Link href="/gestor/visualizar-vagas">
+                      Visualizar Vagas
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/gestor/registrar-vagas">Adicionar Vaga</Link>
@@ -110,13 +111,19 @@ export function Navbar() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
                   <DropdownMenuItem asChild>
-                    <Link href="/gestor/agentes" className="flex items-center gap-2">
+                    <Link
+                      href="/gestor/agentes"
+                      className="flex items-center gap-2"
+                    >
                       <Users className="h-4 w-4" /> Agentes
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/gestor/cadastrar-agente" className="flex items-center gap-2">
-                      <Users className="h-4 w-4" /> Adicionar Agente
+                    <Link
+                      href="/gestor/cadastrar-agente"
+                      className="flex items-center gap-2"
+                    >
+                      <Users className="h-4 w-4" /> Adicionar
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -131,12 +138,18 @@ export function Navbar() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
                     <DropdownMenuItem asChild>
-                      <Link href="/gestor/gestores" className="flex items-center gap-2">
+                      <Link
+                        href="/gestor/gestores"
+                        className="flex items-center gap-2"
+                      >
                         <User className="h-4 w-4" /> Ver Gestores
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link href="/gestor/adicionar-gestores" className="flex items-center gap-2">
+                      <Link
+                        href="/gestor/adicionar-gestores"
+                        className="flex items-center gap-2"
+                      >
                         <User className="h-4 w-4" /> Adicionar
                       </Link>
                     </DropdownMenuItem>
@@ -150,7 +163,10 @@ export function Navbar() {
         {/* --- LADO DIREITO: SINO/PERFIL (DESKTOP) / HAMBURGUER (MOBILE) --- */}
         <div className="flex items-center justify-end md:w-1/4 gap-4">
           {/* Sino Desktop */}
-          <Link href="/gestor/notificacoes" className="hidden md:flex relative p-2 hover:bg-blue-700 rounded-lg transition-colors items-center">
+          <Link
+            href="/gestor/notificacoes"
+            className="hidden md:flex relative p-2 hover:bg-blue-700 rounded-lg transition-colors items-center"
+          >
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
               <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center animate-pulse">
@@ -170,7 +186,10 @@ export function Navbar() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
                   <DropdownMenuItem asChild>
-                    <Link href="/gestor/perfil" className="flex items-center gap-2">
+                    <Link
+                      href="/gestor/perfil"
+                      className="flex items-center gap-2"
+                    >
                       <UserCircle className="h-4 w-4" /> Meu Perfil
                     </Link>
                   </DropdownMenuItem>
@@ -183,54 +202,149 @@ export function Navbar() {
           </div>
 
           {/* Hambúrguer Mobile */}
-          <button className="text-2xl hover:text-gray-300 p-2 md:hidden" onClick={() => setMenuAberto(!menuAberto)}>
+          <button
+            className="text-2xl hover:text-gray-300 p-2 md:hidden"
+            onClick={() => setMenuAberto(!menuAberto)}
+          >
             ☰
           </button>
         </div>
       </nav>
 
       {/* --- MENU MOBILE EXPANSÍVEL --- */}
-      <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${menuAberto ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}>
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${menuAberto ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}
+      >
         <ul className="flex flex-col gap-4 bg-blue-500 p-4 shadow-md">
           <li>
-            <Link href="/gestor/relatorio" onClick={() => setMenuAberto(false)} className="flex items-center gap-2 py-2 border-b border-blue-400">
+            <Link
+              href="/gestor/relatorio"
+              onClick={() => setMenuAberto(false)}
+              className="flex items-center gap-2 py-2 border-b border-blue-400"
+            >
               <FileText className="h-4 w-4" /> Relatório
             </Link>
           </li>
           <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
-            <span className="font-bold text-sm text-blue-200 uppercase">Vagas</span>
-            <Link href="/gestor/visualizar-vagas" onClick={() => setMenuAberto(false)} className="pl-2">Visualizar Vagas</Link>
-            <Link href="/gestor/registrar-vagas" onClick={() => setMenuAberto(false)} className="pl-2">Adicionar Vaga</Link>
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Vagas
+            </span>
+            <Link
+              href="/gestor/visualizar-vagas"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Visualizar Vagas
+            </Link>
+            <Link
+              href="/gestor/registrar-vagas"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Adicionar Vaga
+            </Link>
           </li>
-          <li><Link href="/gestor/disponibilidade-vagas" onClick={() => setMenuAberto(false)} className="block py-1">Disponibilidade</Link></li>
-          <li><Link href="/gestor/reservas" onClick={() => setMenuAberto(false)} className="block py-1">Reservas</Link></li>
-          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
-            <span className="font-bold text-sm text-blue-200 uppercase">Motoristas</span>
-            <Link href="/gestor/motoristas" onClick={() => setMenuAberto(false)} className="pl-2">Ver Motoristas</Link>
-            <Link href="/gestor/denuncias" onClick={() => setMenuAberto(false)} className="pl-2">Denúncias</Link>
-            <Link href="/gestor/enviar-notificacoes" onClick={() => setMenuAberto(false)} className="pl-2">Enviar Notificações</Link>
+          <li>
+            <Link
+              href="/gestor/disponibilidade-vagas"
+              onClick={() => setMenuAberto(false)}
+              className="block py-1"
+            >
+              Disponibilidade
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="/gestor/reservas"
+              onClick={() => setMenuAberto(false)}
+              className="block py-1"
+            >
+              Reservas
+            </Link>
           </li>
           <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
-            <span className="font-bold text-sm text-blue-200 uppercase">Agentes</span>
-            <Link href="/gestor/agentes" onClick={() => setMenuAberto(false)} className="pl-2">Ver Agentes</Link>
-            <Link href="/gestor/cadastrar-agente" onClick={() => setMenuAberto(false)} className="pl-2">Adicionar Agente</Link>
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Motoristas
+            </span>
+            <Link
+              href="/gestor/motoristas"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Ver Motoristas
+            </Link>
+            <Link
+              href="/gestor/denuncias"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Denúncias
+            </Link>
+            <Link
+              href="/gestor/enviar-notificacoes"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Enviar Notificações
+            </Link>
+          </li>
+          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Agentes
+            </span>
+            <Link
+              href="/gestor/agentes"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Ver Agentes
+            </Link>
+            <Link
+              href="/gestor/cadastrar-agente"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Adicionar Agente
+            </Link>
           </li>
           {isAdmin && (
             <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
-              <span className="font-bold text-sm text-yellow-300 uppercase">Admin</span>
-              <Link href="/gestor/gestores" onClick={() => setMenuAberto(false)} className="pl-2">Gestores</Link>
-              <Link href="/gestor/adicionar-gestores" onClick={() => setMenuAberto(false)} className="pl-2">Adicionar Gestor</Link>
+              <span className="font-bold text-sm text-yellow-300 uppercase">
+                Admin
+              </span>
+              <Link
+                href="/gestor/gestores"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Gestores
+              </Link>
+              <Link
+                href="/gestor/adicionar-gestores"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Adicionar Gestor
+              </Link>
             </li>
           )}
           {!isAdmin && (
             <li>
-              <Link href="/gestor/perfil" onClick={() => setMenuAberto(false)} className="flex items-center gap-2 py-1">
+              <Link
+                href="/gestor/perfil"
+                onClick={() => setMenuAberto(false)}
+                className="flex items-center gap-2 py-1"
+              >
                 <UserCircle className="h-4 w-4" /> Meu Perfil
               </Link>
             </li>
           )}
           <li>
-            <Link href="/gestor/guia" onClick={() => setMenuAberto(false)} className="flex items-center gap-2 py-1">
+            <Link
+              href="/gestor/guia"
+              onClick={() => setMenuAberto(false)}
+              className="flex items-center gap-2 py-1"
+            >
               <BookOpen className="h-4 w-4" /> Guia
             </Link>
           </li>
