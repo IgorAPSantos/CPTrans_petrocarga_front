@@ -42,22 +42,31 @@ export default function ReservaAgente({
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState<boolean | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // 👈 NOVO: Estado de loading
 
   // ==========================
   // CONFIRMAR RESERVA
   // ==========================
   const onConfirm = async () => {
-    const result = await handleConfirm();
+    if (isSubmitting) return; // 👈 NOVO: Previne clique duplo
 
-    if (!result.success) {
-      toast.error('Erro ao confirmar reserva');
-    } else {
-      toast.success('Reserva confirmada com sucesso!');
+    setIsSubmitting(true); // 👈 NOVO: Ativa o loading
+
+    try {
+      const result = await handleConfirm();
+
+      if (!result.success) {
+        toast.error('Erro ao confirmar reserva');
+      } else {
+        toast.success('Reserva confirmada com sucesso!');
+      }
+
+      setSuccess(result.success);
+      setFeedbackMessage(result.message ?? null);
+      setStep(6);
+    } finally {
+      setIsSubmitting(false); // 👈 NOVO: Desativa o loading (sempre executa)
     }
-
-    setSuccess(result.success);
-    setFeedbackMessage(result.message ?? null);
-    setStep(6);
   };
 
   const toMinutes = (h: string) => {
@@ -231,6 +240,7 @@ export default function ReservaAgente({
             vehicleName={`${tipoVeiculoAgente} - ${placaAgente}`}
             onConfirm={onConfirm}
             onReset={() => setStep(4)}
+            isSubmitting={isSubmitting} // 👈 NOVO: Passa o estado de loading
           />
         )}
 
