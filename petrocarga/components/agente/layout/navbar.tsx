@@ -5,33 +5,65 @@ import { useState } from 'react';
 import Logo from '@/public/Logo.png';
 import Image from 'next/image';
 import { LogoutButton } from '@/components/logoutButton/logoutButton';
+import { useNotifications } from '@/context/NotificationContext';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ChevronDown, User } from 'lucide-react';
+import { ChevronDown, User, Bell } from 'lucide-react';
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
+  const { notifications, isConnected } = useNotifications();
+
+  // 🔴 Contador de notificações NÃO lidas
+  const unreadCount = notifications.filter(
+    (notification) => !notification.lida,
+  ).length;
 
   const links = [
     { href: '/agente/reserva-rapida', label: 'Reserva Rapida' },
     { href: '/agente/lista-reserva', label: 'Lista de Reservas' },
+    { href: '/agente/denuncias', label: 'Denúncias' },
     { href: '/agente/consulta', label: 'Consultar Placa' },
   ];
 
   return (
     <header className="bg-blue-800 text-white relative">
-      <nav className="flex items-center justify-between p-4 max-w-6xl mx-auto">
-        {/* Logo */}
+      <nav className="grid grid-cols-3 items-center p-4 max-w-6xl mx-auto md:flex md:justify-between">
+        {/* 🔔 SINO - MOBILE */}
+        <Link
+          href="/agente/notificacoes"
+          className="md:hidden flex items-center justify-start"
+        >
+          <div className="relative w-8 h-8 flex items-center justify-center">
+            <Bell className="h-6 w-6" />
+
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </div>
+        </Link>
+
+        {/* LOGO */}
         <Link
           href="/agente"
-          className="flex items-center space-x-2 text-xl font-bold hover:text-gray-300"
+          className="flex justify-center md:justify-start"
         >
           <Image src={Logo} alt="Logo da Cptrans" className="w-16 h-auto" />
         </Link>
+
+        {/* BOTÃO MENU - MOBILE */}
+        <button
+          className="md:hidden text-2xl hover:text-gray-300 flex justify-end"
+          onClick={() => setMenuAberto(!menuAberto)}
+        >
+          ☰
+        </button>
 
         {/* MENU DESKTOP */}
         <ul className="hidden md:flex gap-6 text-lg items-center">
@@ -41,7 +73,7 @@ export function Navbar() {
             </li>
           ))}
 
-          {/* Dropdown Meu Perfil */}
+          {/* PERFIL */}
           <li>
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
@@ -59,26 +91,41 @@ export function Navbar() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="p-0 m-0 focus:bg-gray-100">
-                  {/* Redirect após logout */}
                   <LogoutButton />
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </li>
-        </ul>
 
-        {/* BOTÃO HAMBURGUER (mobile) */}
-        <button
-          className="md:hidden text-2xl hover:text-gray-300"
-          onClick={() => setMenuAberto(!menuAberto)}
-          aria-expanded={menuAberto}
-          aria-label={menuAberto ? 'Fechar menu' : 'Abrir menu'}
-        >
-          ☰
-        </button>
+          {/* 🔔 SINO - DESKTOP */}
+          <li>
+            <Link
+              href="/agente/notificacoes"
+              className="relative flex items-center p-2 rounded-lg hover:bg-blue-700 transition-colors"
+              aria-label={`Notificações${
+                unreadCount > 0 ? `, ${unreadCount} não lidas` : ''
+              }`}
+            >
+              <Bell className="h-5 w-5" />
+
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-pulse">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+
+              {!isConnected && (
+                <span
+                  className="absolute -bottom-1 -right-1 bg-yellow-500 rounded-full h-2 w-2 animate-pulse"
+                  title="Reconectando..."
+                />
+              )}
+            </Link>
+          </li>
+        </ul>
       </nav>
 
-      {/* MENU MOBILE COM ANIMAÇÃO */}
+      {/* MENU MOBILE */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
           menuAberto ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
@@ -97,9 +144,9 @@ export function Navbar() {
             </li>
           ))}
 
-          {/* Logout mobile */}
+          {/* LOGOUT MOBILE */}
           <li className="hover:bg-blue-700 rounded">
-            <LogoutButton mobile={true} />
+            <LogoutButton mobile />
           </li>
         </ul>
       </div>

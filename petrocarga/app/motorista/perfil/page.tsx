@@ -82,12 +82,10 @@ export default function PerfilMotorista() {
 
   if (loading) {
     return (
-      <main className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Carregando perfil...</p>
-        </div>
-      </main>
+      <div className="p-4 flex flex-col items-center justify-center min-h-[60vh] gap-2 text-center">
+        <Loader2 className="animate-spin w-6 h-6 text-blue-600" />
+        <span className="text-gray-600">Carregando perfil...</span>
+      </div>
     );
   }
 
