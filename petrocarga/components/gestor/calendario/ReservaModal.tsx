@@ -182,9 +182,6 @@ export const ReservaModal = ({
                 <p>
                   <strong>Nome:</strong> {modalState.data.reserva.motoristaNome}
                 </p>
-                <p>
-                  <strong>CPF:</strong> {modalState.data.reserva.motoristaCpf}
-                </p>
               </div>
 
               <hr />
@@ -204,7 +201,27 @@ export const ReservaModal = ({
                 </p>
                 <p>
                   <strong>Tamanho:</strong>{' '}
-                  {modalState.data.reserva.tamanhoVeiculo}m
+                  {modalState.data.reserva.tamanhoVeiculo}
+                </p>
+              </div>
+
+              <hr />
+
+              {/* Origem */}
+              <div className="space-y-1">
+                <p className="font-semibold text-base">Origem</p>
+                <p>
+                  {/* <strong>Nome:</strong> {' '} {modalState.data.reserva.origem} */}
+                </p>
+              </div>
+
+              <hr />
+
+              {/* Entrada */}
+              <div className="space-y-1">
+                <p className="font-semibold text-base">Entrada</p>
+                <p>
+                  {/* <strong>Nome:</strong> {''} {modalState.data.reserva.entrada} */}
                 </p>
               </div>
             </div>

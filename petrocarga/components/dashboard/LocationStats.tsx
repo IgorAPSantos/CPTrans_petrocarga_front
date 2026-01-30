@@ -2,16 +2,29 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LocationStat } from '@/lib/types/dashboard';
-import { MapPin, Building } from 'lucide-react';
+import { MapPin, Building, DoorOpen } from 'lucide-react';
 
 interface LocationStatsProps {
   title: string;
   data: LocationStat[];
-  icon: 'district' | 'origin';
+  icon: 'district' | 'origin' | 'entry-origin';
 }
 
 export function LocationStats({ title, data, icon }: LocationStatsProps) {
-  const IconComponent = icon === 'district' ? Building : MapPin;
+  const getIconComponent = () => {
+    switch (icon) {
+      case 'district':
+        return Building;
+      case 'origin':
+        return MapPin;
+      case 'entry-origin':
+        return DoorOpen;
+      default:
+        return MapPin;
+    }
+  };
+
+  const IconComponent = getIconComponent();
   const sortedData = [...data].sort(
     (a, b) => b.reservationCount - a.reservationCount,
   );

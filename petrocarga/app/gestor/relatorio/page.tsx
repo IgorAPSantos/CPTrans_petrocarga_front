@@ -22,7 +22,10 @@ import {
   AlertCircle,
   RefreshCw,
   Menu,
-} from 'lucide-react';
+  Clock,
+  Trash2,
+  DoorOpen,
+} from 'lucide-react'; // NOVOS ÍCONES
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -37,22 +40,15 @@ export default function RelatoriosPage() {
   const [kpisData, setKpisData] = useState<DashboardKPIs | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados separados para datas
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-
   const [activeTab, setActiveTab] = useState('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  // Ref para controlar requisições em andamento
   const isFetching = useRef(false);
 
-  // ✅ useCallback com dependências simplificadas
   const fetchDashboardData = useCallback(
     async (forceRefresh = false) => {
-      // Evita múltiplas requisições simultâneas
       if (isFetching.current && !forceRefresh) return;
-
       if (!user?.id) return;
 
       isFetching.current = true;
@@ -65,13 +61,11 @@ export default function RelatoriosPage() {
           endDate,
         });
 
-        // Faz as duas requisições separadamente
         const [summaryResult, kpisResult] = await Promise.allSettled([
           RelatorioSumario(startDate || undefined, endDate || undefined),
           RelatorioKpis(startDate || undefined, endDate || undefined),
         ]);
 
-        // Processa resultado do summary
         if (summaryResult.status === 'fulfilled') {
           const data = summaryResult.value;
           setDashboardData(data);
@@ -81,7 +75,6 @@ export default function RelatoriosPage() {
           setError('Erro ao carregar resumo do dashboard');
         }
 
-        // Processa resultado dos KPIs
         if (kpisResult.status === 'fulfilled') {
           const data = kpisResult.value;
           setKpisData(data);
@@ -95,7 +88,6 @@ export default function RelatoriosPage() {
           );
         }
 
-        // Se ambos falharem, mostra erro geral
         if (
           summaryResult.status === 'rejected' &&
           kpisResult.status === 'rejected'
@@ -113,22 +105,19 @@ export default function RelatoriosPage() {
       }
     },
     [user?.id, startDate, endDate],
-  ); // ✅ Apenas dependências essenciais
+  );
 
-  // ✅ useEffect que dispara quando fetchDashboardData muda
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  // ✅ Handler que apenas atualiza os estados
   const handleDateChange = (newStartDate: string, newEndDate: string) => {
     setStartDate(newStartDate);
     setEndDate(newEndDate);
-    // O useEffect vai disparar automaticamente quando startDate/endDate mudarem
   };
 
   const handleRefresh = () => {
-    fetchDashboardData(true); // forceRefresh = true
+    fetchDashboardData(true);
   };
 
   if (loading && !dashboardData && !kpisData) {
@@ -148,7 +137,6 @@ export default function RelatoriosPage() {
       <div className="mb-4 md:mb-6 lg:mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
           <div className="flex items-center justify-between md:justify-start gap-3">
-            {/* Mobile Menu Button - Visível apenas em telas pequenas */}
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button variant="outline" size="icon">
@@ -176,7 +164,6 @@ export default function RelatoriosPage() {
             </div>
           </div>
 
-          {/* Descrição mobile */}
           <p className="text-gray-600 text-sm md:hidden mt-2">
             Visualize métricas e estatísticas do sistema
           </p>
@@ -203,7 +190,6 @@ export default function RelatoriosPage() {
         </div>
       </div>
 
-      {/* Mensagem de erro - Responsiva */}
       {error && (
         <Card className="mb-4 md:mb-6">
           <CardContent className="p-4 md:p-6">
@@ -232,10 +218,8 @@ export default function RelatoriosPage() {
         </Card>
       )}
 
-      {/* Só mostra o conteúdo se não houver erro e houver dados */}
       {!error && (dashboardData || kpisData) ? (
         <>
-          {/* Filtros - Escondido no mobile (mostrado no menu lateral) */}
           <Card className="mb-4 md:mb-6 hidden md:block">
             <CardHeader className="p-4 md:p-6">
               <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -258,7 +242,6 @@ export default function RelatoriosPage() {
             </CardContent>
           </Card>
 
-          {/* Tabs Responsivos */}
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -278,9 +261,8 @@ export default function RelatoriosPage() {
               </TabsList>
             </div>
 
-            {/* Overview Tab */}
+            {/* Overview Tab - ATUALIZADO COM NOVOS KPIs */}
             <TabsContent value="overview" className="space-y-4 md:space-y-6">
-              {/* KPIs Grid Responsivo */}
               {kpisData && (
                 <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                   <KPICard
@@ -294,6 +276,12 @@ export default function RelatoriosPage() {
                     value={`${kpisData.occupancyRate}%`}
                     icon={TrendingUp}
                     description="Uso das vagas"
+                  />
+                  <KPICard
+                    title="Reservas Pendentes"
+                    value={kpisData.pendingReservations} // NOVO KPI
+                    icon={Clock}
+                    description="Reservas aguardando"
                   />
                   <KPICard
                     title="Reservas Ativas"
@@ -314,6 +302,12 @@ export default function RelatoriosPage() {
                     description="Reservas canceladas"
                   />
                   <KPICard
+                    title="Reservas Removidas"
+                    value={kpisData.removedReservations} // NOVO KPI
+                    icon={Trash2}
+                    description="Reservas removidas"
+                  />
+                  <KPICard
                     title="Reservas Totais"
                     value={kpisData.totalReservations}
                     icon={BarChart3}
@@ -328,7 +322,6 @@ export default function RelatoriosPage() {
                 </div>
               )}
 
-              {/* Charts Grid Responsivo */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 {dashboardData?.vehicleTypes &&
                 dashboardData.vehicleTypes.length > 0 ? (
@@ -364,14 +357,13 @@ export default function RelatoriosPage() {
               </div>
             </TabsContent>
 
-            {/* Vehicles Tab */}
+            {/* Vehicles Tab - MANTIDO IGUAL */}
             <TabsContent value="vehicles" className="space-y-4 md:space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 {dashboardData?.vehicleTypes &&
                 dashboardData.vehicleTypes.length > 0 ? (
                   <>
                     <VehicleTypesChart data={dashboardData.vehicleTypes} />
-
                     <Card>
                       <CardHeader className="p-4 md:p-6">
                         <CardTitle className="text-base md:text-lg">
@@ -439,9 +431,9 @@ export default function RelatoriosPage() {
               </div>
             </TabsContent>
 
-            {/* Locations Tab */}
+            {/* Locations Tab - ATUALIZADO COM ENTRY ORIGINS */}
             <TabsContent value="locations" className="space-y-4 md:space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 {dashboardData?.districts &&
                 dashboardData.districts.length > 0 ? (
                   <LocationStats
@@ -476,10 +468,29 @@ export default function RelatoriosPage() {
                     </CardContent>
                   </Card>
                 )}
+
+                {dashboardData?.entryOrigins &&
+                dashboardData.entryOrigins.length > 0 ? (
+                  <LocationStats
+                    title="Cidades de Entrada"
+                    data={dashboardData.entryOrigins}
+                    icon="entry-origin"
+                  />
+                ) : (
+                  <Card className="h-full">
+                    <CardContent className="flex flex-col items-center justify-center h-full p-4 md:p-6 min-h-[300px]">
+                      <DoorOpen className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mb-2 md:mb-3" />
+                      <p className="text-gray-600 text-center text-sm md:text-base">
+                        Nenhum dado de cidades de entrada disponível
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
-              {/* Insights */}
-              {(dashboardData?.districts || dashboardData?.origins) && (
+              {(dashboardData?.districts ||
+                dashboardData?.origins ||
+                dashboardData?.entryOrigins) && (
                 <Card>
                   <CardHeader className="p-4 md:p-6">
                     <CardTitle className="flex items-center gap-2 text-base md:text-lg">
@@ -519,6 +530,22 @@ export default function RelatoriosPage() {
                           </p>
                         </div>
                       )}
+
+                      {dashboardData?.entryOrigins?.[0] && (
+                        <div className="p-3 md:p-4 bg-purple-50 rounded-lg">
+                          <h4 className="font-medium text-purple-900 mb-2 text-sm md:text-base">
+                            Entrada Principal
+                          </h4>
+                          <p className="text-purple-700 text-sm md:text-base">
+                            <span className="font-semibold">
+                              {dashboardData.entryOrigins[0].name}
+                            </span>{' '}
+                            é a cidade de entrada mais comum (
+                            {dashboardData.entryOrigins[0].reservationCount}{' '}
+                            reservas)
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -526,7 +553,6 @@ export default function RelatoriosPage() {
             </TabsContent>
           </Tabs>
 
-          {/* Resumo do Período Responsivo */}
           {kpisData && (
             <Card className="mt-4 md:mt-6">
               <CardHeader className="p-4 md:p-6">
@@ -535,7 +561,7 @@ export default function RelatoriosPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 md:p-6 pt-0">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                   <div className="p-3 md:p-4 bg-gray-50 rounded-lg">
                     <p className="text-xs md:text-sm text-gray-600">
                       Período analisado
@@ -582,13 +608,28 @@ export default function RelatoriosPage() {
                       %
                     </p>
                   </div>
+
+                  <div className="p-3 md:p-4 bg-gray-50 rounded-lg">
+                    <p className="text-xs md:text-sm text-gray-600">
+                      Taxa de conclusão
+                    </p>
+                    <p className="font-semibold text-sm md:text-base">
+                      {kpisData.totalReservations
+                        ? (
+                            (kpisData.completedReservations /
+                              kpisData.totalReservations) *
+                            100
+                          ).toFixed(1)
+                        : 0}
+                      %
+                    </p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
           )}
         </>
       ) : !error && !loading ? (
-        // Mensagem quando não há dados, erro ou loading
         <Card className="mb-4 md:mb-6">
           <CardContent className="p-6 md:p-12 text-center min-h-[300px] flex flex-col items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-3 md:gap-4">

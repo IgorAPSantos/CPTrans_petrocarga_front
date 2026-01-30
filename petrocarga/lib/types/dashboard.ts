@@ -1,12 +1,11 @@
 export interface DashboardKPIs {
-  success: any;
-  message: any;
-  data: null;
   totalSlots: number;
   activeReservations: number;
+  pendingReservations: number; // NOVO CAMPO
   occupancyRate: number;
   completedReservations: number;
   canceledReservations: number;
+  removedReservations: number; // NOVO CAMPO
   totalReservations: number;
   multipleSlotReservations: number;
   startDate: string;
@@ -21,18 +20,16 @@ export interface VehicleType {
 
 export interface LocationStat {
   name: string;
-  type: 'district' | 'origin';
+  type: 'district' | 'origin' | 'entry-origin';
   reservationCount: number;
 }
 
 export interface DashboardSummary {
-  success: any;
-  message: string;
-  data: null;
   kpis: DashboardKPIs;
   vehicleTypes: VehicleType[];
   districts: LocationStat[];
   origins: LocationStat[];
+  entryOrigins: LocationStat[];
 }
 
 export interface DateRange {
