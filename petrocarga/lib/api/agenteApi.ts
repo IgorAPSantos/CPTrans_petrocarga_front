@@ -12,7 +12,7 @@ interface Agente {
   senha?: string;
 }
 
-interface AgenteResponse {
+export interface AgenteResponse {
   error?: boolean;
   message?: string;
   valores?: Agente;
