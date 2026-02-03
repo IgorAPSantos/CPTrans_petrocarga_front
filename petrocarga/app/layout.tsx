@@ -5,6 +5,7 @@ import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import { NotificationWrapper } from '@/components/notification/notificationWrapper';
 import { Toaster } from 'react-hot-toast';
+import { Analytics } from '@vercel/analytics/next';
 
 const mavenPro = Maven_Pro({
   weight: 'variable',
@@ -44,6 +45,7 @@ export default function RootLayout({
         <AuthProvider>
           <NotificationWrapper>{children}</NotificationWrapper>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
