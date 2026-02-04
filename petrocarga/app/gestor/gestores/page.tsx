@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
 import { getGestores } from '@/lib/api/gestorApi';
+import { FiltrosGestor } from '@/lib/types/gestor';
 import {
   Loader2,
   Search,
@@ -26,30 +27,75 @@ export default function GestoresPage() {
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [mostrarAtivos, setMostrarAtivos] = useState<boolean | null>(null);
+  const [isLoadingGestores, setIsLoadingGestores] = useState(false);
 
-  useEffect(() => {
-    if (!user?.id) return;
+  // Buscar gestores com filtros
+  const fetchGestores = useCallback(
+    async (ativo?: boolean | null) => {
+      if (!user?.id) return;
 
-    const fetchGestores = async () => {
-      setLoading(true);
+      setIsLoadingGestores(true);
       setError(null);
 
       try {
-        const result = await getGestores();
-        setGestores(result.gestores);
+        const filtros: FiltrosGestor = {};
+        if (ativo !== null) {
+          filtros.ativo = ativo;
+        }
+
+        const result = await getGestores(filtros);
+        if (result.error) {
+          setError(result.message || 'Erro ao carregar gestores');
+        } else {
+          setGestores(result.gestores || []);
+        }
       } catch (err) {
         console.error('Erro ao carregar os gestores:', err);
         setError(
           'Erro ao buscar os gestores cadastrados. Tente novamente mais tarde.',
         );
       } finally {
+        setIsLoadingGestores(false);
         setLoading(false);
       }
-    };
+    },
+    [user?.id],
+  );
 
+  // Buscar gestores inicialmente
+  useEffect(() => {
     fetchGestores();
-  }, [user?.id]);
+  }, [fetchGestores]);
 
+  // Alternar filtro de ativos
+  const toggleAtivos = () => {
+    if (mostrarAtivos === null) {
+      setMostrarAtivos(true); // Mostrar apenas ativos
+    } else if (mostrarAtivos === true) {
+      setMostrarAtivos(false); // Mostrar apenas inativos
+    } else {
+      setMostrarAtivos(null); // Mostrar todos
+    }
+  };
+
+  // Aplicar filtro quando mostrarAtivos mudar
+  useEffect(() => {
+    if (!loading) {
+      setPaginaAtual(1);
+      fetchGestores(mostrarAtivos);
+    }
+  }, [mostrarAtivos]);
+
+  // Limpar filtros (mostrar todos)
+  const mostrarTodos = () => {
+    setMostrarAtivos(null);
+    setBusca('');
+    setPaginaAtual(1);
+    fetchGestores(null);
+  };
+
+  // Filtrar gestores localmente para busca rápida
   const gestoresFiltrados = useMemo(() => {
     if (!busca.trim()) return gestores;
 
@@ -111,7 +157,7 @@ export default function GestoresPage() {
     );
   }
 
-  if (error) {
+  if (error && !gestores.length) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
@@ -124,7 +170,7 @@ export default function GestoresPage() {
             </h2>
             <p className="text-gray-600 mb-6 text-sm sm:text-base">{error}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => fetchGestores(mostrarAtivos)}
               className="inline-flex items-center justify-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium text-sm sm:text-base"
             >
               Tentar novamente
@@ -179,38 +225,93 @@ export default function GestoresPage() {
                 </div>
               </div>
 
-              {/* Estatísticas */}
+              {/* Botões de ação */}
               <div className="flex items-center gap-3">
+                {/* Filtro de Ativos/Inativos */}
+                <button
+                  onClick={toggleAtivos}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
+                    mostrarAtivos === true
+                      ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
+                      : mostrarAtivos === false
+                        ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100'
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Filter className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    {mostrarAtivos === true
+                      ? 'Ativos'
+                      : mostrarAtivos === false
+                        ? 'Inativos'
+                        : 'Todos'}
+                  </span>
+                  {mostrarAtivos !== null && (
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        mostrarAtivos === true ? 'bg-green-600' : 'bg-red-600'
+                      }`}
+                    ></span>
+                  )}
+                </button>
+
+                {/* Botão para limpar todos os filtros */}
+                {(busca || mostrarAtivos !== null) && (
+                  <button
+                    onClick={mostrarTodos}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+                  >
+                    <X className="h-4 w-4" />
+                    Limpar Filtros
+                  </button>
+                )}
+
+                {/* Estatísticas */}
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg">
                   <Users className="h-4 w-4 text-blue-600" />
                   <span className="text-sm font-medium text-blue-800">
                     {gestores.length} gestores
                   </span>
                 </div>
-                {busca && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg">
-                    <Filter className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">
-                      {gestoresFiltrados.length} resultado(s)
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Informação da busca */}
-            {busca && (
+            {/* Informação dos filtros aplicados */}
+            {(busca || mostrarAtivos !== null) && (
               <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="text-sm text-gray-600">
-                  Resultados para "
-                  <span className="font-medium text-blue-600">{busca}</span>"
+                  {busca ? (
+                    <>
+                      Resultados para "
+                      <span className="font-medium text-blue-600">{busca}</span>
+                      "
+                      {mostrarAtivos !== null && (
+                        <>
+                          {' '}
+                          |{' '}
+                          <span className="font-medium">
+                            {mostrarAtivos === true ? 'Ativos' : 'Inativos'}
+                          </span>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      Filtrando por:{' '}
+                      <span className="font-medium text-blue-600">
+                        {mostrarAtivos === true
+                          ? 'Apenas ativos'
+                          : 'Apenas inativos'}
+                      </span>
+                    </>
+                  )}
                 </div>
                 {gestoresFiltrados.length === 0 ? (
                   <button
-                    onClick={() => setBusca('')}
+                    onClick={mostrarTodos}
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
                   >
-                    Limpar busca
+                    Ver todos os gestores
                   </button>
                 ) : (
                   <div className="text-sm text-gray-500">
@@ -223,12 +324,24 @@ export default function GestoresPage() {
           </div>
         </div>
 
+        {/* Indicador de carregamento de filtros */}
+        {isLoadingGestores && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
+              <span className="text-sm text-blue-700">
+                Aplicando filtros...
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Conteúdo principal */}
         <div className="space-y-4 sm:space-y-6">
           {/* Estado vazio */}
           {gestoresFiltrados.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 sm:p-12 text-center">
-              {busca ? (
+              {busca || mostrarAtivos !== null ? (
                 <div className="max-w-md mx-auto">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <Search className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
@@ -237,12 +350,14 @@ export default function GestoresPage() {
                     Nenhum gestor encontrado
                   </h3>
                   <p className="text-gray-600 mb-6 text-sm sm:text-base">
-                    Não encontramos gestores para "
-                    <span className="font-medium">{busca}</span>". Tente buscar
-                    por nome, email ou telefone.
+                    {busca
+                      ? `Não encontramos gestores para "${busca}".`
+                      : `Não encontramos gestores ${
+                          mostrarAtivos === true ? 'ativos' : 'inativos'
+                        }.`}
                   </p>
                   <button
-                    onClick={() => setBusca('')}
+                    onClick={mostrarTodos}
                     className="px-4 sm:px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm sm:text-base"
                   >
                     Ver todos os gestores
@@ -285,6 +400,9 @@ export default function GestoresPage() {
                   </span>{' '}
                   gestor(es)
                   {busca && ' encontrados'}
+                  {mostrarAtivos !== null && !busca && (
+                    <> ({mostrarAtivos === true ? 'ativos' : 'inativos'})</>
+                  )}
                 </div>
 
                 {totalPaginas > 1 && (
@@ -440,27 +558,6 @@ export default function GestoresPage() {
                       <span className="hidden sm:inline">Última</span>
                       <ChevronsRight className="h-4 w-4" />
                     </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Dica de busca */}
-              {gestores.length > 9 && !busca && (
-                <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-blue-50 border border-blue-200 rounded-xl">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                      <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-blue-900 text-sm sm:text-base mb-1">
-                        Use a busca para filtrar resultados
-                      </h4>
-                      <p className="text-blue-700 text-xs sm:text-sm">
-                        Encontre gestores específicos rapidamente buscando por
-                        nome, email ou telefone. A paginação divide
-                        automaticamente os resultados.
-                      </p>
-                    </div>
                   </div>
                 </div>
               )}
