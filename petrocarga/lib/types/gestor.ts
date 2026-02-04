@@ -6,3 +6,10 @@ export type Gestor = {
   email: string;
   senha: string;
 };
+
+export interface FiltrosGestor {
+  nome?: string;
+  email?: string;
+  telefone?: string;
+  ativo?: boolean;
+}

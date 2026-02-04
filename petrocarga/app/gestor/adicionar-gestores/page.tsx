@@ -15,7 +15,6 @@ import {
   CircleAlert,
   UserIcon,
   CheckCircle,
-  ArrowLeft,
   Shield,
   ChevronLeft,
 } from 'lucide-react';

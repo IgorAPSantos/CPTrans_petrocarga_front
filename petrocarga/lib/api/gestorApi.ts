@@ -32,7 +32,7 @@ export async function addGestor(_: unknown, formData: FormData) {
 
   const res = await clientApi(`/petrocarga/gestores`, {
     method: 'POST',
-    json: payload
+    json: payload,
   });
 
   if (!res.ok) {
@@ -41,14 +41,13 @@ export async function addGestor(_: unknown, formData: FormData) {
     try {
       const data = await res.json();
       msg = data.message ?? msg;
-    } catch { }
+    } catch {}
 
     return { error: true, message: msg, valores: payload };
   }
 
   return { error: false, message: 'Gestor cadastrado com sucesso!' };
 }
-
 
 // ----------------------
 // DELETE GESTOR
@@ -69,7 +68,7 @@ export async function deleteGestor(gestorId: string): Promise<GestorResult> {
 // ATUALIZAR GESTOR
 // ----------------------
 export async function atualizarGestor(
-  formData: FormData
+  formData: FormData,
 ): Promise<GestorResult> {
   const usuarioId = formData.get('id') as string;
 
@@ -97,19 +96,37 @@ export async function atualizarGestor(
 }
 
 // ----------------------
-// GET GESTOR
+// GET GESTORES COM FILTROS
 // ----------------------
-export async function getGestores() {
-  const res = await clientApi(`/petrocarga/gestores`, {
-    method: 'GET',
-  });
+export async function getGestores(filtros?: {
+  nome?: string;
+  email?: string;
+  telefone?: string;
+  ativo?: boolean;
+}) {
+  // Construir query string com filtros
+  const params = new URLSearchParams();
+
+  if (filtros?.nome) params.append('nome', filtros.nome);
+  if (filtros?.email) params.append('email', filtros.email);
+  if (filtros?.telefone) params.append('telefone', filtros.telefone);
+  if (filtros?.ativo !== undefined)
+    params.append('ativo', filtros.ativo.toString());
+
+  const queryString = params.toString();
+  const url = queryString
+    ? `/petrocarga/gestores?${queryString}`
+    : `/petrocarga/gestores`;
+
+  const res = await clientApi(url);
+
   if (!res.ok) {
     let msg = 'Erro ao buscar gestores';
 
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch { }
+    } catch {}
 
     return { error: true, message: msg };
   }
@@ -130,7 +147,7 @@ export async function getGestorByUserId(userId: string) {
     try {
       const err = await res.json();
       msg = err.message ?? msg;
-    } catch { }
+    } catch {}
 
     return { error: true, message: msg };
   }

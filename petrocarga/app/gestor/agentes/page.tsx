@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
 import { getAgentes } from '@/lib/api/agenteApi';
+import { FiltrosAgente } from '@/lib/types/agente';
 import {
   Loader2,
   Search,
@@ -26,30 +27,75 @@ export default function AgentesPage() {
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [mostrarAtivos, setMostrarAtivos] = useState<boolean | null>(null);
+  const [isLoadingAgentes, setIsLoadingAgentes] = useState(false);
 
-  useEffect(() => {
-    if (!user?.id) return;
+  // Buscar agentes com filtros
+  const fetchAgentes = useCallback(
+    async (ativo?: boolean | null) => {
+      if (!user?.id) return;
 
-    const fetchAgentes = async () => {
-      setLoading(true);
+      setIsLoadingAgentes(true);
       setError(null);
 
       try {
-        const result = await getAgentes();
-        setAgentes(result.agentes);
+        const filtros: FiltrosAgente = {};
+        if (ativo !== null) {
+          filtros.ativo = ativo;
+        }
+
+        const result = await getAgentes(filtros);
+        if (result.error) {
+          setError(result.message || 'Erro ao buscar agentes');
+        } else {
+          setAgentes(result.agentes || []);
+        }
       } catch (err) {
         console.error('Erro ao carregar os agentes:', err);
         setError(
           'Erro ao buscar os agentes cadastrados. Tente novamente mais tarde.',
         );
       } finally {
+        setIsLoadingAgentes(false);
         setLoading(false);
       }
-    };
+    },
+    [user?.id],
+  );
 
+  // Buscar agentes inicialmente
+  useEffect(() => {
     fetchAgentes();
-  }, [user?.id]);
+  }, [fetchAgentes]);
 
+  // Alternar filtro de ativos
+  const toggleAtivos = () => {
+    if (mostrarAtivos === null) {
+      setMostrarAtivos(true); // Mostrar apenas ativos
+    } else if (mostrarAtivos === true) {
+      setMostrarAtivos(false); // Mostrar apenas inativos
+    } else {
+      setMostrarAtivos(null); // Mostrar todos
+    }
+  };
+
+  // Aplicar filtro quando mostrarAtivos mudar
+  useEffect(() => {
+    if (!loading) {
+      setPaginaAtual(1);
+      fetchAgentes(mostrarAtivos);
+    }
+  }, [mostrarAtivos]);
+
+  // Limpar filtros (mostrar todos)
+  const mostrarTodos = () => {
+    setMostrarAtivos(null);
+    setBusca('');
+    setPaginaAtual(1);
+    fetchAgentes(null);
+  };
+
+  // Filtrar agentes localmente para busca rápida
   const agentesFiltrados = useMemo(() => {
     if (!busca.trim()) return agentes;
 
@@ -113,7 +159,7 @@ export default function AgentesPage() {
     );
   }
 
-  if (error) {
+  if (error && !agentes.length) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
@@ -126,7 +172,7 @@ export default function AgentesPage() {
             </h2>
             <p className="text-gray-600 mb-6 text-sm sm:text-base">{error}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => fetchAgentes(mostrarAtivos)}
               className="inline-flex items-center justify-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium text-sm sm:text-base"
             >
               Tentar novamente
@@ -181,38 +227,93 @@ export default function AgentesPage() {
                 </div>
               </div>
 
-              {/* Estatísticas */}
+              {/* Botões de ação */}
               <div className="flex items-center gap-3">
+                {/* Filtro de Ativos/Inativos */}
+                <button
+                  onClick={toggleAtivos}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
+                    mostrarAtivos === true
+                      ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'
+                      : mostrarAtivos === false
+                        ? 'bg-red-50 border-red-200 text-red-700 hover:bg-red-100'
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Filter className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    {mostrarAtivos === true
+                      ? 'Ativos'
+                      : mostrarAtivos === false
+                        ? 'Inativos'
+                        : 'Todos'}
+                  </span>
+                  {mostrarAtivos !== null && (
+                    <span
+                      className={`w-2 h-2 rounded-full ${
+                        mostrarAtivos === true ? 'bg-green-600' : 'bg-red-600'
+                      }`}
+                    ></span>
+                  )}
+                </button>
+
+                {/* Botão para limpar todos os filtros */}
+                {(busca || mostrarAtivos !== null) && (
+                  <button
+                    onClick={mostrarTodos}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+                  >
+                    <X className="h-4 w-4" />
+                    Limpar Filtros
+                  </button>
+                )}
+
+                {/* Estatísticas */}
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg">
                   <Users className="h-4 w-4 text-blue-600" />
                   <span className="text-sm font-medium text-blue-800">
                     {agentes.length} agentes
                   </span>
                 </div>
-                {busca && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg">
-                    <Filter className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">
-                      {agentesFiltrados.length} resultado(s)
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
 
-            {/* Informação da busca */}
-            {busca && (
+            {/* Informação dos filtros aplicados */}
+            {(busca || mostrarAtivos !== null) && (
               <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="text-sm text-gray-600">
-                  Resultados para "
-                  <span className="font-medium text-blue-600">{busca}</span>"
+                  {busca ? (
+                    <>
+                      Resultados para "
+                      <span className="font-medium text-blue-600">{busca}</span>
+                      "
+                      {mostrarAtivos !== null && (
+                        <>
+                          {' '}
+                          |{' '}
+                          <span className="font-medium">
+                            {mostrarAtivos === true ? 'Ativos' : 'Inativos'}
+                          </span>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      Filtrando por:{' '}
+                      <span className="font-medium text-blue-600">
+                        {mostrarAtivos === true
+                          ? 'Apenas ativos'
+                          : 'Apenas inativos'}
+                      </span>
+                    </>
+                  )}
                 </div>
                 {agentesFiltrados.length === 0 ? (
                   <button
-                    onClick={() => setBusca('')}
+                    onClick={mostrarTodos}
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
                   >
-                    Limpar busca
+                    Ver todos os agentes
                   </button>
                 ) : (
                   <div className="text-sm text-gray-500">
@@ -225,12 +326,24 @@ export default function AgentesPage() {
           </div>
         </div>
 
+        {/* Indicador de carregamento de filtros */}
+        {isLoadingAgentes && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
+              <span className="text-sm text-blue-700">
+                Aplicando filtros...
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Conteúdo principal */}
         <div className="space-y-4 sm:space-y-6">
           {/* Estado vazio */}
           {agentesFiltrados.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 sm:p-12 text-center">
-              {busca ? (
+              {busca || mostrarAtivos !== null ? (
                 <div className="max-w-md mx-auto">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <Search className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
@@ -239,12 +352,14 @@ export default function AgentesPage() {
                     Nenhum agente encontrado
                   </h3>
                   <p className="text-gray-600 mb-6 text-sm sm:text-base">
-                    Não encontramos agentes para "
-                    <span className="font-medium">{busca}</span>". Tente buscar
-                    por nome, email, matrícula ou telefone.
+                    {busca
+                      ? `Não encontramos agentes para "${busca}".`
+                      : `Não encontramos agentes ${
+                          mostrarAtivos === true ? 'ativos' : 'inativos'
+                        }.`}
                   </p>
                   <button
-                    onClick={() => setBusca('')}
+                    onClick={mostrarTodos}
                     className="px-4 sm:px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm sm:text-base"
                   >
                     Ver todos os agentes
@@ -285,6 +400,9 @@ export default function AgentesPage() {
                   <span className="font-medium">{agentesFiltrados.length}</span>{' '}
                   agente(s)
                   {busca && ' encontrados'}
+                  {mostrarAtivos !== null && !busca && (
+                    <> ({mostrarAtivos === true ? 'ativos' : 'inativos'})</>
+                  )}
                 </div>
 
                 {totalPaginas > 1 && (
@@ -440,27 +558,6 @@ export default function AgentesPage() {
                       <span className="hidden sm:inline">Última</span>
                       <ChevronsRight className="h-4 w-4" />
                     </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Dica de busca */}
-              {agentes.length > 9 && !busca && (
-                <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-blue-50 border border-blue-200 rounded-xl">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                      <Search className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-blue-900 text-sm sm:text-base mb-1">
-                        Use a busca para filtrar resultados
-                      </h4>
-                      <p className="text-blue-700 text-xs sm:text-sm">
-                        Encontre agentes específicos rapidamente buscando por
-                        nome, email, matrícula ou telefone. A paginação divide
-                        automaticamente os resultados.
-                      </p>
-                    </div>
                   </div>
                 </div>
               )}

@@ -34,7 +34,7 @@ export default function SelecaoCustomizada({
       id={id}
       name={name}
       defaultValue={defaultValue}
-      className="flex h-12 w-55 rounded-sm border border-gray-400 text-sm md:text-base"
+      className="flex h-10 w-45 rounded-sm border border-gray-400 text-sm md:text-base"
     >
       {placeholder && (
         <option value="" disabled>

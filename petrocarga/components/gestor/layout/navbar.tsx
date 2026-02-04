@@ -142,7 +142,7 @@ export function Navbar() {
                         href="/gestor/gestores"
                         className="flex items-center gap-2"
                       >
-                        <User className="h-4 w-4" /> Ver Gestores
+                        <User className="h-4 w-4" /> Gestores
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
