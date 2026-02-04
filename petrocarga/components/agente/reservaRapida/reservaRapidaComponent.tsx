@@ -197,7 +197,7 @@ export default function ReservaAgente({
               selected={startHour}
               onSelect={(t) => {
                 setStartHour(t);
-                setEndHour(null); // Reseta o fim ao mudar o início
+                setEndHour(null);
                 setStep(4);
               }}
               onBack={() => setStep(2)}
@@ -240,7 +240,6 @@ export default function ReservaAgente({
             vehicleName={`${tipoVeiculoAgente} - ${placaAgente}`}
             onConfirm={onConfirm}
             onReset={() => setStep(4)}
-            isSubmitting={isSubmitting} // 👈 NOVO: Passa o estado de loading
           />
         )}
 
