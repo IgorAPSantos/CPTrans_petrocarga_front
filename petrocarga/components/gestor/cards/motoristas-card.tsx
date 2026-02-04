@@ -1,6 +1,5 @@
 'use client';
 
-import { buttonVariants } from '@/components/ui/button';
 import { Motorista } from '@/lib/types/motorista';
 import { cn } from '@/lib/utils';
 import { Mail, Phone, UserCircle, Bell, Car, Truck } from 'lucide-react';
@@ -19,73 +18,106 @@ export default function MotoristaCard({ motorista }: MotoristaCardProps) {
     <>
       <article
         className={cn(
-          'flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full',
-          'border-blue-500',
+          'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden',
+          'hover:shadow-md transition-shadow',
         )}
       >
-        {/* Informações */}
-        <section className="flex-1 flex flex-col gap-3 min-w-0">
-          {/* Nome */}
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <UserCircle className="w-5 h-5 text-gray-400" />
-              {motorista.usuario.nome}
-            </h3>
-            <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded">
+        {/* Header com nome e badge */}
+        <div className="px-5 pt-5 pb-4 border-b border-gray-100">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <UserCircle className="w-9 h-9 text-blue-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <h3 className="text-base font-semibold text-gray-800 truncate">
+                  {motorista.usuario.nome
+                    .toLowerCase()
+                    .split(' ')
+                    .slice(0, 2)
+                    .join(' ')}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                  <p className="text-sm text-gray-600 truncate">
+                    {motorista.usuario.email}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <span className="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-full">
               Motorista
             </span>
           </div>
+        </div>
 
-          {/* Infos (responsivas) */}
-          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
-            <span className="text-sm text-gray-600 flex items-center gap-1">
-              <Mail className="w-4 h-4 text-gray-400" />
-              {motorista.usuario.email}
-            </span>
+        {/* Informações do motorista */}
+        <div className="px-5 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Telefone */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-gray-400" />
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Telefone
+                </span>
+              </div>
+              <p className="text-sm text-gray-800 font-medium pl-6">
+                {motorista.usuario.telefone}
+              </p>
+            </div>
 
-            <span className="text-sm text-gray-600 flex items-center gap-1">
-              <Phone className="w-4 h-4 text-gray-400" />
-              {motorista.usuario.telefone}
-            </span>
-
-            <span className="text-sm text-gray-600 flex items-center gap-1">
-              <Car className="w-4 h-4 text-gray-400" />
-              CNH: {motorista.tipoCnh}
-            </span>
+            {/* CNH */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Car className="w-4 h-4 text-gray-400" />
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  CNH
+                </span>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="h-4 w-px bg-gray-300"></div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-gray-500">Número</p>
+                  <p className="text-sm text-gray-800 font-medium truncate">
+                    {motorista.numeroCnh}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
+        </div>
 
-        {/* Botões - Lado Direito */}
-        <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
-          {/* Botão Notificar */}
-          <button
-            onClick={() => setIsNotificacaoModalOpen(true)}
-            className={cn(
-              'flex items-center justify-center gap-1.5',
-              'bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200',
-              'rounded-lg transition-colors text-sm font-medium',
-              'h-9 w-full sm:w-28', // Altura fixa e largura fixa em desktop
-            )}
-            title="Enviar notificação"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="hidden sm:inline">Notificar</span>
-          </button>
+        {/* Botões */}
+        <div className="px-5 pb-5 pt-4 border-t border-gray-100">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <button
+              onClick={() => setIsNotificacaoModalOpen(true)}
+              className={cn(
+                'flex items-center justify-center gap-2',
+                'bg-blue-600 hover:bg-blue-700 text-white',
+                'rounded-lg transition-colors text-sm font-medium',
+                'h-10 px-4 py-2.5 flex-1 sm:flex-none sm:w-auto',
+              )}
+              title="Enviar notificação"
+            >
+              <Bell className="w-4 h-4" />
+              <span>Notificar</span>
+            </button>
 
-          {/* Botão Veículos */}
-          <Link
-            href={`/gestor/motoristas/veiculos/${motorista.usuario.id}`}
-            className={cn(
-              'flex items-center justify-center gap-1.5',
-              'bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200',
-              'rounded-lg transition-colors text-sm font-medium',
-              'h-9 w-full sm:w-28', // Mesma altura e largura
-            )}
-            title="Ver veículos"
-          >
-            <Truck className="w-4 h-4" />
-            <span className="hidden sm:inline">Veículos</span>
-          </Link>
+            <Link
+              href={`/gestor/motoristas/veiculos/${motorista.usuario.id}`}
+              className={cn(
+                'flex items-center justify-center gap-2',
+                'bg-gray-100 hover:bg-gray-200 text-gray-800',
+                'rounded-lg transition-colors text-sm font-medium',
+                'h-10 px-4 py-2.5 flex-1 sm:flex-none sm:w-auto',
+                'border border-gray-300',
+              )}
+              title="Ver veículos"
+            >
+              <Truck className="w-4 h-4" />
+              <span>Veículos</span>
+            </Link>
+          </div>
         </div>
       </article>
 

@@ -3,7 +3,7 @@
 import { deleteAgente } from '@/lib/api/agenteApi';
 import { Agente } from '@/lib/types/agente';
 import { cn } from '@/lib/utils';
-import { IdCard, Mail, Phone, UserCircle, Bell, Trash2 } from 'lucide-react';
+import { IdCard, Mail, Phone, UserCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface AgenteCardProps {
@@ -17,7 +17,6 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
     try {
       await deleteAgente(agente.usuario.id);
       setModalExcluirAberto(false);
-      // Usando window.location para recarregar a página
       window.location.reload();
     } catch (err) {
       console.error(err);
@@ -29,56 +28,80 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
     <>
       <article
         className={cn(
-          'flex flex-col sm:flex-row justify-between bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 gap-4 w-full',
-          'border-green-500'
+          'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden',
+          'hover:shadow-md transition-shadow',
         )}
       >
-        {/* Informações do Agente */}
-        <section className="flex-1 flex flex-col gap-3 min-w-0">
-          {/* Nome */}
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <UserCircle className="w-5 h-5 text-gray-400" />
-              {agente.usuario.nome}
-            </h3>
-            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
+        {/* Header com nome e badge */}
+        <div className="px-5 pt-5 pb-4 border-b border-gray-100">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <UserCircle className="w-9 h-9 text-green-500 flex-shrink-0" />
+              <div className="min-w-0">
+                <h3 className="text-base font-semibold text-gray-800 truncate">
+                  {agente.usuario.nome}
+                </h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                  <p className="text-sm text-gray-600 truncate">
+                    {agente.usuario.email}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <span className="px-2.5 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
               Agente
             </span>
           </div>
+        </div>
 
-          {/* Infos (responsivas) */}
-          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
-            <span className="text-sm text-gray-600 flex items-center gap-1">
-              <IdCard className="w-4 h-4 text-gray-400" />
-              Matrícula: {agente.matricula}
-            </span>
+        {/* Informações do agente */}
+        <div className="px-5 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Telefone */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-gray-400" />
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Telefone
+                </span>
+              </div>
+              <p className="text-sm text-gray-800 font-medium pl-6">
+                {agente.usuario.telefone}
+              </p>
+            </div>
 
-            <span className="text-sm text-gray-600 flex items-center gap-1">
-              <Mail className="w-4 h-4 text-gray-400" />
-              {agente.usuario.email}
-            </span>
-
-            <span className="text-sm text-gray-600 flex items-center gap-1">
-              <Phone className="w-4 h-4 text-gray-400" />
-              {agente.usuario.telefone}
-            </span>
+            {/* Matrícula */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <IdCard className="w-4 h-4 text-gray-400" />
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Matrícula
+                </span>
+              </div>
+              <p className="text-sm text-gray-800 font-medium pl-6">
+                {agente.matricula}
+              </p>
+            </div>
           </div>
-        </section>
+        </div>
 
         {/* Botões */}
-        <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
-          <button
-            onClick={() => setModalExcluirAberto(true)}
-            className={cn(
-              'flex items-center justify-center gap-1.5',
-              'bg-red-50 hover:bg-red-100 text-red-700 border border-red-200',
-              'rounded-lg transition-colors text-sm font-medium',
-              'h-9 w-full sm:w-28'
-            )}
-          >
-            <Trash2 className="w-4 h-4" />
-            Excluir
-          </button>
+        <div className="px-5 pb-5 pt-4 border-t border-gray-100">
+          <div className="flex gap-3">
+            <button
+              onClick={() => setModalExcluirAberto(true)}
+              className={cn(
+                'flex items-center justify-center gap-2',
+                'bg-red-600 hover:bg-red-700 text-white',
+                'rounded-lg transition-colors text-sm font-medium',
+                'h-10 px-4 py-2.5 flex-1',
+              )}
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Excluir</span>
+            </button>
+          </div>
         </div>
       </article>
 
