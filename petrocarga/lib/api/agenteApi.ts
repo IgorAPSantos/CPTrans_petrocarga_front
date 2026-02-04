@@ -123,10 +123,31 @@ export async function getAgenteByUserId(userId: string) {
 }
 
 // ----------------------
-// GET AGENTES
+// GET AGENTES COM FILTROS
 // ----------------------
-export async function getAgentes() {
-  const res = await clientApi(`/petrocarga/agentes`);
+export async function getAgentes(filtros?: {
+  nome?: string;
+  matricula?: string;
+  telefone?: string;
+  ativo?: boolean;
+  email?: string;
+}) {
+  // Construir query string com filtros
+  const params = new URLSearchParams();
+
+  if (filtros?.nome) params.append('nome', filtros.nome);
+  if (filtros?.matricula) params.append('matricula', filtros.matricula);
+  if (filtros?.telefone) params.append('telefone', filtros.telefone);
+  if (filtros?.email) params.append('email', filtros.email);
+  if (filtros?.ativo !== undefined)
+    params.append('ativo', filtros.ativo.toString());
+
+  const queryString = params.toString();
+  const url = queryString
+    ? `/petrocarga/agentes?${queryString}`
+    : `/petrocarga/agentes`;
+
+  const res = await clientApi(url);
 
   if (!res.ok) {
     let msg = 'Erro ao buscar agentes';

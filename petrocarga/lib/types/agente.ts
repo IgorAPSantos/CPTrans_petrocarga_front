@@ -12,3 +12,11 @@ export type Agente = {
   matricula: string;
   usuario: Usuario;
 };
+
+export interface FiltrosAgente {
+  nome?: string;
+  matricula?: string;
+  email?: string;
+  telefone?: string;
+  ativo?: boolean;
+}
