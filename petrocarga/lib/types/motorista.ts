@@ -48,3 +48,10 @@ export type MotoristaResult = {
   motorista?: unknown;
   motoristas?: unknown[];
 };
+
+export interface FiltrosMotorista {
+  nome?: string;
+  cnh?: string;
+  telefone?: string;
+  ativo?: boolean;
+}

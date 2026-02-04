@@ -1,18 +1,20 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/components/hooks/useAuth';
 import { getMotoristas } from '@/lib/api/motoristaApi';
+import { FiltrosMotorista } from '@/lib/types/motorista';
 import {
   Loader2,
   Search,
   X,
   Users,
-  Filter,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  SlidersHorizontal,
+  Check,
 } from 'lucide-react';
 import { Motorista } from '@/lib/types/motorista';
 import MotoristaCard from '@/components/gestor/cards/motoristas-card';
@@ -26,30 +28,75 @@ export default function MotoristasPage() {
   const [error, setError] = useState<string | null>(null);
   const [busca, setBusca] = useState('');
   const [paginaAtual, setPaginaAtual] = useState(1);
+  const [mostrarFiltros, setMostrarFiltros] = useState(false);
+  const [filtros, setFiltros] = useState<FiltrosMotorista>({});
+  const [isLoadingMotoristas, setIsLoadingMotoristas] = useState(false);
 
-  useEffect(() => {
-    if (!user?.id) return;
+  // Buscar motoristas com filtros
+  const fetchMotoristas = useCallback(
+    async (filtrosAtivos?: FiltrosMotorista) => {
+      if (!user?.id) return;
 
-    const fetchMotoristas = async () => {
-      setLoading(true);
+      setIsLoadingMotoristas(true);
       setError(null);
 
       try {
-        const result = await getMotoristas();
-        setMotoristas(result.motoristas);
+        const result = await getMotoristas(filtrosAtivos || filtrosAtivos);
+        if (result.error) {
+          setError(result.message || 'Erro ao carregar os motoristas');
+        } else {
+          setMotoristas(result.motoristas || []);
+        }
       } catch (err) {
         console.error('Erro ao carregar os motoristas:', err);
         setError(
           'Erro ao buscar os motoristas cadastrados. Tente novamente mais tarde.',
         );
       } finally {
+        setIsLoadingMotoristas(false);
         setLoading(false);
       }
-    };
+    },
+    [user?.id],
+  );
 
+  // Buscar motoristas inicialmente
+  useEffect(() => {
     fetchMotoristas();
-  }, [user?.id]);
+  }, [fetchMotoristas]);
 
+  // Aplicar filtros
+  const aplicarFiltros = () => {
+    setPaginaAtual(1);
+    fetchMotoristas(filtros);
+  };
+
+  // Limpar todos os filtros
+  const limparFiltros = () => {
+    setFiltros({});
+    setBusca('');
+    setPaginaAtual(1);
+    fetchMotoristas({});
+  };
+
+  // Atualizar filtro individual
+  const atualizarFiltro = (campo: keyof FiltrosMotorista, valor: any) => {
+    setFiltros((prev) => ({
+      ...prev,
+      [campo]: valor || undefined,
+    }));
+  };
+
+  // Verificar se há filtros ativos
+  const filtrosAtivos = useMemo(() => {
+    return Object.keys(filtros).some(
+      (key) =>
+        filtros[key as keyof FiltrosMotorista] !== undefined &&
+        filtros[key as keyof FiltrosMotorista] !== '',
+    );
+  }, [filtros]);
+
+  // Filtrar motoristas localmente para busca rápida
   const motoristasFiltrados = useMemo(() => {
     if (!busca.trim()) return motoristas;
 
@@ -60,6 +107,8 @@ export default function MotoristasPage() {
         motorista.usuario.email.toLowerCase().includes(termoBusca) ||
         (motorista.usuario.telefone &&
           motorista.usuario.telefone.includes(termoBusca)) ||
+        (motorista.numeroCnh &&
+          motorista.numeroCnh.toLowerCase().includes(termoBusca)) ||
         false,
     );
   }, [motoristas, busca]);
@@ -112,7 +161,7 @@ export default function MotoristasPage() {
     );
   }
 
-  if (error) {
+  if (error && !motoristas.length) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full">
@@ -125,7 +174,7 @@ export default function MotoristasPage() {
             </h2>
             <p className="text-gray-600 mb-6 text-sm sm:text-base">{error}</p>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => fetchMotoristas(filtros)}
               className="inline-flex items-center justify-center px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition font-medium text-sm sm:text-base"
             >
               Tentar novamente
@@ -165,7 +214,7 @@ export default function MotoristasPage() {
                     type="text"
                     value={busca}
                     onChange={(e) => setBusca(e.target.value)}
-                    placeholder="Buscar por nome, email ou telefone..."
+                    placeholder="Buscar por nome, email, CNH ou telefone..."
                     className="w-full pl-10 sm:pl-12 pr-10 sm:pr-12 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm text-sm sm:text-base"
                   />
                   {busca && (
@@ -180,38 +229,172 @@ export default function MotoristasPage() {
                 </div>
               </div>
 
-              {/* Estatísticas */}
+              {/* Botões de ação */}
               <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setMostrarFiltros(!mostrarFiltros)}
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border transition-colors ${
+                    filtrosAtivos
+                      ? 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'
+                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  <span className="text-sm font-medium">Filtros</span>
+                  {filtrosAtivos && (
+                    <span className="w-2 h-2 rounded-full bg-blue-600"></span>
+                  )}
+                </button>
+
+                {filtrosAtivos && (
+                  <button
+                    onClick={limparFiltros}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+                  >
+                    <X className="h-4 w-4" />
+                    Limpar Filtros
+                  </button>
+                )}
+
+                {/* Estatísticas */}
                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg">
                   <Users className="h-4 w-4 text-blue-600" />
                   <span className="text-sm font-medium text-blue-800">
                     {motoristas.length} motoristas
                   </span>
                 </div>
-                {busca && (
-                  <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg">
-                    <Filter className="h-4 w-4 text-gray-600" />
-                    <span className="text-sm font-medium text-gray-700">
-                      {motoristasFiltrados.length} resultado(s)
-                    </span>
-                  </div>
-                )}
               </div>
             </div>
 
+            {/* Filtros avançados */}
+            {mostrarFiltros && (
+              <div className="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Filtro por Nome */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nome
+                    </label>
+                    <input
+                      type="text"
+                      value={filtros.nome || ''}
+                      onChange={(e) => atualizarFiltro('nome', e.target.value)}
+                      placeholder="Digite o nome"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    />
+                  </div>
+
+                  {/* Filtro por CNH */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      CNH
+                    </label>
+                    <input
+                      type="text"
+                      value={filtros.cnh || ''}
+                      onChange={(e) => atualizarFiltro('cnh', e.target.value)}
+                      placeholder="Digite a CNH"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    />
+                  </div>
+
+                  {/* Filtro por Telefone */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Telefone
+                    </label>
+                    <input
+                      type="text"
+                      value={filtros.telefone || ''}
+                      onChange={(e) =>
+                        atualizarFiltro('telefone', e.target.value)
+                      }
+                      placeholder="Digite o telefone"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    />
+                  </div>
+
+                  {/* Filtro por Status */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Status
+                    </label>
+                    <select
+                      value={
+                        filtros.ativo === undefined
+                          ? ''
+                          : filtros.ativo.toString()
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        atualizarFiltro(
+                          'ativo',
+                          value === '' ? undefined : value === 'true',
+                        );
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                    >
+                      <option value="">Todos</option>
+                      <option value="true">Ativo</option>
+                      <option value="false">Inativo</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Botões dos filtros */}
+                <div className="mt-4 flex justify-end gap-3">
+                  <button
+                    onClick={limparFiltros}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+                  >
+                    Limpar
+                  </button>
+                  <button
+                    onClick={aplicarFiltros}
+                    disabled={isLoadingMotoristas}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLoadingMotoristas ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Check className="h-4 w-4" />
+                    )}
+                    Aplicar Filtros
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Informação da busca */}
-            {busca && (
+            {(busca || filtrosAtivos) && (
               <div className="mt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="text-sm text-gray-600">
-                  Resultados para "
-                  <span className="font-medium text-blue-600">{busca}</span>"
+                  {busca ? (
+                    <>
+                      Resultados para "
+                      <span className="font-medium text-blue-600">{busca}</span>
+                      "
+                    </>
+                  ) : (
+                    <>
+                      Filtros aplicados:
+                      <span className="font-medium text-blue-600 ml-1">
+                        {Object.entries(filtros)
+                          .filter(
+                            ([_, value]) => value !== undefined && value !== '',
+                          )
+                          .map(([key, value]) => `${key}: ${value}`)
+                          .join(', ')}
+                      </span>
+                    </>
+                  )}
                 </div>
                 {motoristasFiltrados.length === 0 ? (
                   <button
-                    onClick={() => setBusca('')}
+                    onClick={limparFiltros}
                     className="text-sm text-blue-600 hover:text-blue-800 hover:underline font-medium"
                   >
-                    Limpar busca
+                    Limpar {busca ? 'busca' : 'filtros'}
                   </button>
                 ) : (
                   <div className="text-sm text-gray-500">
@@ -224,12 +407,24 @@ export default function MotoristasPage() {
           </div>
         </div>
 
+        {/* Indicador de carregamento de filtros */}
+        {isLoadingMotoristas && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 text-blue-600 animate-spin" />
+              <span className="text-sm text-blue-700">
+                Aplicando filtros...
+              </span>
+            </div>
+          </div>
+        )}
+
         {/* Conteúdo principal */}
         <div className="space-y-4 sm:space-y-6">
           {/* Estado vazio */}
           {motoristasFiltrados.length === 0 ? (
             <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 sm:p-12 text-center">
-              {busca ? (
+              {busca || filtrosAtivos ? (
                 <div className="max-w-md mx-auto">
                   <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                     <Search className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
@@ -238,12 +433,12 @@ export default function MotoristasPage() {
                     Nenhum motorista encontrado
                   </h3>
                   <p className="text-gray-600 mb-6 text-sm sm:text-base">
-                    Não encontramos motoristas para "
-                    <span className="font-medium">{busca}</span>". Tente buscar
-                    por nome, email ou telefone.
+                    {busca
+                      ? `Não encontramos motoristas para "${busca}".`
+                      : 'Não encontramos motoristas com os filtros aplicados.'}
                   </p>
                   <button
-                    onClick={() => setBusca('')}
+                    onClick={limparFiltros}
                     className="px-4 sm:px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm sm:text-base"
                   >
                     Ver todos os motoristas
@@ -286,6 +481,7 @@ export default function MotoristasPage() {
                   </span>{' '}
                   motorista(s)
                   {busca && ' encontrados'}
+                  {filtrosAtivos && !busca && ' filtrados'}
                 </div>
 
                 {totalPaginas > 1 && (
@@ -447,7 +643,7 @@ export default function MotoristasPage() {
               )}
 
               {/* Dica de busca */}
-              {motoristas.length > 9 && !busca && (
+              {motoristas.length > 9 && !busca && !filtrosAtivos && (
                 <div className="mt-4 sm:mt-6 p-4 sm:p-6 bg-blue-50 border border-blue-200 rounded-xl">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
@@ -455,12 +651,12 @@ export default function MotoristasPage() {
                     </div>
                     <div>
                       <h4 className="font-medium text-blue-900 text-sm sm:text-base mb-1">
-                        Use a busca para filtrar resultados
+                        Use os filtros para busca avançada
                       </h4>
                       <p className="text-blue-700 text-xs sm:text-sm">
-                        Encontre motoristas específicos rapidamente buscando por
-                        nome, email ou telefone. A paginação divide
-                        automaticamente os resultados.
+                        Utilize os filtros avançados para encontrar motoristas
+                        específicos por nome, CNH ou status. A busca local
+                        funciona apenas nos resultados já carregados.
                       </p>
                     </div>
                   </div>

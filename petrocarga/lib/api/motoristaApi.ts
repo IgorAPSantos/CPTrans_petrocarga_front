@@ -118,10 +118,29 @@ export async function getMotoristaByUserId(userId: string) {
 }
 
 // ----------------------
-// GET MOTORISTAS
+// GET MOTORISTAS COM FILTROS
 // ----------------------
-export async function getMotoristas() {
-  const res = await clientApi(`/petrocarga/motoristas`);
+export async function getMotoristas(filtros?: {
+  nome?: string;
+  cnh?: string;
+  telefone?: string;
+  ativo?: boolean;
+}) {
+  // Construir query string com filtros
+  const params = new URLSearchParams();
+
+  if (filtros?.nome) params.append('nome', filtros.nome);
+  if (filtros?.cnh) params.append('cnh', filtros.cnh);
+  if (filtros?.telefone) params.append('telefone', filtros.telefone);
+  if (filtros?.ativo !== undefined)
+    params.append('ativo', filtros.ativo.toString());
+
+  const queryString = params.toString();
+  const url = queryString
+    ? `/petrocarga/motoristas?${queryString}`
+    : `/petrocarga/motoristas`;
+
+  const res = await clientApi(url);
 
   if (!res.ok) {
     let msg = 'Erro ao buscar motoristas';
