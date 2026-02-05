@@ -82,7 +82,7 @@ export function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/gestor/registrar-vagas">Adicionar Vaga</Link>
+                    <Link href="/gestor/adicionar-vagas">Adicionar Vaga</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -120,7 +120,7 @@ export function Navbar() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link
-                      href="/gestor/cadastrar-agente"
+                      href="/gestor/adicionar-agente"
                       className="flex items-center gap-2"
                     >
                       <Users className="h-4 w-4" /> Adicionar
@@ -237,7 +237,7 @@ export function Navbar() {
               Visualizar Vagas
             </Link>
             <Link
-              href="/gestor/registrar-vagas"
+              href="/gestor/adicionar-vagas"
               onClick={() => setMenuAberto(false)}
               className="pl-2"
             >
@@ -300,7 +300,7 @@ export function Navbar() {
               Ver Agentes
             </Link>
             <Link
-              href="/gestor/cadastrar-agente"
+              href="/gestor/adicionar-agente"
               onClick={() => setMenuAberto(false)}
               className="pl-2"
             >
