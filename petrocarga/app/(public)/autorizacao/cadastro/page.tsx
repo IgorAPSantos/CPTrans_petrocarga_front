@@ -56,6 +56,10 @@ export default function CadastroUsuario() {
       const emailInput = document.getElementById('email') as HTMLInputElement;
       if (emailInput) {
         setUserEmail(emailInput.value);
+
+        // SALVAR NO STORAGE PARA USAR NO LOGIN
+        sessionStorage.setItem('abrirModalAtivacao', 'true');
+        sessionStorage.setItem('emailCadastro', emailInput.value);
       }
 
       // Mostra o modal
@@ -450,7 +454,10 @@ export default function CadastroUsuario() {
               {/* Botões */}
               <div className="flex flex-col gap-3">
                 <Button
-                  onClick={() => (window.location.href = '/autorizacao/login')}
+                  onClick={() => {
+                    // 🔥 Já salvamos no sessionStorage acima, agora só redireciona
+                    window.location.href = '/autorizacao/login';
+                  }}
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-lg font-medium text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
                 >
                   <svg
@@ -466,7 +473,7 @@ export default function CadastroUsuario() {
                       d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
                     />
                   </svg>
-                  Ir para Tela de Login
+                  Ir para Ativar Conta
                 </Button>
 
                 <Button
