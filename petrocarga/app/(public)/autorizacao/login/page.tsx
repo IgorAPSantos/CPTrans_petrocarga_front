@@ -28,6 +28,7 @@ import {
   Key,
   CheckCircle,
   RefreshCw,
+  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/components/hooks/useAuth';
@@ -36,44 +37,85 @@ import {
   reenviarEmailRecuperacao,
 } from '@/lib/api/recuperacaoApi';
 
+// Função auxiliar para identificar o tipo de entrada
+function identificarTipoLogin(
+  input: string,
+): 'email' | 'cpf' | 'invalido' | 'indeterminado' {
+  if (!input.trim()) return 'indeterminado';
+
+  // Remove caracteres não numéricos para verificar CPF
+  const apenasNumeros = input.replace(/\D/g, '');
+
+  // Verifica se parece um email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (emailRegex.test(input)) {
+    return 'email';
+  } else if (/^\d+$/.test(input) && apenasNumeros.length === 11) {
+    // Verifica se é apenas números e tem 11 dígitos
+    return 'cpf';
+  } else if (
+    /^\d+$/.test(input) &&
+    apenasNumeros.length > 0 &&
+    apenasNumeros.length < 11
+  ) {
+    // Está digitando CPF mas ainda não tem 11 dígitos
+    return 'cpf';
+  }
+
+  return 'invalido';
+}
+
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [loginInput, setLoginInput] = useState('');
   const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [modalEmail, setModalEmail] = useState('');
+  const [modalIdentificador, setModalIdentificador] = useState('');
   const [codigo, setCodigo] = useState('');
   const [modalError, setModalError] = useState('');
   const [modalSuccess, setModalSuccess] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
   const [solicitandoNovoCodigo, setSolicitandoNovoCodigo] = useState(false);
+  const [tipoInput, setTipoInput] = useState<
+    'email' | 'cpf' | 'invalido' | 'indeterminado'
+  >('indeterminado');
 
-  const { login, isAuthenticated, user } = useAuth();
+  const { login, isAuthenticated, user, loading: authLoading } = useAuth();
   const router = useRouter();
 
-  // VERIFICAR STORAGE AO CARREGAR A PÁGINA
   useEffect(() => {
     const abrirModal = sessionStorage.getItem('abrirModalAtivacao');
     const emailSalvo = sessionStorage.getItem('emailCadastro');
 
     if (abrirModal === 'true') {
       if (emailSalvo) {
-        setEmail(emailSalvo);
-        setModalEmail(emailSalvo);
+        setLoginInput(emailSalvo);
+        setModalIdentificador(emailSalvo);
       }
 
       setMostrarModal(true);
 
-      // Limpar storage
       sessionStorage.removeItem('abrirModalAtivacao');
       sessionStorage.removeItem('emailCadastro');
     }
   }, []);
 
+  // Identificar tipo de entrada em tempo real
   useEffect(() => {
-    if (!loading && isAuthenticated && user) {
+    if (!loginInput.trim()) {
+      setTipoInput('indeterminado');
+      return;
+    }
+
+    const tipo = identificarTipoLogin(loginInput);
+    setTipoInput(tipo);
+  }, [loginInput]);
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user) {
       // Redireciona conforme a permissão
       switch (user.permissao) {
         case 'ADMIN':
@@ -88,20 +130,42 @@ export default function LoginPage() {
           break;
       }
     }
-  }, [loading, isAuthenticated, user, router]);
+  }, [authLoading, isAuthenticated, user, router]);
 
   // Enquanto o /me está sendo carregado
-  if (loading) return null;
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Se já estiver logado, nem renderiza a Home (vai redirecionar)
-  if (isAuthenticated) return null;
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600">Redirecionando...</p>
+        </div>
+      </div>
+    );
+  }
 
   async function handleLogin() {
     setLoading(true);
     setError('');
 
     try {
-      const decodedUser = await login({ email, senha });
+      // O AuthContext já cuida da lógica de identificar email/CPF
+      const decodedUser = await login({
+        login: loginInput,
+        senha,
+      });
 
       // Redirecionamento baseado na permissão
       switch (decodedUser.permissao) {
@@ -118,8 +182,11 @@ export default function LoginPage() {
         default:
           setError('Permissão desconhecida');
       }
-    } catch (err: unknown) {
-      setError('Credênciais inválidas ou conta não ativada.');
+    } catch (err: any) {
+      console.error('Erro no handleLogin:', err);
+
+      // Use a mensagem de erro do AuthContext
+      setError(err.message || 'Erro ao fazer login. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -129,8 +196,8 @@ export default function LoginPage() {
     setModalError('');
     setModalSuccess('');
 
-    if (!modalEmail.trim()) {
-      setModalError('Por favor, insira seu email');
+    if (!modalIdentificador.trim()) {
+      setModalError('Por favor, insira seu email ou CPF');
       return;
     }
 
@@ -142,8 +209,21 @@ export default function LoginPage() {
     setModalLoading(true);
 
     try {
+      // Determinar se é email ou CPF
+      const isEmail = modalIdentificador.includes('@');
+      let identificadorEnviar = modalIdentificador.trim();
+
+      if (!isEmail) {
+        // Se for CPF, limpa formatação
+        identificadorEnviar = modalIdentificador.replace(/\D/g, '');
+        // Verifica se tem exatamente 11 dígitos
+        if (identificadorEnviar.length !== 11) {
+          throw new Error('CPF deve conter 11 dígitos');
+        }
+      }
+
       // Lógica direta para ativar conta
-      await ativarConta(modalEmail.trim(), codigo.trim());
+      await ativarConta(identificadorEnviar, codigo.trim());
 
       setModalSuccess(
         'Conta ativada com sucesso! Agora você pode fazer login.',
@@ -153,16 +233,15 @@ export default function LoginPage() {
       // Limpar campos após sucesso
       setTimeout(() => {
         setMostrarModal(false);
-        setModalEmail('');
+        setModalIdentificador('');
         setCodigo('');
         setModalSuccess('');
       }, 2000);
-    } catch (err: unknown) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('Erro na ativação:', err);
       setModalError(
-        err instanceof Error
-          ? err.message
-          : 'Código inválido ou expirado. Verifique e tente novamente.',
+        err.message ||
+          'Código inválido ou expirado. Verifique e tente novamente.',
       );
       setModalSuccess('');
     } finally {
@@ -171,8 +250,8 @@ export default function LoginPage() {
   };
 
   const handleSolicitarNovoCodigo = async () => {
-    if (!modalEmail.trim()) {
-      setModalError('Por favor, insira seu email primeiro');
+    if (!modalIdentificador.trim()) {
+      setModalError('Por favor, insira seu email ou CPF primeiro');
       return;
     }
 
@@ -181,7 +260,20 @@ export default function LoginPage() {
     setModalSuccess('');
 
     try {
-      const resultado = await reenviarEmailRecuperacao(modalEmail.trim());
+      // Determinar se é email ou CPF
+      const isEmail = modalIdentificador.includes('@');
+      let identificadorEnviar = modalIdentificador.trim();
+
+      if (!isEmail) {
+        // Se for CPF, limpa formatação
+        identificadorEnviar = modalIdentificador.replace(/\D/g, '');
+        // Verifica se tem exatamente 11 dígitos
+        if (identificadorEnviar.length !== 11) {
+          throw new Error('CPF deve conter 11 dígitos');
+        }
+      }
+
+      const resultado = await reenviarEmailRecuperacao(identificadorEnviar);
 
       if (resultado.valido === true) {
         setModalSuccess(
@@ -192,12 +284,10 @@ export default function LoginPage() {
       } else {
         setModalSuccess('Código reenviado com sucesso!');
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Erro completo:', err);
       setModalError(
-        err instanceof Error
-          ? err.message
-          : 'Erro ao solicitar novo código. Tente novamente.',
+        err.message || 'Erro ao solicitar novo código. Tente novamente.',
       );
     } finally {
       setSolicitandoNovoCodigo(false);
@@ -205,11 +295,81 @@ export default function LoginPage() {
   };
 
   const handleOpenModal = () => {
-    setModalEmail(email);
+    setModalIdentificador(loginInput);
     setCodigo('');
     setModalError('');
     setModalSuccess('');
     setMostrarModal(true);
+  };
+
+  // Função para obter o ícone baseado no tipo de entrada
+  const getInputIcon = () => {
+    if (tipoInput === 'email') {
+      return (
+        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+      );
+    } else if (tipoInput === 'cpf') {
+      return (
+        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+      );
+    } else {
+      return (
+        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+      );
+    }
+  };
+
+  // Função para obter a dica de formato
+  const getFormatHint = () => {
+    if (tipoInput === 'email') {
+      return (
+        <span className="text-xs text-green-600 mt-1 flex items-center gap-1">
+          ✓ Formato de email válido
+        </span>
+      );
+    } else if (tipoInput === 'cpf') {
+      const apenasNumeros = loginInput.replace(/\D/g, '');
+      if (apenasNumeros.length === 11) {
+        return (
+          <span className="text-xs text-green-600 mt-1 flex items-center gap-1">
+            ✓ CPF válido (11 dígitos)
+          </span>
+        );
+      } else {
+        return (
+          <span className="text-xs text-amber-600 mt-1">
+            ⚠ CPF: {apenasNumeros.length}/11 dígitos
+          </span>
+        );
+      }
+    } else if (loginInput && tipoInput === 'invalido') {
+      return (
+        <span className="text-xs text-red-600 mt-1">
+          ✗ Formato inválido. Use email ou CPF (apenas números)
+        </span>
+      );
+    } else {
+      return (
+        <span className="text-xs text-gray-500 mt-1">
+          Digite seu email ou CPF (11 dígitos)
+        </span>
+      );
+    }
+  };
+
+  // Função para lidar com a mudança no input
+  const handleInputChange = (value: string) => {
+    // Se for CPF, só permite números
+    if (tipoInput === 'cpf' || /^\d+$/.test(value)) {
+      // Permite apenas números para CPF
+      const apenasNumeros = value.replace(/\D/g, '');
+      if (apenasNumeros.length <= 11) {
+        setLoginInput(apenasNumeros);
+      }
+    } else {
+      // Para email, permite qualquer caractere
+      setLoginInput(value);
+    }
   };
 
   return (
@@ -230,7 +390,7 @@ export default function LoginPage() {
             Bem-vindo
           </CardTitle>
           <CardDescription className="text-base">
-            Entre com suas credenciais para acessar o sistema
+            Entre com email ou CPF para acessar o sistema
           </CardDescription>
         </CardHeader>
 
@@ -251,19 +411,21 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Email
+                Email ou CPF
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                {getInputIcon()}
                 <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
+                  type="text"
+                  value={loginInput}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  placeholder="seu@email.com ou 12345678900"
                   className="pl-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                   disabled={loading}
+                  inputMode={tipoInput === 'cpf' ? 'numeric' : 'text'}
                 />
               </div>
+              {getFormatHint()}
             </div>
 
             <div className="space-y-2">
@@ -321,7 +483,9 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              disabled={loading || !email || !senha}
+              disabled={
+                loading || !loginInput || !senha || tipoInput === 'invalido'
+              }
               className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70"
             >
               {loading ? (
@@ -364,7 +528,7 @@ export default function LoginPage() {
               Ativar Conta
             </DialogTitle>
             <DialogDescription>
-              Insira seu email e o código de ativação recebido
+              Insira seu email ou CPF e o código de ativação recebido
             </DialogDescription>
           </DialogHeader>
 
@@ -385,16 +549,19 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Email
+                Email ou CPF
               </label>
               <Input
-                type="email"
-                value={modalEmail}
-                onChange={(e) => setModalEmail(e.target.value)}
-                placeholder="seu@email.com"
+                type="text"
+                value={modalIdentificador}
+                onChange={(e) => setModalIdentificador(e.target.value)}
+                placeholder="seu@email.com ou 12345678900"
                 className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                 disabled={modalLoading}
               />
+              <p className="text-xs text-gray-500">
+                Use o mesmo email ou CPF (11 dígitos) cadastrado
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -445,7 +612,7 @@ export default function LoginPage() {
             <Button
               type="button"
               onClick={handleAtivarConta}
-              disabled={modalLoading || !modalEmail || !codigo}
+              disabled={modalLoading || !modalIdentificador || !codigo}
               className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
             >
               {modalLoading ? (
