@@ -25,7 +25,7 @@ import {
   Clock,
   Trash2,
   DoorOpen,
-} from 'lucide-react'; // NOVOS ÍCONES
+} from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
