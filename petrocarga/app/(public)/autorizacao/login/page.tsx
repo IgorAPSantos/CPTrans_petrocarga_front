@@ -53,6 +53,25 @@ export default function LoginPage() {
   const { login, isAuthenticated, user } = useAuth();
   const router = useRouter();
 
+  // VERIFICAR STORAGE AO CARREGAR A PÁGINA
+  useEffect(() => {
+    const abrirModal = sessionStorage.getItem('abrirModalAtivacao');
+    const emailSalvo = sessionStorage.getItem('emailCadastro');
+
+    if (abrirModal === 'true') {
+      if (emailSalvo) {
+        setEmail(emailSalvo);
+        setModalEmail(emailSalvo);
+      }
+
+      setMostrarModal(true);
+
+      // Limpar storage
+      sessionStorage.removeItem('abrirModalAtivacao');
+      sessionStorage.removeItem('emailCadastro');
+    }
+  }, []);
+
   useEffect(() => {
     if (!loading && isAuthenticated && user) {
       // Redireciona conforme a permissão
@@ -162,12 +181,19 @@ export default function LoginPage() {
     setModalSuccess('');
 
     try {
-      // Lógica direta para solicitar novo código (sem hook)
-      await reenviarEmailRecuperacao(modalEmail.trim());
+      const resultado = await reenviarEmailRecuperacao(modalEmail.trim());
 
-      setModalSuccess('Novo código enviado para seu email!');
+      if (resultado.valido === true) {
+        setModalSuccess(
+          resultado.message || 'Novo código enviado para seu email!',
+        );
+      } else if (resultado.valido === false) {
+        setModalError(resultado.message || 'Erro ao solicitar novo código');
+      } else {
+        setModalSuccess('Código reenviado com sucesso!');
+      }
     } catch (err: unknown) {
-      console.error(err);
+      console.error('Erro completo:', err);
       setModalError(
         err instanceof Error
           ? err.message
@@ -320,7 +346,17 @@ export default function LoginPage() {
       </Card>
 
       {/* Modal para Ativar Conta */}
-      <Dialog open={mostrarModal} onOpenChange={setMostrarModal}>
+      <Dialog
+        open={mostrarModal}
+        onOpenChange={(open) => {
+          setMostrarModal(open);
+          // Se o usuário fechar manualmente, limpa o storage também
+          if (!open) {
+            sessionStorage.removeItem('abrirModalAtivacao');
+            sessionStorage.removeItem('emailCadastro');
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-2xl">
@@ -393,10 +429,6 @@ export default function LoginPage() {
                 className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all font-mono text-center text-lg"
                 disabled={modalLoading}
               />
-              <p className="text-xs text-gray-500">
-                O código foi enviado para o email cadastrado. Verifique sua
-                caixa de entrada e spam.
-              </p>
             </div>
           </div>
 
