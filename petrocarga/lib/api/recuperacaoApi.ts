@@ -32,7 +32,11 @@ export async function solicitarRecuperacaoSenha(email: string): Promise<void> {
 // ----------------------
 // 2. REENVIAR EMAIL
 // ----------------------
-export async function reenviarEmailRecuperacao(email: string): Promise<void> {
+export async function reenviarEmailRecuperacao(email: string): Promise<{
+  valido: boolean;
+  message: string;
+  [key: string]: any;
+}> {
   try {
     const res = await clientApi('/petrocarga/auth/resend-code', {
       method: 'POST',
@@ -43,9 +47,13 @@ export async function reenviarEmailRecuperacao(email: string): Promise<void> {
 
     const data = await res.json();
 
-    if (!data.valido) {
-      throw new Error(data.message || 'Código inválido ou expirado');
+    // Se a resposta HTTP não foi bem-sucedida
+    if (!res.ok) {
+      throw new Error(data.message || `Erro HTTP ${res.status}`);
     }
+
+    // Retorna os dados completos, deixa o frontend decidir
+    return data;
   } catch (error: unknown) {
     throw new Error(extractMessage(error));
   }
