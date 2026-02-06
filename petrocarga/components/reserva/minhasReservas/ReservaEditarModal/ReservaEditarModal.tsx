@@ -78,6 +78,8 @@ export default function ReservaEditarModal({
     vehicles,
     origin,
     setOrigin,
+    entryCity,
+    setEntryCity,
     selectedVehicleId,
     setSelectedVehicleId,
   } = useReserva(vaga);
@@ -121,7 +123,7 @@ export default function ReservaEditarModal({
         status: 'RESERVADA',
       },
       reserva.id,
-      user.id
+      user.id,
     );
 
     if (!result.success) {
@@ -191,8 +193,8 @@ export default function ReservaEditarModal({
           {editField === 'horario'
             ? 'Selecionar horário'
             : editField === 'veiculo-origem'
-            ? 'Editar veículo'
-            : 'Gerenciar reserva'}
+              ? 'Editar veículo'
+              : 'Gerenciar reserva'}
         </h1>
 
         <button
@@ -254,15 +256,20 @@ export default function ReservaEditarModal({
             <OriginVehicleStep
               vehicles={vehiclesForStep}
               origin={origin}
+              entryCity={entryCity}
               selectedVehicleId={selectedVehicleId}
               onOriginChange={setOrigin}
+              onEntryCityChange={setEntryCity}
               onVehicleChange={setSelectedVehicleId}
-              onNext={(cidade, veiculoId) => {
+              onNext={(cidade, entradaCidade, veiculoId) => {
+                if (!veiculoId) return;
+
                 setForm((prev) => ({
                   ...prev,
                   cidadeOrigem: cidade,
-                  veiculoId,
+                  veiculoId: veiculoId,
                 }));
+
                 setEditField(null);
               }}
               onBack={() => setEditField(null)}
