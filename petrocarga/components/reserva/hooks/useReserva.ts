@@ -40,6 +40,7 @@ export function useReserva(selectedVaga: Vaga | null) {
     startHour: null,
     endHour: null,
     origin: '',
+    entryCity: null,
     selectedVehicleId: undefined,
     tipoVeiculoAgente: undefined,
     placaAgente: '',
@@ -61,6 +62,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       startHour: null,
       endHour: null,
       origin: '',
+      entryCity: null,
       selectedVehicleId: undefined,
       tipoVeiculoAgente: undefined,
       placaAgente: '',
@@ -351,6 +353,10 @@ export function useReserva(selectedVaga: Vaga | null) {
   const setOrigin = (origin: string) =>
     setReservaState((prev) => ({ ...prev, origin }));
 
+  const setEntryCity = (entryCity: string | null) =>
+  setReservaState((prev) => ({ ...prev, entryCity }));
+
+
   const setSelectedVehicleId = (selectedVehicleId?: string) =>
     setReservaState((prev) => ({ ...prev, selectedVehicleId }));
 
@@ -380,6 +386,7 @@ export function useReserva(selectedVaga: Vaga | null) {
       startHour,
       endHour,
       origin,
+      entryCity,
     } = reservaState;
 
     if (!selectedDay || !startHour || !endHour) {
@@ -405,6 +412,10 @@ export function useReserva(selectedVaga: Vaga | null) {
       formData.append('motoristaId', motoristaId);
       formData.append('veiculoId', selectedVehicleId);
       formData.append('cidadeOrigem', origin);
+
+      if (entryCity) {
+    formData.append('entradaCidade', entryCity);
+  }
     }
 
     formData.append('inicio', formatDateTime(selectedDay, startHour));
@@ -426,7 +437,9 @@ export function useReserva(selectedVaga: Vaga | null) {
     return {
       success: true,
       message: 'Reserva confirmada com sucesso!',
+      
     };
+    
   }, [user, selectedVaga, motoristaId, reservaState, isAgente, reset]);
 
   // ====================================================
@@ -446,6 +459,7 @@ export function useReserva(selectedVaga: Vaga | null) {
     setStartHour,
     setEndHour,
     setOrigin,
+    setEntryCity,
     setSelectedVehicleId,
     setTipoVeiculoAgente,
     setPlacaAgente,

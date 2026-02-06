@@ -15,6 +15,7 @@ export async function reservarVaga(formData: FormData): Promise<ConfirmResult> {
     motoristaId: formData.get('motoristaId'),
     veiculoId: formData.get('veiculoId'),
     cidadeOrigem: formData.get('cidadeOrigem'),
+    entradaCidade: formData.get('entradaCidade'),
     inicio: formData.get('inicio'),
     fim: formData.get('fim'),
     status: 'ATIVA',

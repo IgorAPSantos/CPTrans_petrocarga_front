@@ -8,7 +8,10 @@ export interface ReservaState {
   reservedTimesEnd: string[];
   startHour: string | null;
   endHour: string | null;
+
   origin: string;
+  entryCity: string | null;
+
 
   // motorista
   selectedVehicleId?: string;

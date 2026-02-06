@@ -7,6 +7,7 @@ interface ConfirmationProps {
   startHour: string;
   endHour: string;
   origin?: string;
+  entryCity?: string | null;
   destination?: string;
   vehicleName?: string;
   onConfirm: () => Promise<void> | void;
