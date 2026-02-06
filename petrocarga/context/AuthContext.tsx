@@ -14,20 +14,19 @@ import { api } from '@/service/api';
 interface UserData {
   id: string;
   nome: string;
-  email: string;
+  login: string;
   permissao: 'ADMIN' | 'GESTOR' | 'MOTORISTA' | 'AGENTE';
 }
 
 interface AuthContextData {
   isAuthenticated: boolean;
   user: UserData | null;
-  loading: boolean; // Mantido nome original
-  login: (data: { email: string; senha: string }) => Promise<UserData>; // Agora retorna UserData de novo
+  loading: boolean;
+  login: (data: { login: string; senha: string }) => Promise<UserData>;
   logout: () => void;
   refreshUser: () => Promise<void>;
 }
 
-// Inicializamos com 'as AuthContextData' para evitar erros de tipagem nos componentes
 export const AuthContext = createContext({} as AuthContextData);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -51,18 +50,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [refreshUser]);
 
   const login = useCallback(
-    async ({ email, senha }: { email: string; senha: string }) => {
+    async ({
+      login: identificador,
+      senha,
+    }: {
+      login: string;
+      senha: string;
+    }) => {
       try {
-        await api.post('petrocarga/auth/login', { email, senha });
+        // Determinar se é email ou CPF
+        const isEmail = identificador.includes('@');
+
+        // Formatar dados conforme backend Java espera
+        const dadosLogin = isEmail
+          ? { email: identificador.trim(), senha }
+          : { cpf: identificador.replace(/\D/g, ''), senha };
+
+        await api.post('petrocarga/auth/login', dadosLogin);
 
         const response = await api.get('/petrocarga/auth/me');
         const userData = response.data;
 
         setUser(userData);
         return userData;
-      } catch (error: unknown) {
+      } catch (error: any) {
         console.error('Erro no login:', error);
-        throw error;
+
+        // Tratamento básico de erros
+        let mensagemErro = 'Credenciais inválidas ou conta não ativada.';
+
+        if (error.response?.data?.includes?.('Usuário desativado')) {
+          mensagemErro = 'Usuário desativado.';
+        } else if (error.response?.status === 400) {
+          mensagemErro = 'Formato inválido. Use email ou CPF válido.';
+        }
+
+        throw new Error(mensagemErro);
       }
     },
     [],
@@ -79,8 +102,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [router]);
 
-  // O useMemo é essencial para performance, garantindo que o contexto
-  // só notifique mudanças quando realmente necessário.
   const value = useMemo(
     () => ({
       isAuthenticated: !!user,

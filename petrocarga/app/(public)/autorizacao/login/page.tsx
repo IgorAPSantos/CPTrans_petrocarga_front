@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -28,6 +28,7 @@ import {
   Key,
   CheckCircle,
   RefreshCw,
+  User,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/components/hooks/useAuth';
@@ -36,45 +37,85 @@ import {
   reenviarEmailRecuperacao,
 } from '@/lib/api/recuperacaoApi';
 
-export default function LoginPage() {
-  const [email, setEmail] = useState('');
+function identificarTipoLogin(
+  input: string,
+): 'email' | 'cpf' | 'invalido' | 'indeterminado' {
+  if (!input.trim()) return 'indeterminado';
+
+  const apenasNumeros = input.replace(/\D/g, '');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (emailRegex.test(input)) {
+    return 'email';
+  } else if (/^\d+$/.test(input) && apenasNumeros.length === 11) {
+    return 'cpf';
+  } else if (
+    /^\d+$/.test(input) &&
+    apenasNumeros.length > 0 &&
+    apenasNumeros.length < 11
+  ) {
+    return 'cpf';
+  }
+
+  return 'invalido';
+}
+
+function LoginContent() {
+  const [loginInput, setLoginInput] = useState('');
   const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [modalEmail, setModalEmail] = useState('');
+  const [modalIdentificador, setModalIdentificador] = useState('');
   const [codigo, setCodigo] = useState('');
   const [modalError, setModalError] = useState('');
   const [modalSuccess, setModalSuccess] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
   const [solicitandoNovoCodigo, setSolicitandoNovoCodigo] = useState(false);
+  const [tipoInput, setTipoInput] = useState<
+    'email' | 'cpf' | 'invalido' | 'indeterminado'
+  >('indeterminado');
 
-  const { login, isAuthenticated, user } = useAuth();
+  const { login, isAuthenticated, user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // VERIFICAR STORAGE AO CARREGAR A PÁGINA
   useEffect(() => {
-    const abrirModal = sessionStorage.getItem('abrirModalAtivacao');
-    const emailSalvo = sessionStorage.getItem('emailCadastro');
+    const ativarContaParam = searchParams.get('ativar-conta');
 
-    if (abrirModal === 'true') {
+    if (ativarContaParam === 'true') {
+      const emailSalvo = sessionStorage.getItem('emailCadastro');
       if (emailSalvo) {
-        setEmail(emailSalvo);
-        setModalEmail(emailSalvo);
+        setLoginInput(emailSalvo);
+        setModalIdentificador(emailSalvo);
+        sessionStorage.removeItem('emailCadastro');
       }
 
       setMostrarModal(true);
-
-      // Limpar storage
-      sessionStorage.removeItem('abrirModalAtivacao');
-      sessionStorage.removeItem('emailCadastro');
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
-    if (!loading && isAuthenticated && user) {
-      // Redireciona conforme a permissão
+    if (mostrarModal) {
+      const currentParams = new URLSearchParams(window.location.search);
+      const hasParam = currentParams.get('ativar-conta') === 'true';
+
+      if (!hasParam) {
+        currentParams.set('ativar-conta', 'true');
+        const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, [mostrarModal]);
+
+  useEffect(() => {
+    const tipo = identificarTipoLogin(loginInput);
+    setTipoInput(tipo);
+  }, [loginInput]);
+
+  useEffect(() => {
+    if (!authLoading && isAuthenticated && user) {
       switch (user.permissao) {
         case 'ADMIN':
         case 'GESTOR':
@@ -88,22 +129,40 @@ export default function LoginPage() {
           break;
       }
     }
-  }, [loading, isAuthenticated, user, router]);
+  }, [authLoading, isAuthenticated, user, router]);
 
-  // Enquanto o /me está sendo carregado
-  if (loading) return null;
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Se já estiver logado, nem renderiza a Home (vai redirecionar)
-  if (isAuthenticated) return null;
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600">Redirecionando...</p>
+        </div>
+      </div>
+    );
+  }
 
   async function handleLogin() {
     setLoading(true);
     setError('');
 
     try {
-      const decodedUser = await login({ email, senha });
+      const decodedUser = await login({
+        login: loginInput,
+        senha,
+      });
 
-      // Redirecionamento baseado na permissão
       switch (decodedUser.permissao) {
         case 'ADMIN':
         case 'GESTOR':
@@ -118,8 +177,8 @@ export default function LoginPage() {
         default:
           setError('Permissão desconhecida');
       }
-    } catch (err: unknown) {
-      setError('Credênciais inválidas ou conta não ativada.');
+    } catch (err: any) {
+      setError(err.message || 'Erro ao fazer login. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -129,8 +188,8 @@ export default function LoginPage() {
     setModalError('');
     setModalSuccess('');
 
-    if (!modalEmail.trim()) {
-      setModalError('Por favor, insira seu email');
+    if (!modalIdentificador.trim()) {
+      setModalError('Por favor, insira seu email ou CPF');
       return;
     }
 
@@ -142,37 +201,38 @@ export default function LoginPage() {
     setModalLoading(true);
 
     try {
-      // Lógica direta para ativar conta
-      await ativarConta(modalEmail.trim(), codigo.trim());
+      const isEmail = modalIdentificador.includes('@');
+      let identificadorEnviar = modalIdentificador.trim();
+
+      if (!isEmail) {
+        identificadorEnviar = modalIdentificador.replace(/\D/g, '');
+        if (identificadorEnviar.length !== 11) {
+          throw new Error('CPF deve conter 11 dígitos');
+        }
+      }
+
+      await ativarConta(identificadorEnviar, codigo.trim());
 
       setModalSuccess(
         'Conta ativada com sucesso! Agora você pode fazer login.',
       );
-      setModalError('');
 
-      // Limpar campos após sucesso
       setTimeout(() => {
-        setMostrarModal(false);
-        setModalEmail('');
-        setCodigo('');
-        setModalSuccess('');
+        handleCloseModal();
       }, 2000);
-    } catch (err: unknown) {
-      console.error(err);
+    } catch (err: any) {
       setModalError(
-        err instanceof Error
-          ? err.message
-          : 'Código inválido ou expirado. Verifique e tente novamente.',
+        err.message ||
+          'Código inválido ou expirado. Verifique e tente novamente.',
       );
-      setModalSuccess('');
     } finally {
       setModalLoading(false);
     }
   };
 
   const handleSolicitarNovoCodigo = async () => {
-    if (!modalEmail.trim()) {
-      setModalError('Por favor, insira seu email primeiro');
+    if (!modalIdentificador.trim()) {
+      setModalError('Por favor, insira seu email ou CPF primeiro');
       return;
     }
 
@@ -181,7 +241,17 @@ export default function LoginPage() {
     setModalSuccess('');
 
     try {
-      const resultado = await reenviarEmailRecuperacao(modalEmail.trim());
+      const isEmail = modalIdentificador.includes('@');
+      let identificadorEnviar = modalIdentificador.trim();
+
+      if (!isEmail) {
+        identificadorEnviar = modalIdentificador.replace(/\D/g, '');
+        if (identificadorEnviar.length !== 11) {
+          throw new Error('CPF deve conter 11 dígitos');
+        }
+      }
+
+      const resultado = await reenviarEmailRecuperacao(identificadorEnviar);
 
       if (resultado.valido === true) {
         setModalSuccess(
@@ -192,12 +262,9 @@ export default function LoginPage() {
       } else {
         setModalSuccess('Código reenviado com sucesso!');
       }
-    } catch (err: unknown) {
-      console.error('Erro completo:', err);
+    } catch (err: any) {
       setModalError(
-        err instanceof Error
-          ? err.message
-          : 'Erro ao solicitar novo código. Tente novamente.',
+        err.message || 'Erro ao solicitar novo código. Tente novamente.',
       );
     } finally {
       setSolicitandoNovoCodigo(false);
@@ -205,16 +272,101 @@ export default function LoginPage() {
   };
 
   const handleOpenModal = () => {
-    setModalEmail(email);
+    setModalIdentificador(loginInput);
     setCodigo('');
     setModalError('');
     setModalSuccess('');
     setMostrarModal(true);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('ativar-conta', 'true');
+    window.history.replaceState({}, '', `?${params.toString()}`);
+  };
+
+  const handleCloseModal = () => {
+    setMostrarModal(false);
+    setModalIdentificador('');
+    setCodigo('');
+    setModalSuccess('');
+    setModalError('');
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('ativar-conta');
+
+    const newUrl =
+      params.toString() === ''
+        ? window.location.pathname
+        : `?${params.toString()}`;
+
+    window.history.replaceState({}, '', newUrl);
+  };
+
+  const getInputIcon = () => {
+    if (tipoInput === 'email') {
+      return (
+        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+      );
+    } else if (tipoInput === 'cpf') {
+      return (
+        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+      );
+    } else {
+      return (
+        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+      );
+    }
+  };
+
+  const getFormatHint = () => {
+    if (tipoInput === 'email') {
+      return (
+        <span className="text-xs text-green-600 mt-1 flex items-center gap-1">
+          ✓ Formato de email válido
+        </span>
+      );
+    } else if (tipoInput === 'cpf') {
+      const apenasNumeros = loginInput.replace(/\D/g, '');
+      if (apenasNumeros.length === 11) {
+        return (
+          <span className="text-xs text-green-600 mt-1 flex items-center gap-1">
+            ✓ CPF válido (11 dígitos)
+          </span>
+        );
+      } else {
+        return (
+          <span className="text-xs text-amber-600 mt-1">
+            ⚠ CPF: {apenasNumeros.length}/11 dígitos
+          </span>
+        );
+      }
+    } else if (loginInput && tipoInput === 'invalido') {
+      return (
+        <span className="text-xs text-red-600 mt-1">
+          ✗ Formato inválido. Use email ou CPF (apenas números)
+        </span>
+      );
+    } else {
+      return (
+        <span className="text-xs text-gray-500 mt-1">
+          Digite seu email ou CPF (11 dígitos)
+        </span>
+      );
+    }
+  };
+
+  const handleInputChange = (value: string) => {
+    if (tipoInput === 'cpf' || /^\d+$/.test(value)) {
+      const apenasNumeros = value.replace(/\D/g, '');
+      if (apenasNumeros.length <= 11) {
+        setLoginInput(apenasNumeros);
+      }
+    } else {
+      setLoginInput(value.toLowerCase());
+    }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100">
-      {/* Background decorativo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob-delayed"></div>
@@ -230,7 +382,7 @@ export default function LoginPage() {
             Bem-vindo
           </CardTitle>
           <CardDescription className="text-base">
-            Entre com suas credenciais para acessar o sistema
+            Entre com email ou CPF para acessar o sistema
           </CardDescription>
         </CardHeader>
 
@@ -251,19 +403,21 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Email
+                Email ou CPF
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 pointer-events-none" />
+                {getInputIcon()}
                 <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu@email.com"
+                  type="text"
+                  value={loginInput}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  placeholder="seu@email.com ou 12345678900"
                   className="pl-10 h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                   disabled={loading}
+                  inputMode={tipoInput === 'cpf' ? 'numeric' : 'text'}
                 />
               </div>
+              {getFormatHint()}
             </div>
 
             <div className="space-y-2">
@@ -295,7 +449,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Linha com "Esqueceu sua senha?" e "Ativar Conta" */}
             <div className="flex items-center justify-between pt-1">
               <button
                 type="button"
@@ -321,7 +474,9 @@ export default function LoginPage() {
 
             <Button
               type="submit"
-              disabled={loading || !email || !senha}
+              disabled={
+                loading || !loginInput || !senha || tipoInput === 'invalido'
+              }
               className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-70"
             >
               {loading ? (
@@ -345,15 +500,18 @@ export default function LoginPage() {
         </CardContent>
       </Card>
 
-      {/* Modal para Ativar Conta */}
       <Dialog
         open={mostrarModal}
         onOpenChange={(open) => {
-          setMostrarModal(open);
-          // Se o usuário fechar manualmente, limpa o storage também
-          if (!open) {
-            sessionStorage.removeItem('abrirModalAtivacao');
-            sessionStorage.removeItem('emailCadastro');
+          if (open) {
+            setMostrarModal(true);
+            if (!searchParams.get('ativar-conta')) {
+              const params = new URLSearchParams(searchParams.toString());
+              params.set('ativar-conta', 'true');
+              window.history.replaceState({}, '', `?${params.toString()}`);
+            }
+          } else {
+            handleCloseModal();
           }
         }}
       >
@@ -364,7 +522,7 @@ export default function LoginPage() {
               Ativar Conta
             </DialogTitle>
             <DialogDescription>
-              Insira seu email e o código de ativação recebido
+              Insira seu email ou CPF e o código de ativação recebido
             </DialogDescription>
           </DialogHeader>
 
@@ -377,24 +535,27 @@ export default function LoginPage() {
             )}
 
             {modalSuccess && (
-              <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-lg flex items-start gap-2">
-                <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-lg flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm">{modalSuccess}</span>
               </div>
             )}
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Email
+                Email ou CPF
               </label>
               <Input
-                type="email"
-                value={modalEmail}
-                onChange={(e) => setModalEmail(e.target.value)}
-                placeholder="seu@email.com"
+                type="text"
+                value={modalIdentificador}
+                onChange={(e) => setModalIdentificador(e.target.value)}
+                placeholder="seu@email.com ou 12345678900"
                 className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                 disabled={modalLoading}
               />
+              <p className="text-xs text-gray-500">
+                Use o mesmo email ou CPF (11 dígitos) cadastrado
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -436,7 +597,7 @@ export default function LoginPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setMostrarModal(false)}
+              onClick={handleCloseModal}
               disabled={modalLoading}
               className="w-full sm:w-auto"
             >
@@ -445,7 +606,7 @@ export default function LoginPage() {
             <Button
               type="button"
               onClick={handleAtivarConta}
-              disabled={modalLoading || !modalEmail || !codigo}
+              disabled={modalLoading || !modalIdentificador || !codigo}
               className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
             >
               {modalLoading ? (
@@ -461,5 +622,22 @@ export default function LoginPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
