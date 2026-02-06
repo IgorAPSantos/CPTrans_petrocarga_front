@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -60,7 +60,7 @@ function identificarTipoLogin(
   return 'invalido';
 }
 
-export default function LoginPage() {
+function LoginContent() {
   const [loginInput, setLoginInput] = useState('');
   const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -81,7 +81,6 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Detecta parâmetro na URL e abre modal
   useEffect(() => {
     const ativarContaParam = searchParams.get('ativar-conta');
 
@@ -94,9 +93,21 @@ export default function LoginPage() {
       }
 
       setMostrarModal(true);
-      // NÃO limpa URL aqui - mantém parâmetro visível
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    if (mostrarModal) {
+      const currentParams = new URLSearchParams(window.location.search);
+      const hasParam = currentParams.get('ativar-conta') === 'true';
+
+      if (!hasParam) {
+        currentParams.set('ativar-conta', 'true');
+        const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
+        window.history.replaceState({}, '', newUrl);
+      }
+    }
+  }, [mostrarModal]);
 
   useEffect(() => {
     const tipo = identificarTipoLogin(loginInput);
@@ -267,10 +278,9 @@ export default function LoginPage() {
     setModalSuccess('');
     setMostrarModal(true);
 
-    // Adiciona parâmetro na URL ao abrir modal manualmente
     const params = new URLSearchParams(searchParams.toString());
     params.set('ativar-conta', 'true');
-    window.history.pushState({}, '', `?${params.toString()}`);
+    window.history.replaceState({}, '', `?${params.toString()}`);
   };
 
   const handleCloseModal = () => {
@@ -280,16 +290,15 @@ export default function LoginPage() {
     setModalSuccess('');
     setModalError('');
 
-    // Remove parâmetro da URL ao fechar modal
     const params = new URLSearchParams(searchParams.toString());
     params.delete('ativar-conta');
 
-    // Se não há outros parâmetros, remove a ? inteira
-    if (params.toString() === '') {
-      window.history.replaceState({}, '', window.location.pathname);
-    } else {
-      window.history.replaceState({}, '', `?${params.toString()}`);
-    }
+    const newUrl =
+      params.toString() === ''
+        ? window.location.pathname
+        : `?${params.toString()}`;
+
+    window.history.replaceState({}, '', newUrl);
   };
 
   const getInputIcon = () => {
@@ -496,11 +505,10 @@ export default function LoginPage() {
         onOpenChange={(open) => {
           if (open) {
             setMostrarModal(true);
-            // Se abrir manualmente (não por URL), adiciona parâmetro
             if (!searchParams.get('ativar-conta')) {
               const params = new URLSearchParams(searchParams.toString());
               params.set('ativar-conta', 'true');
-              window.history.pushState({}, '', `?${params.toString()}`);
+              window.history.replaceState({}, '', `?${params.toString()}`);
             }
           } else {
             handleCloseModal();
@@ -527,8 +535,8 @@ export default function LoginPage() {
             )}
 
             {modalSuccess && (
-              <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-lg flex items-start gap-2">
-                <CheckCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <div className="bg-green-50 border border-green-200 text-green-700 p-3 rounded-lg flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm">{modalSuccess}</span>
               </div>
             )}
@@ -614,5 +622,22 @@ export default function LoginPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-600">Carregando...</p>
+          </div>
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
