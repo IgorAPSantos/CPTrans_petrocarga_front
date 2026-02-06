@@ -455,8 +455,8 @@ export default function CadastroUsuario() {
               <div className="flex flex-col gap-3">
                 <Button
                   onClick={() => {
-                    // 🔥 Já salvamos no sessionStorage acima, agora só redireciona
-                    window.location.href = '/autorizacao/login';
+                    window.location.href =
+                      '/autorizacao/login?ativar-conta=true';
                   }}
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-lg font-medium text-base shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
                 >

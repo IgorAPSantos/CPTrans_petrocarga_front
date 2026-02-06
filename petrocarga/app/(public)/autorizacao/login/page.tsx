@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -37,29 +37,23 @@ import {
   reenviarEmailRecuperacao,
 } from '@/lib/api/recuperacaoApi';
 
-// Função auxiliar para identificar o tipo de entrada
 function identificarTipoLogin(
   input: string,
 ): 'email' | 'cpf' | 'invalido' | 'indeterminado' {
   if (!input.trim()) return 'indeterminado';
 
-  // Remove caracteres não numéricos para verificar CPF
   const apenasNumeros = input.replace(/\D/g, '');
-
-  // Verifica se parece um email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (emailRegex.test(input)) {
     return 'email';
   } else if (/^\d+$/.test(input) && apenasNumeros.length === 11) {
-    // Verifica se é apenas números e tem 11 dígitos
     return 'cpf';
   } else if (
     /^\d+$/.test(input) &&
     apenasNumeros.length > 0 &&
     apenasNumeros.length < 11
   ) {
-    // Está digitando CPF mas ainda não tem 11 dígitos
     return 'cpf';
   }
 
@@ -85,38 +79,32 @@ export default function LoginPage() {
 
   const { login, isAuthenticated, user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
+  // Detecta parâmetro na URL e abre modal
   useEffect(() => {
-    const abrirModal = sessionStorage.getItem('abrirModalAtivacao');
-    const emailSalvo = sessionStorage.getItem('emailCadastro');
+    const ativarContaParam = searchParams.get('ativar-conta');
 
-    if (abrirModal === 'true') {
+    if (ativarContaParam === 'true') {
+      const emailSalvo = sessionStorage.getItem('emailCadastro');
       if (emailSalvo) {
         setLoginInput(emailSalvo);
         setModalIdentificador(emailSalvo);
+        sessionStorage.removeItem('emailCadastro');
       }
 
       setMostrarModal(true);
-
-      sessionStorage.removeItem('abrirModalAtivacao');
-      sessionStorage.removeItem('emailCadastro');
+      // NÃO limpa URL aqui - mantém parâmetro visível
     }
-  }, []);
+  }, [searchParams]);
 
-  // Identificar tipo de entrada em tempo real
   useEffect(() => {
-    if (!loginInput.trim()) {
-      setTipoInput('indeterminado');
-      return;
-    }
-
     const tipo = identificarTipoLogin(loginInput);
     setTipoInput(tipo);
   }, [loginInput]);
 
   useEffect(() => {
     if (!authLoading && isAuthenticated && user) {
-      // Redireciona conforme a permissão
       switch (user.permissao) {
         case 'ADMIN':
         case 'GESTOR':
@@ -132,7 +120,6 @@ export default function LoginPage() {
     }
   }, [authLoading, isAuthenticated, user, router]);
 
-  // Enquanto o /me está sendo carregado
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -144,7 +131,6 @@ export default function LoginPage() {
     );
   }
 
-  // Se já estiver logado, nem renderiza a Home (vai redirecionar)
   if (isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -161,13 +147,11 @@ export default function LoginPage() {
     setError('');
 
     try {
-      // O AuthContext já cuida da lógica de identificar email/CPF
       const decodedUser = await login({
         login: loginInput,
         senha,
       });
 
-      // Redirecionamento baseado na permissão
       switch (decodedUser.permissao) {
         case 'ADMIN':
         case 'GESTOR':
@@ -183,9 +167,6 @@ export default function LoginPage() {
           setError('Permissão desconhecida');
       }
     } catch (err: any) {
-      console.error('Erro no handleLogin:', err);
-
-      // Use a mensagem de erro do AuthContext
       setError(err.message || 'Erro ao fazer login. Tente novamente.');
     } finally {
       setLoading(false);
@@ -209,41 +190,30 @@ export default function LoginPage() {
     setModalLoading(true);
 
     try {
-      // Determinar se é email ou CPF
       const isEmail = modalIdentificador.includes('@');
       let identificadorEnviar = modalIdentificador.trim();
 
       if (!isEmail) {
-        // Se for CPF, limpa formatação
         identificadorEnviar = modalIdentificador.replace(/\D/g, '');
-        // Verifica se tem exatamente 11 dígitos
         if (identificadorEnviar.length !== 11) {
           throw new Error('CPF deve conter 11 dígitos');
         }
       }
 
-      // Lógica direta para ativar conta
       await ativarConta(identificadorEnviar, codigo.trim());
 
       setModalSuccess(
         'Conta ativada com sucesso! Agora você pode fazer login.',
       );
-      setModalError('');
 
-      // Limpar campos após sucesso
       setTimeout(() => {
-        setMostrarModal(false);
-        setModalIdentificador('');
-        setCodigo('');
-        setModalSuccess('');
+        handleCloseModal();
       }, 2000);
     } catch (err: any) {
-      console.error('Erro na ativação:', err);
       setModalError(
         err.message ||
           'Código inválido ou expirado. Verifique e tente novamente.',
       );
-      setModalSuccess('');
     } finally {
       setModalLoading(false);
     }
@@ -260,14 +230,11 @@ export default function LoginPage() {
     setModalSuccess('');
 
     try {
-      // Determinar se é email ou CPF
       const isEmail = modalIdentificador.includes('@');
       let identificadorEnviar = modalIdentificador.trim();
 
       if (!isEmail) {
-        // Se for CPF, limpa formatação
         identificadorEnviar = modalIdentificador.replace(/\D/g, '');
-        // Verifica se tem exatamente 11 dígitos
         if (identificadorEnviar.length !== 11) {
           throw new Error('CPF deve conter 11 dígitos');
         }
@@ -285,7 +252,6 @@ export default function LoginPage() {
         setModalSuccess('Código reenviado com sucesso!');
       }
     } catch (err: any) {
-      console.error('Erro completo:', err);
       setModalError(
         err.message || 'Erro ao solicitar novo código. Tente novamente.',
       );
@@ -300,9 +266,32 @@ export default function LoginPage() {
     setModalError('');
     setModalSuccess('');
     setMostrarModal(true);
+
+    // Adiciona parâmetro na URL ao abrir modal manualmente
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('ativar-conta', 'true');
+    window.history.pushState({}, '', `?${params.toString()}`);
   };
 
-  // Função para obter o ícone baseado no tipo de entrada
+  const handleCloseModal = () => {
+    setMostrarModal(false);
+    setModalIdentificador('');
+    setCodigo('');
+    setModalSuccess('');
+    setModalError('');
+
+    // Remove parâmetro da URL ao fechar modal
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('ativar-conta');
+
+    // Se não há outros parâmetros, remove a ? inteira
+    if (params.toString() === '') {
+      window.history.replaceState({}, '', window.location.pathname);
+    } else {
+      window.history.replaceState({}, '', `?${params.toString()}`);
+    }
+  };
+
   const getInputIcon = () => {
     if (tipoInput === 'email') {
       return (
@@ -319,7 +308,6 @@ export default function LoginPage() {
     }
   };
 
-  // Função para obter a dica de formato
   const getFormatHint = () => {
     if (tipoInput === 'email') {
       return (
@@ -357,24 +345,19 @@ export default function LoginPage() {
     }
   };
 
-  // Função para lidar com a mudança no input
   const handleInputChange = (value: string) => {
-    // Se for CPF, só permite números
     if (tipoInput === 'cpf' || /^\d+$/.test(value)) {
-      // Permite apenas números para CPF
       const apenasNumeros = value.replace(/\D/g, '');
       if (apenasNumeros.length <= 11) {
         setLoginInput(apenasNumeros);
       }
     } else {
-      // Para email, permite qualquer caractere
-      setLoginInput(value);
+      setLoginInput(value.toLowerCase());
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-blue-50 via-white to-blue-100">
-      {/* Background decorativo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob-delayed"></div>
@@ -457,7 +440,6 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Linha com "Esqueceu sua senha?" e "Ativar Conta" */}
             <div className="flex items-center justify-between pt-1">
               <button
                 type="button"
@@ -509,15 +491,19 @@ export default function LoginPage() {
         </CardContent>
       </Card>
 
-      {/* Modal para Ativar Conta */}
       <Dialog
         open={mostrarModal}
         onOpenChange={(open) => {
-          setMostrarModal(open);
-          // Se o usuário fechar manualmente, limpa o storage também
-          if (!open) {
-            sessionStorage.removeItem('abrirModalAtivacao');
-            sessionStorage.removeItem('emailCadastro');
+          if (open) {
+            setMostrarModal(true);
+            // Se abrir manualmente (não por URL), adiciona parâmetro
+            if (!searchParams.get('ativar-conta')) {
+              const params = new URLSearchParams(searchParams.toString());
+              params.set('ativar-conta', 'true');
+              window.history.pushState({}, '', `?${params.toString()}`);
+            }
+          } else {
+            handleCloseModal();
           }
         }}
       >
@@ -603,7 +589,7 @@ export default function LoginPage() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setMostrarModal(false)}
+              onClick={handleCloseModal}
               disabled={modalLoading}
               className="w-full sm:w-auto"
             >
