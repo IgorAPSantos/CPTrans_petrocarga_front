@@ -7,18 +7,25 @@ import { useMapboxSuggestions } from '../map/hooks/useMapboxSuggestions';
 interface OriginVehicleStepProps {
   vehicles: VeiculoAPI[];
   origin: string;
+  entryCity: string | null;
   selectedVehicleId?: string;
+
   onOriginChange: (value: string) => void;
+  onEntryCityChange: (value: string | null) => void;
   onVehicleChange: (id: string) => void;
-  onNext: (origin: string, vehicleId: string) => void;
+
+  onNext: (origin: string, entryCity: string | null, vehicleId: string) => void;
+
   onBack?: () => void;
 }
 
 export default function OriginVehicleStep({
   vehicles,
   origin,
+  entryCity,
   selectedVehicleId,
   onOriginChange,
+  onEntryCityChange,
   onVehicleChange,
   onNext,
   onBack,
@@ -26,7 +33,6 @@ export default function OriginVehicleStep({
   const router = useRouter();
   const [localOrigin, setLocalOrigin] = useState(origin);
   const [localVehicleId, setLocalVehicleId] = useState(selectedVehicleId || '');
-  const [entradaId, setEntradaId] = useState(''); // NOVO estado para a entrada
   const [isFocused, setIsFocused] = useState(false);
   const [origem, setOrigem] = useState('');
 
@@ -49,14 +55,18 @@ export default function OriginVehicleStep({
   const handleNext = () => {
     if (!localVehicleId) return;
 
-    if (origem === 'outro-municipio' && (!localOrigin || !entradaId)) return;
+    if (origem === 'outro-municipio' && (!localOrigin || !entryCity)) return;
 
     const cidadeOrigemFinal =
       origem === 'proprio-municipio' ? 'Petrópolis - RJ' : localOrigin;
 
+    const entradaFinal = origem === 'proprio-municipio' ? null : entryCity;
+
     onOriginChange(cidadeOrigemFinal);
+    onEntryCityChange(entradaFinal);
+
     onVehicleChange(localVehicleId);
-    onNext(cidadeOrigemFinal, localVehicleId);
+    onNext(cidadeOrigemFinal, entradaFinal, localVehicleId);
   };
 
   return (
@@ -116,8 +126,8 @@ export default function OriginVehicleStep({
               Qual entrada irá utilizar para chegar à Petrópolis?
             </label>
             <select
-              value={entradaId}
-              onChange={(e) => setEntradaId(e.target.value)}
+              value={entryCity ?? ''}
+              onChange={(e) => onEntryCityChange(e.target.value)}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="" disabled>
@@ -193,7 +203,7 @@ export default function OriginVehicleStep({
           onClick={handleNext}
           disabled={
             !localVehicleId ||
-            (origem === 'outro-municipio' && (!localOrigin || !entradaId))
+            (origem === 'outro-municipio' && (!localOrigin || !entryCity))
           }
         >
           Próximo

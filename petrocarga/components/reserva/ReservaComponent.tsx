@@ -38,6 +38,8 @@ export default function ReservaComponent({
     setEndHour,
     origin,
     setOrigin,
+    entryCity,
+    setEntryCity,
     selectedVehicleId,
     setSelectedVehicleId,
     vehicles,
@@ -119,18 +121,24 @@ export default function ReservaComponent({
           <OriginVehicleStep
             vehicles={vehiclesForStep}
             origin={origin}
+            entryCity={entryCity}
             selectedVehicleId={selectedVehicleId}
             onOriginChange={setOrigin}
+            onEntryCityChange={setEntryCity}
             onVehicleChange={setSelectedVehicleId}
-            onNext={async (origin, vehicleId) => {
-              if (!selectedDay) return;
+            onNext={async (origin, entryCity, vehicleId) => {
+              if (!selectedDay || !selectedVaga) return;
+
               setOrigin(origin);
+              setEntryCity(entryCity);
               setSelectedVehicleId(vehicleId);
+
               await fetchHorariosDisponiveis(
                 selectedDay,
                 selectedVaga,
                 vehicleId,
               );
+
               setStep(3);
             }}
             onBack={() => setStep(1)}
@@ -177,6 +185,7 @@ export default function ReservaComponent({
             startHour={startHour!}
             endHour={endHour!}
             origin={origin}
+            entryCity={entryCity}
             destination={`${selectedVaga.endereco.logradouro}, ${selectedVaga.endereco.bairro}`}
             vehicleName={`${
               vehiclesForStep.find((v) => v.id === selectedVehicleId)?.name
