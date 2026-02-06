@@ -7,6 +7,7 @@ interface ConfirmationProps {
   startHour: string;
   endHour: string;
   origin?: string;
+  entryCity?: string | null;
   destination?: string;
   vehicleName?: string;
   onConfirm: () => Promise<void> | void;
@@ -81,12 +82,6 @@ export default function Confirmation({
           Reiniciar
         </button>
       </div>
-
-      {isPending && (
-        <p className="text-sm text-gray-600 mt-2 text-center">
-          Processando sua reserva...
-        </p>
-      )}
     </div>
   );
 }

@@ -373,7 +373,7 @@ export default function NotificacoesPage() {
                     </div>
                   </div>
 
-                  {/* Conteúdo */}
+                   {/* Conteúdo */}
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <span className="text-xl sm:text-2xl flex-shrink-0">
                       {getIconeNotificacao(notif.tipo)}
@@ -381,10 +381,10 @@ export default function NotificacoesPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <p className="text-gray-800 font-medium text-sm sm:text-base mb-1 truncate">
+                          <p className="text-gray-800 font-medium text-sm sm:text-base mb-1 break-words">
                             {notif.titulo}
                           </p>
-                          <p className="text-gray-600 text-xs sm:text-sm mb-2 line-clamp-2">
+                          <p className="text-gray-600 text-xs sm:text-sm mb-2 break-words whitespace-pre-wrap">
                             {notif.mensagem}
                           </p>
                         </div>
