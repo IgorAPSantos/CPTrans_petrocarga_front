@@ -82,12 +82,6 @@ export default function Confirmation({
           Reiniciar
         </button>
       </div>
-
-      {isPending && (
-        <p className="text-sm text-gray-600 mt-2 text-center">
-          Processando sua reserva...
-        </p>
-      )}
     </div>
   );
 }
