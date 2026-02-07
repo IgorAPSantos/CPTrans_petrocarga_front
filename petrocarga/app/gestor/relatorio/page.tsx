@@ -8,6 +8,9 @@ import { KPICard } from '@/components/dashboard/KPICard';
 import { VehicleTypesChart } from '@/components/dashboard/VehicleTypesChart';
 import { LocationStats } from '@/components/dashboard/LocationStats';
 import { DateRangePicker } from '@/components/dashboard/DateRangePicker';
+import { DashboardMetricsSection } from '@/components/dashboard/DashboardMetricsSection';
+import { MostUsedParkingSpaces } from '@/components/dashboard/MostUsedParkingSpaces';
+import { VehicleRoutesTable } from '@/components/dashboard/VehicleRoutesTable';
 import {
   Loader2,
   BarChart3,
@@ -25,11 +28,30 @@ import {
   Clock,
   Trash2,
   DoorOpen,
+  Ruler,
+  Navigation,
+  TrendingDown,
+  Activity,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  Legend,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  ComposedChart,
+  Line,
+} from 'recharts';
 
 export default function RelatoriosPage() {
   const { user } = useAuth();
@@ -39,7 +61,6 @@ export default function RelatoriosPage() {
   );
   const [kpisData, setKpisData] = useState<DashboardKPIs | null>(null);
   const [error, setError] = useState<string | null>(null);
-
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
@@ -56,29 +77,20 @@ export default function RelatoriosPage() {
       setError(null);
 
       try {
-        console.log('Buscando dados do dashboard com filtros:', {
-          startDate,
-          endDate,
-        });
-
         const [summaryResult, kpisResult] = await Promise.allSettled([
           RelatorioSumario(startDate || undefined, endDate || undefined),
           RelatorioKpis(startDate || undefined, endDate || undefined),
         ]);
 
         if (summaryResult.status === 'fulfilled') {
-          const data = summaryResult.value;
-          setDashboardData(data);
-          console.log('Dashboard summary carregado:', data);
+          setDashboardData(summaryResult.value);
         } else {
           console.error('Erro ao carregar summary:', summaryResult.reason);
           setError('Erro ao carregar resumo do dashboard');
         }
 
         if (kpisResult.status === 'fulfilled') {
-          const data = kpisResult.value;
-          setKpisData(data);
-          console.log('Dashboard KPIs carregado:', data);
+          setKpisData(kpisResult.value);
         } else {
           console.error('Erro ao carregar KPIs:', kpisResult.reason);
           setError((prev) =>
@@ -120,6 +132,126 @@ export default function RelatoriosPage() {
     fetchDashboardData(true);
   };
 
+  const calculateMetrics = () => {
+    if (!kpisData) return null;
+
+    const completionRate =
+      kpisData.totalReservations > 0
+        ? (kpisData.completedReservations / kpisData.totalReservations) * 100
+        : 0;
+
+    const cancellationRate =
+      kpisData.totalReservations > 0
+        ? (kpisData.canceledReservations / kpisData.totalReservations) * 100
+        : 0;
+
+    const reservationsPerSlot =
+      kpisData.totalSlots > 0
+        ? kpisData.totalReservations / kpisData.totalSlots
+        : 0;
+
+    return {
+      completionRate: completionRate.toFixed(1),
+      cancellationRate: cancellationRate.toFixed(1),
+      reservationsPerSlot: reservationsPerSlot.toFixed(1),
+    };
+  };
+
+  const derivedMetrics = calculateMetrics();
+
+  const reservationStatusData = kpisData
+    ? [
+        {
+          name: 'Concluídas',
+          value: kpisData.completedReservations,
+          color: '#10b981',
+        },
+        {
+          name: 'Pendentes',
+          value: kpisData.pendingReservations,
+          color: '#f59e0b',
+        },
+        {
+          name: 'Ativas',
+          value: kpisData.activeReservations,
+          color: '#3b82f6',
+        },
+        {
+          name: 'Canceladas',
+          value: kpisData.canceledReservations,
+          color: '#ef4444',
+        },
+        {
+          name: 'Removidas',
+          value: kpisData.removedReservations,
+          color: '#6b7280',
+        },
+      ].filter((item) => item.value > 0)
+    : [];
+
+  const reservationTypesData = kpisData
+    ? [
+        {
+          name: 'Reservas Normais',
+          value: kpisData.totalReservations - kpisData.multipleSlotReservations,
+          color: '#3b82f6',
+        },
+        {
+          name: 'Múltiplas Vagas',
+          value: kpisData.multipleSlotReservations,
+          color: '#8b5cf6',
+        },
+      ].filter((item) => item.value > 0)
+    : [];
+
+  const topDistrictsData =
+    dashboardData?.districts?.slice(0, 5).map((item) => ({
+      name:
+        item.name.length > 15 ? item.name.substring(0, 12) + '...' : item.name,
+      fullName: item.name,
+      value: item.reservationCount,
+      color: '#10b981',
+    })) || [];
+
+  const stayDurationData = dashboardData?.stayDurationStats
+    ? [
+        {
+          name: 'Mínimo',
+          value: dashboardData.stayDurationStats.minMinutes || 0,
+          color: '#10b981',
+        },
+        {
+          name: 'Médio',
+          value: dashboardData.stayDurationStats.avgMinutes || 0,
+          color: '#3b82f6',
+        },
+        {
+          name: 'Máximo',
+          value: dashboardData.stayDurationStats.maxMinutes || 0,
+          color: '#f59e0b',
+        },
+      ].filter((item) => item.value > 0)
+    : [];
+
+  const lengthOccupancyData = dashboardData?.lengthOccupancyStats
+    ? [
+        {
+          name: 'Ocupado',
+          value: dashboardData.lengthOccupancyStats.occupiedLengthMeters,
+          color: '#10b981',
+        },
+        {
+          name: 'Disponível',
+          value: Math.max(
+            0,
+            dashboardData.lengthOccupancyStats.availableLengthMeters -
+              dashboardData.lengthOccupancyStats.occupiedLengthMeters,
+          ),
+          color: '#d1d5db',
+        },
+      ].filter((item) => item.value > 0)
+    : [];
+
   if (loading && !dashboardData && !kpisData) {
     return (
       <div className="p-4 md:p-8 flex flex-col items-center justify-center min-h-[60vh] md:min-h-screen">
@@ -133,7 +265,6 @@ export default function RelatoriosPage() {
 
   return (
     <div className="p-3 md:p-6 lg:p-8 max-w-7xl mx-auto">
-      {/* Header Responsivo */}
       <div className="mb-4 md:mb-6 lg:mb-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4">
           <div className="flex items-center justify-between md:justify-start gap-3">
@@ -248,7 +379,7 @@ export default function RelatoriosPage() {
             className="space-y-4 md:space-y-6"
           >
             <div className="overflow-x-auto pb-2 md:pb-0">
-              <TabsList className="inline-flex h-10 w-full min-w-[300px] md:w-auto md:grid md:grid-cols-3 md:max-w-md">
+              <TabsList className="inline-flex h-10 w-full min-w-[400px] md:w-auto md:grid md:grid-cols-4 md:max-w-xl">
                 <TabsTrigger value="overview" className="flex-1 min-w-[100px]">
                   <span className="truncate">Visão Geral</span>
                 </TabsTrigger>
@@ -258,10 +389,12 @@ export default function RelatoriosPage() {
                 <TabsTrigger value="locations" className="flex-1 min-w-[100px]">
                   <span className="truncate">Localizações</span>
                 </TabsTrigger>
+                <TabsTrigger value="advanced" className="flex-1 min-w-[100px]">
+                  <span className="truncate">Avançado</span>
+                </TabsTrigger>
               </TabsList>
             </div>
 
-            {/* Overview Tab - ATUALIZADO COM NOVOS KPIs */}
             <TabsContent value="overview" className="space-y-4 md:space-y-6">
               {kpisData && (
                 <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
@@ -273,13 +406,17 @@ export default function RelatoriosPage() {
                   />
                   <KPICard
                     title="Taxa de Ocupação"
-                    value={`${kpisData.occupancyRate}%`}
+                    value={`${kpisData.occupancyRate.toFixed(1)}%`}
                     icon={TrendingUp}
                     description="Uso das vagas"
+                    trend={{
+                      value: kpisData.occupancyRate > 50 ? 5 : -2,
+                      isPositive: kpisData.occupancyRate > 50,
+                    }}
                   />
                   <KPICard
                     title="Reservas Pendentes"
-                    value={kpisData.pendingReservations} // NOVO KPI
+                    value={kpisData.pendingReservations}
                     icon={Clock}
                     description="Reservas aguardando"
                   />
@@ -303,7 +440,7 @@ export default function RelatoriosPage() {
                   />
                   <KPICard
                     title="Reservas Removidas"
-                    value={kpisData.removedReservations} // NOVO KPI
+                    value={kpisData.removedReservations}
                     icon={Trash2}
                     description="Reservas removidas"
                   />
@@ -319,6 +456,31 @@ export default function RelatoriosPage() {
                     icon={Car}
                     description="Reservas com +1 vaga"
                   />
+                  {derivedMetrics && (
+                    <>
+                      <KPICard
+                        title="Taxa de Conclusão"
+                        value={`${derivedMetrics.completionRate}%`}
+                        icon={CheckCircle}
+                        description="Reservas finalizadas"
+                        className="bg-green-50 border-green-200"
+                      />
+                      <KPICard
+                        title="Taxa de Cancelamento"
+                        value={`${derivedMetrics.cancellationRate}%`}
+                        icon={TrendingDown}
+                        description="Reservas canceladas"
+                        className="bg-red-50 border-red-200"
+                      />
+                      <KPICard
+                        title="Reservas/Vaga"
+                        value={derivedMetrics.reservationsPerSlot}
+                        icon={Activity}
+                        description="Média por vaga"
+                        className="bg-blue-50 border-blue-200"
+                      />
+                    </>
+                  )}
                 </div>
               )}
 
@@ -337,78 +499,203 @@ export default function RelatoriosPage() {
                   </Card>
                 )}
 
-                {dashboardData?.districts &&
-                dashboardData.districts.length > 0 ? (
-                  <LocationStats
-                    title="Bairros com Mais Reservas"
-                    data={dashboardData.districts}
-                    icon="district"
-                  />
+                {reservationStatusData.length > 0 ? (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5" />
+                        Status das Reservas
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="h-[250px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                          <PieChart>
+                            <Pie
+                              data={reservationStatusData}
+                              cx="50%"
+                              cy="50%"
+                              innerRadius={60}
+                              outerRadius={100}
+                              paddingAngle={2}
+                              dataKey="value"
+                              label
+                            >
+                              {reservationStatusData.map((entry, index) => (
+                                <Cell
+                                  key={`cell-${index}`}
+                                  fill={entry.color}
+                                />
+                              ))}
+                            </Pie>
+                            <Tooltip />
+                            <Legend />
+                          </PieChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </CardContent>
+                  </Card>
                 ) : (
                   <Card className="h-full">
                     <CardContent className="flex flex-col items-center justify-center h-full p-4 md:p-6 min-h-[300px]">
-                      <MapPin className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mb-2 md:mb-3" />
+                      <BarChart3 className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mb-2 md:mb-3" />
                       <p className="text-gray-600 text-center text-sm md:text-base">
-                        Nenhum dado de bairros disponível
+                        Nenhum dado de status de reservas disponível
                       </p>
                     </CardContent>
                   </Card>
                 )}
               </div>
+
+              {reservationTypesData.length > 0 &&
+                topDistrictsData.length > 0 && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <TrendingUp className="h-5 w-5" />
+                          Distribuição de Tipos de Reserva
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={reservationTypesData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={70}
+                                outerRadius={100}
+                                paddingAngle={2}
+                                dataKey="value"
+                                label
+                              >
+                                {reservationTypesData.map((entry, index) => (
+                                  <Cell
+                                    key={`cell-${index}`}
+                                    fill={entry.color}
+                                  />
+                                ))}
+                              </Pie>
+                              <Tooltip />
+                              <Legend />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MapPin className="h-5 w-5" />
+                          Top 5 Bairros
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                              data={topDistrictsData}
+                              layout="vertical"
+                              margin={{
+                                top: 20,
+                                right: 30,
+                                left: 20,
+                                bottom: 20,
+                              }}
+                            >
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis type="number" />
+                              <YAxis
+                                type="category"
+                                dataKey="name"
+                                width={80}
+                              />
+                              <Tooltip
+                                formatter={(value) => [value, 'Reservas']}
+                              />
+                              <Bar
+                                dataKey="value"
+                                fill="#10b981"
+                                radius={[0, 4, 4, 0]}
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
             </TabsContent>
 
-            {/* Vehicles Tab - MANTIDO IGUAL */}
             <TabsContent value="vehicles" className="space-y-4 md:space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                 {dashboardData?.vehicleTypes &&
                 dashboardData.vehicleTypes.length > 0 ? (
                   <>
                     <VehicleTypesChart data={dashboardData.vehicleTypes} />
+
                     <Card>
-                      <CardHeader className="p-4 md:p-6">
+                      <CardHeader>
                         <CardTitle className="text-base md:text-lg">
-                          Detalhes por Tipo de Veículo
+                          Comparação de Utilização
                         </CardTitle>
                       </CardHeader>
-                      <CardContent className="p-4 md:p-6 pt-0">
-                        <div className="space-y-3 md:space-y-4">
-                          {dashboardData.vehicleTypes.map((vehicle) => (
-                            <div
-                              key={vehicle.type}
-                              className="p-3 md:p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                      <CardContent>
+                        <div className="h-[300px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <ComposedChart
+                              data={dashboardData.vehicleTypes.map(
+                                (vehicle) => ({
+                                  name: vehicle.type,
+                                  total: vehicle.count,
+                                  únicos: vehicle.uniqueVehicles,
+                                  média:
+                                    vehicle.uniqueVehicles > 0
+                                      ? vehicle.count / vehicle.uniqueVehicles
+                                      : 0,
+                                }),
+                              )}
+                              margin={{
+                                top: 20,
+                                right: 30,
+                                left: 20,
+                                bottom: 60,
+                              }}
                             >
-                              <div className="flex items-center justify-between mb-2">
-                                <h3 className="font-semibold text-sm md:text-lg truncate mr-2">
-                                  {vehicle.type}
-                                </h3>
-                                <span className="text-xs md:text-sm text-gray-500 whitespace-nowrap">
-                                  {vehicle.count} reservas
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-2 gap-3 md:gap-4">
-                                <div className="space-y-1">
-                                  <p className="text-xs md:text-sm text-gray-600">
-                                    Veículos únicos:
-                                  </p>
-                                  <p className="text-lg md:text-2xl font-bold text-blue-600">
-                                    {vehicle.uniqueVehicles}
-                                  </p>
-                                </div>
-                                <div className="space-y-1">
-                                  <p className="text-xs md:text-sm text-gray-600">
-                                    Média por veículo:
-                                  </p>
-                                  <p className="text-lg md:text-2xl font-bold text-green-600">
-                                    {vehicle.uniqueVehicles > 0
-                                      ? (
-                                          vehicle.count / vehicle.uniqueVehicles
-                                        ).toFixed(1)
-                                      : 0}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis
+                                dataKey="name"
+                                angle={-45}
+                                textAnchor="end"
+                                height={60}
+                              />
+                              <YAxis />
+                              <Tooltip />
+                              <Legend />
+                              <Bar
+                                dataKey="total"
+                                name="Total Reservas"
+                                fill="#3b82f6"
+                                barSize={30}
+                              />
+                              <Bar
+                                dataKey="únicos"
+                                name="Veículos Únicos"
+                                fill="#10b981"
+                                barSize={30}
+                              />
+                              <Line
+                                type="monotone"
+                                dataKey="média"
+                                name="Média por Veículo"
+                                stroke="#f59e0b"
+                                strokeWidth={2}
+                              />
+                            </ComposedChart>
+                          </ResponsiveContainer>
                         </div>
                       </CardContent>
                     </Card>
@@ -431,7 +718,6 @@ export default function RelatoriosPage() {
               </div>
             </TabsContent>
 
-            {/* Locations Tab - ATUALIZADO COM ENTRY ORIGINS */}
             <TabsContent value="locations" className="space-y-4 md:space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
                 {dashboardData?.districts &&
@@ -488,68 +774,134 @@ export default function RelatoriosPage() {
                 )}
               </div>
 
-              {(dashboardData?.districts ||
-                dashboardData?.origins ||
-                dashboardData?.entryOrigins) && (
-                <Card>
-                  <CardHeader className="p-4 md:p-6">
-                    <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-                      <MapPin className="h-4 w-4 md:h-5 md:w-5" />
-                      Insights de Localização
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-4 md:p-6 pt-0">
-                    <div className="space-y-3 md:space-y-4">
-                      {dashboardData?.districts?.[0] && (
-                        <div className="p-3 md:p-4 bg-blue-50 rounded-lg">
-                          <h4 className="font-medium text-blue-900 mb-2 text-sm md:text-base">
-                            Localização Mais Popular
-                          </h4>
-                          <p className="text-blue-700 text-sm md:text-base">
-                            <span className="font-semibold">
-                              {dashboardData.districts[0].name}
-                            </span>{' '}
-                            é o bairro com mais reservas (
-                            {dashboardData.districts[0].reservationCount})
-                          </p>
-                        </div>
-                      )}
+              {dashboardData?.mostUsedVagas &&
+                dashboardData.mostUsedVagas.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Ruler className="h-5 w-5" />
+                        Vagas Mais Utilizadas
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <MostUsedParkingSpaces
+                        data={dashboardData.mostUsedVagas}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+            </TabsContent>
 
-                      {dashboardData?.origins?.[0] && (
-                        <div className="p-3 md:p-4 bg-green-50 rounded-lg">
-                          <h4 className="font-medium text-green-900 mb-2 text-sm md:text-base">
-                            Origem Principal
-                          </h4>
-                          <p className="text-green-700 text-sm md:text-base">
-                            <span className="font-semibold">
-                              {dashboardData.origins[0].name}
-                            </span>{' '}
-                            é a cidade de origem mais comum (
-                            {dashboardData.origins[0].reservationCount}{' '}
-                            reservas)
-                          </p>
-                        </div>
-                      )}
+            <TabsContent value="advanced" className="space-y-4 md:space-y-6">
+              <DashboardMetricsSection
+                stayDurationStats={dashboardData?.stayDurationStats}
+                activeDuringPeriodStats={dashboardData?.activeDuringPeriodStats}
+                lengthOccupancyStats={dashboardData?.lengthOccupancyStats}
+              />
 
-                      {dashboardData?.entryOrigins?.[0] && (
-                        <div className="p-3 md:p-4 bg-purple-50 rounded-lg">
-                          <h4 className="font-medium text-purple-900 mb-2 text-sm md:text-base">
-                            Entrada Principal
-                          </h4>
-                          <p className="text-purple-700 text-sm md:text-base">
-                            <span className="font-semibold">
-                              {dashboardData.entryOrigins[0].name}
-                            </span>{' '}
-                            é a cidade de entrada mais comum (
-                            {dashboardData.entryOrigins[0].reservationCount}{' '}
-                            reservas)
-                          </p>
+              {stayDurationData.length > 0 &&
+                lengthOccupancyData.length > 0 && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clock className="h-5 w-5" />
+                          Tempo de Permanência
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={stayDurationData}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" />
+                              <YAxis />
+                              <Tooltip />
+                              <Bar
+                                dataKey="value"
+                                fill="#3b82f6"
+                                radius={[4, 4, 0, 0]}
+                              >
+                                {stayDurationData.map((entry, index) => (
+                                  <Cell
+                                    key={`cell-${index}`}
+                                    fill={entry.color}
+                                  />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
                         </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Activity className="h-5 w-5" />
+                          Utilização de Espaço
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="h-[250px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={lengthOccupancyData}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={100}
+                                paddingAngle={2}
+                                dataKey="value"
+                                label
+                              >
+                                {lengthOccupancyData.map((entry, index) => (
+                                  <Cell
+                                    key={`cell-${index}`}
+                                    fill={entry.color}
+                                  />
+                                ))}
+                              </Pie>
+                              <Tooltip />
+                              <Legend />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+
+                        <div className="mt-4 grid grid-cols-2 gap-3">
+                          <div className="p-3 bg-green-50 rounded-lg">
+                            <p className="text-sm font-medium text-green-900">
+                              Comprimento Ocupado
+                            </p>
+                            <p className="text-lg font-bold text-green-700">
+                              {dashboardData?.lengthOccupancyStats?.occupiedLengthMeters.toFixed(
+                                1,
+                              )}{' '}
+                              m
+                            </p>
+                          </div>
+                          <div className="p-3 bg-gray-50 rounded-lg">
+                            <p className="text-sm font-medium text-gray-900">
+                              Taxa de Ocupação
+                            </p>
+                            <p className="text-lg font-bold text-gray-700">
+                              {dashboardData?.lengthOccupancyStats?.occupancyRatePercent.toFixed(
+                                1,
+                              )}
+                              %
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+              {dashboardData?.vehicleRoutes &&
+                dashboardData.vehicleRoutes.length > 0 && (
+                  <VehicleRoutesTable routes={dashboardData.vehicleRoutes} />
+                )}
             </TabsContent>
           </Tabs>
 
