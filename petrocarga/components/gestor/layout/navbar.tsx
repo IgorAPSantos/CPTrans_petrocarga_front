@@ -21,6 +21,7 @@ import {
   Users,
   UserCircle,
   BookOpen,
+  List,
 } from 'lucide-react';
 
 export function Navbar() {
@@ -93,10 +94,6 @@ export function Navbar() {
             </li>
 
             <li className="hover:text-gray-300">
-              <Link href="/gestor/denuncias">Denúncias</Link>
-            </li>
-
-            <li className="hover:text-gray-300">
               <Link href="/gestor/reservas">Reservas</Link>
             </li>
 
@@ -157,6 +154,32 @@ export function Navbar() {
                 </DropdownMenu>
               </li>
             )}
+
+            <li>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                  Notificações <ChevronDown className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/gestor/enviar-notificacoes"
+                      className="flex items-center gap-2"
+                    >
+                      <List className="h-4 w-4" /> Enviar Notificações
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href="/gestor/denuncias"
+                      className="flex items-center gap-2"
+                    >
+                      <List className="h-4 w-4" /> Denúncias recebidas
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </li>
           </ul>
         </div>
 
@@ -216,14 +239,37 @@ export function Navbar() {
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${menuAberto ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'}`}
       >
         <ul className="flex flex-col gap-4 bg-blue-500 p-4 shadow-md">
-          <li>
-            <Link
-              href="/gestor/relatorio"
-              onClick={() => setMenuAberto(false)}
-              className="flex items-center gap-2 py-2 border-b border-blue-400"
-            >
-              <FileText className="h-4 w-4" /> Relatório
-            </Link>
+          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Geral
+            </span>
+            <li>
+              <Link
+                href="/gestor/relatorio"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Relatório
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/gestor/disponibilidade-vagas"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Disponibilidade
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/gestor/reservas"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Reservas
+              </Link>
+            </li>
           </li>
           <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
             <span className="font-bold text-sm text-blue-200 uppercase">
@@ -242,24 +288,6 @@ export function Navbar() {
               className="pl-2"
             >
               Adicionar Vaga
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/gestor/disponibilidade-vagas"
-              onClick={() => setMenuAberto(false)}
-              className="block py-1"
-            >
-              Disponibilidade
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/gestor/reservas"
-              onClick={() => setMenuAberto(false)}
-              className="block py-1"
-            >
-              Reservas
             </Link>
           </li>
           <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
@@ -317,7 +345,7 @@ export function Navbar() {
                 onClick={() => setMenuAberto(false)}
                 className="pl-2"
               >
-                Gestores
+                Ver Gestores
               </Link>
               <Link
                 href="/gestor/adicionar-gestores"
@@ -329,25 +357,21 @@ export function Navbar() {
             </li>
           )}
           {!isAdmin && (
-            <li>
-              <Link
-                href="/gestor/perfil"
-                onClick={() => setMenuAberto(false)}
-                className="flex items-center gap-2 py-1"
-              >
-                <UserCircle className="h-4 w-4" /> Meu Perfil
-              </Link>
+            <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+              <span className="font-bold text-sm text-blue-200 uppercase">
+                Perfil
+              </span>
+              <li>
+                <Link
+                  href="/gestor/perfil"
+                  onClick={() => setMenuAberto(false)}
+                  className="pl-2"
+                >
+                  Meu Perfil
+                </Link>
+              </li>
             </li>
           )}
-          <li>
-            <Link
-              href="/gestor/guia"
-              onClick={() => setMenuAberto(false)}
-              className="flex items-center gap-2 py-1"
-            >
-              <BookOpen className="h-4 w-4" /> Guia
-            </Link>
-          </li>
           <li className="mt-2">
             <LogoutButton mobile={true} />
           </li>

@@ -24,7 +24,7 @@ export function Navbar() {
   ).length;
 
   const links = [
-    { href: '/agente/reserva-rapida', label: 'Reserva Rapida' },
+    { href: '/agente/reserva-rapida', label: 'Reserva Rápida' },
     { href: '/agente/lista-reserva', label: 'Lista de Reservas' },
     { href: '/agente/denuncias', label: 'Denúncias' },
     { href: '/agente/consulta', label: 'Consultar Placa' },
@@ -50,10 +50,7 @@ export function Navbar() {
         </Link>
 
         {/* LOGO */}
-        <Link
-          href="/agente"
-          className="flex justify-center md:justify-start"
-        >
+        <Link href="/agente" className="flex justify-center md:justify-start">
           <Image src={Logo} alt="Logo da Cptrans" className="w-16 h-auto" />
         </Link>
 
@@ -132,21 +129,82 @@ export function Navbar() {
         }`}
       >
         <ul className="flex flex-col gap-4 bg-blue-500 p-4 shadow-md">
-          {links.map(({ href, label }) => (
-            <li key={href} className="hover:bg-blue-700 rounded">
+          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Reservas
+            </span>
+            {/* Reservas Rápidas Criadas */}
+            <li className="hover:bg-blue-700 rounded">
               <Link
-                href={href}
+                href="/agente/reserva-rapida"
                 onClick={() => setMenuAberto(false)}
-                className="block px-2 py-1 w-full"
+                className="pl-2"
               >
-                {label}
+                Reservar Vaga
               </Link>
             </li>
-          ))}
 
-          {/* LOGOUT MOBILE */}
-          <li className="hover:bg-blue-700 rounded">
-            <LogoutButton mobile />
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/agente/lista-reserva"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Lista de Reservas
+              </Link>
+            </li>
+          </li>
+
+          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Consultas
+            </span>
+            {/* Consulta de Placa */}
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/agente/consulta"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Consultar Placa
+              </Link>
+            </li>
+          </li>
+
+          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Notificações
+            </span>
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/agente/denuncias"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Ver Denúncias
+              </Link>
+            </li>
+          </li>
+
+          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Perfil
+            </span>
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/agente/perfil"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Meu Perfil
+              </Link>
+            </li>
+            {/* LOGOUT MOBILE */}
+            <li className="hover:bg-blue-700 rounded">
+              <div className="pl-2">
+                <LogoutButton mobile={true} />
+              </div>
+            </li>
           </li>
         </ul>
       </div>

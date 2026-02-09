@@ -193,78 +193,105 @@ export function Navbar() {
         }`}
       >
         <ul className="flex flex-col gap-4 bg-blue-500 p-4 shadow-md">
-          {links.map(({ href, label }) => (
-            <li key={href} className="hover:bg-blue-700 rounded">
+          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Reservas
+            </span>
+            {/* Reservar Vagas no Mobile */}
+            <li className="hover:bg-blue-700 rounded">
               <Link
-                href={href}
+                href="/motorista/reservar-vaga"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Reservar Vaga
+              </Link>
+            </li>
+
+            {/* Minhas Reservas no Mobile */}
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/motorista/reservas"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Minhas Reservas
+              </Link>
+            </li>
+          </li>
+          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Veículos
+            </span>
+            {/* Meus Veículos no Mobile */}
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/motorista/veiculos/meus-veiculos"
                 onClick={() => setMenuAberto(false)}
                 className="block px-2 py-1 w-full"
               >
-                {label}
+                Meus Veículos
               </Link>
             </li>
-          ))}
 
-          {/* Minhas Reservas no Mobile */}
-          <li className="hover:bg-blue-700 rounded">
-            <Link
-              href="/motorista/reservas"
-              onClick={() => setMenuAberto(false)}
-              className="block px-2 py-1 w-full"
-            >
-              Minhas Reservas
-            </Link>
+            {/* Adicionar Veículo no Mobile */}
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/motorista/veiculos/cadastrar-veiculos"
+                onClick={() => setMenuAberto(false)}
+                className="block px-2 py-1 w-full"
+              >
+                Adicionar Veículo
+              </Link>
+            </li>
           </li>
-
-          {/* Minhas Denuncias no Mobile */}
-          <li className="hover:bg-blue-700 rounded">
-            <Link
-              href="/motorista/reservas/minhas-denuncias"
-              onClick={() => setMenuAberto(false)}
-              className="block px-2 py-1 w-full"
-            >
-              Minhas Denúncias
-            </Link>
+          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+            <span className="font-bold text-sm text-blue-200 uppercase">
+              Notificações
+            </span>
+            {/* Notificações no Mobile */}
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/motorista/notificacoes"
+                onClick={() => setMenuAberto(false)}
+                className="block px-2 py-1 w-full"
+              >
+                Ver Notificações
+              </Link>
+            </li>
+            {/* Minhas Denuncias no Mobile */}
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/motorista/reservas/minhas-denuncias"
+                onClick={() => setMenuAberto(false)}
+                className="block px-2 py-1 w-full"
+              >
+                Minhas Denúncias
+              </Link>
+            </li>
           </li>
-
-          {/* Meus Veículos no Mobile */}
-          <li className="hover:bg-blue-700 rounded">
-            <Link
-              href="/motorista/veiculos/meus-veiculos"
-              onClick={() => setMenuAberto(false)}
-              className="block px-2 py-1 w-full"
-            >
-              Meus Veículos
-            </Link>
-          </li>
-
-          {/* Adicionar Veículo no Mobile */}
-          <li className="hover:bg-blue-700 rounded">
-            <Link
-              href="/motorista/veiculos/cadastrar-veiculos"
-              onClick={() => setMenuAberto(false)}
-              className="block px-2 py-1 w-full"
-            >
-              Adicionar Veículo
-            </Link>
-          </li>
-
-          {/* Meu Perfil no Mobile */}
-          <li className="hover:bg-blue-700 rounded">
-            <Link
-              href="/motorista/perfil"
-              onClick={() => setMenuAberto(false)}
-              className="block px-2 py-1 w-full"
-            >
+          <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
+            <span className="font-bold text-sm text-blue-200 uppercase">
               Perfil
-            </Link>
-          </li>
+            </span>
 
-          {/* Logout no Mobile */}
-          <li className="hover:bg-blue-700 rounded">
-            <div className="px-2 py-1 w-full">
-              <LogoutButton mobile={true} />
-            </div>
+            {/* Meu Perfil no Mobile */}
+            <li className="hover:bg-blue-700 rounded">
+              <Link
+                href="/motorista/perfil"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Perfil
+              </Link>
+            </li>
+
+            {/* Logout no Mobile */}
+            <li className="hover:bg-blue-700 rounded">
+              <div className="pl-2">
+                <LogoutButton mobile={true} />
+              </div>
+            </li>
           </li>
         </ul>
       </div>
