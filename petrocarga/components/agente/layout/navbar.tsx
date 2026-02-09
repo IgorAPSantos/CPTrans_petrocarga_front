@@ -134,25 +134,22 @@ export function Navbar() {
               Reservas
             </span>
             {/* Reservas Rápidas Criadas */}
-            <li className="hover:bg-blue-700 rounded">
-              <Link
-                href="/agente/reserva-rapida"
-                onClick={() => setMenuAberto(false)}
-                className="pl-2"
-              >
-                Reservar Vaga
-              </Link>
-            </li>
+            <Link
+              href="/agente/reserva-rapida"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Reservar Vaga
+            </Link>
 
-            <li className="hover:bg-blue-700 rounded">
-              <Link
-                href="/agente/lista-reserva"
-                onClick={() => setMenuAberto(false)}
-                className="pl-2"
-              >
-                Lista de Reservas
-              </Link>
-            </li>
+            {/* Lista de Reservas Rápidas */}
+            <Link
+              href="/agente/lista-reserva"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Lista de Reservas
+            </Link>
           </li>
 
           <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
@@ -160,51 +157,47 @@ export function Navbar() {
               Consultas
             </span>
             {/* Consulta de Placa */}
-            <li className="hover:bg-blue-700 rounded">
-              <Link
-                href="/agente/consulta"
-                onClick={() => setMenuAberto(false)}
-                className="pl-2"
-              >
-                Consultar Placa
-              </Link>
-            </li>
+            <Link
+              href="/agente/consulta"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Consultar Placa
+            </Link>
           </li>
 
           <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
             <span className="font-bold text-sm text-blue-200 uppercase">
               Notificações
             </span>
-            <li className="hover:bg-blue-700 rounded">
-              <Link
-                href="/agente/denuncias"
-                onClick={() => setMenuAberto(false)}
-                className="pl-2"
-              >
-                Ver Denúncias
-              </Link>
-            </li>
+
+            {/* Denúncias */}
+            <Link
+              href="/agente/denuncias"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Ver Denúncias
+            </Link>
           </li>
 
           <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
             <span className="font-bold text-sm text-blue-200 uppercase">
               Perfil
             </span>
-            <li className="hover:bg-blue-700 rounded">
-              <Link
-                href="/agente/perfil"
-                onClick={() => setMenuAberto(false)}
-                className="pl-2"
-              >
-                Meu Perfil
-              </Link>
-            </li>
+
+            {/* Meu Perfil */}
+            <Link
+              href="/agente/perfil"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Meu Perfil
+            </Link>
             {/* LOGOUT MOBILE */}
-            <li className="hover:bg-blue-700 rounded">
-              <div className="pl-2">
-                <LogoutButton mobile={true} />
-              </div>
-            </li>
+            <div className="pl-2">
+              <LogoutButton mobile={true} />
+            </div>
           </li>
         </ul>
       </div>

@@ -243,33 +243,32 @@ export function Navbar() {
             <span className="font-bold text-sm text-blue-200 uppercase">
               Geral
             </span>
-            <li>
-              <Link
-                href="/gestor/relatorio"
-                onClick={() => setMenuAberto(false)}
-                className="pl-2"
-              >
-                Relatório
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/gestor/disponibilidade-vagas"
-                onClick={() => setMenuAberto(false)}
-                className="pl-2"
-              >
-                Disponibilidade
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/gestor/reservas"
-                onClick={() => setMenuAberto(false)}
-                className="pl-2"
-              >
-                Reservas
-              </Link>
-            </li>
+            {/* Relatório */}
+            <Link
+              href="/gestor/relatorio"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Relatório
+            </Link>
+
+            {/* Disponibilidade */}
+            <Link
+              href="/gestor/disponibilidade-vagas"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Disponibilidade
+            </Link>
+
+            {/* Disponibilidade */}
+            <Link
+              href="/gestor/reservas"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Reservas
+            </Link>
           </li>
           <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
             <span className="font-bold text-sm text-blue-200 uppercase">
