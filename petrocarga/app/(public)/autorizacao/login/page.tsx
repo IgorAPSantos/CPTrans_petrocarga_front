@@ -189,7 +189,7 @@ function LoginContent() {
     setModalSuccess('');
 
     if (!modalIdentificador.trim()) {
-      setModalError('Por favor, insira seu email ou CPF');
+      setModalError('Por favor, insira seu email');
       return;
     }
 
@@ -232,7 +232,7 @@ function LoginContent() {
 
   const handleSolicitarNovoCodigo = async () => {
     if (!modalIdentificador.trim()) {
-      setModalError('Por favor, insira seu email ou CPF primeiro');
+      setModalError('Por favor, insira seu email');
       return;
     }
 
@@ -522,7 +522,7 @@ function LoginContent() {
               Ativar Conta
             </DialogTitle>
             <DialogDescription>
-              Insira seu email ou CPF e o código de ativação recebido
+              Insira seu email e o código de ativação recebido
             </DialogDescription>
           </DialogHeader>
 
@@ -543,18 +543,18 @@ function LoginContent() {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Email ou CPF
+                Email
               </label>
               <Input
                 type="text"
                 value={modalIdentificador}
                 onChange={(e) => setModalIdentificador(e.target.value)}
-                placeholder="seu@email.com ou 12345678900"
+                placeholder="seu@email.com"
                 className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                 disabled={modalLoading}
               />
               <p className="text-xs text-gray-500">
-                Use o mesmo email ou CPF (11 dígitos) cadastrado
+                Use o mesmo email cadastrado
               </p>
             </div>
 

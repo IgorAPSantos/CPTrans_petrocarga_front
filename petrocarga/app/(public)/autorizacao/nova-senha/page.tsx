@@ -393,13 +393,6 @@ export default function ResetarSenhaComCodigo() {
               {/* Botões */}
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <button
-                  onClick={voltarParaEtapaCodigo}
-                  disabled={estaCarregando}
-                  className="flex-1 border border-gray-300 text-gray-700 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-gray-50 transition disabled:opacity-50"
-                >
-                  Voltar
-                </button>
-                <button
                   onClick={redefinirSenha}
                   disabled={estaCarregando}
                   className="flex-1 bg-indigo-600 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
@@ -415,6 +408,14 @@ export default function ResetarSenhaComCodigo() {
                   ) : (
                     'Redefinir Senha'
                   )}
+                </button>
+
+                <button
+                  onClick={voltarParaEtapaCodigo}
+                  disabled={estaCarregando}
+                  className="flex-1 border border-gray-300 text-gray-700 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-gray-50 transition disabled:opacity-50"
+                >
+                  Voltar
                 </button>
               </div>
             </div>

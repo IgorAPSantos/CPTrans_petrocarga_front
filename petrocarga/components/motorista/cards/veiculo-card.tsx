@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Veiculo } from '@/lib/types/veiculo';
 import { useRouter } from 'next/navigation';
 import { deleteVeiculo, atualizarVeiculo } from '@/lib/api/veiculoApi';
@@ -8,9 +8,13 @@ import { CheckCircle2, AlertCircle, Edit, Trash2, Save, X } from 'lucide-react';
 
 type VeiculoDetalhesProps = {
   veiculo: Veiculo;
+  onVeiculoAtualizado?: (veiculoAtualizado: Veiculo) => void;
 };
 
-export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
+export default function VeiculoDetalhes({
+  veiculo,
+  onVeiculoAtualizado,
+}: VeiculoDetalhesProps) {
   const router = useRouter();
 
   const [modalAberto, setModalAberto] = useState(false);
@@ -20,7 +24,7 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
     texto: string;
   }>({ tipo: null, texto: '' });
 
-  // Estados de edição
+  // Estados de edição - sincronizados com o veículo prop
   const [formData, setFormData] = useState({
     id: veiculo.id,
     marca: veiculo.marca,
@@ -29,8 +33,22 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
     tipo: veiculo.tipo,
     cpfProprietario: veiculo.cpfProprietario || '',
     cnpjProprietario: veiculo.cnpjProprietario || '',
-    usuarioId: veiculo.usuarioId,
+    usuarioId: veiculo.usuarioId || '',
   });
+
+  // Sincroniza o formData quando o veículo prop muda
+  useEffect(() => {
+    setFormData({
+      id: veiculo.id,
+      marca: veiculo.marca,
+      modelo: veiculo.modelo,
+      placa: veiculo.placa,
+      tipo: veiculo.tipo,
+      cpfProprietario: veiculo.cpfProprietario || '',
+      cnpjProprietario: veiculo.cnpjProprietario || '',
+      usuarioId: veiculo.usuarioId || '',
+    });
+  }, [veiculo]);
 
   const handleInput = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -40,10 +58,33 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
     try {
       const fd = new FormData();
       Object.entries(formData).forEach(([key, value]) => {
-        fd.append(key, value as string);
+        if (value !== undefined && value !== null) {
+          fd.append(key, value.toString());
+        }
       });
 
-      await atualizarVeiculo(fd);
+      const resultado = await atualizarVeiculo(fd);
+
+      if (resultado.error) {
+        throw new Error(resultado.message);
+      }
+
+      // Cria o objeto veículo atualizado
+      const veiculoAtualizado: Veiculo = {
+        id: formData.id,
+        marca: formData.marca,
+        modelo: formData.modelo,
+        placa: formData.placa,
+        tipo: formData.tipo as any,
+        usuarioId: formData.usuarioId || undefined,
+        cpfProprietario: formData.cpfProprietario || null,
+        cnpjProprietario: formData.cnpjProprietario || null,
+      };
+
+      // Notifica o componente pai com os dados atualizados
+      if (onVeiculoAtualizado) {
+        onVeiculoAtualizado(veiculoAtualizado);
+      }
 
       setMensagem({
         tipo: 'sucesso',
@@ -51,12 +92,14 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
       });
 
       setEditando(false);
-      router.refresh();
-    } catch (err) {
+
+      // Opcional: recarregar a página para garantir sincronia
+      // router.refresh();
+    } catch (err: any) {
       console.error(err);
       setMensagem({
         tipo: 'erro',
-        texto: 'Erro ao atualizar veículo.',
+        texto: err.message || 'Erro ao atualizar veículo.',
       });
     }
   };
@@ -102,6 +145,22 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
     );
   };
 
+  // Função para cancelar edição (restaura os dados originais)
+  const handleCancelarEdicao = () => {
+    setFormData({
+      id: veiculo.id,
+      marca: veiculo.marca,
+      modelo: veiculo.modelo,
+      placa: veiculo.placa,
+      tipo: veiculo.tipo,
+      cpfProprietario: veiculo.cpfProprietario || '',
+      cnpjProprietario: veiculo.cnpjProprietario || '',
+      usuarioId: veiculo.usuarioId || '',
+    });
+    setEditando(false);
+    setMensagem({ tipo: null, texto: '' });
+  };
+
   return (
     <>
       <article className="relative bg-white p-4 sm:p-6 lg:p-8 rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl border-l-4 sm:border-l-8 border-blue-500 transition-all duration-300 w-full">
@@ -121,7 +180,9 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
             {!editando ? (
               <p className="text-gray-600 mt-1 sm:mt-2 text-sm sm:text-base">
                 Placa:{' '}
-                <span className="font-mono font-semibold">{veiculo.placa}</span>
+                <span className="font-mono font-semibold">
+                  {formData.placa}
+                </span>
               </p>
             ) : (
               <p className="text-sm text-blue-600 mt-1 flex items-center gap-1">
@@ -159,27 +220,27 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
               <p className="font-semibold text-gray-500 text-xs sm:text-sm mb-1">
                 Tipo
               </p>
-              <p className="text-gray-800">{veiculo.tipo}</p>
+              <p className="text-gray-800">{formData.tipo}</p>
             </div>
 
-            {veiculo.cpfProprietario && (
+            {formData.cpfProprietario && (
               <div className="bg-gray-50 p-3 sm:p-4 rounded-lg">
                 <p className="font-semibold text-gray-500 text-xs sm:text-sm mb-1">
                   CPF Proprietário
                 </p>
                 <p className="text-gray-800 font-mono">
-                  {veiculo.cpfProprietario}
+                  {formData.cpfProprietario}
                 </p>
               </div>
             )}
 
-            {veiculo.cnpjProprietario && (
+            {formData.cnpjProprietario && (
               <div className="bg-gray-50 p-3 sm:p-4 rounded-lg xs:col-span-2">
                 <p className="font-semibold text-gray-500 text-xs sm:text-sm mb-1">
                   CNPJ Proprietário
                 </p>
                 <p className="text-gray-800 font-mono">
-                  {veiculo.cnpjProprietario}
+                  {formData.cnpjProprietario}
                 </p>
               </div>
             )}
@@ -275,7 +336,7 @@ export default function VeiculoDetalhes({ veiculo }: VeiculoDetalhesProps) {
         {editando && (
           <div className="flex flex-col xs:flex-row justify-end gap-2 sm:gap-3 mt-4 sm:mt-6">
             <button
-              onClick={() => setEditando(false)}
+              onClick={handleCancelarEdicao}
               className="px-4 sm:px-5 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-medium order-2 xs:order-1"
             >
               <X className="w-4 h-4 sm:w-5 sm:h-5" />
