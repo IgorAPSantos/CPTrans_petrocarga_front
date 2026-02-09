@@ -207,15 +207,13 @@ export function Navbar() {
             </Link>
 
             {/* Minhas Reservas no Mobile */}
-            <li className="hover:bg-blue-700 rounded">
-              <Link
-                href="/motorista/reservas"
-                onClick={() => setMenuAberto(false)}
-                className="pl-2"
-              >
-                Minhas Reservas
-              </Link>
-            </li>
+            <Link
+              href="/motorista/reservas"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Minhas Reservas
+            </Link>
           </li>
           <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
             <span className="font-bold text-sm text-blue-200 uppercase">
