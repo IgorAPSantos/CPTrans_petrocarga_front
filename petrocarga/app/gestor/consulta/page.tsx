@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import {
   Search,
   Loader2,
   Car,
   AlertCircle,
   Filter,
-  Download,
   BarChart3,
   Building,
   Users,
@@ -23,7 +22,6 @@ import { ReservaPlaca } from '@/lib/types/reservaPlaca';
 import ReservaPlacaGestorCard from '@/components/gestor/cards/reservaPlaca-card';
 
 export default function GestorConsultarPlacaPage() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [placa, setPlaca] = useState('');
   const [reservas, setReservas] = useState<ReservaPlaca[]>([]);
@@ -75,11 +73,6 @@ export default function GestorConsultarPlacaPage() {
           .length,
       };
       setStats(stats);
-
-      const placaFormatada = placaToSearch
-        .replace(/[^a-zA-Z0-9]/g, '')
-        .toUpperCase();
-      router.push(`/gestor/reservas/placa?placa=${placaFormatada}`);
     } catch (err) {
       setError(
         err instanceof Error
@@ -118,64 +111,6 @@ export default function GestorConsultarPlacaPage() {
     if (filter === 'TODAS') return true;
     return reserva.status === filter;
   });
-
-  const exportToCSV = () => {
-    if (reservas.length === 0) return;
-
-    const headers = [
-      'ID',
-      'Placa',
-      'Motorista',
-      'CPF Motorista',
-      'Status',
-      'Veículo',
-      'Tamanho',
-      'Endereço',
-      'Bairro',
-      'Código PMP',
-      'Início',
-      'Fim',
-      'Criado em',
-      'Criado por',
-    ];
-
-    const csvContent = [
-      headers.join(','),
-      ...reservas.map((reserva) =>
-        [
-          reserva.id,
-          reserva.placaVeiculo,
-          reserva.motoristaNome,
-          reserva.motoristaCpf,
-          reserva.status,
-          `${reserva.marcaVeiculo} ${reserva.modeloVeiculo}`,
-          reserva.tamanhoVeiculo,
-          `${reserva.enderecoVaga.logradouro}, ${reserva.numeroEndereco}`,
-          reserva.enderecoVaga.bairro,
-          reserva.enderecoVaga.codigoPmp,
-          new Date(reserva.inicio).toISOString(),
-          new Date(reserva.fim).toISOString(),
-          new Date(reserva.criadoEm).toISOString(),
-          reserva.criadoPor?.nome || '',
-        ]
-          .map((field) => `"${field}"`)
-          .join(','),
-      ),
-    ].join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute(
-      'download',
-      `reservas_${placa}_${new Date().toISOString().split('T')[0]}.csv`,
-    );
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
 
   return (
     <div className="p-4 md:p-6 lg:p-8 flex flex-col items-center w-full min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -257,16 +192,6 @@ export default function GestorConsultarPlacaPage() {
                       </>
                     )}
                   </Button>
-                  {reservas.length > 0 && (
-                    <Button
-                      onClick={exportToCSV}
-                      variant="outline"
-                      className="h-12 border-green-200 hover:bg-green-50"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Exportar
-                    </Button>
-                  )}
                 </div>
               </div>
 
@@ -423,23 +348,12 @@ export default function GestorConsultarPlacaPage() {
 
             <Card className="bg-gray-50 border-gray-200">
               <CardContent className="p-4">
-                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                  <div className="text-sm text-gray-600">
-                    <span className="font-semibold">Placa:</span> {placa} |
-                    <span className="font-semibold ml-3">Total:</span>{' '}
-                    {filteredReservas.length} reserva(s) |
-                    <span className="font-semibold ml-3">Filtro:</span>{' '}
-                    {filter === 'TODAS' ? 'Todos os status' : filter}
-                  </div>
-                  <Button
-                    onClick={exportToCSV}
-                    variant="outline"
-                    size="sm"
-                    className="border-green-200 hover:bg-green-50"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Exportar Resultados
-                  </Button>
+                <div className="text-sm text-gray-600">
+                  <span className="font-semibold">Placa:</span> {placa} |
+                  <span className="font-semibold ml-3">Total:</span>{' '}
+                  {filteredReservas.length} reserva(s) |
+                  <span className="font-semibold ml-3">Filtro:</span>{' '}
+                  {filter === 'TODAS' ? 'Todos os status' : filter}
                 </div>
               </CardContent>
             </Card>
@@ -480,19 +394,8 @@ export default function GestorConsultarPlacaPage() {
                   <h4 className="font-semibold text-gray-800 mb-2">
                     Filtro Automático
                   </h4>
-                </CardContent>
-              </Card>
-
-              <Card className="border-purple-100 hover:border-purple-300 transition-colors">
-                <CardContent className="p-6">
-                  <div className="w-12 h-12 rounded-lg bg-purple-50 flex items-center justify-center mb-4 mx-auto">
-                    <Download className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <h4 className="font-semibold text-gray-800 mb-2">
-                    Exportação
-                  </h4>
                   <p className="text-sm text-gray-600">
-                    Exporte os resultados para análise em formato CSV
+                    Remove automaticamente canceladas e finalizadas
                   </p>
                 </CardContent>
               </Card>
