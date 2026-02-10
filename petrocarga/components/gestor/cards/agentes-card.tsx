@@ -5,6 +5,7 @@ import { Agente } from '@/lib/types/agente';
 import { cn } from '@/lib/utils';
 import { IdCard, Mail, Phone, UserCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface AgenteCardProps {
   agente: Agente;
@@ -19,8 +20,7 @@ export default function AgenteCard({ agente }: AgenteCardProps) {
       setModalExcluirAberto(false);
       window.location.reload();
     } catch (err) {
-      console.error(err);
-      alert('Erro ao excluir agente.');
+      toast.error('Erro ao excluir agente. Tente novamente.');
     }
   };
 

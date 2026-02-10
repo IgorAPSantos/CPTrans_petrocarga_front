@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { MapPin, FileText, Tag, Clock } from 'lucide-react';
 import { DenunciaAnaliseModal } from './denuncia-analise-modal';
 import { iniciarAnaliseDenuncia } from '@/lib/api/denunciaApi';
+import toast from 'react-hot-toast';
 
 interface DenuProps {
   denuncia: Denuncia;
@@ -71,7 +72,7 @@ export default function Denu({ denuncia }: DenuProps) {
 
       setModalOpen(true);
     } catch (err) {
-      console.error('Erro ao iniciar análise da denúncia:', err);
+      toast.error('Erro ao iniciar análise. Tente novamente.');
     }
   }
 

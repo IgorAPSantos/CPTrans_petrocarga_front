@@ -92,14 +92,11 @@ export default function VeiculoDetalhes({
       });
 
       setEditando(false);
-
-      // Opcional: recarregar a página para garantir sincronia
-      // router.refresh();
-    } catch (err: any) {
-      console.error(err);
+    } catch (err: unknown) {
       setMensagem({
         tipo: 'erro',
-        texto: err.message || 'Erro ao atualizar veículo.',
+        texto:
+          err instanceof Error ? err.message : 'Erro ao atualizar veículo.',
       });
     }
   };
