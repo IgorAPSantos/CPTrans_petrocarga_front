@@ -44,7 +44,6 @@ export default function PerfilAgente() {
           setAgente(resultado.agente);
         }
       } catch (err) {
-        console.error('Erro ao carregar agente:', err);
         setError('Erro ao carregar informações do perfil. Tente novamente.');
       } finally {
         setLoading(false);

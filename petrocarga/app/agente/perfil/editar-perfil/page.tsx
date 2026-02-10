@@ -51,7 +51,6 @@ export default function EditarAgentePerfil() {
           }
         }
       } catch (err) {
-        console.error('Erro ao buscar perfil do agente:', err);
         setError('Erro ao buscar perfil do agente.');
       } finally {
         setLoading(false);

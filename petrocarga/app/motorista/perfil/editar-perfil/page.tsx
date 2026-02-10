@@ -50,7 +50,6 @@ export default function EditarMotoristaPage() {
           }
         }
       } catch (err) {
-        console.error('Erro ao buscar perfil do motorista:', err);
         setError('Erro ao buscar perfil do motorista.');
       } finally {
         setLoading(false);

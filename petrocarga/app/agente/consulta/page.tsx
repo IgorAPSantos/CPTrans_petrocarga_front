@@ -39,7 +39,6 @@ export default function ConsultarPlacaPage() {
       const resultado = await getReservasPorPlaca(placa);
       setReservas(resultado || []);
     } catch (err) {
-      console.error('Erro ao buscar reservas:', err);
       setError(
         err instanceof Error
           ? err.message

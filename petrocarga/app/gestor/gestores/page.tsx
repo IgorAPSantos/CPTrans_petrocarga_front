@@ -51,7 +51,6 @@ export default function GestoresPage() {
           setGestores(result.gestores || []);
         }
       } catch (err) {
-        console.error('Erro ao carregar os gestores:', err);
         setError(
           'Erro ao buscar os gestores cadastrados. Tente novamente mais tarde.',
         );

@@ -5,7 +5,7 @@ import { useAuth } from '@/components/hooks/useAuth';
 import { getReservasRapidas } from '@/lib/api/reservaApi';
 import { ReservaRapida } from '@/lib/types/reservaRapida';
 import { Loader2 } from 'lucide-react';
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function ReservaRapidaPage() {
   const { user } = useAuth();
@@ -24,7 +24,6 @@ export default function ReservaRapidaPage() {
         const result = await getReservasRapidas(user.id);
         setReservas(result);
       } catch (err) {
-        console.error('Erro ao carregar as reservas:', err);
         setError('Erro ao buscar as reservas. Tente novamente mais tarde.');
       } finally {
         setLoading(false);

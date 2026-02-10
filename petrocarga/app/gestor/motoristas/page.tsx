@@ -52,7 +52,6 @@ export default function MotoristasPage() {
           setMotoristas(result.motoristas || []);
         }
       } catch (err) {
-        console.error('Erro ao carregar os motoristas:', err);
         setError(
           'Erro ao buscar os motoristas cadastrados. Tente novamente mais tarde.',
         );
