@@ -29,7 +29,6 @@ export default function VagaPosting() {
           setVaga(vagaData);
         }
       } catch (err) {
-        console.error('Erro ao buscar vaga:', err);
         setError('Erro ao buscar vaga.');
       } finally {
         setLoading(false);

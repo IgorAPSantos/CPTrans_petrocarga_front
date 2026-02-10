@@ -17,6 +17,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useCallback, useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function NotificacoesPage() {
   const {
@@ -103,7 +104,7 @@ export default function NotificacoesPage() {
       setSelectedIds([]);
       setShowDeleteModal(false);
     } catch (error) {
-      console.error('Erro ao deletar notificações:', error);
+      toast.error('Erro ao remover notificações. Por favor, tente novamente.');
     }
   };
 
@@ -113,7 +114,9 @@ export default function NotificacoesPage() {
       setSelectedIds([]);
       setShowMarkReadModal(false);
     } catch (error) {
-      console.error('Erro ao marcar notificações como lidas:', error);
+      toast.error(
+        'Erro ao marcar notificações como lidas. Por favor, tente novamente.',
+      );
     }
   };
 
@@ -373,7 +376,7 @@ export default function NotificacoesPage() {
                     </div>
                   </div>
 
-                   {/* Conteúdo */}
+                  {/* Conteúdo */}
                   <div className="flex items-start gap-3 flex-1 min-w-0">
                     <span className="text-xl sm:text-2xl flex-shrink-0">
                       {getIconeNotificacao(notif.tipo)}

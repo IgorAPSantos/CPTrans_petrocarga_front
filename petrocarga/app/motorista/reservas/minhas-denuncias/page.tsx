@@ -7,6 +7,7 @@ import DenunciaLista from '@/components/motorista/cards/denuncia/DenunciaLista';
 import { Denuncia } from '@/lib/types/denuncias';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function MinhasDenuncias() {
   const { user } = useAuth();
@@ -23,7 +24,9 @@ export default function MinhasDenuncias() {
         const result = await getDenunciasByUsuario(user.id);
         setDenuncias(result ?? []);
       } catch (err) {
-        console.error('Erro ao carregar as denúncias.', err);
+        toast.error(
+          'Erro ao carregar suas denúncias. Por favor, tente novamente mais tarde.',
+        );
         setDenuncias([]);
       } finally {
         setLoading(false);

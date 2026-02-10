@@ -32,10 +32,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/components/hooks/useAuth';
-import {
-  ativarConta,
-  reenviarEmailRecuperacao,
-} from '@/lib/api/recuperacaoApi';
+import { ativarConta, reenviarCodigoAtivacao } from '@/lib/api/recuperacaoApi';
 
 function identificarTipoLogin(
   input: string,
@@ -67,12 +64,12 @@ function LoginContent() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [modalIdentificador, setModalIdentificador] = useState('');
+  const [cpfAtivacao, setCpfAtivacao] = useState('');
   const [codigo, setCodigo] = useState('');
   const [modalError, setModalError] = useState('');
   const [modalSuccess, setModalSuccess] = useState('');
   const [modalLoading, setModalLoading] = useState(false);
-  const [solicitandoNovoCodigo, setSolicitandoNovoCodigo] = useState(false);
+  const [reenviandoCodigo, setReenviandoCodigo] = useState(false);
   const [tipoInput, setTipoInput] = useState<
     'email' | 'cpf' | 'invalido' | 'indeterminado'
   >('indeterminado');
@@ -85,13 +82,6 @@ function LoginContent() {
     const ativarContaParam = searchParams.get('ativar-conta');
 
     if (ativarContaParam === 'true') {
-      const emailSalvo = sessionStorage.getItem('emailCadastro');
-      if (emailSalvo) {
-        setLoginInput(emailSalvo);
-        setModalIdentificador(emailSalvo);
-        sessionStorage.removeItem('emailCadastro');
-      }
-
       setMostrarModal(true);
     }
   }, [searchParams]);
@@ -188,8 +178,8 @@ function LoginContent() {
     setModalError('');
     setModalSuccess('');
 
-    if (!modalIdentificador.trim()) {
-      setModalError('Por favor, insira seu email');
+    if (!cpfAtivacao.trim()) {
+      setModalError('Por favor, insira seu CPF');
       return;
     }
 
@@ -201,17 +191,13 @@ function LoginContent() {
     setModalLoading(true);
 
     try {
-      const isEmail = modalIdentificador.includes('@');
-      let identificadorEnviar = modalIdentificador.trim();
+      const cpfLimpo = cpfAtivacao.replace(/\D/g, '');
 
-      if (!isEmail) {
-        identificadorEnviar = modalIdentificador.replace(/\D/g, '');
-        if (identificadorEnviar.length !== 11) {
-          throw new Error('CPF deve conter 11 dígitos');
-        }
+      if (cpfLimpo.length !== 11) {
+        throw new Error('CPF deve conter 11 dígitos');
       }
 
-      await ativarConta(identificadorEnviar, codigo.trim());
+      await ativarConta(cpfLimpo, codigo.trim());
 
       setModalSuccess(
         'Conta ativada com sucesso! Agora você pode fazer login.',
@@ -230,28 +216,24 @@ function LoginContent() {
     }
   };
 
-  const handleSolicitarNovoCodigo = async () => {
-    if (!modalIdentificador.trim()) {
-      setModalError('Por favor, insira seu email');
+  const handleReenviarCodigo = async () => {
+    if (!cpfAtivacao.trim()) {
+      setModalError('Por favor, insira seu CPF');
       return;
     }
 
-    setSolicitandoNovoCodigo(true);
+    setReenviandoCodigo(true);
     setModalError('');
     setModalSuccess('');
 
     try {
-      const isEmail = modalIdentificador.includes('@');
-      let identificadorEnviar = modalIdentificador.trim();
+      const cpfLimpo = cpfAtivacao.replace(/\D/g, '');
 
-      if (!isEmail) {
-        identificadorEnviar = modalIdentificador.replace(/\D/g, '');
-        if (identificadorEnviar.length !== 11) {
-          throw new Error('CPF deve conter 11 dígitos');
-        }
+      if (cpfLimpo.length !== 11) {
+        throw new Error('CPF deve conter 11 dígitos');
       }
 
-      const resultado = await reenviarEmailRecuperacao(identificadorEnviar);
+      const resultado = await reenviarCodigoAtivacao(cpfLimpo);
 
       if (resultado.valido === true) {
         setModalSuccess(
@@ -267,12 +249,17 @@ function LoginContent() {
         err.message || 'Erro ao solicitar novo código. Tente novamente.',
       );
     } finally {
-      setSolicitandoNovoCodigo(false);
+      setReenviandoCodigo(false);
     }
   };
 
   const handleOpenModal = () => {
-    setModalIdentificador(loginInput);
+    if (tipoInput === 'cpf') {
+      setCpfAtivacao(loginInput.replace(/\D/g, ''));
+    } else {
+      setCpfAtivacao('');
+    }
+
     setCodigo('');
     setModalError('');
     setModalSuccess('');
@@ -285,7 +272,7 @@ function LoginContent() {
 
   const handleCloseModal = () => {
     setMostrarModal(false);
-    setModalIdentificador('');
+    setCpfAtivacao('');
     setCodigo('');
     setModalSuccess('');
     setModalError('');
@@ -522,7 +509,7 @@ function LoginContent() {
               Ativar Conta
             </DialogTitle>
             <DialogDescription>
-              Insira seu email e o código de ativação recebido
+              Insira seu CPF e o código de ativação recebido
             </DialogDescription>
           </DialogHeader>
 
@@ -543,18 +530,24 @@ function LoginContent() {
 
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-700">
-                Email
+                CPF
               </label>
               <Input
                 type="text"
-                value={modalIdentificador}
-                onChange={(e) => setModalIdentificador(e.target.value)}
-                placeholder="seu@email.com"
+                value={cpfAtivacao}
+                onChange={(e) => {
+                  const apenasNumeros = e.target.value.replace(/\D/g, '');
+                  if (apenasNumeros.length <= 11) {
+                    setCpfAtivacao(apenasNumeros);
+                  }
+                }}
+                placeholder="12345678900"
                 className="h-12 border-gray-300 focus:border-blue-500 focus:ring-blue-500 transition-all"
                 disabled={modalLoading}
+                inputMode="numeric"
               />
               <p className="text-xs text-gray-500">
-                Use o mesmo email cadastrado
+                Digite apenas números, sem pontuações
               </p>
             </div>
 
@@ -565,11 +558,11 @@ function LoginContent() {
                 </label>
                 <button
                   type="button"
-                  onClick={handleSolicitarNovoCodigo}
-                  disabled={solicitandoNovoCodigo || modalLoading}
+                  onClick={handleReenviarCodigo}
+                  disabled={reenviandoCodigo || modalLoading}
                   className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 transition-colors"
                 >
-                  {solicitandoNovoCodigo ? (
+                  {reenviandoCodigo ? (
                     <>
                       <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                       <span>Enviando...</span>
@@ -606,7 +599,7 @@ function LoginContent() {
             <Button
               type="button"
               onClick={handleAtivarConta}
-              disabled={modalLoading || !modalIdentificador || !codigo}
+              disabled={modalLoading || !cpfAtivacao || !codigo}
               className="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
             >
               {modalLoading ? (

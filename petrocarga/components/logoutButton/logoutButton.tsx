@@ -2,7 +2,6 @@
 import { useAuth } from '../hooks/useAuth';
 import { redirect } from 'next/navigation';
 import { useState } from 'react';
-import { LogOut } from 'lucide-react';
 
 interface LogoutButtonProps {
   mobile?: boolean;

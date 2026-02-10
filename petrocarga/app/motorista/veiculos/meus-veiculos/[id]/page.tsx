@@ -9,6 +9,7 @@ import VeiculoDetalhes from '@/components/motorista/cards/veiculo-card';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function EditarVeiculoPage() {
   const { user } = useAuth();
@@ -49,7 +50,7 @@ export default function EditarVeiculoPage() {
           }
         }
       } catch (err) {
-        console.error('Erro ao buscar veículo:', err);
+        toast.error('Erro ao carregar os dados do veículo. Tente novamente.');
         setError('Erro ao buscar veículo.');
       } finally {
         setLoading(false);

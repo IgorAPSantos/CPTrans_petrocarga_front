@@ -32,7 +32,6 @@ export default function MinhasReservas() {
       setReservas(data || []);
       setIsOffline(false);
     } catch (err) {
-      console.error('Erro ao buscar reservas:', err);
       setError('Não foi possível carregar suas reservas atuais.');
 
       if (!navigator.onLine) setIsOffline(true);
@@ -59,7 +58,6 @@ export default function MinhasReservas() {
       await getGerarComprovanteReserva(reservaId);
       toast.success('Comprovante Gerado com sucesso!');
     } catch (err) {
-      console.error('Erro ao gerar comprovante:', err);
       toast.error('Erro ao Gerar Comprovante!');
     }
   };
@@ -77,7 +75,6 @@ export default function MinhasReservas() {
       toast.success('Reserva deletada com sucesso!');
       fetchReservas();
     } catch (err) {
-      console.error('Erro ao deletar reserva:', err);
       toast.error('Erro ao excluir. Verifique sua conexão.');
     }
   };
@@ -97,7 +94,7 @@ export default function MinhasReservas() {
         fetchReservas();
       }
     } catch (err) {
-      console.error('Erro no checkout:', err);
+      toast.error('Erro ao realizar checkout da reserva.');
     }
   };
 

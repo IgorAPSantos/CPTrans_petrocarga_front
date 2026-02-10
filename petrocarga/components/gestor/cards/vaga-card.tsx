@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import CardMap from '@/components/map/cardMap';
 import { deleteVaga } from '@/lib/api/vagaApi';
+import toast from 'react-hot-toast';
 
 type VagaDetalhesProps = {
   vaga: Vaga;
@@ -31,7 +32,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
   vaga.operacoesVaga.forEach((op) => {
     horariosPorDia.set(
       op.diaSemanaAsEnum,
-      `${op.horaInicio.slice(0, 5)} - ${op.horaFim.slice(0, 5)}`
+      `${op.horaInicio.slice(0, 5)} - ${op.horaFim.slice(0, 5)}`,
     );
   });
 
@@ -41,8 +42,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
       setModalAberto(false);
       router.back();
     } catch (err) {
-      console.error(err);
-      alert('Erro ao excluir vaga.');
+      toast.error('Erro ao excluir vaga. Tente novamente.');
     }
   };
 
@@ -54,7 +54,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
             'absolute top-4 right-4 w-4 h-4 rounded-full shadow-md',
             vaga.status === 'DISPONIVEL' && 'bg-green-500',
             vaga.status === 'INDISPONIVEL' && 'bg-red-500',
-            vaga.status === 'MANUTENCAO' && 'bg-yellow-400'
+            vaga.status === 'MANUTENCAO' && 'bg-yellow-400',
           )}
           title={vaga.status}
         />
@@ -98,7 +98,7 @@ export default function VagaDetalhes({ vaga }: VagaDetalhesProps) {
                   ? selecionado
                     ? 'bg-green-500 text-white'
                     : 'bg-green-100 text-green-800 hover:bg-green-200'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed',
               )}
               disabled={!ativo}
               onClick={() => setDiaSelecionado(ativo ? dia : null)}

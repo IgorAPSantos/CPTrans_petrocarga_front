@@ -85,14 +85,12 @@ export default function RelatoriosPage() {
         if (summaryResult.status === 'fulfilled') {
           setDashboardData(summaryResult.value);
         } else {
-          console.error('Erro ao carregar summary:', summaryResult.reason);
           setError('Erro ao carregar resumo do dashboard');
         }
 
         if (kpisResult.status === 'fulfilled') {
           setKpisData(kpisResult.value);
         } else {
-          console.error('Erro ao carregar KPIs:', kpisResult.reason);
           setError((prev) =>
             prev
               ? `${prev}; Erro ao carregar KPIs`
@@ -109,7 +107,6 @@ export default function RelatoriosPage() {
           );
         }
       } catch (err) {
-        console.error('Erro inesperado ao carregar dados do dashboard:', err);
         setError('Erro interno ao processar os dados');
       } finally {
         setLoading(false);

@@ -49,6 +49,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     refreshUser();
   }, [refreshUser]);
 
+  const identificarTipoLogin = useCallback(
+    (identificador: string): 'email' | 'cpf' | 'invalido' => {
+      if (!identificador.trim()) return 'invalido';
+
+      const apenasNumeros = identificador.replace(/\D/g, '');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (emailRegex.test(identificador)) {
+        return 'email';
+      } else if (apenasNumeros.length === 11 && /^\d+$/.test(identificador)) {
+        return 'cpf';
+      } else if (apenasNumeros.length > 0 && /^\d+$/.test(identificador)) {
+        return 'cpf';
+      }
+
+      return 'invalido';
+    },
+    [],
+  );
+
   const login = useCallback(
     async ({
       login: identificador,
@@ -58,13 +78,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       senha: string;
     }) => {
       try {
-        // Determinar se é email ou CPF
-        const isEmail = identificador.includes('@');
+        const tipo = identificarTipoLogin(identificador);
 
-        // Formatar dados conforme backend Java espera
-        const dadosLogin = isEmail
-          ? { email: identificador.trim(), senha }
-          : { cpf: identificador.replace(/\D/g, ''), senha };
+        if (tipo === 'invalido') {
+          throw new Error(
+            'Formato inválido. Use email ou CPF (apenas números)',
+          );
+        }
+
+        const dadosLogin =
+          tipo === 'email'
+            ? {
+                email: identificador.trim().toLowerCase(),
+                senha,
+              }
+            : {
+                cpf: identificador.replace(/\D/g, ''),
+                senha,
+              };
+
+        console.log('Tentando login com:', dadosLogin);
 
         await api.post('petrocarga/auth/login', dadosLogin);
 
@@ -76,19 +109,51 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } catch (error: any) {
         console.error('Erro no login:', error);
 
-        // Tratamento básico de erros
         let mensagemErro = 'Credenciais inválidas ou conta não ativada.';
 
-        if (error.response?.data?.includes?.('Usuário desativado')) {
-          mensagemErro = 'Usuário desativado.';
+        if (error.response?.data?.message) {
+          const backendMessage = String(
+            error.response.data.message,
+          ).toLowerCase();
+
+          if (backendMessage.includes('cpf')) {
+            mensagemErro = 'CPF inválido. Verifique o formato.';
+          } else if (backendMessage.includes('email')) {
+            mensagemErro = 'Email inválido. Verifique o formato.';
+          } else if (
+            backendMessage.includes('senha') ||
+            backendMessage.includes('password')
+          ) {
+            mensagemErro = 'Senha incorreta.';
+          } else if (
+            backendMessage.includes('formato') ||
+            backendMessage.includes('format')
+          ) {
+            mensagemErro =
+              'Formato inválido. Use email ou CPF (apenas números).';
+          } else if (
+            backendMessage.includes('desativado') ||
+            backendMessage.includes('inativo')
+          ) {
+            mensagemErro = 'Usuário desativado.';
+          } else {
+            mensagemErro = error.response.data.message || mensagemErro;
+          }
         } else if (error.response?.status === 400) {
-          mensagemErro = 'Formato inválido. Use email ou CPF válido.';
+          mensagemErro = 'Erro na requisição. Verifique seus dados.';
+        } else if (error.response?.status === 401) {
+          mensagemErro = 'CPF/Email ou senha incorretos.';
+        } else if (error.response?.status === 403) {
+          mensagemErro =
+            'Conta não ativada. Por favor, ative sua conta primeiro.';
+        } else if (error.response?.status === 404) {
+          mensagemErro = 'Usuário não encontrado. Verifique seu CPF/Email.';
         }
 
         throw new Error(mensagemErro);
       }
     },
-    [],
+    [identificarTipoLogin],
   );
 
   const logout = useCallback(async () => {

@@ -18,6 +18,7 @@ import {
   X,
   Search,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function EnviarNotificacoesPage() {
   const { user } = useAuth();
@@ -60,7 +61,10 @@ export default function EnviarNotificacoesPage() {
           setMotoristas(motoristasRes.motoristas || []);
         }
       } catch (err) {
-        console.error('Erro ao carregar dados:', err);
+        toast.error(
+          'Erro ao carregar motoristas. Por favor, tente novamente mais tarde.',
+        );
+        setMotoristas([]);
       } finally {
         setLoading(false);
       }

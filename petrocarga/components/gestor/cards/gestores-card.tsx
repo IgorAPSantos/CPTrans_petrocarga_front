@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Mail, Phone, Trash2, UserCircle } from 'lucide-react';
 import router from 'next/router';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 interface GestorCardProps {
   gestor: Gestor;
@@ -19,8 +20,7 @@ export default function GestorCard({ gestor }: GestorCardProps) {
       await deleteGestor(gestor.id);
       router.back();
     } catch (err) {
-      console.error(err);
-      alert('Erro ao excluir vaga.');
+      toast.error('Erro ao excluir gestor. Tente novamente.');
     }
   };
 

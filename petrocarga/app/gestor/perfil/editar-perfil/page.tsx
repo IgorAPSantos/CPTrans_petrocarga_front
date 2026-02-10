@@ -50,7 +50,6 @@ export default function EditarGestorPerfil() {
           }
         }
       } catch (err) {
-        console.error('Erro ao buscar perfil do gestor:', err);
         setError('Erro ao buscar perfil do gestor.');
       } finally {
         setLoading(false);

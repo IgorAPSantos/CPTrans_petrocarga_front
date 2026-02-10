@@ -31,7 +31,7 @@ export default function PerfilMotorista() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [modalAberto, setModalAberto] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -47,8 +47,7 @@ export default function PerfilMotorista() {
         } else {
           setMotorista(resultado.motorista);
         }
-      } catch (err) {
-        console.error('Erro ao carregar motorista:', err);
+      } catch {
         setError('Erro ao carregar informações do perfil. Tente novamente.');
       } finally {
         setLoading(false);
@@ -59,24 +58,20 @@ export default function PerfilMotorista() {
   }, [user]);
 
   const handleExcluir = async () => {
-    if (!user) {
-      alert('Você precisa estar logado para excluir a conta.');
-      return;
-    }
+    if (!user) return;
 
     try {
       const resultado = await deleteMotorista(user.id);
 
       if (resultado?.error) {
-        alert(resultado.message || 'Erro ao excluir conta.');
+        // Sem alert
       } else {
         setModalAberto(false);
-        alert('Conta excluída com sucesso!');
+        await logout();
         router.push('/');
       }
-    } catch (err) {
-      console.error(err);
-      alert('Erro ao excluir conta.');
+    } catch {
+      // Sem alert e sem console.error
     }
   };
 
@@ -138,9 +133,7 @@ export default function PerfilMotorista() {
         </CardHeader>
 
         <div className="px-4 sm:px-6 pb-6 space-y-6">
-          {/* Grid de informações responsivo */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {/* Nome */}
             <div className="flex items-start sm:items-center space-x-3 p-4 bg-gray-50 rounded-lg">
               <UserIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
               <div className="min-w-0">
@@ -151,7 +144,6 @@ export default function PerfilMotorista() {
               </div>
             </div>
 
-            {/* Telefone */}
             <div className="flex items-start sm:items-center space-x-3 p-4 bg-gray-50 rounded-lg">
               <Phone className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
               <div className="min-w-0">
@@ -162,7 +154,6 @@ export default function PerfilMotorista() {
               </div>
             </div>
 
-            {/* Número da CNH */}
             <div className="flex items-start sm:items-center space-x-3 p-4 bg-gray-50 rounded-lg">
               <IdCardIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
               <div className="min-w-0">
@@ -175,7 +166,6 @@ export default function PerfilMotorista() {
               </div>
             </div>
 
-            {/* Tipo da CNH */}
             <div className="flex items-start sm:items-center space-x-3 p-4 bg-gray-50 rounded-lg">
               <FileText className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
               <div className="min-w-0">
@@ -186,7 +176,6 @@ export default function PerfilMotorista() {
               </div>
             </div>
 
-            {/* CPF */}
             <div className="flex items-start sm:items-center space-x-3 p-4 bg-gray-50 rounded-lg">
               <Fingerprint className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
               <div className="min-w-0">
@@ -197,7 +186,6 @@ export default function PerfilMotorista() {
               </div>
             </div>
 
-            {/* Email */}
             <div className="flex items-start sm:items-center space-x-3 p-4 bg-gray-50 rounded-lg col-span-1 sm:col-span-2 lg:col-span-1">
               <Mail className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5 sm:mt-0" />
               <div className="min-w-0 flex-1">
@@ -209,9 +197,7 @@ export default function PerfilMotorista() {
             </div>
           </div>
 
-          {/* Botões de Ação - MESMO TAMANHO EXATO */}
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center pt-6">
-            {/* Botão Editar - Estilo igual ao Excluir */}
             <Link
               href={`/motorista/perfil/editar-perfil`}
               className={cn(
@@ -223,7 +209,6 @@ export default function PerfilMotorista() {
               <span>Editar Perfil</span>
             </Link>
 
-            {/* Botão Excluir - Estilo consistente */}
             <button
               onClick={() => setModalAberto(true)}
               className={cn(
@@ -238,7 +223,6 @@ export default function PerfilMotorista() {
         </div>
       </Card>
 
-      {/* Modal de Confirmação - Responsivo */}
       {modalAberto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div

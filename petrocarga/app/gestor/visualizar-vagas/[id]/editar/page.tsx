@@ -32,7 +32,6 @@ export default function EditarVagaPage() {
           setVaga(vagaData);
         }
       } catch (err) {
-        console.error('Erro ao buscar vaga:', err);
         router.replace('/gestor/visualizar-vagas');
       } finally {
         setLoading(false);

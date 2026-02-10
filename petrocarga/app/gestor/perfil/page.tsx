@@ -42,7 +42,6 @@ export default function PerfilGestor() {
           setGestor(resultado.gestor);
         }
       } catch (err) {
-        console.error('Erro ao carregar gestor:', err);
         setError('Erro ao carregar informações do perfil. Tente novamente.');
       } finally {
         setLoading(false);

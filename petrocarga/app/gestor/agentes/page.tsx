@@ -51,7 +51,6 @@ export default function AgentesPage() {
           setAgentes(result.agentes || []);
         }
       } catch (err) {
-        console.error('Erro ao carregar os agentes:', err);
         setError(
           'Erro ao buscar os agentes cadastrados. Tente novamente mais tarde.',
         );

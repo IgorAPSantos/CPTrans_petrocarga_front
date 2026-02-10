@@ -5,6 +5,7 @@ import { Denuncia } from '@/lib/types/denuncias';
 import { getDenuncias } from '@/lib/api/denunciaApi';
 import { Loader2 } from 'lucide-react';
 import DenunciaLista from '@/components/gestor/denuncia/DenunciaLista';
+import toast from 'react-hot-toast';
 
 export default function DenunciasAgente() {
   const [denuncias, setDenuncias] = useState<Denuncia[]>([]);
@@ -16,7 +17,7 @@ export default function DenunciasAgente() {
       const result = await getDenuncias();
       setDenuncias(result ?? []);
     } catch (err) {
-      console.error('Erro ao carregar as denúncias.', err);
+      toast.error('Erro ao carregar denúncias. Por favor, tente novamente.');
       setDenuncias([]);
     } finally {
       setLoading(false);
