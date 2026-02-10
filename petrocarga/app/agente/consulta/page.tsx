@@ -136,7 +136,7 @@ export default function ConsultarPlacaPage() {
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <AlertCircle className="w-4 h-4" />
-                <span>Placa no formato AAA-0000</span>
+                <span>Placa no formato AAA0000</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-500">
                 <Calendar className="w-4 h-4" />

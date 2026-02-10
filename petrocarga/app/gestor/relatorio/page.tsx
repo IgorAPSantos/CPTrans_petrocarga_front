@@ -737,7 +737,7 @@ export default function RelatoriosPage() {
 
                 {dashboardData?.origins && dashboardData.origins.length > 0 ? (
                   <LocationStats
-                    title="Cidades de Origem"
+                    title="Locais de Origem"
                     data={dashboardData.origins}
                     icon="origin"
                   />
@@ -746,7 +746,7 @@ export default function RelatoriosPage() {
                     <CardContent className="flex flex-col items-center justify-center h-full p-4 md:p-6 min-h-[300px]">
                       <MapPin className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mb-2 md:mb-3" />
                       <p className="text-gray-600 text-center text-sm md:text-base">
-                        Nenhum dado de cidades de origem disponível
+                        Nenhum dado de locais de origem disponível
                       </p>
                     </CardContent>
                   </Card>
@@ -755,7 +755,7 @@ export default function RelatoriosPage() {
                 {dashboardData?.entryOrigins &&
                 dashboardData.entryOrigins.length > 0 ? (
                   <LocationStats
-                    title="Cidades de Entrada"
+                    title="Entradas da Cidade"
                     data={dashboardData.entryOrigins}
                     icon="entry-origin"
                   />
@@ -764,7 +764,7 @@ export default function RelatoriosPage() {
                     <CardContent className="flex flex-col items-center justify-center h-full p-4 md:p-6 min-h-[300px]">
                       <DoorOpen className="h-10 w-10 md:h-12 md:w-12 text-gray-400 mb-2 md:mb-3" />
                       <p className="text-gray-600 text-center text-sm md:text-base">
-                        Nenhum dado de cidades de entrada disponível
+                        Nenhum dado de entradas da cidade disponível
                       </p>
                     </CardContent>
                   </Card>
