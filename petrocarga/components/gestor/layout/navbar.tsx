@@ -13,16 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  ChevronDown,
-  User,
-  Bell,
-  FileText,
-  Users,
-  UserCircle,
-  BookOpen,
-  List,
-} from 'lucide-react';
+import { ChevronDown, User, Bell, Users, UserCircle, List } from 'lucide-react';
 
 export function Navbar() {
   const [menuAberto, setMenuAberto] = useState(false);
@@ -73,7 +64,10 @@ export function Navbar() {
 
             <li>
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                <DropdownMenuTrigger
+                  suppressHydrationWarning
+                  className="flex items-center gap-1 hover:text-gray-300 focus:outline-none"
+                >
                   Vagas <ChevronDown className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
@@ -97,13 +91,22 @@ export function Navbar() {
               <Link href="/gestor/reservas">Reservas</Link>
             </li>
 
+            <li>
+              <Link href="/gestor/consulta" className="hover:text-gray-300">
+                Consultar Reserva
+              </Link>
+            </li>
+
             <li className="hover:text-gray-300">
               <Link href="/gestor/motoristas">Motoristas</Link>
             </li>
 
             <li>
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                <DropdownMenuTrigger
+                  suppressHydrationWarning
+                  className="flex items-center gap-1 hover:text-gray-300 focus:outline-none"
+                >
                   Agentes <ChevronDown className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
@@ -130,7 +133,10 @@ export function Navbar() {
             {isAdmin && (
               <li>
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                  <DropdownMenuTrigger
+                    suppressHydrationWarning
+                    className="flex items-center gap-1 hover:text-gray-300 focus:outline-none"
+                  >
                     Gestores <ChevronDown className="h-4 w-4" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
@@ -157,7 +163,10 @@ export function Navbar() {
 
             <li>
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                <DropdownMenuTrigger
+                  suppressHydrationWarning
+                  className="flex items-center gap-1 hover:text-gray-300 focus:outline-none"
+                >
                   Notificações <ChevronDown className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
@@ -204,7 +213,10 @@ export function Navbar() {
               <LogoutButton />
             ) : (
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-1 hover:text-gray-300 focus:outline-none">
+                <DropdownMenuTrigger
+                  suppressHydrationWarning
+                  className="flex items-center gap-1 hover:text-gray-300 focus:outline-none"
+                >
                   Perfil <ChevronDown className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white text-gray-800 border border-gray-200">
@@ -268,6 +280,15 @@ export function Navbar() {
               className="pl-2"
             >
               Reservas
+            </Link>
+
+            {/* Consultar Reserva por Placa */}
+            <Link
+              href="/gestor/consulta"
+              onClick={() => setMenuAberto(false)}
+              className="pl-2"
+            >
+              Consultar Reserva
             </Link>
           </li>
           <li className="flex flex-col gap-2 border-b border-blue-400 pb-2">
@@ -360,15 +381,13 @@ export function Navbar() {
               <span className="font-bold text-sm text-blue-200 uppercase">
                 Perfil
               </span>
-              <li>
-                <Link
-                  href="/gestor/perfil"
-                  onClick={() => setMenuAberto(false)}
-                  className="pl-2"
-                >
-                  Meu Perfil
-                </Link>
-              </li>
+              <Link
+                href="/gestor/perfil"
+                onClick={() => setMenuAberto(false)}
+                className="pl-2"
+              >
+                Meu Perfil
+              </Link>
             </li>
           )}
           <li className="mt-2">
