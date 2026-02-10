@@ -277,7 +277,6 @@ export default function GestorConsultarPlacaPage() {
                 </h4>
                 <ul className="text-sm text-blue-700 space-y-1">
                   <li>• Exibe apenas reservas ATIVAS e RESERVADAS</li>
-                  <li>• Reservas CANCELADAS e FINALIZADAS são ocultadas</li>
                   <li>• Placa deve ser digitada sem hífen</li>
                   <li>• Busca automática ao carregar página com parâmetro</li>
                 </ul>
@@ -455,8 +454,7 @@ export default function GestorConsultarPlacaPage() {
             </h3>
             <p className="text-gray-600 max-w-xl mx-auto mb-8">
               Digite a placa do veículo para consultar as reservas ativas e
-              reservadas. Esta ferramenta filtra automaticamente reservas
-              canceladas e finalizadas.
+              reservadas.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
@@ -482,9 +480,6 @@ export default function GestorConsultarPlacaPage() {
                   <h4 className="font-semibold text-gray-800 mb-2">
                     Filtro Automático
                   </h4>
-                  <p className="text-sm text-gray-600">
-                    Remove automaticamente canceladas e finalizadas
-                  </p>
                 </CardContent>
               </Card>
 
