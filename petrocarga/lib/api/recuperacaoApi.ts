@@ -8,12 +8,26 @@ function extractMessage(error: unknown): string {
   return 'Ocorreu um erro. Tente novamente.';
 }
 
-export async function solicitarRecuperacaoSenha(email: string): Promise<void> {
+export async function solicitarRecuperacaoSenha(
+  identificador: string,
+): Promise<void> {
   try {
+    const isEmail = identificador.includes('@');
+    const cpfLimpo = identificador.replace(/\D/g, '');
+
+    const jsonBody = isEmail
+      ? { email: identificador.trim() }
+      : { cpf: cpfLimpo };
+
+    if (!isEmail && cpfLimpo.length !== 11) {
+      throw new Error('CPF deve conter 11 dígitos');
+    }
+
     const res = await clientApi('/petrocarga/auth/forgot-password', {
       method: 'POST',
-      json: { email },
+      json: jsonBody,
     });
+
     if (!res.ok) {
       const data = await res.json();
       throw new Error(
