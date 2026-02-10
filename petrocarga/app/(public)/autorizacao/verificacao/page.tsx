@@ -1,32 +1,78 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle2, AlertCircle, User } from 'lucide-react';
 import { solicitarRecuperacaoSenha } from '@/lib/api/recuperacaoApi';
 import { validateEmail } from '@/lib/utils';
 
 export default function RecuperacaoSenha() {
-  // Estados
-  const [email, setEmail] = useState('');
+  const [identificador, setIdentificador] = useState('');
   const [estaCarregando, setEstaCarregando] = useState(false);
   const [status, setStatus] = useState<'success' | 'error' | null>(null);
   const [mensagem, setMensagem] = useState('');
   const [mostrarModal, setMostrarModal] = useState(false);
-  const [emailEnviado, setEmailEnviado] = useState(false);
+  const [codigoEnviado, setCodigoEnviado] = useState(false);
+  const [tipoInput, setTipoInput] = useState<'email' | 'cpf' | 'indeterminado'>(
+    'indeterminado',
+  );
 
-  // Validações
+  const identificarTipoIdentificador = useCallback(
+    (input: string): 'email' | 'cpf' | 'indeterminado' => {
+      if (!input.trim()) return 'indeterminado';
+
+      const apenasNumeros = input.replace(/\D/g, '');
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (emailRegex.test(input)) {
+        return 'email';
+      } else if (/^\d+$/.test(input) && apenasNumeros.length === 11) {
+        return 'cpf';
+      } else if (/^\d+$/.test(input) && apenasNumeros.length > 0) {
+        return 'cpf';
+      }
+
+      return 'indeterminado';
+    },
+    [],
+  );
+
   const emailValido = useCallback((email: string): boolean => {
     return validateEmail(email);
   }, []);
 
+  const cpfValido = useCallback((cpf: string): boolean => {
+    const apenasNumeros = cpf.replace(/\D/g, '');
+    return apenasNumeros.length === 11;
+  }, []);
+
   const validarFormulario = (): string | null => {
-    if (!email.trim()) return 'Por favor, digite seu email.';
-    if (!emailValido(email)) return 'Por favor, digite um email válido.';
+    if (!identificador.trim()) {
+      return 'Por favor, digite seu email ou CPF.';
+    }
+
+    const tipo = identificarTipoIdentificador(identificador);
+
+    if (tipo === 'email' && !emailValido(identificador)) {
+      return 'Por favor, digite um email válido.';
+    }
+
+    if (tipo === 'cpf' && !cpfValido(identificador)) {
+      return 'CPF deve conter 11 dígitos.';
+    }
+
+    if (tipo === 'indeterminado') {
+      return 'Formato inválido. Use email ou CPF (apenas números).';
+    }
+
     return null;
   };
 
-  // Função para enviar email de recuperação - VERSÃO ATUALIZADA
-  const enviarEmailRecuperacao = async () => {
+  const handleIdentificadorChange = (value: string) => {
+    setIdentificador(value);
+    setTipoInput(identificarTipoIdentificador(value));
+  };
+
+  const enviarCodigoRecuperacao = async () => {
     const erroValidacao = validarFormulario();
     if (erroValidacao) {
       setStatus('error');
@@ -39,24 +85,26 @@ export default function RecuperacaoSenha() {
     setMensagem('');
 
     try {
-      await solicitarRecuperacaoSenha(email);
+      await solicitarRecuperacaoSenha(identificador);
       setStatus('success');
       setMensagem(
-        'Se este email estiver cadastrado, você receberá um código em instantes.',
+        'Se este email/CPF estiver cadastrado, você receberá um código em instantes.',
       );
       setMostrarModal(true);
-      setEmailEnviado(true);
-    } catch (erro: unknown) {
+      setCodigoEnviado(true);
+    } catch (erro: any) {
       setStatus('error');
+      setMensagem(
+        erro.message || 'Erro ao solicitar recuperação. Tente novamente.',
+      );
     } finally {
       setEstaCarregando(false);
     }
   };
 
-  // Eventos
   const aoPressionarTecla = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !estaCarregando) {
-      enviarEmailRecuperacao();
+      enviarCodigoRecuperacao();
     }
   };
 
@@ -64,12 +112,13 @@ export default function RecuperacaoSenha() {
     window.location.href = '/autorizacao/login';
   };
 
-  const tentarOutroEmail = () => {
-    setEmail('');
-    setEmailEnviado(false);
+  const tentarOutroIdentificador = () => {
+    setIdentificador('');
+    setCodigoEnviado(false);
     setStatus(null);
     setMensagem('');
     setMostrarModal(false);
+    setTipoInput('indeterminado');
   };
 
   const fecharModal = () => {
@@ -79,10 +128,54 @@ export default function RecuperacaoSenha() {
     irParaLogin();
   };
 
-  // Renderização principal
+  const getInputIcon = () => {
+    if (tipoInput === 'email') {
+      return <Mail className="w-5 h-5 text-indigo-600" />;
+    } else if (tipoInput === 'cpf') {
+      return <User className="w-5 h-5 text-indigo-600" />;
+    }
+    return <Mail className="w-5 h-5 text-indigo-600" />;
+  };
+
+  const getFormatHint = () => {
+    if (tipoInput === 'email') {
+      return (
+        <span className="text-xs text-green-600 mt-1 flex items-center gap-1">
+          ✓ Formato de email válido
+        </span>
+      );
+    } else if (tipoInput === 'cpf') {
+      const apenasNumeros = identificador.replace(/\D/g, '');
+      if (apenasNumeros.length === 11) {
+        return (
+          <span className="text-xs text-green-600 mt-1 flex items-center gap-1">
+            ✓ CPF válido (11 dígitos)
+          </span>
+        );
+      } else {
+        return (
+          <span className="text-xs text-amber-600 mt-1">
+            ⚠ CPF: {apenasNumeros.length}/11 dígitos
+          </span>
+        );
+      }
+    } else if (identificador && tipoInput === 'indeterminado') {
+      return (
+        <span className="text-xs text-red-600 mt-1">
+          ✗ Formato inválido. Use email ou CPF (apenas números)
+        </span>
+      );
+    } else {
+      return (
+        <span className="text-xs text-gray-500 mt-1">
+          Digite seu email ou CPF (11 dígitos)
+        </span>
+      );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-3 sm:p-4">
-      {/* Modal de Confirmação */}
       {mostrarModal && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm sm:backdrop-blur-lg flex items-center justify-center p-3 sm:p-4 z-50">
           <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-2xl p-5 sm:p-6 md:p-8 max-w-sm sm:max-w-md w-full mx-3 animate-fadeIn">
@@ -94,7 +187,6 @@ export default function RecuperacaoSenha() {
                 Solicitação recebida
               </h2>
 
-              {/* Status de reenvio */}
               {status && (
                 <div
                   className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg flex items-start gap-2 sm:gap-3 border ${
@@ -113,7 +205,6 @@ export default function RecuperacaoSenha() {
               )}
 
               <div className="space-y-4 sm:space-y-6">
-                {/* Botão Voltar para Login */}
                 <button
                   onClick={fecharModal}
                   className="w-full bg-gray-100 text-gray-700 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-gray-200 transition"
@@ -128,20 +219,18 @@ export default function RecuperacaoSenha() {
 
       <div className="w-full max-w-sm sm:max-w-md">
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg sm:shadow-xl p-5 sm:p-6 md:p-8">
-          {/* Header */}
           <div className="text-center mb-6 sm:mb-8">
             <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-indigo-100 rounded-full mb-3 sm:mb-4">
-              <Mail className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-indigo-600" />
+              {getInputIcon()}
             </div>
             <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
               Recuperar Senha
             </h1>
             <p className="text-xs sm:text-sm text-gray-600">
-              Digite seu email para receber o token de recuperação.
+              Digite seu email ou CPF para receber o código de recuperação.
             </p>
           </div>
 
-          {/* Mensagem de Status (fora do modal) */}
           {status && !mostrarModal && (
             <div
               className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg flex items-start gap-2 sm:gap-3 border ${
@@ -159,38 +248,36 @@ export default function RecuperacaoSenha() {
             </div>
           )}
 
-          {/* Conteúdo principal */}
-          {!emailEnviado ? (
+          {!codigoEnviado ? (
             <div className="space-y-4 sm:space-y-6">
-              {/* Input Email */}
               <div>
                 <label
-                  htmlFor="email"
+                  htmlFor="identificador"
                   className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2"
                 >
-                  Email cadastrado
+                  Email ou CPF cadastrado
                 </label>
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onKeyDown={aoPressionarTecla}
-                  placeholder="seu@email.com"
-                  className="w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition disabled:opacity-50"
-                  disabled={estaCarregando}
-                  autoComplete="email"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Digite o email cadastrado na sua conta para receber o token de
-                  recuperação.
-                </p>
+                <div className="relative">
+                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                    {getInputIcon()}
+                  </div>
+                  <input
+                    type="text"
+                    id="identificador"
+                    value={identificador}
+                    onChange={(e) => handleIdentificadorChange(e.target.value)}
+                    onKeyDown={aoPressionarTecla}
+                    placeholder="seu@email.com ou 12345678900"
+                    className="w-full pl-10 pr-3 sm:pl-10 sm:pr-4 py-2.5 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition disabled:opacity-50"
+                    disabled={estaCarregando}
+                  />
+                </div>
+                {getFormatHint()}
               </div>
 
-              {/* Botão Enviar */}
               <button
-                onClick={enviarEmailRecuperacao}
-                disabled={estaCarregando}
+                onClick={enviarCodigoRecuperacao}
+                disabled={estaCarregando || tipoInput === 'indeterminado'}
                 className="w-full bg-indigo-600 text-white py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {estaCarregando ? (
@@ -202,14 +289,13 @@ export default function RecuperacaoSenha() {
                 ) : (
                   <>
                     <span className="hidden sm:inline">
-                      Enviar token de recuperação
+                      Enviar código de recuperação
                     </span>
-                    <span className="inline sm:hidden">Enviar token</span>
+                    <span className="inline sm:hidden">Enviar código</span>
                   </>
                 )}
               </button>
 
-              {/* Link Voltar */}
               <div className="mt-4 sm:mt-6 text-center">
                 <button
                   onClick={irParaLogin}
@@ -222,7 +308,6 @@ export default function RecuperacaoSenha() {
               </div>
             </div>
           ) : (
-            /* Tela de Sucesso */
             <div className="text-center space-y-4 sm:space-y-6">
               <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-green-100 rounded-full">
                 <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 text-green-600" />
@@ -232,8 +317,8 @@ export default function RecuperacaoSenha() {
                   Solicitação recebida!
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-600 mb-2">
-                  Se este email estiver cadastrado, você receberá um código em
-                  instantes.
+                  Se este {tipoInput === 'email' ? 'email' : 'CPF'} estiver
+                  cadastrado, você receberá um código em instantes.
                 </p>
                 <p className="text-xs sm:text-sm text-gray-500">
                   Verifique sua caixa de entrada e também a pasta de spam.
@@ -247,20 +332,19 @@ export default function RecuperacaoSenha() {
                   Voltar para o login
                 </button>
                 <button
-                  onClick={tentarOutroEmail}
+                  onClick={tentarOutroIdentificador}
                   className="w-full bg-gray-100 text-gray-700 py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-medium hover:bg-gray-200 transition"
                 >
-                  Tentar outro email
+                  Tentar outro {tipoInput === 'email' ? 'email' : 'CPF'}
                 </button>
               </div>
             </div>
           )}
         </div>
 
-        {/* Texto informativo */}
         <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
           <p className="text-center text-xs sm:text-sm text-gray-600">
-            O token tem validade de 15 minutos. Não compartilhe com ninguém.
+            O código tem validade de 15 minutos. Não compartilhe com ninguém.
           </p>
         </div>
       </div>
