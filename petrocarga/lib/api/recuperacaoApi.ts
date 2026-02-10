@@ -2,16 +2,12 @@
 
 import { clientApi } from '../clientApi';
 
-// Função auxiliar para extrair mensagem de erro
 function extractMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   if (typeof error === 'string') return error;
   return 'Ocorreu um erro. Tente novamente.';
 }
 
-// ----------------------
-// 1. SOLICITAR RECUPERAÇÃO
-// ----------------------
 export async function solicitarRecuperacaoSenha(email: string): Promise<void> {
   try {
     const res = await clientApi('/petrocarga/auth/forgot-password', {
@@ -29,39 +25,37 @@ export async function solicitarRecuperacaoSenha(email: string): Promise<void> {
   }
 }
 
-// ----------------------
-// 2. REENVIAR EMAIL
-// ----------------------
-export async function reenviarEmailRecuperacao(email: string): Promise<{
+export async function reenviarCodigoAtivacao(cpf: string): Promise<{
   valido: boolean;
   message: string;
   [key: string]: any;
 }> {
   try {
+    const cpfLimpo = cpf.replace(/\D/g, '');
+
+    if (cpfLimpo.length !== 11) {
+      throw new Error('CPF deve conter 11 dígitos');
+    }
+
     const res = await clientApi('/petrocarga/auth/resend-code', {
       method: 'POST',
       json: {
-        email: email.trim(),
+        cpf: cpfLimpo,
       },
     });
 
     const data = await res.json();
 
-    // Se a resposta HTTP não foi bem-sucedida
     if (!res.ok) {
       throw new Error(data.message || `Erro HTTP ${res.status}`);
     }
 
-    // Retorna os dados completos, deixa o frontend decidir
     return data;
   } catch (error: unknown) {
     throw new Error(extractMessage(error));
   }
 }
 
-// ----------------------
-// 3. REDEFINIR SENHA
-// ----------------------
 export async function redefinirSenhaComCodigo(
   email: string,
   codigo: string,
@@ -86,21 +80,23 @@ export async function redefinirSenhaComCodigo(
     throw new Error(extractMessage(error));
   }
 }
-// ----------------------
-// 4. ATIVAR CONTA
-// ----------------------
-export async function ativarConta(
-  email: string,
-  codigo: string,
-): Promise<void> {
+
+export async function ativarConta(cpf: string, codigo: string): Promise<void> {
   try {
+    const cpfLimpo = cpf.replace(/\D/g, '');
+
+    if (cpfLimpo.length !== 11) {
+      throw new Error('CPF deve conter exatamente 11 dígitos');
+    }
+
     const res = await clientApi('/petrocarga/auth/activate', {
       method: 'POST',
       json: {
-        email: email.trim(),
+        cpf: cpfLimpo,
         codigo: codigo.trim().toUpperCase(),
       },
     });
+
     const data = await res.json();
 
     if (!data.success) {
