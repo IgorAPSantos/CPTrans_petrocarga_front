@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import toast from 'react-hot-toast';
 import { ArrowLeft, CheckCircle, CircleAlert, TruckIcon } from 'lucide-react';
 import Form from 'next/form';
 import FormItem from '@/components/form/form-item';
@@ -29,25 +30,20 @@ export default function CadastroVeiculo() {
     startTransition(async () => {
       try {
         if (!user) {
-          setMessage({
-            error: true,
-            text: 'Usuário não autenticado. Faça login novamente.',
-          });
+          toast.error('Usuário não autenticado. Faça login novamente.');
           return;
         }
 
         formData.append('usuarioId', user.id);
         const result = await addVeiculo(formData);
 
-        setMessage({
-          error: result?.error,
-          text: result?.message || 'Veículo cadastrado com sucesso!',
-        });
+        if (result?.error) {
+          toast.error(result.message || 'Erro ao cadastrar veículo');
+        } else {
+          toast.success(result?.message || 'Veículo cadastrado com sucesso!');
+        }
       } catch (err) {
-        setMessage({
-          error: true,
-          text: 'Erro inesperado ao cadastrar veículo.',
-        });
+        toast.error('Erro inesperado ao cadastrar veículo.');
       }
     });
   }
