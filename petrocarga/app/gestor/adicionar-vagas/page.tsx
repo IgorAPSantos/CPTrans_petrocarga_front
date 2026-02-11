@@ -13,7 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { addVaga } from '@/lib/api/vagaApi';
 import { ArrowLeft, CircleAlert, ParkingSquare } from 'lucide-react';
 import Form from 'next/form';
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import FormItem from '../../../components/form/form-item';
 import DiaSemana from '../../../components/gestor/dia-semana/dia-semana';
 import SelecaoCustomizada from '../../../components/gestor/selecaoItem/selecao-customizada';
@@ -26,6 +27,16 @@ export default function Cadastro() {
     },
     null,
   );
+
+  useEffect(() => {
+    if (!state) return;
+
+    if (state.error) {
+      toast.error(state.message || 'Erro ao cadastrar vaga');
+    } else {
+      toast.success(state.message || 'Vaga cadastrada com sucesso!');
+    }
+  }, [state]);
 
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">

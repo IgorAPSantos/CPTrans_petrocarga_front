@@ -23,6 +23,7 @@ export default function EditarVeiculoPage() {
 
   useEffect(() => {
     if (!user?.id) {
+      toast.error('Usuário não autenticado. Faça login novamente.');
       setError('Usuário não autenticado.');
       setLoading(false);
       return;
@@ -39,11 +40,13 @@ export default function EditarVeiculoPage() {
         const result = await getVeiculosUsuario(userId);
 
         if (result.error) {
+          toast.error(result.message || 'Erro ao buscar veículo');
           setError(result.message);
           setVeiculo(null);
         } else {
           const v = result.veiculos.find((v) => v.id === params.id);
           if (!v) {
+            toast.error('Veículo não encontrado.');
             setError('Veículo não encontrado.');
           } else {
             setVeiculo(v);
@@ -62,13 +65,10 @@ export default function EditarVeiculoPage() {
 
   // Função para lidar com a atualização do veículo
   const handleVeiculoAtualizado = (veiculoAtualizado: Veiculo) => {
-    // Atualiza o estado local com os novos dados
     setVeiculo(veiculoAtualizado);
 
-    // Mostra feedback visual (opcional)
-    // Você poderia adicionar um toast ou notificação aqui
+    toast.success('Veículo atualizado com sucesso!');
 
-    // Força um refetch para garantir que os dados estão sincronizados
     setTimeout(() => {
       setRefetchTrigger((prev) => prev + 1);
     }, 100);
