@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { atualizarVaga } from '@/lib/api/vagaApi';
 import { CircleAlert } from 'lucide-react';
 import Form from 'next/form';
-import { useActionState } from 'react';
+import { useActionState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import FormItem from '@/components/form/form-item';
 import React from 'react';
 import DiaSemana from '@/components/gestor/dia-semana/dia-semana';
@@ -19,6 +20,16 @@ export default function EditarVaga({ vaga }: { vaga: Vaga }) {
   };
 
   const [state, atualizarVagaAction, pending] = useActionState(atualizar, null);
+  useEffect(() => {
+  if (!state) return;
+
+  if (state.error) {
+    toast.error(state.message || 'Erro ao atualizar vaga');
+  } else {
+    toast.success(state.message || 'Vaga atualizada com sucesso!');
+  }
+}, [state]);
+
   return (
     <main className="container mx-auto px-4 py-4 md:py-8">
       <Card className="w-full max-w-5xl mx-auto">
