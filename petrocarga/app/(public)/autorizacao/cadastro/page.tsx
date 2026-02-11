@@ -20,6 +20,7 @@ import {
   X,
   AlertCircle,
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import Form from 'next/form';
 import { useActionState } from 'react';
 import { useState, useEffect, useRef } from 'react';
@@ -50,34 +51,41 @@ export default function CadastroUsuario() {
   }, [senha, confirmarSenha]);
 
   // Monitora o state para abrir o modal quando o cadastro for bem-sucedido
-  useEffect(() => {
-    if (state && !state?.error) {
-      // Obtém o email do formulário
-      const emailInput = document.getElementById('email') as HTMLInputElement;
-      if (emailInput) {
-        setUserEmail(emailInput.value);
+useEffect(() => {
+  if (!state) return;
 
-        // SALVAR NO STORAGE PARA USAR NO LOGIN
-        sessionStorage.setItem('abrirModalAtivacao', 'true');
-        sessionStorage.setItem('emailCadastro', emailInput.value);
-      }
+  if (state.error) {
+    toast.error(state.message || 'Erro ao cadastrar motorista.');
+    return;
+  }
 
-      // Mostra o modal
-      setShowSuccessModal(true);
+  if (!state.error) {
+    toast.success(state.message || 'Cadastro realizado com sucesso!');
 
-      // Limpa o formulário
-      if (formRef.current) {
-        formRef.current.reset();
-        setSenha('');
-        setConfirmarSenha('');
-      }
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+
+    if (emailInput) {
+      setUserEmail(emailInput.value);
+      sessionStorage.setItem('abrirModalAtivacao', 'true');
+      sessionStorage.setItem('emailCadastro', emailInput.value);
     }
-  }, [state]);
+
+    setShowSuccessModal(true);
+
+    if (formRef.current) {
+      formRef.current.reset();
+      setSenha('');
+      setConfirmarSenha('');
+    }
+  }
+}, [state]);
+
 
   // Função para lidar com o envio do formulário
   const handleSubmit = async (formData: FormData) => {
     if (!senhasIguais) {
       // Impede o envio se as senhas não forem iguais
+      toast.error('As senhas não coincidem.');
       return;
     }
 
