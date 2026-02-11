@@ -4,6 +4,7 @@ import {
   updateDisponibilidade,
 } from '../services/disponibilidadeService';
 
+import toast from 'react-hot-toast';
 import { Disponibilidade } from '@/lib/types/disponibilidadeVagas';
 import { Vaga } from '@/lib/types/vaga';
 
@@ -34,7 +35,15 @@ export function useDisponibilidadeActions({
     selecionados,
   }: SalvarDisponibilidadeData) {
     if (!inicio || !fim) {
-      alert('Preencha início e fim.');
+      toast('Preencha início e fim.', { icon: '⚠️' });
+      return;
+    }
+
+    const dataInicio = new Date(inicio);
+    const dataFim = new Date(fim);
+
+    if (dataFim < dataInicio) {
+      toast.error('A data de fim não pode ser menor que a data de início.');
       return;
     }
 
@@ -67,7 +76,7 @@ export function useDisponibilidadeActions({
         }
       }
 
-      alert(`Erro ao salvar disponibilidade: ${mensagem}`);
+      toast.error(`Erro ao salvar disponibilidade: ${mensagem}`);
     }
   }
 
@@ -94,6 +103,19 @@ export function useDisponibilidadeActions({
     inicio: string,
     fim: string,
   ) {
+    if (!inicio || !fim) {
+      toast('Preencha início e fim.', { icon: '⚠️' });
+      return;
+    }
+
+    const dataInicio = new Date(inicio);
+    const dataFim = new Date(fim);
+
+    if (dataFim < dataInicio) {
+      toast.error('A data de fim não pode ser menor que a data de início.');
+      return;
+    }
+
     setDisponibilidades((prev) =>
       prev.map((d) => (d.id === id ? { ...d, inicio, fim } : d)),
     );
