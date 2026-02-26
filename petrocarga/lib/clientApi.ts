@@ -1,5 +1,7 @@
 'use client';
 
+import { TOKEN_KEY } from '@/service/api';
+
 type ClientApiOptions = RequestInit & {
   json?: unknown;
 };
@@ -10,6 +12,13 @@ export async function clientApi(path: string, options: ClientApiOptions = {}) {
   const headers: Record<string, string> = {
     ...((options.headers as Record<string, string>) || {}),
   };
+
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
 
   let body = options.body;
 
@@ -27,6 +36,7 @@ export async function clientApi(path: string, options: ClientApiOptions = {}) {
     });
 
     if (res.status === 401) {
+      localStorage.removeItem(TOKEN_KEY);
       console.warn('Sessão expirada, redirecionando...');
       window.location.href = '/autorizacao/login';
     }

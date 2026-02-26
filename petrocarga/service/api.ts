@@ -2,6 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // --- Configurações de Constantes ---
 const LOGIN_PATH = '/autorizacao/login';
+export const TOKEN_KEY = '@Petrocarga:token';
 
 // 🚀 Instância Principal
 export const api = axios.create({
@@ -14,13 +15,16 @@ export const api = axios.create({
 
 /**
  * INTERCEPTOR DE REQUISIÇÃO
- * Embora os cookies httpOnly sejam automáticos, manter o interceptor
- * permite adicionar logs de debug ou headers específicos no futuro.
+ * Adiciona o token JWT no header Authorization para autenticação persistente.
  */
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    // Exemplo: Log de requisições em desenvolvimento
-    // if (process.env.NODE_ENV === 'development') console.log(`🚀 Request: ${config.url}`);
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
     return config;
   },
   (error: AxiosError) => Promise.reject(error),
@@ -38,12 +42,9 @@ api.interceptors.response.use(
     // 401: Unauthorized (Sessão expirada ou Token inválido)
     if (error.response?.status === 401) {
       if (isClient) {
+        localStorage.removeItem(TOKEN_KEY);
         const isLoginPage = window.location.pathname.includes(LOGIN_PATH);
-
         if (!isLoginPage) {
-          // Limpeza opcional de algum dado no localStorage se houver
-          // localStorage.removeItem('@Petrocarga:user');
-
           console.warn('Sessão expirada. Redirecionando...');
           window.location.href = LOGIN_PATH;
         }
