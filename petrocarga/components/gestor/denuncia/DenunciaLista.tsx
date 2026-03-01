@@ -5,7 +5,6 @@ import { ChevronDown, ChevronUp, Archive, AlertTriangle } from 'lucide-react';
 import DenunciaCard from '@/components/gestor/cards/denuncia-card';
 import { Denuncia } from '@/lib/types/denuncias';
 
-// prioridade de exibição
 const PRIORIDADE: Record<string, number> = {
   ABERTA: 1,
   EM_ANALISE: 2,
@@ -26,52 +25,57 @@ const sortDenuncias = (a: Denuncia, b: Denuncia) => {
 
 interface DenunciaListaProps {
   denuncias: Denuncia[];
+  /** Chamado quando uma denúncia é finalizada, para o parent refazer o fetch */
+  onRefresh?: () => void;
 }
 
-export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
+export default function DenunciaLista({
+  denuncias,
+  onRefresh,
+}: DenunciaListaProps) {
   const [mostrarOcultas, setMostrarOcultas] = useState(false);
 
   const { visiveis, ocultas } = useMemo(() => {
     const buckets = denuncias.reduce(
       (acc, d) => {
         const status = (d.status || '').toUpperCase();
-
-        if (VISIBLE_STATUSES.has(status)) {
-          acc.visiveis.push(d);
-        } else if (HIDDEN_STATUSES.has(status)) {
-          acc.ocultas.push(d);
-        }
-
+        if (VISIBLE_STATUSES.has(status)) acc.visiveis.push(d);
+        else if (HIDDEN_STATUSES.has(status)) acc.ocultas.push(d);
         return acc;
       },
       { visiveis: [] as Denuncia[], ocultas: [] as Denuncia[] },
     );
 
     return {
-      visiveis: buckets.visiveis.sort(sortDenuncias),
-      ocultas: buckets.ocultas.sort(sortDenuncias),
+      visiveis: [...buckets.visiveis].sort(sortDenuncias),
+      ocultas: [...buckets.ocultas].sort(sortDenuncias),
     };
   }, [denuncias]);
 
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col gap-6">
-      {/* --- DENÚNCIAS ATIVAS --- */}
       <section className="flex flex-col gap-4 animate-in fade-in duration-500">
         {visiveis.length > 0 ? (
           visiveis.map((denuncia) => (
-            <DenunciaCard key={denuncia.id} denuncia={denuncia} />
+            <DenunciaCard
+              key={denuncia.id}
+              denuncia={denuncia}
+              onRefresh={onRefresh}
+            />
           ))
         ) : (
           <EmptyState />
         )}
       </section>
 
-      {/* --- HISTÓRICO --- */}
       {ocultas.length > 0 && (
         <div className="border-t border-gray-100 pt-6">
           <button
+            type="button"
             onClick={() => setMostrarOcultas((s) => !s)}
             className="group w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-all active:scale-[0.99]"
+            aria-expanded={mostrarOcultas}
+            aria-controls="denuncias-historico"
           >
             <div className="flex items-center gap-3 text-gray-600">
               <Archive className="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors" />
@@ -82,16 +86,15 @@ export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
                 {ocultas.length}
               </span>
             </div>
-
             {mostrarOcultas ? (
-              <ChevronUp className="w-4 h-4 text-gray-400" />
+              <ChevronUp className="w-4 h-4 text-gray-400" aria-hidden />
             ) : (
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <ChevronDown className="w-4 h-4 text-gray-400" aria-hidden />
             )}
           </button>
 
-          {/* animação suave */}
           <div
+            id="denuncias-historico"
             className={`grid transition-[grid-template-rows] duration-300 ease-out ${
               mostrarOcultas ? 'grid-rows-[1fr] mt-4' : 'grid-rows-[0fr]'
             }`}
@@ -103,7 +106,10 @@ export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
                     key={denuncia.id}
                     className="opacity-75 hover:opacity-100 transition-opacity"
                   >
-                    <DenunciaCard denuncia={denuncia} />
+                    <DenunciaCard
+                      denuncia={denuncia}
+                      onRefresh={onRefresh}
+                    />
                   </div>
                 ))}
               </div>
@@ -117,16 +123,14 @@ export default function DenunciaLista({ denuncias }: DenunciaListaProps) {
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+    <div className="flex flex-col items-center justify-center py-12 md:py-16 px-4 text-center border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
       <div className="bg-white p-3 rounded-full shadow-sm mb-4">
-        <AlertTriangle className="w-8 h-8 text-gray-400" />
+        <AlertTriangle className="w-8 h-8 md:w-10 md:h-10 text-gray-400" aria-hidden />
       </div>
-
-      <h3 className="text-gray-900 font-medium text-lg mb-2">
+      <h3 className="text-gray-900 font-semibold text-lg md:text-xl mb-2">
         Nenhuma denúncia ativa
       </h3>
-
-      <p className="text-gray-500 text-sm">
+      <p className="text-gray-500 text-sm md:text-base max-w-md mx-auto">
         Todas as denúncias já foram analisadas.
       </p>
     </div>

@@ -1,16 +1,21 @@
 'use client';
 
 import { Denuncia } from '@/lib/types/denuncias';
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { MapPin, FileText, Tag, Clock } from 'lucide-react';
 import { DenunciaAnaliseModal } from './denuncia-analise-modal';
 import { iniciarAnaliseDenuncia } from '@/lib/api/denunciaApi';
 import toast from 'react-hot-toast';
-
-interface DenuProps {
-  denuncia: Denuncia;
-}
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 const statusStyles: Record<
   string,
@@ -43,38 +48,52 @@ const statusStyles: Record<
   },
 };
 
-export default function Denu({ denuncia }: DenuProps) {
+interface DenunciaCardProps {
+  denuncia: Denuncia;
+  /** Chamado quando a análise é finalizada, para o parent refazer o fetch */
+  onRefresh?: () => void;
+}
+
+export default function DenunciaCard({
+  denuncia,
+  onRefresh,
+}: DenunciaCardProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [loadingInicio, setLoadingInicio] = useState(false);
   const [statusAtual, setStatusAtual] = useState(denuncia.status);
 
-  const currentStatus = statusStyles[statusAtual] || statusStyles.DEFAULT;
+  const currentStatus = statusStyles[statusAtual] ?? statusStyles.DEFAULT;
+  const podeAnalisar =
+    statusAtual === 'ABERTA' || statusAtual === 'EM_ANALISE';
 
-  const podeAnalisar = statusAtual === 'ABERTA' || statusAtual === 'EM_ANALISE';
+  const iniciarAnalise = useCallback(() => {
+    if (statusAtual === 'ABERTA') setConfirmOpen(true);
+    if (statusAtual === 'EM_ANALISE') setModalOpen(true);
+  }, [statusAtual]);
 
-  function iniciarAnalise() {
-    if (statusAtual === 'ABERTA') {
-      setConfirmOpen(true);
-    }
-
-    if (statusAtual === 'EM_ANALISE') {
-      setModalOpen(true);
-    }
-  }
-
-  async function confirmarInicio() {
-    setConfirmOpen(false);
-
+  const confirmarInicio = useCallback(async () => {
+    setLoadingInicio(true);
     try {
       await iniciarAnaliseDenuncia(denuncia.id);
-
+      setConfirmOpen(false);
       setStatusAtual('EM_ANALISE');
-
       setModalOpen(true);
-    } catch (err) {
+    } catch {
       toast.error('Erro ao iniciar análise. Tente novamente.');
+    } finally {
+      setLoadingInicio(false);
     }
-  }
+  }, [denuncia.id]);
+
+  const handleFinalizado = useCallback(
+    (novoStatus: 'PROCEDENTE' | 'IMPROCEDENTE') => {
+      setStatusAtual(novoStatus);
+      setModalOpen(false);
+      onRefresh?.();
+    },
+    [onRefresh],
+  );
 
   return (
     <>
@@ -87,7 +106,6 @@ export default function Denu({ denuncia }: DenuProps) {
         )}
       >
         <div className="space-y-3 flex-1">
-          {/* Header */}
           <div className="flex items-center gap-3">
             <h2 className="text-base font-bold text-slate-900">
               Denúncia #{denuncia.id.slice(0, 5).toUpperCase()}
@@ -102,10 +120,9 @@ export default function Denu({ denuncia }: DenuProps) {
             </span>
           </div>
 
-          {/* Infos */}
           <div className="grid grid-cols-1 gap-2">
             <div className="flex items-start gap-2 text-sm text-slate-600">
-              <MapPin className="w-4 h-4 mt-0.5 text-slate-400 shrink-0" />
+              <MapPin className="w-4 h-4 mt-0.5 text-slate-400 shrink-0" aria-hidden />
               <span>
                 {denuncia.enderecoVaga.logradouro}, {denuncia.numeroEndereco} —{' '}
                 {denuncia.enderecoVaga.bairro}
@@ -113,14 +130,14 @@ export default function Denu({ denuncia }: DenuProps) {
             </div>
 
             <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Tag className="w-4 h-4 text-slate-400 shrink-0" />
+              <Tag className="w-4 h-4 text-slate-400 shrink-0" aria-hidden />
               <span className="capitalize">
                 {denuncia.tipo.toLowerCase().replaceAll('_', ' ')}
               </span>
             </div>
 
             <div className="flex items-center gap-2 text-sm text-slate-600">
-              <Clock className="w-4 h-4 text-slate-400 shrink-0" />
+              <Clock className="w-4 h-4 text-slate-400 shrink-0" aria-hidden />
               <span>
                 {new Date(denuncia.criadoEm).toLocaleDateString('pt-BR', {
                   day: '2-digit',
@@ -133,73 +150,57 @@ export default function Denu({ denuncia }: DenuProps) {
             </div>
 
             <div className="flex items-start gap-2 text-sm text-slate-500 italic">
-              <FileText className="w-4 h-4 mt-0.5 text-slate-400 shrink-0" />
+              <FileText className="w-4 h-4 mt-0.5 text-slate-400 shrink-0" aria-hidden />
               <p className="line-clamp-2 italic">{denuncia.descricao}</p>
             </div>
           </div>
         </div>
 
-        {/* Botão Gestor */}
         {podeAnalisar && (
           <div className="flex self-end sm:self-center">
-            <button
+            <Button
               onClick={iniciarAnalise}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+              disabled={loadingInicio}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               {statusAtual === 'ABERTA'
-                ? 'Iniciar Análise'
+                ? loadingInicio
+                  ? 'Iniciando...'
+                  : 'Iniciar Análise'
                 : 'Continuar Análise'}
-            </button>
+            </Button>
           </div>
         )}
       </article>
 
-      {/* Modal de confirmação */}
-      {confirmOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={() => setConfirmOpen(false)}
-          />
-
-          <div className="relative bg-white rounded-2xl p-6 w-96 max-w-full shadow-2xl">
-            <h3 className="text-xl font-semibold text-gray-800 mb-3 text-center">
-              Confirmar Início
-            </h3>
-
-            <p className="text-gray-600 mb-6 text-center">
-              Tem certeza que deseja iníciar está Denúncia? Está ação não pode
+      <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar Início</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja iniciar esta denúncia? Esta ação não pode
               ser desfeita.
-            </p>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-3 sm:justify-center">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={confirmarInicio} disabled={loadingInicio}>
+              {loadingInicio ? 'Iniciando...' : 'Iniciar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-            <div className="flex justify-center gap-3 w-full">
-              <button
-                onClick={() => setConfirmOpen(false)}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition"
-              >
-                Cancelar
-              </button>
-
-              <button
-                onClick={confirmarInicio}
-                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition"
-              >
-                Iniciar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal de análise */}
       <DenunciaAnaliseModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         denuncia={{ ...denuncia, status: statusAtual }}
-        onFinalizado={(novoStatus) => {
-          setStatusAtual(novoStatus);
-          setModalOpen(false);
-        }}
+        onFinalizado={handleFinalizado}
       />
     </>
   );

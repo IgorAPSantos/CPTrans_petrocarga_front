@@ -66,7 +66,7 @@ export default function DenunciasAgente() {
         <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-800 text-center">
           Denúncias
         </h1>
-        <DenunciaLista denuncias={denuncias} />
+        <DenunciaLista denuncias={denuncias} onRefresh={refetch} />
       </div>
     </section>
   );
