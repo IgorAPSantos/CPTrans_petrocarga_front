@@ -1,7 +1,7 @@
 'use client';
 
 import { Denuncia } from '@/lib/types/denuncias';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import {
   X,
   CheckCircle2,
@@ -27,7 +27,7 @@ interface DenunciaAnaliseModalProps {
   onFinalizado: (status: 'PROCEDENTE' | 'IMPROCEDENTE') => void;
 }
 
-export function DenunciaAnaliseModal({
+function DenunciaAnaliseModalInner({
   isOpen,
   onClose,
   denuncia,
@@ -60,6 +60,9 @@ export function DenunciaAnaliseModal({
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
+  const toggleExpanded = useCallback(() => setIsExpanded((prev) => !prev), []);
+  const collapseOnFocus = useCallback(() => setIsExpanded(false), []);
+
   const handleSubmit = useCallback(async () => {
     if (isFormIncompleto || !resultado) return;
 
@@ -78,20 +81,20 @@ export function DenunciaAnaliseModal({
     } finally {
       setIsSubmitting(false);
     }
-  }, [denuncia.id, resultado, resposta, onFinalizado, onClose]);
+  }, [denuncia.id, resultado, resposta, isFormIncompleto, onFinalizado, onClose]);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-slate-900/70"
         onClick={onClose}
         role="presentation"
       />
 
       <div
-        className="relative bg-slate-50 rounded-t-3xl sm:rounded-2xl w-full max-w-md max-h-[92vh] shadow-2xl flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300"
+        className="relative bg-slate-50 rounded-t-3xl sm:rounded-2xl w-full max-w-md max-h-[92vh] shadow-xl flex flex-col overflow-hidden"
         role="dialog"
         aria-labelledby="analise-modal-title"
         aria-describedby="analise-modal-desc"
@@ -125,7 +128,7 @@ export function DenunciaAnaliseModal({
           <div className="space-y-3">
             <button
               type="button"
-              onClick={() => setIsExpanded(!isExpanded)}
+              onClick={toggleExpanded}
               className="w-full flex items-center justify-between px-2 text-slate-500 hover:text-slate-700 transition-colors"
               aria-expanded={isExpanded}
             >
@@ -142,7 +145,7 @@ export function DenunciaAnaliseModal({
             </button>
 
             {isExpanded && (
-              <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
+              <div className="space-y-3">
                 <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-3">
                   <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
                     <MapPin className="w-5 h-5" aria-hidden />
@@ -285,7 +288,7 @@ export function DenunciaAnaliseModal({
               </div>
             </div>
 
-            <div className="space-y-2 focus-within:translate-y-[-120px] sm:focus-within:translate-y-0 transition-transform duration-300">
+            <div className="space-y-2">
               <div className="flex justify-between items-center ml-2">
                 <label
                   htmlFor="resposta-analise"
@@ -308,7 +311,7 @@ export function DenunciaAnaliseModal({
                 id="resposta-analise"
                 value={resposta}
                 onChange={(e) => setResposta(e.target.value)}
-                onFocus={() => setIsExpanded(false)}
+                onFocus={collapseOnFocus}
                 maxLength={RESPOSTA_LIMITE}
                 rows={4}
                 placeholder="Informe ao cidadão o motivo da decisão..."
@@ -339,3 +342,5 @@ export function DenunciaAnaliseModal({
     </div>
   );
 }
+
+export const DenunciaAnaliseModal = memo(DenunciaAnaliseModalInner);

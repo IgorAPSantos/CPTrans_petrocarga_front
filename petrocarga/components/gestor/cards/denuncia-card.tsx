@@ -1,7 +1,7 @@
 'use client';
 
 import { Denuncia } from '@/lib/types/denuncias';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { MapPin, FileText, Tag, Clock } from 'lucide-react';
 import { DenunciaAnaliseModal } from './denuncia-analise-modal';
@@ -93,6 +93,13 @@ export default function DenunciaCard({
       onRefresh?.();
     },
     [onRefresh],
+  );
+
+  const handleCloseModal = useCallback(() => setModalOpen(false), []);
+
+  const denunciaParaModal = useMemo(
+    () => ({ ...denuncia, status: statusAtual }),
+    [denuncia, statusAtual],
   );
 
   return (
@@ -198,8 +205,8 @@ export default function DenunciaCard({
 
       <DenunciaAnaliseModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        denuncia={{ ...denuncia, status: statusAtual }}
+        onClose={handleCloseModal}
+        denuncia={denunciaParaModal}
         onFinalizado={handleFinalizado}
       />
     </>
