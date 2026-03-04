@@ -9,13 +9,22 @@ import {
   useMemo,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import { api } from '@/service/api';
+import { api, TOKEN_KEY } from '@/service/api';
 
 interface UserData {
   id: string;
   nome: string;
   login: string;
   permissao: 'ADMIN' | 'GESTOR' | 'MOTORISTA' | 'AGENTE';
+}
+
+function normalizeUserData(data: Record<string, unknown>): UserData {
+  return {
+    id: String(data.id ?? ''),
+    nome: String(data.nome ?? ''),
+    login: String(data.login ?? data.email ?? ''),
+    permissao: (data.permissao as UserData['permissao']) ?? 'MOTORISTA',
+  };
 }
 
 interface AuthContextData {
@@ -36,8 +45,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshUser = useCallback(async () => {
     try {
+      if (typeof window !== 'undefined' && !localStorage.getItem(TOKEN_KEY)) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
       const response = await api.get('/petrocarga/auth/me');
-      setUser(response.data);
+      setUser(normalizeUserData(response.data));
     } catch (error) {
       setUser(null);
     } finally {
@@ -97,13 +111,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 senha,
               };
 
-        console.log('Tentando login com:', dadosLogin);
+        const loginResponse = await api.post('/petrocarga/auth/login', dadosLogin);
+        const { usuario, token } = loginResponse.data as { usuario: Record<string, unknown>; token: string };
 
-        await api.post('petrocarga/auth/login', dadosLogin);
+        if (token) {
+          localStorage.setItem(TOKEN_KEY, token);
+        }
 
-        const response = await api.get('/petrocarga/auth/me');
-        const userData = response.data;
-
+        const userData = normalizeUserData(usuario);
         setUser(userData);
         return userData;
       } catch (error: any) {
@@ -162,6 +177,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Erro ao notificar logout', error);
     } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(TOKEN_KEY);
+      }
       setUser(null);
       router.push('/autorizacao/login');
     }
